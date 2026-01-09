@@ -1,0 +1,62 @@
+{
+  "name": "Orkela - Gestión de Proyectos",
+  "short_name": "Orkela",
+  "description": "Sistema de gestión de proyectos, tareas y equipos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/img/isotipo_orkela.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/isotipo_orkela.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ir al panel principal",
+      "url": "/dashboard",
+      "icons": [{ "src": "/img/isotipo_orkela.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Proyectos",
+      "short_name": "Proyectos",
+      "description": "Ver todos los proyectos",
+      "url": "/projects",
+      "icons": [{ "src": "/img/isotipo_orkela.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tareas",
+      "short_name": "Tareas",
+      "description": "Ver todas las tareas",
+      "url": "/tasks",
+      "icons": [{ "src": "/img/isotipo_orkela.png", "sizes": "192x192" }]
+    }
+  ]
+}

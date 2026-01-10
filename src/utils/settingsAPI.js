@@ -1,4 +1,4 @@
-const API_URL = "http://orkela.localhost/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://orkela.localhost/api";
 
 // Función helper para hacer peticiones
 const request = async (endpoint, options = {}) => {

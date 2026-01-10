@@ -64,12 +64,12 @@ Esto debe crear una carpeta `dist/` con los archivos compilados.
 
 En la pantalla de configuración:
 
-| Campo | Valor |
-|-------|-------|
-| **Branch to deploy** | `main` (o tu rama principal) |
-| **Base directory** | *(dejar vacío si el repo solo tiene el frontend)* |
-| **Build command** | `npm run build` |
-| **Publish directory** | `dist` |
+| Campo                 | Valor                                             |
+| --------------------- | ------------------------------------------------- |
+| **Branch to deploy**  | `main` (o tu rama principal)                      |
+| **Base directory**    | _(dejar vacío si el repo solo tiene el frontend)_ |
+| **Build command**     | `npm run build`                                   |
+| **Publish directory** | `dist`                                            |
 
 #### 2.3 Configurar Variables de Entorno
 
@@ -78,14 +78,14 @@ En la pantalla de configuración:
 1. Haz clic en **"Show advanced"**
 2. En **"Environment variables"**, agrega:
 
-| Variable | Valor | Descripción |
-|----------|-------|-------------|
-| `VITE_API_URL` | `https://tu-backend.com/api` | URL de tu API backend |
-| `VITE_REVERB_APP_KEY` | `dgczpergxfxyiffhkzvr` | Key de Reverb |
-| `VITE_REVERB_HOST` | `tu-backend.com` | Host del WebSocket |
-| `VITE_REVERB_PORT` | `6001` | Puerto de Reverb |
-| `VITE_REVERB_SCHEME` | `https` | Usar `https` en producción |
-| `VITE_APP_NAME` | `Orkela` | Nombre de la app |
+| Variable              | Valor                        | Descripción                |
+| --------------------- | ---------------------------- | -------------------------- |
+| `VITE_API_URL`        | `https://tu-backend.com/api` | URL de tu API backend      |
+| `VITE_REVERB_APP_KEY` | `dgczpergxfxyiffhkzvr`       | Key de Reverb              |
+| `VITE_REVERB_HOST`    | `tu-backend.com`             | Host del WebSocket         |
+| `VITE_REVERB_PORT`    | `6001`                       | Puerto de Reverb           |
+| `VITE_REVERB_SCHEME`  | `https`                      | Usar `https` en producción |
+| `VITE_APP_NAME`       | `Orkela`                     | Nombre de la app           |
 
 3. Haz clic en **"Deploy site"**
 
@@ -113,6 +113,7 @@ netlify init
 ```
 
 Sigue las instrucciones:
+
 - **Create & configure a new site**
 - **Team**: Selecciona tu equipo
 - **Site name**: `orkela-app` (o el nombre que prefieras)
@@ -151,6 +152,7 @@ netlify deploy --prod
 Agrega estos registros en tu proveedor de DNS:
 
 **Para dominio raíz (tuempresa.com):**
+
 ```
 Tipo: A
 Host: @
@@ -158,6 +160,7 @@ Valor: 75.2.60.5
 ```
 
 **Para subdominio (app.tuempresa.com):**
+
 ```
 Tipo: CNAME
 Host: app
@@ -185,24 +188,24 @@ Tu backend Laravel debe permitir requests desde el dominio de Netlify.
 
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/auth'],
-    
+
     'allowed_methods' => ['*'],
-    
+
     'allowed_origins' => [
         'http://localhost:5173',           // Desarrollo local
         'http://localhost:5174',           // Desarrollo local (alternativo)
         'https://tu-sitio.netlify.app',    // Netlify
         'https://app.tuempresa.com',       // Tu dominio personalizado
     ],
-    
+
     'allowed_origins_patterns' => [],
-    
+
     'allowed_headers' => ['*'],
-    
+
     'exposed_headers' => [],
-    
+
     'max_age' => 0,
-    
+
     'supports_credentials' => true,
 ];
 ```
@@ -221,12 +224,14 @@ php artisan route:cache
 ### Configurar Auto-Deploy
 
 Netlify automáticamente hace deploy cuando:
+
 - Haces push a la rama `main`
 - Mergeas un Pull Request
 
 ### Deploy Previews
 
 Para cada Pull Request, Netlify crea un preview único:
+
 - URL: `deploy-preview-123--tu-sitio.netlify.app`
 - Perfecto para revisar cambios antes de mergear
 
@@ -265,7 +270,8 @@ Para cada Pull Request, Netlify crea un preview único:
 
 **Síntoma**: La API no responde y la consola muestra error de CORS.
 
-**Solución**: 
+**Solución**:
+
 1. Verifica `VITE_API_URL` en Netlify
 2. Agrega el dominio de Netlify a `config/cors.php` en el backend
 3. Limpia caché: `php artisan config:cache`
@@ -275,6 +281,7 @@ Para cada Pull Request, Netlify crea un preview único:
 **Síntoma**: Las notificaciones en tiempo real no funcionan.
 
 **Solución**:
+
 1. Verifica que las variables `VITE_REVERB_*` estén configuradas
 2. Asegúrate de que Reverb esté corriendo en el servidor
 3. Para producción, usa `VITE_REVERB_SCHEME=https`
@@ -284,6 +291,7 @@ Para cada Pull Request, Netlify crea un preview único:
 **Síntoma**: El deploy falla durante el build.
 
 **Solución**:
+
 1. Revisa los logs del deploy
 2. Prueba el build localmente: `npm run build`
 3. Verifica que todas las dependencias estén en `package.json`
@@ -294,6 +302,7 @@ Para cada Pull Request, Netlify crea un preview único:
 **Síntoma**: `import.meta.env.VITE_API_URL` es `undefined`.
 
 **Solución**:
+
 1. Las variables de Vite DEBEN empezar con `VITE_`
 2. Después de cambiar variables, haz un nuevo deploy
 3. Verifica en **Site settings** > **Environment variables**
@@ -317,11 +326,11 @@ Para cada Pull Request, Netlify crea un preview único:
 
 ## 🔗 URLs de Ejemplo
 
-| Ambiente | URL |
-|----------|-----|
-| Netlify (temporal) | `https://random-name-123.netlify.app` |
-| Netlify (personalizado) | `https://orkela.netlify.app` |
-| Dominio propio | `https://app.tuempresa.com` |
+| Ambiente                | URL                                   |
+| ----------------------- | ------------------------------------- |
+| Netlify (temporal)      | `https://random-name-123.netlify.app` |
+| Netlify (personalizado) | `https://orkela.netlify.app`          |
+| Dominio propio          | `https://app.tuempresa.com`           |
 
 ---
 

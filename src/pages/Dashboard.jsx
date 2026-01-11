@@ -512,7 +512,7 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-            <div className='grid grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
               <div className='text-center p-4 bg-gray-50 rounded-xl'>
                 <div className='text-3xl font-bold text-gray-900'>
                   {stats.avgProgress}%
@@ -683,7 +683,7 @@ const Dashboard = () => {
                   />
                 </div>
               </div>
-              <div className='grid grid-cols-2 gap-3 pt-2'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2'>
                 <div className='bg-white/10 rounded-lg p-3 text-center'>
                   <div className='text-2xl font-bold'>
                     {stats.completedThisWeek}

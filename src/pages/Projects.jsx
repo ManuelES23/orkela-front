@@ -467,7 +467,7 @@ const Projects = () => {
                         </div>
 
                         {/* Estadísticas de tareas */}
-                        <div className='grid grid-cols-4 gap-2'>
+                        <div className='grid grid-cols-2 sm:grid-cols-4 gap-2'>
                           <div className='text-center p-2 bg-gray-50 rounded-lg'>
                             <div className='flex items-center justify-center gap-1'>
                               <ListTodo className='w-3.5 h-3.5 text-gray-400' />

@@ -24,14 +24,14 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
+        <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4'>
           {/* Backdrop animado */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className='absolute inset-0 bg-gradient-to-br from-gray-900/60 via-gray-900/50 to-indigo-900/40 backdrop-blur-sm'
+            className='absolute inset-0 bg-linear-to-br from-gray-900/60 via-gray-900/50 to-indigo-900/40 backdrop-blur-sm'
             onClick={onClose}
           />
 
@@ -46,15 +46,15 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
               stiffness: 300,
               duration: 0.3,
             }}
-            className={`relative bg-white rounded-2xl shadow-2xl ${sizes[size]} w-full max-h-[90vh] overflow-hidden flex flex-col`}
+            className={`relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl ${sizes[size]} w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col`}
           >
             {/* Header con gradiente */}
-            <div className='flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white'>
+            <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-linear-to-r from-gray-50 to-white'>
               <motion.h2
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className='text-xl font-semibold text-gray-900'
+                className='text-lg sm:text-xl font-semibold text-gray-900'
               >
                 {title}
               </motion.h2>
@@ -73,7 +73,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className='flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100'
+              className='flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100'
             >
               {children}
             </motion.div>

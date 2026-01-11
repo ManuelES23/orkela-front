@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Layout from "../components/layout/Layout";
 import TaskModal from "../components/modals/TaskModal";
+import TaskDetailModal from "../components/modals/TaskDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
@@ -26,13 +27,14 @@ import {
   AlertTriangle,
   CalendarClock,
 } from "lucide-react";
-import { tasksAPI } from "../utils/api";
+import { tasksAPI, checklistAPI } from "../utils/api";
 
 const Tasks = () => {
   const { success, error: showError } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const [activeTab, setActiveTab] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -172,6 +174,46 @@ const Tasks = () => {
       ...prev,
       [taskId]: !prev[taskId],
     }));
+  };
+
+  const handleViewDetail = (task) => {
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleToggleChecklistItem = async (taskId, itemId, event) => {
+    event.stopPropagation();
+    
+    // Optimistic update
+    const originalTasks = [...tasks];
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              checklist_items: task.checklist_items.map((item) =>
+                item.id === itemId
+                  ? { ...item, is_completed: !item.is_completed }
+                  : item
+              ),
+            }
+          : task
+      )
+    );
+
+    try {
+      await checklistAPI.toggle(taskId, itemId);
+    } catch (err) {
+      console.error("Error toggling checklist item:", err);
+      showError(err.message || "No se pudo actualizar la subtarea");
+      // Revert on error
+      setTasks(originalTasks);
+    }
   };
 
   const priorityColors = {
@@ -444,12 +486,16 @@ const Tasks = () => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     whileHover={{ scale: 1.01, x: 4 }}
+                    onClick={() => handleViewDetail(task)}
                     className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer group'
                   >
                     <div className='flex items-start gap-4'>
                       {/* Checkbox */}
                       <button
-                        onClick={() => handleToggleStatus(task.id, task.status)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleStatus(task.id, task.status);
+                        }}
                         className='mt-1 hover:scale-110 transition-transform'
                       >
                         {task.status === "done" ? (
@@ -491,13 +537,19 @@ const Tasks = () => {
                             {/* Acciones */}
                             <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
                               <button
-                                onClick={() => handleEdit(task)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(task);
+                                }}
                                 className='p-1 hover:bg-blue-50 rounded transition-all duration-200'
                               >
                                 <Edit className='w-4 h-4 text-blue-600' />
                               </button>
                               <button
-                                onClick={() => openDeleteConfirm(task.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDeleteConfirm(task.id);
+                                }}
                                 className='p-1 hover:bg-red-50 rounded transition-all duration-200'
                               >
                                 <Trash2 className='w-4 h-4 text-red-600' />
@@ -691,9 +743,11 @@ const Tasks = () => {
                             >
                               <div className='space-y-1.5'>
                                 {task.checklist_items.map((item) => (
-                                  <div
+                                  <button
                                     key={item.id}
-                                    className='flex items-center gap-2 text-sm'
+                                    type='button'
+                                    onClick={(e) => handleToggleChecklistItem(task.id, item.id, e)}
+                                    className='flex items-center gap-2 text-sm w-full text-left py-1 px-2 -mx-2 rounded hover:bg-gray-100 transition-colors'
                                   >
                                     {item.is_completed ? (
                                       <CheckSquare className='w-4 h-4 text-green-500 shrink-0' />
@@ -709,7 +763,7 @@ const Tasks = () => {
                                     >
                                       {item.text}
                                     </span>
-                                  </div>
+                                  </button>
                                 ))}
                               </div>
                             </motion.div>
@@ -730,6 +784,22 @@ const Tasks = () => {
         onClose={handleCloseModal}
         task={selectedTask}
         onSuccess={handleSuccess}
+      />
+
+      {/* Modal de Detalle de Tarea */}
+      <TaskDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        task={selectedTask}
+        onEdit={(task) => {
+          setSelectedTask(task);
+          setIsDetailModalOpen(false);
+          setIsModalOpen(true);
+        }}
+        onDelete={(taskId) => {
+          setIsDetailModalOpen(false);
+          openDeleteConfirm(taskId);
+        }}
       />
 
       {/* Modal de Confirmación de Eliminación */}

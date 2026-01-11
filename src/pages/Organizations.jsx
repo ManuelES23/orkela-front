@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
+import { getAssetUrl } from "../utils/assetUrl";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
@@ -204,7 +205,7 @@ const Organizations = () => {
                     <div className='w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center border-4 border-white overflow-hidden'>
                       {org.logo ? (
                         <img
-                          src={`http://orkela.localhost${org.logo}`}
+                          src={getAssetUrl(org.logo)}
                           alt={org.name}
                           className='w-full h-full object-cover'
                         />

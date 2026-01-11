@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
+import { getAssetUrl } from "../../utils/assetUrl";
 import OrganizationModal from "../../components/modals/OrganizationModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import Modal from "../../components/ui/Modal";
@@ -474,7 +475,7 @@ const AdminOrganizations = () => {
                               <div className='w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center overflow-hidden'>
                                 {org.logo ? (
                                   <img
-                                    src={`http://orkela.localhost${org.logo}`}
+                                    src={getAssetUrl(org.logo)}
                                     alt={org.name}
                                     className='w-full h-full object-cover'
                                   />

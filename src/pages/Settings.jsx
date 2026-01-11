@@ -7,6 +7,7 @@ import {
   StaggerItem,
 } from "../components/animations/MotionComponents";
 import { profileAPI } from "../utils/api";
+import { getAssetUrl } from "../utils/assetUrl";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 
@@ -132,7 +133,7 @@ const Settings = () => {
 
   const getAvatarUrl = () => {
     if (profile.avatar) {
-      return `http://orkela.localhost${profile.avatar}`;
+      return getAssetUrl(profile.avatar);
     }
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(
       profile.name || "U"

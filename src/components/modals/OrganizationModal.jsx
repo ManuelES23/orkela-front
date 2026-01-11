@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Modal from "../ui/Modal";
 import { useNotification } from "../../context/NotificationContext";
+import { getAssetUrl } from "../../utils/assetUrl";
 import { useAuth } from "../../context/AuthContext";
 import {
   Building2,
@@ -283,11 +284,7 @@ const OrganizationModal = ({
                   <Loader2 className='w-8 h-8 text-gray-400 animate-spin' />
                 ) : logoPreview ? (
                   <img
-                    src={
-                      logoPreview.startsWith("data:")
-                        ? logoPreview
-                        : `http://orkela.localhost${logoPreview}`
-                    }
+                    src={getAssetUrl(logoPreview)}
                     alt='Logo preview'
                     className='w-full h-full object-cover'
                   />

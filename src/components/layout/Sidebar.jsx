@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAssetUrl } from "../../utils/assetUrl";
 import ContextSwitcher from "../ui/ContextSwitcher";
 import {
   LayoutDashboard,
@@ -151,7 +152,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               }`}
             >
               <img
-                src={user?.avatar}
+                src={getAssetUrl(user?.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=6366f1&color=fff`}
                 alt={user?.name}
                 className='w-8 h-8 rounded-full shrink-0'
               />

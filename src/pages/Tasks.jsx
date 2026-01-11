@@ -188,7 +188,7 @@ const Tasks = () => {
 
   const handleToggleChecklistItem = async (taskId, itemId, event) => {
     event.stopPropagation();
-    
+
     // Optimistic update
     const originalTasks = [...tasks];
     setTasks((prevTasks) =>
@@ -746,7 +746,13 @@ const Tasks = () => {
                                   <button
                                     key={item.id}
                                     type='button'
-                                    onClick={(e) => handleToggleChecklistItem(task.id, item.id, e)}
+                                    onClick={(e) =>
+                                      handleToggleChecklistItem(
+                                        task.id,
+                                        item.id,
+                                        e
+                                      )
+                                    }
                                     className='flex items-center gap-2 text-sm w-full text-left py-1 px-2 -mx-2 rounded hover:bg-gray-100 transition-colors'
                                   >
                                     {item.is_completed ? (

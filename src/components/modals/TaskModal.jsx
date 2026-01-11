@@ -64,9 +64,13 @@ const TaskModal = ({
         is_urgent: task?.is_urgent || false,
         assigned_user_ids: task?.assigned_users?.map((u) => u.id) || [],
       });
-      // Resetear checklist items
+      // Resetear checklist items - siempre limpiar primero
       setChecklistItems(task?.checklist_items || []);
       setError(null);
+    } else {
+      // Limpiar completamente cuando se cierra el modal
+      setChecklistItems([]);
+      setProjectMembers([]);
     }
   }, [isOpen, task, projectId]);
 
@@ -331,7 +335,8 @@ const TaskModal = ({
                 name='project_id'
                 value={formData.project_id}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+                disabled={!!projectId}
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed'
                 required
               >
                 <option value=''>Seleccionar proyecto</option>

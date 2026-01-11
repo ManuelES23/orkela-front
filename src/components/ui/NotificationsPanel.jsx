@@ -20,6 +20,7 @@ import {
   MailPlus,
   MailCheck,
   MailX,
+  ListTodo,
 } from "lucide-react";
 import { useRealtime } from "../../context/RealtimeContext";
 import { formatDistanceToNow } from "../../utils/dateUtils";
@@ -73,6 +74,12 @@ const NotificationsPanel = () => {
 
       case "task_completed":
         return <CheckCircle className='w-4 h-4 text-green-600' />;
+
+      case "checklist_item_completed":
+        return <ListTodo className='w-4 h-4 text-green-600' />;
+
+      case "checklist_item_updated":
+        return <ListTodo className='w-4 h-4 text-indigo-500' />;
 
       case "task_due_soon":
         return <Clock className='w-4 h-4 text-yellow-500' />;
@@ -135,10 +142,12 @@ const NotificationsPanel = () => {
       case "task_created":
       case "task_assigned":
       case "task_completed":
+      case "checklist_item_completed":
         return "bg-green-50";
 
       case "task_updated":
       case "task_status_changed":
+      case "checklist_item_updated":
         return "bg-indigo-50";
 
       case "task_due_soon":
@@ -198,7 +207,7 @@ const NotificationsPanel = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className='absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
+            className='absolute right-0 mt-2 w-96 sm:w-120 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
           >
             {/* Header */}
             <div className='px-4 py-3 bg-linear-to-r from-indigo-50 to-white border-b border-gray-100'>
@@ -243,7 +252,7 @@ const NotificationsPanel = () => {
             </div>
 
             {/* Lista de notificaciones */}
-            <div className='max-h-96 overflow-y-auto'>
+            <div className='max-h-125 overflow-y-auto'>
               {notifications.length === 0 ? (
                 <div className='py-12 text-center'>
                   <Bell className='w-12 h-12 text-gray-300 mx-auto mb-3' />
@@ -277,7 +286,7 @@ const NotificationsPanel = () => {
                             <p className='text-sm font-medium text-gray-900'>
                               {notification.title}
                             </p>
-                            <p className='text-sm text-gray-600 truncate'>
+                            <p className='text-sm text-gray-600 leading-relaxed'>
                               {notification.message}
                             </p>
                             <p className='text-xs text-gray-400 mt-1'>

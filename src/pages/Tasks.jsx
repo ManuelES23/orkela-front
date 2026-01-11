@@ -5,6 +5,7 @@ import TaskDetailModal from "../components/modals/TaskDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import {
@@ -30,6 +31,7 @@ import {
 import { tasksAPI, checklistAPI } from "../utils/api";
 
 const Tasks = () => {
+  const { user } = useAuth();
   const { success, error: showError } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const [activeTab, setActiveTab] = useState("all");
@@ -214,6 +216,28 @@ const Tasks = () => {
       // Revert on error
       setTasks(originalTasks);
     }
+  };
+
+  // Verificar si el usuario puede editar/eliminar una tarea
+  const canEditOrDeleteTask = (task) => {
+    if (!user || !task) return false;
+
+    // El creador de la tarea puede editar/eliminar
+    if (task.user_id === user.id) return true;
+
+    // Los usuarios asignados pueden editar/eliminar
+    if (task.assigned_users && task.assigned_users.length > 0) {
+      return task.assigned_users.some(
+        (assignedUser) => assignedUser.id === user.id
+      );
+    }
+
+    // Fallback para assigned_user (retrocompatibilidad)
+    if (task.assigned_user && task.assigned_user.id === user.id) {
+      return true;
+    }
+
+    return false;
   };
 
   const priorityColors = {
@@ -534,27 +558,29 @@ const Tasks = () => {
                               {priorityLabels[task.priority]}
                             </span>
 
-                            {/* Acciones */}
-                            <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEdit(task);
-                                }}
-                                className='p-1 hover:bg-blue-50 rounded transition-all duration-200'
-                              >
-                                <Edit className='w-4 h-4 text-blue-600' />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openDeleteConfirm(task.id);
-                                }}
-                                className='p-1 hover:bg-red-50 rounded transition-all duration-200'
-                              >
-                                <Trash2 className='w-4 h-4 text-red-600' />
-                              </button>
-                            </div>
+                            {/* Acciones - Solo si tiene permisos */}
+                            {canEditOrDeleteTask(task) && (
+                              <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(task);
+                                  }}
+                                  className='p-1 hover:bg-blue-50 rounded transition-all duration-200'
+                                >
+                                  <Edit className='w-4 h-4 text-blue-600' />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openDeleteConfirm(task.id);
+                                  }}
+                                  className='p-1 hover:bg-red-50 rounded transition-all duration-200'
+                                >
+                                  <Trash2 className='w-4 h-4 text-red-600' />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -806,6 +832,7 @@ const Tasks = () => {
           setIsDetailModalOpen(false);
           openDeleteConfirm(taskId);
         }}
+        onUpdate={refreshTasksSilently}
       />
 
       {/* Modal de Confirmación de Eliminación */}

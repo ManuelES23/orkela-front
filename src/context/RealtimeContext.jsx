@@ -156,6 +156,18 @@ export const RealtimeProvider = ({ children }) => {
           refreshCallbacks.projects?.(); // También actualizar proyectos (progreso)
           break;
 
+        case "checklist_item_completed":
+          success(data.message);
+          refreshCallbacks.tasks?.();
+          refreshCallbacks.projects?.(); // Actualizar progreso del proyecto
+          break;
+
+        case "checklist_item_updated":
+          info(data.message);
+          refreshCallbacks.tasks?.();
+          refreshCallbacks.projects?.(); // Actualizar progreso del proyecto
+          break;
+
         case "task_due_soon":
           warning(data.message);
           refreshCallbacks.tasks?.();

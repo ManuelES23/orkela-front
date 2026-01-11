@@ -152,7 +152,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               }`}
             >
               <img
-                src={getAssetUrl(user?.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=6366f1&color=fff`}
+                src={
+                  getAssetUrl(user?.avatar) ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user?.name || "U"
+                  )}&background=6366f1&color=fff`
+                }
                 alt={user?.name}
                 className='w-8 h-8 rounded-full shrink-0'
               />

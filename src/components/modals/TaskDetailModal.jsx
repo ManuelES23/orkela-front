@@ -38,6 +38,7 @@ const TaskDetailModal = ({
   const [newItemText, setNewItemText] = useState("");
   const [initializing, setInitializing] = useState(true);
   const [addingItem, setAddingItem] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Cargar tarea completa cuando se abre el modal
   useEffect(() => {

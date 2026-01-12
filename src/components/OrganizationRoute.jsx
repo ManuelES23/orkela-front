@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
  * exclusivas de usuarios en modo organización.
  *
  * Redirige a /dashboard si:
- * - El usuario no tiene organización
+ * - El usuario no tiene organización (ni directa ni por pivot)
  * - El usuario tiene organización pero está en modo personal
  */
 const OrganizationRoute = ({ children }) => {
@@ -25,8 +25,11 @@ const OrganizationRoute = ({ children }) => {
     return <Navigate to='/login' />;
   }
 
+  // Verificar si tiene organización (directa o por pivot)
+  const hasOrganization = user.organization_id || user.organization;
+
   // Si el usuario no tiene organización O no está en modo organización, redirigir al dashboard
-  if (!user.organization_id || user.active_context !== "organization") {
+  if (!hasOrganization || user.active_context !== "organization") {
     return <Navigate to='/dashboard' />;
   }
 

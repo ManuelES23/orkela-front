@@ -5,6 +5,11 @@ import TeamModal from "../components/modals/TeamModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import { useAuth } from "../context/AuthContext";
+import {
+  useOrganizationPermissions,
+  useUserContext,
+} from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import {
@@ -18,13 +23,21 @@ import {
   Mail,
   Inbox,
   ArrowRight,
+  Info,
 } from "lucide-react";
 import { teamsAPI, teamInvitationsAPI } from "../utils/api";
 
 const Teams = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { success, error: showError } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
+
+  // Permisos de organización
+  const { isOrganizationContext } = useUserContext();
+  const { canCreateTeams, role, hasOrganization } =
+    useOrganizationPermissions();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teams, setTeams] = useState([]);
@@ -173,15 +186,31 @@ const Teams = () => {
             />
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleNewTeam}
-            className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition w-full md:w-auto justify-center'
-          >
-            <Plus className='w-5 h-5' />
-            Nuevo Equipo
-          </motion.button>
+          {/* Solo mostrar botón de crear equipo si tiene permisos */}
+          {canCreateTeams ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNewTeam}
+              className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition w-full md:w-auto justify-center'
+            >
+              <Plus className='w-5 h-5' />
+              Nuevo Equipo
+            </motion.button>
+          ) : (
+            isOrganizationContext && (
+              <div className='flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg w-full md:w-auto justify-center'>
+                <Info className='w-4 h-4' />
+                <span className='text-sm'>
+                  Solo{" "}
+                  {role === "member"
+                    ? "propietarios, administradores y managers"
+                    : "tu rol"}{" "}
+                  pueden crear equipos
+                </span>
+              </div>
+            )
+          )}
         </div>
       </FadeIn>
 

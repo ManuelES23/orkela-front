@@ -9,6 +9,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { RealtimeProvider, useRealtime } from "./context/RealtimeContext";
 import PrivateRoute from "./components/PrivateRoute";
+import AdminRoute from "./components/AdminRoute";
 import OrganizationRoute from "./components/OrganizationRoute";
 import RemovedFromOrgModal from "./components/ui/RemovedFromOrgModal";
 
@@ -165,57 +166,57 @@ function App() {
                 <Route
                   path='/admin'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <Admin />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path='/admin/users'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <Users />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path='/admin/organizations'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <AdminOrganizations />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path='/admin/licenses'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <Licenses />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path='/admin/logs'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <Logs />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path='/admin/stats'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <Stats />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route
                   path='/admin/settings'
                   element={
-                    <PrivateRoute>
+                    <AdminRoute>
                       <AdminSettings />
-                    </PrivateRoute>
+                    </AdminRoute>
                   }
                 />
                 <Route

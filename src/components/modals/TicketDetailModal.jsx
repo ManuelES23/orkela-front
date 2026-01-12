@@ -3,6 +3,7 @@ import Modal from "../ui/Modal";
 import Select from "react-select";
 import { useNotification } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
+import { useRealtime } from "../../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Ticket,
@@ -41,6 +42,7 @@ const TicketDetailModal = ({
 }) => {
   const { success, error: showError } = useNotification();
   const { user } = useAuth();
+  const { registerRefresh, unregisterRefresh } = useRealtime();
   const [ticket, setTicket] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -85,6 +87,21 @@ const TicketDetailModal = ({
       setSelectedMember(null);
     }
   }, [isOpen, initialTicket?.id, loadTicketDetails]);
+
+  // Registrar callback para actualizaciones en tiempo real
+  useEffect(() => {
+    if (isOpen && initialTicket?.id) {
+      const refreshKey = `ticketDetail-${initialTicket.id}`;
+      registerRefresh(refreshKey, loadTicketDetails);
+      return () => unregisterRefresh(refreshKey);
+    }
+  }, [
+    isOpen,
+    initialTicket?.id,
+    registerRefresh,
+    unregisterRefresh,
+    loadTicketDetails,
+  ]);
 
   // Handlers para tomar/asignar/devolver ticket
   const handleTakeTicket = async () => {

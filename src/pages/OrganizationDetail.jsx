@@ -117,6 +117,7 @@ const OrganizationDetail = () => {
           ? organizationsAPI.getPendingInvitations(id)
           : Promise.resolve([]),
       ]);
+      console.log("[DEBUG] Miembros cargados desde API:", membersData);
       setMembers(membersData);
       setPendingInvitations(invitationsData);
     } catch (err) {
@@ -170,6 +171,15 @@ const OrganizationDetail = () => {
         organizationsAPI.getProjects(id),
       ]);
 
+      console.log("[DEBUG] Datos de organización cargados:", {
+        user_role: orgData.user_role,
+        is_owner: orgData.is_owner,
+        can_manage: orgData.can_manage,
+        can_delete: orgData.can_delete,
+        can_view_details: orgData.can_view_details,
+        can_create_teams: orgData.can_create_teams,
+        can_invite_members: orgData.can_invite_members,
+      });
       setOrganization(orgData);
       setStats(statsData);
       setTeams(teamsData);
@@ -296,12 +306,37 @@ const OrganizationDetail = () => {
   };
 
   const handleUpdateMemberRole = async (userId, newRole) => {
+    console.log("[DEBUG] Actualizando rol de miembro:", {
+      organizationId: id,
+      memberId: userId,
+      newRole: newRole,
+      canManage: organization?.can_manage,
+    });
+
     try {
-      await organizationsAPI.updateMember(id, userId, { role: newRole });
-      success("Rol actualizado");
-      loadMembers();
+      const response = await organizationsAPI.updateMember(id, userId, {
+        role: newRole,
+      });
+      console.log("[DEBUG] Respuesta del servidor:", response);
+      success("Rol actualizado exitosamente");
+
+      // Recargar todos los datos para asegurar que el rol se actualice en la UI
+      console.log("[DEBUG] Recargando miembros...");
+      await loadMembers();
+      console.log("[DEBUG] Miembros recargados");
     } catch (err) {
-      showError(err.message || "No se pudo actualizar el rol");
+      console.error("[ERROR] Error al actualizar rol:", {
+        error: err,
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "No se pudo actualizar el rol";
+      showError(errorMessage);
     }
   };
 
@@ -709,16 +744,16 @@ const OrganizationDetail = () => {
                               {member.name}
                             </p>
                             {getRoleBadge(
-                              member.pivot?.role,
+                              member.role,
                               member.id === organization.owner_id
                             )}
                           </div>
                           <p className='text-sm text-gray-500'>
                             {member.email}
                           </p>
-                          {member.pivot?.job_title && (
+                          {member.job_title && (
                             <p className='text-xs text-gray-400'>
-                              {member.pivot.job_title}
+                              {member.job_title}
                             </p>
                           )}
                         </div>
@@ -728,7 +763,7 @@ const OrganizationDetail = () => {
                         member.id !== organization.owner_id && (
                           <div className='flex items-center gap-2'>
                             <select
-                              value={member.pivot?.role || "member"}
+                              value={member.role || "member"}
                               onChange={(e) =>
                                 handleUpdateMemberRole(
                                   member.id,

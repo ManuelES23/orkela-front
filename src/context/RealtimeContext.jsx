@@ -35,32 +35,28 @@ export const RealtimeProvider = ({ children }) => {
   });
 
   // Callbacks para refrescar datos en componentes
-  const [refreshCallbacks, setRefreshCallbacks] = useState({
-    projects: null,
-    tasks: null,
-    teams: null,
-    tickets: null,
-    invitations: null,
-    organizations: null,
-  });
+  // Cambiado a Map para soportar keys dinámicas (ej: "ticketDetail-123")
+  const [refreshCallbacks, setRefreshCallbacks] = useState(new Map());
 
   // Ref para mantener la función de notificación actualizada sin causar re-suscripciones
   const handleNotificationRef = useRef(null);
 
   // Registrar callback de refresco
   const registerRefresh = useCallback((type, callback) => {
-    setRefreshCallbacks((prev) => ({
-      ...prev,
-      [type]: callback,
-    }));
+    setRefreshCallbacks((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(type, callback);
+      return newMap;
+    });
   }, []);
 
   // Desregistrar callback de refresco
   const unregisterRefresh = useCallback((type) => {
-    setRefreshCallbacks((prev) => ({
-      ...prev,
-      [type]: null,
-    }));
+    setRefreshCallbacks((prev) => {
+      const newMap = new Map(prev);
+      newMap.delete(type);
+      return newMap;
+    });
   }, []);
 
   // Agregar notificación al historial
@@ -99,8 +95,33 @@ export const RealtimeProvider = ({ children }) => {
   const triggerRefresh = useCallback(
     (type) => {
       console.log(`🔄 Triggering refresh for: ${type}`);
-      if (refreshCallbacks[type]) {
-        refreshCallbacks[type]();
+      const callback = refreshCallbacks.get(type);
+      if (callback) {
+        callback();
+      }
+    },
+    [refreshCallbacks]
+  );
+
+  // Función auxiliar para disparar callbacks que coincidan con un patrón
+  const triggerMatchingRefresh = useCallback(
+    (pattern) => {
+      refreshCallbacks.forEach((callback, key) => {
+        if (key.startsWith(pattern)) {
+          console.log(`🔄 Triggering refresh for: ${key}`);
+          callback();
+        }
+      });
+    },
+    [refreshCallbacks]
+  );
+
+  // Helper para disparar refresh de un tipo específico
+  const refresh = useCallback(
+    (type) => {
+      const callback = refreshCallbacks.get(type);
+      if (callback) {
+        callback();
       }
     },
     [refreshCallbacks]
@@ -124,58 +145,58 @@ export const RealtimeProvider = ({ children }) => {
         case "project_created":
         case "project_collaborator_joined":
           info(data.message);
-          refreshCallbacks.projects?.();
+          refresh("projects");
           break;
 
         case "project_updated":
           info(data.message);
-          refreshCallbacks.projects?.();
+          refresh("projects");
           break;
 
         case "project_deleted":
           warning(data.message);
-          refreshCallbacks.projects?.();
+          refresh("projects");
           break;
 
         case "task_created":
         case "task_assigned":
           info(data.message);
-          refreshCallbacks.tasks?.();
+          refresh("tasks");
           break;
 
         case "task_updated":
         case "task_status_changed":
           info(data.message);
-          refreshCallbacks.tasks?.();
-          refreshCallbacks.projects?.(); // También actualizar proyectos
+          refresh("tasks");
+          refresh("projects"); // También actualizar proyectos
           break;
 
         case "task_completed":
           success(data.message);
-          refreshCallbacks.tasks?.();
-          refreshCallbacks.projects?.(); // También actualizar proyectos (progreso)
+          refresh("tasks");
+          refresh("projects"); // También actualizar proyectos (progreso)
           break;
 
         case "checklist_item_completed":
           success(data.message);
-          refreshCallbacks.tasks?.();
-          refreshCallbacks.projects?.(); // Actualizar progreso del proyecto
+          refresh("tasks");
+          refresh("projects"); // Actualizar progreso del proyecto
           break;
 
         case "checklist_item_updated":
           info(data.message);
-          refreshCallbacks.tasks?.();
-          refreshCallbacks.projects?.(); // Actualizar progreso del proyecto
+          refresh("tasks");
+          refresh("projects"); // Actualizar progreso del proyecto
           break;
 
         case "task_due_soon":
           warning(data.message);
-          refreshCallbacks.tasks?.();
+          refresh("tasks");
           break;
 
         case "task_overdue":
           warning(data.message);
-          refreshCallbacks.tasks?.();
+          refresh("tasks");
           break;
 
         case "team_invitation_sent":
@@ -185,56 +206,77 @@ export const RealtimeProvider = ({ children }) => {
 
         case "team_created":
           info(data.message);
-          refreshCallbacks.teams?.();
-          refreshCallbacks.organizations?.();
+          refresh("teams");
+          refresh("organizations");
           break;
 
         case "team_updated":
           info(data.message);
-          refreshCallbacks.teams?.();
+          refresh("teams");
           break;
 
         case "team_member_joined":
           info(data.message);
-          refreshCallbacks.teams?.();
+          refresh("teams");
           break;
 
         case "team_deleted":
           warning(data.message);
-          refreshCallbacks.teams?.();
-          refreshCallbacks.organizations?.();
+          refresh("teams");
+          refresh("organizations");
           break;
 
         // Tickets
         case "ticket_created":
           info(data.message);
-          refreshCallbacks.tickets?.();
+          refresh("tickets");
           break;
 
         case "ticket_taken":
         case "ticket_assigned":
           info(data.message);
-          refreshCallbacks.tickets?.();
+          refresh("tickets");
+          // Refrescar modal de detalle si está abierto
+          if (data.data?.ticket_id) {
+            refresh(`ticketDetail-${data.data.ticket_id}`);
+          }
           break;
 
         case "ticket_status_changed":
           info(data.message);
-          refreshCallbacks.tickets?.();
+          refresh("tickets");
+          // Refrescar modal de detalle si está abierto
+          if (data.data?.ticket_id) {
+            refresh(`ticketDetail-${data.data.ticket_id}`);
+          }
           break;
 
         case "ticket_resolved":
           success(data.message);
-          refreshCallbacks.tickets?.();
+          refresh("tickets");
+          // Refrescar modal de detalle si está abierto
+          if (data.data?.ticket_id) {
+            refresh(`ticketDetail-${data.data.ticket_id}`);
+          }
           break;
 
         case "ticket_returned_to_inbox":
           info(data.message);
-          refreshCallbacks.tickets?.();
+          refresh("tickets");
+          // Refrescar modal de detalle si está abierto
+          if (data.data?.ticket_id) {
+            refresh(`ticketDetail-${data.data.ticket_id}`);
+          }
           break;
 
         case "ticket_comment_added":
           info(data.message);
-          refreshCallbacks.tickets?.();
+          refresh("tickets");
+          // También refrescar modal de detalle si está abierto
+          if (data.data?.ticket_id) {
+            const ticketDetailKey = `ticketDetail-${data.data.ticket_id}`;
+            refresh(ticketDetailKey);
+          }
           break;
 
         // Invitaciones recibidas
@@ -242,7 +284,7 @@ export const RealtimeProvider = ({ children }) => {
         case "team_invitation_received":
         case "organization_invitation_received":
           info(data.message);
-          refreshCallbacks.invitations?.();
+          refresh("invitations");
           break;
 
         // Invitaciones aceptadas/rechazadas (para quien invitó)
@@ -250,9 +292,9 @@ export const RealtimeProvider = ({ children }) => {
         case "team_invitation_accepted":
         case "organization_invitation_accepted":
           success(data.message);
-          refreshCallbacks.projects?.();
-          refreshCallbacks.teams?.();
-          refreshCallbacks.organizations?.();
+          refresh("projects");
+          refresh("teams");
+          refresh("organizations");
           break;
 
         case "project_invitation_declined":
@@ -276,25 +318,25 @@ export const RealtimeProvider = ({ children }) => {
           } else {
             // Otro miembro fue removido - solo notificar
             warning(data.message);
-            refreshCallbacks.organizations?.();
+            refresh("organizations");
           }
           break;
 
         case "organization_member_left":
           info(data.message);
-          refreshCallbacks.organizations?.();
+          refresh("organizations");
           break;
 
         case "organization_role_updated":
           info(data.message);
-          refreshCallbacks.organizations?.();
+          refresh("organizations");
           break;
 
         default:
           info(data.message);
       }
     },
-    [addRealtimeNotification, info, success, warning, refreshCallbacks]
+    [addRealtimeNotification, info, success, warning, refresh]
   );
 
   // Mantener la ref actualizada con la última versión de handleNotification

@@ -1,5 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://orkela.localhost/api";
 
+// Clase de error personalizada para errores de API con información adicional
+export class APIError extends Error {
+  constructor(message, status, data = {}) {
+    super(message);
+    this.name = "APIError";
+    this.status = status;
+    this.data = data;
+    this.errorCode = data.error || null;
+    this.requiredContext = data.required_context || null;
+  }
+}
+
 // Función helper para hacer peticiones
 const request = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
@@ -19,11 +31,20 @@ const request = async (endpoint, options = {}) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Error en la petición");
+      // Crear error con información adicional
+      throw new APIError(
+        data.message || "Error en la petición",
+        response.status,
+        data
+      );
     }
 
     return data;
   } catch (error) {
+    // Re-throw APIError directamente
+    if (error instanceof APIError) {
+      throw error;
+    }
     console.error("API Error:", error);
     throw error;
   }

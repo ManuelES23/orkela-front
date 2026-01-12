@@ -62,8 +62,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         ...(isInOrganizationMode
           ? [{ icon: Ticket, label: "Tickets", path: "/tickets" }]
           : []),
-        // Solo mostrar "Mi Organización" si es owner de la organización
-        ...(isInOrganizationMode && user.is_organization_owner
+        // Mostrar "Mi Organización" si es owner o admin de la organización
+        ...(isInOrganizationMode &&
+        (user.is_organization_owner || user.organization_role === "admin")
           ? [
               {
                 icon: Building2,

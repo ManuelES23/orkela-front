@@ -217,9 +217,7 @@ const TicketModal = ({
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 text-sm mt-1'>
-            Preparando el formulario
-          </p>
+          <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>

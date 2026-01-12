@@ -152,273 +152,274 @@ const ProjectModal = ({
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 text-sm mt-1'>
-            Preparando el formulario
-          </p>
+          <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>
-        {/* Nombre del proyecto */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Nombre del Proyecto *
-          </label>
-          <div className='relative'>
-            <FolderKanban className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
-            <input
-              type='text'
-              name='name'
-              value={formData.name}
-              onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
-              placeholder='Ej: Rediseño de Website'
-              required
-            />
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Descripción
-          </label>
-          <textarea
-            name='description'
-            value={formData.description}
-            onChange={handleChange}
-            rows='3'
-            className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
-            placeholder='Describe brevemente el proyecto...'
-          ></textarea>
-        </div>
-
-        {/* Fecha de vencimiento y Prioridad */}
-        <div className='grid grid-cols-2 gap-4'>
+          {/* Nombre del proyecto */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Fecha de Vencimiento
+              Nombre del Proyecto *
             </label>
             <div className='relative'>
-              <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+              <FolderKanban className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
               <input
-                type='date'
-                name='due_date'
-                value={formData.due_date}
+                type='text'
+                name='name'
+                value={formData.name}
                 onChange={handleChange}
                 className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                placeholder='Ej: Rediseño de Website'
+                required
               />
             </div>
           </div>
 
+          {/* Descripción */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Prioridad
+              Descripción
             </label>
-            <div className='relative'>
-              <Flag className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
-              <select
-                name='priority'
-                value={formData.priority}
-                onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
-              >
-                <option value='low'>Baja</option>
-                <option value='medium'>Media</option>
-                <option value='high'>Alta</option>
-              </select>
+            <textarea
+              name='description'
+              value={formData.description}
+              onChange={handleChange}
+              rows='3'
+              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              placeholder='Describe brevemente el proyecto...'
+            ></textarea>
+          </div>
+
+          {/* Fecha de vencimiento y Prioridad */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Fecha de Vencimiento
+              </label>
+              <div className='relative'>
+                <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+                <input
+                  type='date'
+                  name='due_date'
+                  value={formData.due_date}
+                  onChange={handleChange}
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Prioridad
+              </label>
+              <div className='relative'>
+                <Flag className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+                <select
+                  name='priority'
+                  value={formData.priority}
+                  onChange={handleChange}
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
+                >
+                  <option value='low'>Baja</option>
+                  <option value='medium'>Media</option>
+                  <option value='high'>Alta</option>
+                </select>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Color del proyecto */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Color del Proyecto
-          </label>
-          <div className='grid grid-cols-8 gap-2'>
-            {colors.map((color) => (
-              <button
-                key={color.value}
-                type='button'
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, color: color.value }))
-                }
-                className={`w-8 h-8 rounded-lg ${color.value} ${
-                  formData.color === color.value
-                    ? "ring-2 ring-offset-2 ring-indigo-600 scale-110"
-                    : "hover:scale-110 opacity-80 hover:opacity-100"
-                } transition-all duration-200`}
-                title={color.label}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Equipo asignado */}
-        {teams.length > 0 && (
-          <div className='border-2 border-indigo-200 rounded-lg p-4 bg-indigo-50/50'>
-            <label className='block text-sm font-medium text-gray-900 mb-2'>
-              <UsersIcon className='inline w-4 h-4 mr-1' />
-              Opción 1: Asignar Equipo Completo
+          {/* Color del proyecto */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Color del Proyecto
             </label>
-            <select
-              name='team_id'
-              value={formData.team_id}
-              onChange={handleChange}
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white'
-            >
-              <option value=''>Sin equipo asignado</option>
-              {teams.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.name} ({team.member_count || 0} miembros)
-                </option>
+            <div className='grid grid-cols-8 gap-2'>
+              {colors.map((color) => (
+                <button
+                  key={color.value}
+                  type='button'
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, color: color.value }))
+                  }
+                  className={`w-8 h-8 rounded-lg ${color.value} ${
+                    formData.color === color.value
+                      ? "ring-2 ring-offset-2 ring-indigo-600 scale-110"
+                      : "hover:scale-110 opacity-80 hover:opacity-100"
+                  } transition-all duration-200`}
+                  title={color.label}
+                />
               ))}
-            </select>
-            <p className='text-xs text-gray-600 mt-2'>
-              ✓ Todos los miembros del equipo tendrán acceso automáticamente
-            </p>
-            {formData.team_id && (
-              <p className='text-xs text-indigo-600 mt-1 font-medium'>
-                📌 Equipo seleccionado - Los usuarios individuales se ignorarán
+            </div>
+          </div>
+
+          {/* Equipo asignado */}
+          {teams.length > 0 && (
+            <div className='border-2 border-indigo-200 rounded-lg p-4 bg-indigo-50/50'>
+              <label className='block text-sm font-medium text-gray-900 mb-2'>
+                <UsersIcon className='inline w-4 h-4 mr-1' />
+                Opción 1: Asignar Equipo Completo
+              </label>
+              <select
+                name='team_id'
+                value={formData.team_id}
+                onChange={handleChange}
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white'
+              >
+                <option value=''>Sin equipo asignado</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name} ({team.member_count || 0} miembros)
+                  </option>
+                ))}
+              </select>
+              <p className='text-xs text-gray-600 mt-2'>
+                ✓ Todos los miembros del equipo tendrán acceso automáticamente
               </p>
-            )}
-          </div>
-        )}
-
-        {/* Separador visual */}
-        {teams.length > 0 && (
-          <div className='flex items-center gap-3 my-4'>
-            <div className='flex-1 border-t border-gray-300'></div>
-            <span className='text-sm text-gray-500 font-medium'>O</span>
-            <div className='flex-1 border-t border-gray-300'></div>
-          </div>
-        )}
-
-        {/* Miembros del equipo */}
-        <div
-          className={`${
-            formData.team_id
-              ? "opacity-50 pointer-events-none"
-              : "border-2 border-green-200 rounded-lg p-4 bg-green-50/50"
-          }`}
-        >
-          <label className='block text-sm font-medium text-gray-900 mb-2'>
-            <UserCheck className='inline w-4 h-4 mr-1' />
-            {teams.length > 0
-              ? "Opción 2: Invitar Colaboradores"
-              : "Colaboradores del Proyecto"}
-          </label>
-
-          {formData.team_id ? (
-            <p className='text-sm text-gray-500 py-4 text-center border border-gray-300 rounded-lg bg-gray-50'>
-              Has seleccionado un equipo. Todos los miembros tendrán acceso
-              automáticamente.
-            </p>
-          ) : (
-            <>
-              {/* Mostrar colaboradores actuales del proyecto */}
-              {project && project.users && project.users.length > 0 && (
-                <div className='mb-3'>
-                  <p className='text-xs text-gray-700 mb-2 font-medium'>
-                    Colaboradores actuales:
-                  </p>
-                  <div className='max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-1 bg-white'>
-                    {project.users.map((user) => (
-                      <div
-                        key={user.id}
-                        className='flex items-center gap-2 p-2 bg-gray-50 rounded'
-                      >
-                        <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className='flex-1'>
-                          <p className='text-sm font-medium text-gray-900'>
-                            {user.name}
-                          </p>
-                          <p className='text-xs text-gray-500'>{user.email}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Invitar por email */}
-              {project ? (
-                <div className='border border-gray-300 rounded-lg p-3 bg-white'>
-                  <p className='text-xs text-gray-700 mb-2 font-medium'>
-                    Invitar nuevo colaborador por email:
-                  </p>
-                  <div className='flex gap-2'>
-                    <div className='flex-1 relative'>
-                      <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
-                      <input
-                        type='email'
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleSendInvite(e);
-                          }
-                        }}
-                        placeholder='email@ejemplo.com'
-                        className='w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
-                      />
-                    </div>
-                    <button
-                      type='button'
-                      onClick={handleSendInvite}
-                      disabled={sendingInvite || !inviteEmail}
-                      className='px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed'
-                    >
-                      <Send className='w-4 h-4' />
-                    </button>
-                  </div>
-                  <p className='text-xs text-gray-500 mt-1'>
-                    El usuario recibirá una invitación que debe aceptar
-                  </p>
-                </div>
-              ) : (
-                <p className='text-sm text-gray-500 text-center py-4 border border-gray-200 rounded-lg bg-white'>
-                  Una vez creado el proyecto, podrás invitar colaboradores por
-                  email. Ellos deberán aceptar la invitación para unirse.
+              {formData.team_id && (
+                <p className='text-xs text-indigo-600 mt-1 font-medium'>
+                  📌 Equipo seleccionado - Los usuarios individuales se
+                  ignorarán
                 </p>
               )}
-            </>
+            </div>
           )}
-        </div>
 
-        {/* Error message */}
-        {error && (
-          <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
-            {error}
+          {/* Separador visual */}
+          {teams.length > 0 && (
+            <div className='flex items-center gap-3 my-4'>
+              <div className='flex-1 border-t border-gray-300'></div>
+              <span className='text-sm text-gray-500 font-medium'>O</span>
+              <div className='flex-1 border-t border-gray-300'></div>
+            </div>
+          )}
+
+          {/* Miembros del equipo */}
+          <div
+            className={`${
+              formData.team_id
+                ? "opacity-50 pointer-events-none"
+                : "border-2 border-green-200 rounded-lg p-4 bg-green-50/50"
+            }`}
+          >
+            <label className='block text-sm font-medium text-gray-900 mb-2'>
+              <UserCheck className='inline w-4 h-4 mr-1' />
+              {teams.length > 0
+                ? "Opción 2: Invitar Colaboradores"
+                : "Colaboradores del Proyecto"}
+            </label>
+
+            {formData.team_id ? (
+              <p className='text-sm text-gray-500 py-4 text-center border border-gray-300 rounded-lg bg-gray-50'>
+                Has seleccionado un equipo. Todos los miembros tendrán acceso
+                automáticamente.
+              </p>
+            ) : (
+              <>
+                {/* Mostrar colaboradores actuales del proyecto */}
+                {project && project.users && project.users.length > 0 && (
+                  <div className='mb-3'>
+                    <p className='text-xs text-gray-700 mb-2 font-medium'>
+                      Colaboradores actuales:
+                    </p>
+                    <div className='max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-1 bg-white'>
+                      {project.users.map((user) => (
+                        <div
+                          key={user.id}
+                          className='flex items-center gap-2 p-2 bg-gray-50 rounded'
+                        >
+                          <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className='flex-1'>
+                            <p className='text-sm font-medium text-gray-900'>
+                              {user.name}
+                            </p>
+                            <p className='text-xs text-gray-500'>
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Invitar por email */}
+                {project ? (
+                  <div className='border border-gray-300 rounded-lg p-3 bg-white'>
+                    <p className='text-xs text-gray-700 mb-2 font-medium'>
+                      Invitar nuevo colaborador por email:
+                    </p>
+                    <div className='flex gap-2'>
+                      <div className='flex-1 relative'>
+                        <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+                        <input
+                          type='email'
+                          value={inviteEmail}
+                          onChange={(e) => setInviteEmail(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSendInvite(e);
+                            }
+                          }}
+                          placeholder='email@ejemplo.com'
+                          className='w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                        />
+                      </div>
+                      <button
+                        type='button'
+                        onClick={handleSendInvite}
+                        disabled={sendingInvite || !inviteEmail}
+                        className='px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed'
+                      >
+                        <Send className='w-4 h-4' />
+                      </button>
+                    </div>
+                    <p className='text-xs text-gray-500 mt-1'>
+                      El usuario recibirá una invitación que debe aceptar
+                    </p>
+                  </div>
+                ) : (
+                  <p className='text-sm text-gray-500 text-center py-4 border border-gray-200 rounded-lg bg-white'>
+                    Una vez creado el proyecto, podrás invitar colaboradores por
+                    email. Ellos deberán aceptar la invitación para unirse.
+                  </p>
+                )}
+              </>
+            )}
           </div>
-        )}
 
-        {/* Botones */}
-        <div className='flex gap-3 pt-4'>
-          <button
-            type='submit'
-            disabled={loading}
-            className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {loading
-              ? "Guardando..."
-              : project
-              ? "Guardar Cambios"
-              : "Crear Proyecto"}
-          </button>
-          <button
-            type='button'
-            onClick={onClose}
-            disabled={loading}
-            className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
+          {/* Error message */}
+          {error && (
+            <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
+              {error}
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className='flex gap-3 pt-4'>
+            <button
+              type='submit'
+              disabled={loading}
+              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {loading
+                ? "Guardando..."
+                : project
+                ? "Guardar Cambios"
+                : "Crear Proyecto"}
+            </button>
+            <button
+              type='button'
+              onClick={onClose}
+              disabled={loading}
+              className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
       )}
     </Modal>
   );

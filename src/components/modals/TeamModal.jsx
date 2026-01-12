@@ -304,185 +304,188 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 text-sm mt-1'>
-            Preparando el formulario
-          </p>
+          <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>
-        {/* Nombre del equipo */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Nombre del Equipo *
-          </label>
-          <div className='relative'>
-            <Type className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
-            <input
-              type='text'
-              name='name'
-              value={formData.name}
-              onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
-              placeholder='Ej: Equipo de Desarrollo'
-              required
-            />
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Descripción
-          </label>
-          <div className='relative'>
-            <FileText className='absolute left-3 top-3 w-5 h-5 text-gray-400' />
-            <textarea
-              name='description'
-              value={formData.description}
-              onChange={handleChange}
-              rows='3'
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
-              placeholder='Describe el propósito de este equipo...'
-            ></textarea>
-          </div>
-        </div>
-
-        {/* Color */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Color del Equipo
-          </label>
-          <div className='grid grid-cols-8 gap-2'>
-            {colorOptions.map((colorOption) => (
-              <button
-                key={colorOption.value}
-                type='button'
-                onClick={() =>
-                  setFormData((prev) => ({ ...prev, color: colorOption.value }))
-                }
-                className={`w-8 h-8 rounded-lg ${
-                  colorOption.value
-                } transition-all duration-200 ${
-                  formData.color === colorOption.value
-                    ? "ring-2 ring-offset-2 ring-indigo-500 scale-110"
-                    : "hover:scale-110 opacity-80 hover:opacity-100"
-                }`}
-                title={colorOption.label}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Invitar miembros (por selección) */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            <UserPlus className='inline w-4 h-4 mr-1' />
-            Invitar Miembros
-          </label>
-          <Select
-            isMulti
-            options={memberOptions}
-            value={selectedMembers}
-            onChange={handleMemberChange}
-            isLoading={loadingMembers}
-            placeholder='Buscar y seleccionar usuarios a invitar...'
-            noOptionsMessage={() => "No hay usuarios disponibles para invitar"}
-            components={{
-              Option: CustomOption,
-              MultiValue: CustomMultiValue,
-            }}
-            styles={selectStyles}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            isClearable={false}
-          />
-          <p className='mt-1 text-xs text-gray-500'>
-            Los usuarios seleccionados recibirán una invitación para unirse al
-            equipo
-          </p>
-        </div>
-
-        {/* Invitaciones por email - Solo al crear */}
-        {!team && (
+          {/* Nombre del equipo */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
-              <Mail className='inline w-4 h-4 mr-1' />
-              Invitar por Email (Opcional)
+              Nombre del Equipo *
             </label>
-            <div className='space-y-2'>
-              {inviteEmails.map((email, index) => (
-                <div key={index} className='flex gap-2'>
-                  <input
-                    type='email'
-                    value={email}
-                    onChange={(e) => {
-                      const newEmails = [...inviteEmails];
-                      newEmails[index] = e.target.value;
-                      setInviteEmails(newEmails);
-                    }}
-                    className='flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
-                    placeholder='email@ejemplo.com'
-                  />
-                  {inviteEmails.length > 1 && (
-                    <button
-                      type='button'
-                      onClick={() =>
-                        setInviteEmails(
-                          inviteEmails.filter((_, i) => i !== index)
-                        )
-                      }
-                      className='px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
-                    >
-                      <X className='w-5 h-5' />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type='button'
-                onClick={() => setInviteEmails([...inviteEmails, ""])}
-                className='flex items-center gap-2 px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
-              >
-                <Plus className='w-4 h-4' />
-                Agregar otro email
-              </button>
+            <div className='relative'>
+              <Type className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+              <input
+                type='text'
+                name='name'
+                value={formData.name}
+                onChange={handleChange}
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                placeholder='Ej: Equipo de Desarrollo'
+                required
+              />
             </div>
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Descripción
+            </label>
+            <div className='relative'>
+              <FileText className='absolute left-3 top-3 w-5 h-5 text-gray-400' />
+              <textarea
+                name='description'
+                value={formData.description}
+                onChange={handleChange}
+                rows='3'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+                placeholder='Describe el propósito de este equipo...'
+              ></textarea>
+            </div>
+          </div>
+
+          {/* Color */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              Color del Equipo
+            </label>
+            <div className='grid grid-cols-8 gap-2'>
+              {colorOptions.map((colorOption) => (
+                <button
+                  key={colorOption.value}
+                  type='button'
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      color: colorOption.value,
+                    }))
+                  }
+                  className={`w-8 h-8 rounded-lg ${
+                    colorOption.value
+                  } transition-all duration-200 ${
+                    formData.color === colorOption.value
+                      ? "ring-2 ring-offset-2 ring-indigo-500 scale-110"
+                      : "hover:scale-110 opacity-80 hover:opacity-100"
+                  }`}
+                  title={colorOption.label}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Invitar miembros (por selección) */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <UserPlus className='inline w-4 h-4 mr-1' />
+              Invitar Miembros
+            </label>
+            <Select
+              isMulti
+              options={memberOptions}
+              value={selectedMembers}
+              onChange={handleMemberChange}
+              isLoading={loadingMembers}
+              placeholder='Buscar y seleccionar usuarios a invitar...'
+              noOptionsMessage={() =>
+                "No hay usuarios disponibles para invitar"
+              }
+              components={{
+                Option: CustomOption,
+                MultiValue: CustomMultiValue,
+              }}
+              styles={selectStyles}
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false}
+              isClearable={false}
+            />
             <p className='mt-1 text-xs text-gray-500'>
-              Las invitaciones se enviarán automáticamente al crear el equipo
+              Los usuarios seleccionados recibirán una invitación para unirse al
+              equipo
             </p>
           </div>
-        )}
 
-        {/* Error message */}
-        {error && (
-          <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
-            {error}
+          {/* Invitaciones por email - Solo al crear */}
+          {!team && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                <Mail className='inline w-4 h-4 mr-1' />
+                Invitar por Email (Opcional)
+              </label>
+              <div className='space-y-2'>
+                {inviteEmails.map((email, index) => (
+                  <div key={index} className='flex gap-2'>
+                    <input
+                      type='email'
+                      value={email}
+                      onChange={(e) => {
+                        const newEmails = [...inviteEmails];
+                        newEmails[index] = e.target.value;
+                        setInviteEmails(newEmails);
+                      }}
+                      className='flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                      placeholder='email@ejemplo.com'
+                    />
+                    {inviteEmails.length > 1 && (
+                      <button
+                        type='button'
+                        onClick={() =>
+                          setInviteEmails(
+                            inviteEmails.filter((_, i) => i !== index)
+                          )
+                        }
+                        className='px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+                      >
+                        <X className='w-5 h-5' />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type='button'
+                  onClick={() => setInviteEmails([...inviteEmails, ""])}
+                  className='flex items-center gap-2 px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
+                >
+                  <Plus className='w-4 h-4' />
+                  Agregar otro email
+                </button>
+              </div>
+              <p className='mt-1 text-xs text-gray-500'>
+                Las invitaciones se enviarán automáticamente al crear el equipo
+              </p>
+            </div>
+          )}
+
+          {/* Error message */}
+          {error && (
+            <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
+              {error}
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className='flex gap-3 pt-4'>
+            <button
+              type='submit'
+              disabled={loading}
+              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {loading
+                ? "Guardando..."
+                : team
+                ? "Guardar Cambios"
+                : "Crear Equipo"}
+            </button>
+            <button
+              type='button'
+              onClick={onClose}
+              disabled={loading}
+              className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Cancelar
+            </button>
           </div>
-        )}
-
-        {/* Botones */}
-        <div className='flex gap-3 pt-4'>
-          <button
-            type='submit'
-            disabled={loading}
-            className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {loading
-              ? "Guardando..."
-              : team
-              ? "Guardar Cambios"
-              : "Crear Equipo"}
-          </button>
-          <button
-            type='button'
-            onClick={onClose}
-            disabled={loading}
-            className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
+        </form>
       )}
     </Modal>
   );

@@ -330,232 +330,230 @@ const TaskModal = ({
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 text-sm mt-1'>
-            Preparando el formulario
-          </p>
+          <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>
-        {/* Título de la tarea */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Título de la Tarea *
-          </label>
-          <div className='relative'>
-            <CheckSquare className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
-            <input
-              type='text'
-              name='title'
-              value={formData.title}
-              onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
-              placeholder='Ej: Diseñar mockups para landing'
-              required
-            />
-          </div>
-        </div>
-
-        {/* Descripción */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Descripción
-          </label>
-          <textarea
-            name='description'
-            value={formData.description}
-            onChange={handleChange}
-            rows='3'
-            className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
-            placeholder='Describe la tarea en detalle...'
-          ></textarea>
-        </div>
-
-        {/* Lista de tareas (Checklist) - Opcional */}
-        <div className='border border-gray-200 rounded-lg p-4 bg-gray-50/50'>
-          <TaskChecklist
-            taskId={task?.id}
-            items={checklistItems}
-            onUpdate={onSuccess}
-            onLocalChange={handleChecklistChange}
-          />
-        </div>
-
-        {/* Proyecto y Estado */}
-        <div className='grid grid-cols-2 gap-4'>
+          {/* Título de la tarea */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Proyecto *
+              Título de la Tarea *
             </label>
             <div className='relative'>
-              <FolderKanban className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-              <select
-                name='project_id'
-                value={formData.project_id}
+              <CheckSquare className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+              <input
+                type='text'
+                name='title'
+                value={formData.title}
                 onChange={handleChange}
-                disabled={!!projectId}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                placeholder='Ej: Diseñar mockups para landing'
                 required
-              >
-                <option value=''>Seleccionar proyecto</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           </div>
 
+          {/* Descripción */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Estado
+              Descripción
             </label>
-            <select
-              name='status'
-              value={formData.status}
+            <textarea
+              name='description'
+              value={formData.description}
               onChange={handleChange}
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
-            >
-              <option value='pending'>Pendiente</option>
-              <option value='in_progress'>En progreso</option>
-              <option value='completed'>Completada</option>
-              <option value='cancelled'>Cancelada</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Asignar Usuarios */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
-            Asignar a
-          </label>
-          <Select
-            isMulti
-            options={memberOptions}
-            value={selectedMembers}
-            onChange={handleMemberChange}
-            isDisabled={!formData.project_id}
-            isLoading={loadingMembers}
-            placeholder={
-              !formData.project_id
-                ? "Selecciona un proyecto primero"
-                : loadingMembers
-                ? "Cargando miembros..."
-                : "Buscar y seleccionar miembros..."
-            }
-            noOptionsMessage={() => "No hay miembros en este proyecto"}
-            components={{
-              Option: CustomOption,
-              MultiValue: CustomMultiValue,
-            }}
-            styles={selectStyles}
-            closeMenuOnSelect={false}
-            hideSelectedOptions={false}
-            isClearable={false}
-          />
-        </div>
-
-        {/* Prioridad y Fecha */}
-        <div className='grid grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Prioridad
-            </label>
-            <div className='relative'>
-              <Flag className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-              <select
-                name='priority'
-                value={formData.priority}
-                onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
-              >
-                <option value='low'>Baja</option>
-                <option value='medium'>Media</option>
-                <option value='high'>Alta</option>
-                <option value='urgent'>Urgente</option>
-              </select>
-            </div>
+              rows='3'
+              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              placeholder='Describe la tarea en detalle...'
+            ></textarea>
           </div>
 
-          <div className='flex items-center pt-7'>
-            <input
-              type='checkbox'
-              name='is_urgent'
-              checked={formData.is_urgent}
-              onChange={handleChange}
-              className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
+          {/* Lista de tareas (Checklist) - Opcional */}
+          <div className='border border-gray-200 rounded-lg p-4 bg-gray-50/50'>
+            <TaskChecklist
+              taskId={task?.id}
+              items={checklistItems}
+              onUpdate={onSuccess}
+              onLocalChange={handleChecklistChange}
             />
-            <label className='ml-2 text-sm font-medium text-gray-700'>
-              Marcar como urgente
-            </label>
           </div>
-        </div>
 
-        {/* Fechas de inicio y vencimiento */}
-        <div className='grid grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Fecha de Inicio
-            </label>
-            <div className='relative'>
-              <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-              <input
-                type='date'
-                name='start_date'
-                value={formData.start_date}
+          {/* Proyecto y Estado */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Proyecto *
+              </label>
+              <div className='relative'>
+                <FolderKanban className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <select
+                  name='project_id'
+                  value={formData.project_id}
+                  onChange={handleChange}
+                  disabled={!!projectId}
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed'
+                  required
+                >
+                  <option value=''>Seleccionar proyecto</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Estado
+              </label>
+              <select
+                name='status'
+                value={formData.status}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-              />
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+              >
+                <option value='pending'>Pendiente</option>
+                <option value='in_progress'>En progreso</option>
+                <option value='completed'>Completada</option>
+                <option value='cancelled'>Cancelada</option>
+              </select>
             </div>
           </div>
 
+          {/* Asignar Usuarios */}
           <div>
             <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Fecha de Vencimiento
+              Asignar a
             </label>
-            <div className='relative'>
-              <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+            <Select
+              isMulti
+              options={memberOptions}
+              value={selectedMembers}
+              onChange={handleMemberChange}
+              isDisabled={!formData.project_id}
+              isLoading={loadingMembers}
+              placeholder={
+                !formData.project_id
+                  ? "Selecciona un proyecto primero"
+                  : loadingMembers
+                  ? "Cargando miembros..."
+                  : "Buscar y seleccionar miembros..."
+              }
+              noOptionsMessage={() => "No hay miembros en este proyecto"}
+              components={{
+                Option: CustomOption,
+                MultiValue: CustomMultiValue,
+              }}
+              styles={selectStyles}
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false}
+              isClearable={false}
+            />
+          </div>
+
+          {/* Prioridad y Fecha */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Prioridad
+              </label>
+              <div className='relative'>
+                <Flag className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <select
+                  name='priority'
+                  value={formData.priority}
+                  onChange={handleChange}
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+                >
+                  <option value='low'>Baja</option>
+                  <option value='medium'>Media</option>
+                  <option value='high'>Alta</option>
+                  <option value='urgent'>Urgente</option>
+                </select>
+              </div>
+            </div>
+
+            <div className='flex items-center pt-7'>
               <input
-                type='date'
-                name='due_date'
-                value={formData.due_date}
+                type='checkbox'
+                name='is_urgent'
+                checked={formData.is_urgent}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
               />
+              <label className='ml-2 text-sm font-medium text-gray-700'>
+                Marcar como urgente
+              </label>
             </div>
           </div>
-        </div>
 
-        {/* Error message */}
-        {error && (
-          <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
-            {error}
+          {/* Fechas de inicio y vencimiento */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Fecha de Inicio
+              </label>
+              <div className='relative'>
+                <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <input
+                  type='date'
+                  name='start_date'
+                  value={formData.start_date}
+                  onChange={handleChange}
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
+                Fecha de Vencimiento
+              </label>
+              <div className='relative'>
+                <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <input
+                  type='date'
+                  name='due_date'
+                  value={formData.due_date}
+                  onChange={handleChange}
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                />
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Botones */}
-        <div className='flex gap-3 pt-4'>
-          <button
-            type='submit'
-            disabled={loading}
-            className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            {loading
-              ? "Guardando..."
-              : task
-              ? "Guardar Cambios"
-              : "Crear Tarea"}
-          </button>
-          <button
-            type='button'
-            onClick={onClose}
-            disabled={loading}
-            className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
+          {/* Error message */}
+          {error && (
+            <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
+              {error}
+            </div>
+          )}
+
+          {/* Botones */}
+          <div className='flex gap-3 pt-4'>
+            <button
+              type='submit'
+              disabled={loading}
+              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              {loading
+                ? "Guardando..."
+                : task
+                ? "Guardar Cambios"
+                : "Crear Tarea"}
+            </button>
+            <button
+              type='button'
+              onClick={onClose}
+              disabled={loading}
+              className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
       )}
     </Modal>
   );

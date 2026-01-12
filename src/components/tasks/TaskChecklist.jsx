@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckSquare,
@@ -14,14 +14,17 @@ import { useNotification } from "../../context/NotificationContext";
 // Modo "local" para cuando se crea una tarea nueva (sin taskId)
 // Modo "api" para cuando se edita una tarea existente (con taskId)
 const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
-  // Usamos useRef para los items iniciales para que no se re-sincronice
-  const initialItemsRef = useRef(items);
-  const [checklistItems, setChecklistItems] = useState(initialItemsRef.current);
+  const [checklistItems, setChecklistItems] = useState(items);
   const [newItemText, setNewItemText] = useState("");
   const [addingItem, setAddingItem] = useState(false);
   const { error: showError } = useNotification();
 
   const isLocalMode = !taskId;
+
+  // Sincronizar estado cuando cambian las props items (al abrir modal con otra tarea)
+  useEffect(() => {
+    setChecklistItems(items);
+  }, [items]);
 
   // Notificar cambios locales al padre (sin causar re-sincronización)
   const notifyParent = (newItems) => {

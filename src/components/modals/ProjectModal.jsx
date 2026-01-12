@@ -9,6 +9,7 @@ import {
   UserCheck,
   Mail,
   Send,
+  Loader2,
 } from "lucide-react";
 import { projectsAPI, invitationsAPI, teamsAPI } from "../../utils/api";
 
@@ -33,35 +34,45 @@ const ProjectModal = ({
   const [teams, setTeams] = useState([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [sendingInvite, setSendingInvite] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
+  // Cargar datos cuando se abre el modal
   useEffect(() => {
-    loadTeams();
-  }, []);
+    const initializeModal = async () => {
+      if (!isOpen) {
+        setInitializing(true);
+        return;
+      }
 
-  // Resetear form cuando se abre el modal
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        name: project?.name || "",
-        description: project?.description || "",
-        due_date: project?.due_date ? project.due_date.split("T")[0] : "",
-        priority: project?.priority || "medium",
-        color: project?.color || "bg-blue-500",
-        team_id: project?.team_id || teamId || "",
-      });
-      setError(null);
-      setInviteEmail("");
-    }
+      try {
+        setInitializing(true);
+        setError(null);
+
+        // 1. Cargar equipos
+        const teamsData = await teamsAPI.getAll();
+        setTeams(teamsData);
+
+        // 2. Establecer formData
+        setFormData({
+          name: project?.name || "",
+          description: project?.description || "",
+          due_date: project?.due_date ? project.due_date.split("T")[0] : "",
+          priority: project?.priority || "medium",
+          color: project?.color || "bg-blue-500",
+          team_id: project?.team_id || teamId || "",
+        });
+        setInviteEmail("");
+
+        // TODO LISTO
+        setInitializing(false);
+      } catch (err) {
+        console.error("Error al cargar equipos:", err);
+        setInitializing(false);
+      }
+    };
+
+    initializeModal();
   }, [isOpen, project, teamId]);
-
-  const loadTeams = async () => {
-    try {
-      const data = await teamsAPI.getAll();
-      setTeams(data);
-    } catch (err) {
-      console.error("Error al cargar equipos:", err);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -137,7 +148,16 @@ const ProjectModal = ({
       title={project ? "Editar Proyecto" : "Nuevo Proyecto"}
       size='md'
     >
-      <form onSubmit={handleSubmit} className='space-y-5'>
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando el formulario
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className='space-y-5'>
         {/* Nombre del proyecto */}
         <div>
           <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -399,6 +419,7 @@ const ProjectModal = ({
           </button>
         </div>
       </form>
+      )}
     </Modal>
   );
 };

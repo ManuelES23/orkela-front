@@ -11,6 +11,7 @@ import {
   Mail,
   Plus,
   UserPlus,
+  Loader2,
 } from "lucide-react";
 import { teamsAPI, teamInvitationsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
@@ -29,6 +30,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState(null);
+  const [initializing, setInitializing] = useState(true);
 
   const colorOptions = [
     { value: "bg-indigo-500", label: "Indigo", color: "#6366f1" },
@@ -50,32 +52,40 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
   ];
 
   useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        name: team?.name || "",
-        description: team?.description || "",
-        color: team?.color || "bg-indigo-500",
-      });
-      setSelectedUserIds([]);
-      setInviteEmails([""]);
-      setError(null);
-      loadAvailableMembers();
-    }
-  }, [isOpen, team]);
+    const initializeModal = async () => {
+      if (!isOpen) {
+        setInitializing(true);
+        return;
+      }
 
-  const loadAvailableMembers = async () => {
-    try {
-      setLoadingMembers(true);
-      // Si estamos editando, pasar el teamId para excluir miembros existentes
-      const data = await teamsAPI.getAvailableMembers(team?.id);
-      setAvailableMembers(data);
-    } catch (err) {
-      console.error("Error loading available members:", err);
-      setAvailableMembers([]);
-    } finally {
-      setLoadingMembers(false);
-    }
-  };
+      try {
+        setInitializing(true);
+        setError(null);
+
+        // 1. Cargar miembros disponibles
+        const data = await teamsAPI.getAvailableMembers(team?.id);
+        setAvailableMembers(data);
+
+        // 2. Establecer formData
+        setFormData({
+          name: team?.name || "",
+          description: team?.description || "",
+          color: team?.color || "bg-indigo-500",
+        });
+        setSelectedUserIds([]);
+        setInviteEmails([""]);
+
+        // TODO LISTO
+        setInitializing(false);
+      } catch (err) {
+        console.error("Error loading available members:", err);
+        setAvailableMembers([]);
+        setInitializing(false);
+      }
+    };
+
+    initializeModal();
+  }, [isOpen, team]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -290,7 +300,16 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
       title={team ? "Editar Equipo" : "Nuevo Equipo"}
       size='md'
     >
-      <form onSubmit={handleSubmit} className='space-y-5'>
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando el formulario
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className='space-y-5'>
         {/* Nombre del equipo */}
         <div>
           <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -464,6 +483,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
           </button>
         </div>
       </form>
+      )}
     </Modal>
   );
 };

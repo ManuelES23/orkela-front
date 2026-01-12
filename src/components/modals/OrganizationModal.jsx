@@ -30,6 +30,7 @@ const OrganizationModal = ({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const fileInputRef = useRef(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [formData, setFormData] = useState({
@@ -50,40 +51,57 @@ const OrganizationModal = ({
   const isCreating = !organization;
 
   useEffect(() => {
-    if (isOpen) {
-      if (organization) {
-        setFormData({
-          name: organization.name || "",
-          description: organization.description || "",
-          website: organization.website || "",
-          email: organization.email || "",
-          phone: organization.phone || "",
-          address: organization.address || "",
-          city: organization.city || "",
-          country: organization.country || "",
-          industry: organization.industry || "",
-          size: organization.size || "",
-          plan: organization.plan || "free",
-        });
-        // Establecer preview del logo existente
-        setLogoPreview(organization.logo || null);
-      } else {
-        setFormData({
-          name: "",
-          description: "",
-          website: "",
-          email: "",
-          phone: "",
-          address: "",
-          city: "",
-          country: "",
-          industry: "",
-          size: "",
-          plan: "free",
-        });
-        setLogoPreview(null);
+    const initializeModal = async () => {
+      if (!isOpen) {
+        setInitializing(true);
+        return;
       }
-    }
+
+      try {
+        setInitializing(true);
+
+        // Establecer formData
+        if (organization) {
+          setFormData({
+            name: organization.name || "",
+            description: organization.description || "",
+            website: organization.website || "",
+            email: organization.email || "",
+            phone: organization.phone || "",
+            address: organization.address || "",
+            city: organization.city || "",
+            country: organization.country || "",
+            industry: organization.industry || "",
+            size: organization.size || "",
+            plan: organization.plan || "free",
+          });
+          setLogoPreview(organization.logo || null);
+        } else {
+          setFormData({
+            name: "",
+            description: "",
+            website: "",
+            email: "",
+            phone: "",
+            address: "",
+            city: "",
+            country: "",
+            industry: "",
+            size: "",
+            plan: "free",
+          });
+          setLogoPreview(null);
+        }
+
+        // TODO LISTO
+        setInitializing(false);
+      } catch (err) {
+        console.error("Error initializing modal:", err);
+        setInitializing(false);
+      }
+    };
+
+    initializeModal();
   }, [isOpen, organization]);
 
   const handleChange = (e) => {
@@ -230,7 +248,16 @@ const OrganizationModal = ({
       title={organization ? "Editar Organización" : "Nueva Organización"}
       size='md'
     >
-      <form onSubmit={handleSubmit} className='space-y-5'>
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando el formulario
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className='space-y-5'>
         {/* Aviso para SystemAdmins al crear */}
         {isSystemAdmin && isCreating && (
           <div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
@@ -562,6 +589,7 @@ const OrganizationModal = ({
           </button>
         </div>
       </form>
+      )}
     </Modal>
   );
 };

@@ -36,15 +36,32 @@ const TaskDetailModal = ({
   const [checklistItems, setChecklistItems] = useState([]);
   const [currentTask, setCurrentTask] = useState(null);
   const [newItemText, setNewItemText] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const [addingItem, setAddingItem] = useState(false);
 
-  // Cargar items del checklist cuando se abre el modal
+  // Cargar tarea completa cuando se abre el modal
   useEffect(() => {
-    if (isOpen && task?.id) {
-      setCurrentTask(task);
-      setChecklistItems(task.checklist_items || []);
-    }
+    const initializeModal = async () => {
+      if (!isOpen || !task?.id) {
+        setInitializing(true);
+        return;
+      }
+
+      try {
+        setInitializing(true);
+        const updatedTask = await tasksAPI.getById(task.id);
+        setCurrentTask(updatedTask);
+        setChecklistItems(updatedTask.checklist_items || []);
+      } catch (err) {
+        console.error("Error loading task:", err);
+        setCurrentTask(task);
+        setChecklistItems(task.checklist_items || []);
+      } finally {
+        setInitializing(false);
+      }
+    };
+    
+    initializeModal();
   }, [isOpen, task]);
 
   // Función para recargar la tarea desde el servidor
@@ -224,7 +241,16 @@ const TaskDetailModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title='Detalle de Tarea' size='lg'>
-      <div className='space-y-6'>
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando tarea...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando detalles de la tarea
+          </p>
+        </div>
+      ) : (
+        <div className='space-y-6'>
         {/* Header con título y acciones */}
         <div className='flex items-start justify-between gap-4'>
           <div className='flex-1'>
@@ -541,6 +567,7 @@ const TaskDetailModal = ({
           </div>
         </div>
       </div>
+      )}
     </Modal>
   );
 };

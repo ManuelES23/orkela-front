@@ -36,50 +36,58 @@ const TicketModal = ({
   const [teams, setTeams] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
+  const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const initializeModal = async () => {
+      if (!isOpen) {
+        setInitializing(true);
+        return;
+      }
+
       try {
-        setLoadingData(true);
+        setInitializing(true);
+        setError(null);
+
+        // 1. Cargar equipos y proyectos en paralelo
         const [teamsData, projectsData] = await Promise.all([
           teamsAPI.getAll(),
           projectsAPI.getAll(),
         ]);
         setTeams(teamsData);
         setProjects(projectsData);
+
+        // 2. Establecer formData
+        if (ticket) {
+          setFormData({
+            title: ticket.title || "",
+            description: ticket.description || "",
+            type: ticket.type || "request",
+            priority: ticket.priority || "medium",
+            team_id: ticket.team_id || teamId || "",
+            project_id: ticket.project_id || "",
+          });
+        } else {
+          setFormData({
+            title: "",
+            description: "",
+            type: "request",
+            priority: "medium",
+            team_id: teamId || "",
+            project_id: "",
+          });
+        }
+
+        // TODO LISTO
+        setInitializing(false);
       } catch (err) {
         console.error("Error loading data:", err);
-      } finally {
-        setLoadingData(false);
+        setInitializing(false);
       }
     };
 
-    if (isOpen) {
-      fetchData();
-      // Resetear formData cuando se abre el modal
-      if (ticket) {
-        setFormData({
-          title: ticket.title || "",
-          description: ticket.description || "",
-          type: ticket.type || "request",
-          priority: ticket.priority || "medium",
-          team_id: ticket.team_id || teamId || "",
-          project_id: ticket.project_id || "",
-        });
-      } else {
-        setFormData({
-          title: "",
-          description: "",
-          type: "request",
-          priority: "medium",
-          team_id: teamId || "",
-          project_id: "",
-        });
-      }
-      setError(null);
-    }
+    initializeModal();
   }, [isOpen, ticket, teamId]);
 
   const handleChange = (e) => {
@@ -205,9 +213,13 @@ const TicketModal = ({
       title={ticket ? "Editar Ticket" : "Nuevo Ticket"}
       size='md'
     >
-      {loadingData ? (
-        <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando el formulario
+          </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>

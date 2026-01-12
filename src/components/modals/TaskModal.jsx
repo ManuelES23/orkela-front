@@ -39,43 +39,87 @@ const TaskModal = ({
   const [loading, setLoading] = useState(false);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState(null);
+  const [initializing, setInitializing] = useState(true);
 
+  // Efecto principal para inicializar el modal
   useEffect(() => {
-    const fetchProjects = async () => {
+    const initializeModal = async () => {
+      if (!isOpen) {
+        // Limpiar completamente cuando se cierra el modal
+        setChecklistItems([]);
+        setProjectMembers([]);
+        setFormData({
+          title: "",
+          description: "",
+          project_id: "",
+          priority: "medium",
+          start_date: "",
+          due_date: "",
+          status: "pending",
+          is_urgent: false,
+          assigned_user_ids: [],
+        });
+        setInitializing(true);
+        return;
+      }
+
       try {
-        const data = await projectsAPI.getAll();
-        setProjects(data);
+        // Mostrar estado de carga
+        setInitializing(true);
+        setError(null);
+
+        // 1. Cargar proyectos
+        const projectsData = await projectsAPI.getAll();
+        setProjects(projectsData);
+
+        // 2. Determinar el project_id a usar
+        const targetProjectId = task?.project_id || projectId || "";
+
+        // 3. Si hay un proyecto, cargar sus miembros
+        let members = [];
+        if (targetProjectId) {
+          try {
+            members = await tasksAPI.getProjectMembers(targetProjectId);
+            setProjectMembers(members);
+          } catch (err) {
+            console.error("Error loading project members:", err);
+            setProjectMembers([]);
+          }
+        }
+
+        // 4. Establecer el formData con todos los datos
+        setFormData({
+          title: task?.title || "",
+          description: task?.description || "",
+          project_id: targetProjectId,
+          priority: task?.priority || "medium",
+          start_date: task?.start_date ? task.start_date.split("T")[0] : "",
+          due_date: task?.due_date ? task.due_date.split("T")[0] : "",
+          status: task?.status || "pending",
+          is_urgent: task?.is_urgent || false,
+          assigned_user_ids: task?.assigned_users?.map((u) => u.id) || [],
+        });
+
+        // 5. Establecer checklist items
+        setChecklistItems(task?.checklist_items || []);
+
+        // TODO LISTO - Permitir renderizado
+        setInitializing(false);
       } catch (err) {
-        console.error("Error loading projects:", err);
+        console.error("Error initializing modal:", err);
+        setError("Error al cargar los datos del formulario");
+        setInitializing(false);
       }
     };
 
-    if (isOpen) {
-      fetchProjects();
-      // Resetear formData cuando se abre el modal
-      setFormData({
-        title: task?.title || "",
-        description: task?.description || "",
-        project_id: task?.project_id || projectId || "",
-        priority: task?.priority || "medium",
-        start_date: task?.start_date ? task.start_date.split("T")[0] : "",
-        due_date: task?.due_date ? task.due_date.split("T")[0] : "",
-        status: task?.status || "pending",
-        is_urgent: task?.is_urgent || false,
-        assigned_user_ids: task?.assigned_users?.map((u) => u.id) || [],
-      });
-      // Resetear checklist items - siempre limpiar primero
-      setChecklistItems(task?.checklist_items || []);
-      setError(null);
-    } else {
-      // Limpiar completamente cuando se cierra el modal
-      setChecklistItems([]);
-      setProjectMembers([]);
-    }
+    initializeModal();
   }, [isOpen, task, projectId]);
 
-  // Cargar miembros del proyecto cuando cambie el proyecto seleccionado
+  // Cargar miembros del proyecto cuando cambie el proyecto seleccionado MANUALMENTE
   useEffect(() => {
+    // Solo ejecutar si el modal está abierto y no estamos en la inicialización
+    if (!isOpen) return;
+
     const fetchProjectMembers = async () => {
       if (!formData.project_id) {
         setProjectMembers([]);
@@ -94,8 +138,11 @@ const TaskModal = ({
       }
     };
 
-    fetchProjectMembers();
-  }, [formData.project_id]);
+    // Solo cargar si el project_id cambió después de la inicialización
+    if (formData.project_id && isOpen) {
+      fetchProjectMembers();
+    }
+  }, [formData.project_id, isOpen]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -278,7 +325,17 @@ const TaskModal = ({
       title={task ? "Editar Tarea" : "Nueva Tarea"}
       size='md'
     >
-      <form onSubmit={handleSubmit} className='space-y-5'>
+      {/* Loading State - Mostrar mientras se cargan los datos */}
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando el formulario
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className='space-y-5'>
         {/* Título de la tarea */}
         <div>
           <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -499,6 +556,7 @@ const TaskModal = ({
           </button>
         </div>
       </form>
+      )}
     </Modal>
   );
 };

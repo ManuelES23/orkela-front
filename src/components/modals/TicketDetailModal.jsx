@@ -45,7 +45,7 @@ const TicketDetailModal = ({
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [isInternal, setIsInternal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
   const [sendingComment, setSendingComment] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
@@ -57,7 +57,7 @@ const TicketDetailModal = ({
     if (!initialTicket?.id) return;
 
     try {
-      setLoading(true);
+      setInitializing(true);
       const [ticketData, commentsData] = await Promise.all([
         ticketsAPI.getById(initialTicket.id),
         ticketsAPI.getComments(initialTicket.id),
@@ -74,7 +74,7 @@ const TicketDetailModal = ({
       console.error("Error loading ticket:", err);
       showError("No se pudo cargar el ticket");
     } finally {
-      setLoading(false);
+      setInitializing(false);
     }
   }, [initialTicket?.id, showError]);
 
@@ -249,9 +249,13 @@ const TicketDetailModal = ({
       title={`Ticket #${initialTicket?.id || ""}`}
       size='lg'
     >
-      {loading ? (
-        <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+      {initializing ? (
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <p className='text-gray-600 font-medium'>Cargando ticket...</p>
+          <p className='text-gray-400 text-sm mt-1'>
+            Preparando detalles del ticket
+          </p>
         </div>
       ) : ticket ? (
         <div className='space-y-6'>

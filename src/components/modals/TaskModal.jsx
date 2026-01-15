@@ -11,9 +11,11 @@ import {
   Check,
   Loader2,
   ListTodo,
+  Tag,
 } from "lucide-react";
 import { tasksAPI, projectsAPI } from "../../utils/api";
 import TaskChecklist from "../tasks/TaskChecklist";
+import TagSelector from "../tasks/TagSelector";
 
 const TaskModal = ({
   isOpen,
@@ -32,6 +34,7 @@ const TaskModal = ({
     status: "pending",
     is_urgent: false,
     assigned_user_ids: [],
+    tag_ids: [],
   });
   const [checklistItems, setChecklistItems] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -58,6 +61,7 @@ const TaskModal = ({
           status: "pending",
           is_urgent: false,
           assigned_user_ids: [],
+          tag_ids: [],
         });
         setInitializing(true);
         return;
@@ -98,6 +102,7 @@ const TaskModal = ({
           status: task?.status || "pending",
           is_urgent: task?.is_urgent || false,
           assigned_user_ids: task?.assigned_users?.map((u) => u.id) || [],
+          tag_ids: task?.tags?.map((t) => t.id) || [],
         });
 
         // 5. Establecer checklist items
@@ -151,12 +156,13 @@ const TaskModal = ({
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Si cambia el proyecto, limpiar usuarios asignados
+    // Si cambia el proyecto, limpiar usuarios asignados y tags
     if (name === "project_id") {
       setFormData((prev) => ({
         ...prev,
         project_id: value,
         assigned_user_ids: [],
+        tag_ids: [],
       }));
     }
   };
@@ -280,6 +286,14 @@ const TaskModal = ({
   // Callback para cuando cambian los items del checklist en modo local (crear tarea)
   const handleChecklistChange = (items) => {
     setChecklistItems(items);
+  };
+
+  // Callback para cuando cambian los tags seleccionados
+  const handleTagsChange = (tagIds) => {
+    setFormData((prev) => ({
+      ...prev,
+      tag_ids: tagIds,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -450,6 +464,22 @@ const TaskModal = ({
               closeMenuOnSelect={false}
               hideSelectedOptions={false}
               isClearable={false}
+            />
+          </div>
+
+          {/* Etiquetas */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <div className='flex items-center gap-2'>
+                <Tag className='w-4 h-4' />
+                Etiquetas
+              </div>
+            </label>
+            <TagSelector
+              projectId={formData.project_id}
+              selectedTagIds={formData.tag_ids}
+              onChange={handleTagsChange}
+              showManageHint={true}
             />
           </div>
 

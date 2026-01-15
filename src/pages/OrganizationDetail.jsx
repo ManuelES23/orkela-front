@@ -36,6 +36,8 @@ import {
   Ticket,
   UserMinus,
   CheckSquare,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { organizationsAPI } from "../utils/api";
 
@@ -73,6 +75,14 @@ const OrganizationDetail = () => {
 
   // Stats
   const [stats, setStats] = useState(null);
+
+  // Member stats modal
+  const [memberStatsModal, setMemberStatsModal] = useState({
+    isOpen: false,
+    member: null,
+    stats: null,
+    loading: false,
+  });
 
   // Invite form
   const [inviteForm, setInviteForm] = useState({
@@ -290,6 +300,39 @@ const OrganizationDetail = () => {
     } catch (err) {
       showError(err.message || "No se pudo cancelar la invitación");
     }
+  };
+
+  const handleOpenMemberStats = async (member) => {
+    setMemberStatsModal({
+      isOpen: true,
+      member: member,
+      stats: null,
+      loading: true,
+    });
+
+    try {
+      const statsData = await organizationsAPI.getMemberStats(id, member.id);
+      setMemberStatsModal((prev) => ({
+        ...prev,
+        stats: statsData,
+        loading: false,
+      }));
+    } catch (err) {
+      showError(err.message || "No se pudieron cargar las estadísticas");
+      setMemberStatsModal((prev) => ({
+        ...prev,
+        loading: false,
+      }));
+    }
+  };
+
+  const handleCloseMemberStats = () => {
+    setMemberStatsModal({
+      isOpen: false,
+      member: null,
+      stats: null,
+      loading: false,
+    });
   };
 
   const handleRemoveMember = async () => {
@@ -759,37 +802,48 @@ const OrganizationDetail = () => {
                         </div>
                       </div>
 
-                      {organization.can_manage &&
-                        member.id !== organization.owner_id && (
-                          <div className='flex items-center gap-2'>
-                            <select
-                              value={member.role || "member"}
-                              onChange={(e) =>
-                                handleUpdateMemberRole(
-                                  member.id,
-                                  e.target.value
-                                )
-                              }
-                              className='text-sm border border-gray-300 rounded-lg px-2 py-1'
-                            >
-                              <option value='admin'>Admin</option>
-                              <option value='manager'>Manager</option>
-                              <option value='member'>Miembro</option>
-                            </select>
-                            <button
-                              onClick={() =>
-                                setConfirmModal({
-                                  isOpen: true,
-                                  type: "removeMember",
-                                  data: member,
-                                })
-                              }
-                              className='p-2 text-red-500 hover:bg-red-50 rounded-lg'
-                            >
-                              <UserMinus className='w-4 h-4' />
-                            </button>
-                          </div>
-                        )}
+                      <div className='flex items-center gap-2'>
+                        {/* Botón de estadísticas - visible para todos */}
+                        <button
+                          onClick={() => handleOpenMemberStats(member)}
+                          className='p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors'
+                          title='Ver estadísticas'
+                        >
+                          <BarChart3 className='w-4 h-4' />
+                        </button>
+
+                        {organization.can_manage &&
+                          member.id !== organization.owner_id && (
+                            <>
+                              <select
+                                value={member.role || "member"}
+                                onChange={(e) =>
+                                  handleUpdateMemberRole(
+                                    member.id,
+                                    e.target.value
+                                  )
+                                }
+                                className='text-sm border border-gray-300 rounded-lg px-2 py-1'
+                              >
+                                <option value='admin'>Admin</option>
+                                <option value='manager'>Manager</option>
+                                <option value='member'>Miembro</option>
+                              </select>
+                              <button
+                                onClick={() =>
+                                  setConfirmModal({
+                                    isOpen: true,
+                                    type: "removeMember",
+                                    data: member,
+                                  })
+                                }
+                                className='p-2 text-red-500 hover:bg-red-50 rounded-lg'
+                              >
+                                <UserMinus className='w-4 h-4' />
+                              </button>
+                            </>
+                          )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1214,6 +1268,278 @@ const OrganizationDetail = () => {
         confirmText='Remover'
         type='danger'
       />
+
+      {/* Member Stats Modal */}
+      <AnimatePresence>
+        {memberStatsModal.isOpen && (
+          <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className='absolute inset-0 bg-black/50'
+              onClick={handleCloseMemberStats}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className='relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
+            >
+              {/* Header */}
+              <div className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+                    {memberStatsModal.member?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className='text-lg font-semibold text-gray-900'>
+                      {memberStatsModal.member?.name}
+                    </h3>
+                    <p className='text-sm text-gray-500'>
+                      {memberStatsModal.member?.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseMemberStats}
+                  className='p-2 hover:bg-gray-100 rounded-lg'
+                >
+                  <X className='w-5 h-5 text-gray-500' />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className='p-6'>
+                {memberStatsModal.loading ? (
+                  <div className='flex flex-col items-center justify-center py-12'>
+                    <Loader2 className='w-8 h-8 animate-spin text-indigo-600 mb-3' />
+                    <p className='text-gray-500'>Cargando estadísticas...</p>
+                  </div>
+                ) : memberStatsModal.stats ? (
+                  <div className='space-y-6'>
+                    {/* Productividad */}
+                    <div className='bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl p-5 text-white'>
+                      <div className='flex items-center gap-2 mb-4'>
+                        <Sparkles className='w-5 h-5' />
+                        <h4 className='font-semibold'>Productividad</h4>
+                      </div>
+
+                      {/* Barra de progreso principal */}
+                      <div className='mb-4'>
+                        <div className='flex justify-between items-center mb-2'>
+                          <span className='text-sm text-indigo-100'>
+                            Tareas completadas
+                          </span>
+                          <span className='font-bold'>
+                            {memberStatsModal.stats.tasks?.completed || 0}/
+                            {(memberStatsModal.stats.tasks?.completed || 0) +
+                              (memberStatsModal.stats.tasks?.pending || 0)}
+                          </span>
+                        </div>
+                        <div className='w-full bg-white/20 rounded-full h-3'>
+                          <div
+                            className='bg-white h-3 rounded-full transition-all duration-500'
+                            style={{
+                              width: `${
+                                memberStatsModal.stats.productivity
+                                  ?.percentage || 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Métricas de productividad */}
+                      <div className='grid grid-cols-3 gap-3'>
+                        <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
+                          <p className='text-2xl font-bold'>
+                            {memberStatsModal.stats.productivity?.percentage ||
+                              0}
+                            %
+                          </p>
+                          <p className='text-xs text-indigo-100'>Completado</p>
+                        </div>
+                        <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
+                          <div className='flex items-center justify-center gap-1'>
+                            <TrendingUp className='w-4 h-4' />
+                            <p className='text-2xl font-bold'>
+                              {memberStatsModal.stats.productivity
+                                ?.completed_this_week || 0}
+                            </p>
+                          </div>
+                          <p className='text-xs text-indigo-100'>Esta semana</p>
+                        </div>
+                        <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
+                          <p className='text-2xl font-bold'>
+                            {memberStatsModal.stats.productivity
+                              ?.avg_project_progress || 0}
+                            %
+                          </p>
+                          <p className='text-xs text-indigo-100'>
+                            Avg. Progreso
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Proyectos */}
+                    <div className='bg-blue-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <FolderKanban className='w-5 h-5 text-blue-600' />
+                        <h4 className='font-semibold text-blue-900'>
+                          Proyectos
+                        </h4>
+                      </div>
+                      <div className='grid grid-cols-3 gap-4'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600'>
+                            {memberStatsModal.stats.projects?.owned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Propios</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600'>
+                            {memberStatsModal.stats.projects?.collaborating ||
+                              0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Colabora</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600'>
+                            {memberStatsModal.stats.projects?.total || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Total</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tareas */}
+                    <div className='bg-green-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <CheckSquare className='w-5 h-5 text-green-600' />
+                        <h4 className='font-semibold text-green-900'>Tareas</h4>
+                        {memberStatsModal.stats.tasks?.completion_rate > 0 && (
+                          <span className='ml-auto text-sm font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full'>
+                            {memberStatsModal.stats.tasks.completion_rate}%
+                            completado
+                          </span>
+                        )}
+                      </div>
+                      <div className='grid grid-cols-4 gap-3'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStatsModal.stats.tasks?.created || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Creadas</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStatsModal.stats.tasks?.assigned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Asignadas</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStatsModal.stats.tasks?.completed || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Completadas</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-yellow-600'>
+                            {memberStatsModal.stats.tasks?.pending || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Pendientes</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tickets */}
+                    <div className='bg-orange-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <Ticket className='w-5 h-5 text-orange-600' />
+                        <h4 className='font-semibold text-orange-900'>
+                          Tickets
+                        </h4>
+                        {memberStatsModal.stats.tickets?.resolution_rate >
+                          0 && (
+                          <span className='ml-auto text-sm font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full'>
+                            {memberStatsModal.stats.tickets.resolution_rate}%
+                            resueltos
+                          </span>
+                        )}
+                      </div>
+                      <div className='grid grid-cols-4 gap-3'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-orange-600'>
+                            {memberStatsModal.stats.tickets?.created || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Creados</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-orange-600'>
+                            {memberStatsModal.stats.tickets?.assigned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Asignados</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStatsModal.stats.tickets?.resolved || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Resueltos</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-red-600'>
+                            {memberStatsModal.stats.tickets?.open || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Abiertos</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Equipos */}
+                    <div className='bg-purple-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <Users className='w-5 h-5 text-purple-600' />
+                        <h4 className='font-semibold text-purple-900'>
+                          Equipos
+                        </h4>
+                      </div>
+                      <div className='grid grid-cols-3 gap-4'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-purple-600'>
+                            {memberStatsModal.stats.teams?.owned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Lidera</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-purple-600'>
+                            {memberStatsModal.stats.teams?.member_of || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Miembro</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-purple-600'>
+                            {memberStatsModal.stats.teams?.total || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Total</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='text-center py-12'>
+                    <BarChart3 className='w-12 h-12 text-gray-300 mx-auto mb-3' />
+                    <p className='text-gray-500'>
+                      No se pudieron cargar las estadísticas
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 };

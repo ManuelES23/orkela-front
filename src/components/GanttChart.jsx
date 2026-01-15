@@ -201,7 +201,44 @@ const GanttChart = ({ projects }) => {
     let itemList = [];
 
     if (viewMode === "projects") {
-      projects.forEach((project) => {
+      // Ordenar proyectos por fecha de inicio/vencimiento antes de procesarlos
+      const sortedProjects = [...projects].sort((a, b) => {
+        // Calcular fecha de inicio para cada proyecto
+        const getProjectStartDate = (project) => {
+          // Obtener tareas del proyecto
+          const projectTasks = tasksData.filter(
+            (t) => t.project_id === project.id
+          );
+
+          // Si hay tareas con fechas, usar la fecha más temprana
+          if (projectTasks.length > 0) {
+            const taskDates = projectTasks
+              .filter((t) => t.start_date || t.due_date)
+              .map((t) => {
+                const start = t.start_date
+                  ? parseDateString(t.start_date)
+                  : parseDateString(t.due_date);
+                return start;
+              })
+              .filter((d) => d);
+
+            if (taskDates.length > 0) {
+              return new Date(Math.min(...taskDates.map((d) => d.getTime())));
+            }
+          }
+
+          // Si no hay tareas, usar la fecha del proyecto o fecha actual
+          return project.due_date
+            ? parseDateString(project.due_date)
+            : new Date();
+        };
+
+        const dateA = getProjectStartDate(a);
+        const dateB = getProjectStartDate(b);
+        return dateA - dateB;
+      });
+
+      sortedProjects.forEach((project) => {
         // Obtener tareas del proyecto
         const projectTasks = tasksData.filter(
           (t) => t.project_id === project.id
@@ -271,9 +308,24 @@ const GanttChart = ({ projects }) => {
           tasks: projectTasks,
         });
 
-        // Si el proyecto está expandido, añadir sus tareas
+        // Si el proyecto está expandido, añadir sus tareas ordenadas por fecha
         if (expandedProjects[project.id]) {
-          projectTasks.forEach((task) => {
+          // Ordenar tareas del proyecto por fecha
+          const sortedProjectTasks = [...projectTasks].sort((a, b) => {
+            const dateA = a.start_date
+              ? parseDateString(a.start_date)
+              : a.due_date
+              ? parseDateString(a.due_date)
+              : new Date();
+            const dateB = b.start_date
+              ? parseDateString(b.start_date)
+              : b.due_date
+              ? parseDateString(b.due_date)
+              : new Date();
+            return dateA - dateB;
+          });
+
+          sortedProjectTasks.forEach((task) => {
             const taskStart = task.start_date
               ? parseDateString(task.start_date)
               : task.due_date
@@ -321,7 +373,22 @@ const GanttChart = ({ projects }) => {
         }
       });
     } else if (viewMode === "tasks") {
-      tasksData.forEach((task) => {
+      // Ordenar tareas por fecha de inicio/vencimiento
+      const sortedTasks = [...tasksData].sort((a, b) => {
+        const dateA = a.start_date
+          ? parseDateString(a.start_date)
+          : a.due_date
+          ? parseDateString(a.due_date)
+          : new Date();
+        const dateB = b.start_date
+          ? parseDateString(b.start_date)
+          : b.due_date
+          ? parseDateString(b.due_date)
+          : new Date();
+        return dateA - dateB;
+      });
+
+      sortedTasks.forEach((task) => {
         const taskStart = task.start_date
           ? parseDateString(task.start_date)
           : task.due_date

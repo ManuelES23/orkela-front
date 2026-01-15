@@ -3,12 +3,13 @@
 ## Architecture Overview
 
 **Frontend**: React 19 + Vite + Tailwind CSS 4 + Framer Motion + react-select  
-**Backend**: Laravel 12 + MySQL + Laravel Sanctum  
+**Backend**: Laravel 12 + MySQL + Laravel Sanctum + Laravel Reverb (WebSockets)  
 **Authentication**: Dual authentication system - SystemAdmins (table: `system_admins`) and Application Users (table: `users`)  
-**Routing**: Protected routes with role-based access control via `PrivateRoute` component  
+**Routing**: Protected routes with role-based access control via `PrivateRoute`, `AdminRoute`, `OrganizationRoute`  
 **API Integration**: RESTful API at `http://orkela.localhost/api` (Apache) or `http://localhost:8000/api` (artisan serve)  
-**State Management**: React Context (AuthContext, NotificationContext)  
+**State Management**: React Context (AuthContext, NotificationContext, RealtimeContext)  
 **Notifications**: Toast notification system with auto-dismiss (5 seconds)  
+**Real-time**: WebSockets via Laravel Reverb for live updates  
 **Confirmations**: Custom `ConfirmModal` component - NEVER use native `confirm()` or `alert()`
 
 ## Critical Architecture Decisions
@@ -24,30 +25,54 @@ Authentication checks happen in **TWO STEPS** (see [AuthController.php](../../or
 - Token stored in `localStorage.getItem("token")`
 - User object stored in `localStorage.getItem("user")` (includes `isSystemAdmin` flag)
 - On mount, verify token validity with `GET /api/user`
+- Context switching via `switchContext()` for organization/personal modes
+
+### Organization Context & Route Protection
+
+**Three route protection components:**
+- `PrivateRoute`: Requires authenticated user (any)
+- `AdminRoute`: Requires `isSystemAdmin: true`
+- `OrganizationRoute`: Requires `active_context === "organization"` + organization membership
+
+**OrganizationRoute Pattern** ([OrganizationRoute.jsx](../src/components/OrganizationRoute.jsx)):
+```jsx
+// Only allows access when:
+// 1. User has organization (organization_id OR memberOrganizations)
+// 2. User's active_context is "organization"
+if (!hasOrganization || user.active_context !== "organization") {
+    return <Navigate to='/dashboard' />;
+}
+```
+
+**useOrganizationPermissions Hook** ([useOrganizationPermissions.js](../src/hooks/useOrganizationPermissions.js)):
+```jsx
+const { canDelete, canManage, canInviteMembers, isOwner, role } = useOrganizationPermissions(organization);
+```
 
 ### Two Completely Separate User Systems
 
 **1. System Administration (Superadmin Panel)**
 - **Purpose**: Platform management for developers/vendors
 - **Table**: `system_admins`
-- **Routes**: `/admin/users`, `/admin/licenses`, `/admin/logs`, `/admin/stats`
+- **Routes**: `/admin/users`, `/admin/organizations`, `/admin/licenses`, `/admin/logs`, `/admin/stats`
 - **API Prefix**: `/api/admin/*`
 - **Components**: `src/components/admin/*`
 - **API Client**: `src/utils/adminAPI.js`
 - **Access**: Only users with `isSystemAdmin: true`
-- **Scope**: Manage application users, licenses, logs - NO access to projects/tasks/teams
+- **Scope**: Manage application users, organizations, licenses, logs - NO access to projects/tasks/teams
 - **Test Login**: `admin@orkela.com` / `password`
 
 **2. Application System (End Users)**
 - **Purpose**: Project management application for clients
 - **Table**: `users`
-- **Routes**: `/dashboard`, `/projects`, `/tasks`, `/teams`, `/team`, `/settings`
+- **Routes**: `/dashboard`, `/projects`, `/tasks`, `/teams`, `/tickets`, `/organizations`, `/settings`
 - **API Prefix**: `/api/*` (non-admin routes)
 - **Components**: `src/components/modals/*`, `src/components/tasks/*`, etc.
 - **API Client**: `src/utils/api.js`
 - **Access**: Regular authenticated users
-- **Scope**: Projects, tasks, checklists, teams - NO access to admin panel
-- **Test Login**: `demo@orkela.com` / `password`
+- **Scope**: Projects, tasks, checklists, teams, tickets (org only), organizations - NO access to admin panel
+- **Test Login (Free)**: `demo@orkela.com` / `password`
+- **Test Login (Org)**: `roberto@grupoesplendido.com` / `password`
 
 ## Critical Development Patterns
 
@@ -161,50 +186,48 @@ orkela/
 ├── orkela-front/          # React 19 frontend
 │   ├── src/
 │   │   ├── components/    # UI components
-│   │   │   ├── admin/     # Admin panel (Users, Licenses, Logs, Stats)
+│   │   │   ├── admin/     # Admin panel (Users, Organizations, Licenses, Logs, Stats)
 │   │   │   ├── animations/# Framer Motion wrappers (MotionComponents, variants)
-│   │   │   ├── layout/    # Layout (Sidebar, Header)
-│   │   │   ├── modals/    # Modals (ProjectModal, TaskModal, TeamMemberModal)
+│   │   │   ├── layout/    # Layout (Sidebar, Header, BottomNav for mobile)
+│   │   │   ├── modals/    # Modals (ProjectModal, TaskModal, TicketDetailModal)
+│   │   │   ├── organizations/ # Organization-specific components
 │   │   │   ├── tasks/     # Task components (TaskChecklist - dual mode)
-│   │   │   └── ui/        # Reusable UI (Button, Card, Modal, ConfirmModal)
-│   │   ├── context/       # React Context (Auth with dual system, Notifications)
+│   │   │   └── ui/        # Reusable UI (Button, Card, Modal, ConfirmModal, NotificationsPanel)
+│   │   ├── context/       # React Context (Auth, Notifications, Realtime)
+│   │   ├── hooks/         # Custom hooks (useOrganizationPermissions)
 │   │   ├── pages/         # Route pages
-│   │   │   ├── admin/     # Admin pages (Users, Licenses, Logs, Stats)
-│   │   │   └── ...        # App pages (Dashboard, Projects, Tasks, Settings)
-│   │   └── utils/         # API clients (api.js for app, adminAPI.js for admin)
-│   ├── documentacion/     # Frontend docs (currently empty)
+│   │   │   ├── admin/     # Admin pages (Users, Organizations, Licenses, Logs, Stats)
+│   │   │   └── ...        # App pages (Dashboard, Projects, Tasks, Teams, Tickets, Organizations)
+│   │   └── utils/         # API clients (api.js, adminAPI.js, echo.js)
+│   ├── documentacion/     # Frontend docs
 │   └── package.json
 └── orkela-back/           # Laravel 12 backend
     ├── app/
-    │   ├── Http/Controllers/Api/
-    │   │   ├── Admin/           # Admin controllers (UsersController, SettingsController)
-    │   │   ├── AuthController   # Dual auth (checks system_admins FIRST, then users)
-    │   │   ├── ChecklistItemController # Nested resource with project auth check
-    │   │   ├── ProjectController
-    │   │   ├── TaskController
-    │   │   └── ...
-    │   └── Models/
-    │       ├── User.php              # Application users
-    │       ├── SystemAdmin.php       # System administrators
-    │       ├── Task.php              # belongsToMany assignedUsers via task_user
-    │       └── ChecklistItem.php     # belongsTo Task (cascade delete)
+    │   ├── Http/
+    │   │   ├── Controllers/Api/
+    │   │   │   ├── Admin/           # Admin controllers
+    │   │   │   ├── AuthController   # Dual auth
+    │   │   │   ├── OrganizationController # Org management
+    │   │   │   ├── TicketController # Tickets (org-only)
+    │   │   │   └── ...
+    │   │   ├── Middleware/          # OrganizationScope, RequireOrganizationContext
+    │   │   └── Controllers/Traits/  # HasOrganizationScope
+    │   ├── Models/                  # Organization, User, Team, Ticket, etc.
+    │   └── Services/                # NotificationService
     ├── database/
     │   ├── migrations/
-    │   │   ├── *_create_system_admins_table
-    │   │   ├── *_create_task_user_table       # Pivot for multi-assignment
-    │   │   ├── *_create_checklist_items_table
-    │   │   └── ...
     │   └── seeders/DatabaseSeeder.php  # Creates test users + demo data
-    ├── documentacion/     # Backend docs (API, Email config, DB setup)
-    ├── routes/api.php     # All API routes (public + auth:sanctum protected)
-    └── .env               # MySQL config
+    ├── documentacion/     # Backend docs
+    ├── routes/api.php     # All API routes
+    └── .env               # MySQL + Reverb config
 ```
 
 ## Key Files Reference
 
 ### Frontend Core
-- [App.jsx](../src/App.jsx) - Route definitions with PrivateRoute wrapper
-- [AuthContext.jsx](../src/context/AuthContext.jsx) - Auth state, token management, dual login
+- [App.jsx](../src/App.jsx) - Route definitions with PrivateRoute/AdminRoute/OrganizationRoute
+- [AuthContext.jsx](../src/context/AuthContext.jsx) - Auth state, token management, context switching
+- [RealtimeContext.jsx](../src/context/RealtimeContext.jsx) - WebSocket state, notifications, refresh callbacks
 - [Layout.jsx](../src/components/layout/Layout.jsx) - Page layout with Sidebar + Header
 - [api.js](../src/utils/api.js) - API client with all app endpoints
 - [adminAPI.js](../src/utils/adminAPI.js) - Separate API client for admin endpoints
@@ -214,15 +237,17 @@ orkela/
 - [TaskModal.jsx](../src/components/modals/TaskModal.jsx) - Create/edit with checklist + multi-user select
 - [TaskChecklist.jsx](../src/components/tasks/TaskChecklist.jsx) - Dual-mode checklist component
 
+### Organization System
+- [Organizations.jsx](../src/pages/Organizations.jsx) - Organization listing
+- [OrganizationDetail.jsx](../src/pages/OrganizationDetail.jsx) - Org management (members, invites, stats)
+- [OrganizationRoute.jsx](../src/components/OrganizationRoute.jsx) - Route guard for org-only pages
+- [useOrganizationPermissions.js](../src/hooks/useOrganizationPermissions.js) - Permission hook
+
 ### UI Components
 - [ConfirmModal.jsx](../src/components/ui/ConfirmModal.jsx) - Custom confirmation dialogs (required)
+- [NotificationsPanel.jsx](../src/components/ui/NotificationsPanel.jsx) - Real-time notifications dropdown
 - [Modal.jsx](../src/components/ui/Modal.jsx) - Base modal component
 - [Card.jsx](../src/components/ui/Card.jsx) - Card composition component
-- [Button.jsx](../src/components/ui/Button.jsx) - Button variants
-
-### Animations
-- [MotionComponents.jsx](../src/components/animations/MotionComponents.jsx) - Reusable animation wrappers
-- [variants.js](../src/components/animations/variants.js) - Animation variants library
 
 ### Backend Core
 - [api.php](../../orkela-back/routes/api.php) - All API routes (public + protected)
@@ -431,8 +456,11 @@ const MyPage = () => {
 
 **Notification Types:**
 - `project_created`, `project_updated`, `project_deleted`
-- `task_created`, `task_updated`, `task_assigned`
-- `team_member_joined`
+- `task_created`, `task_updated`, `task_assigned`, `task_completed`
+- `checklist_item_completed`, `checklist_item_updated`
+- `team_member_joined`, `team_deleted`
+- `ticket_created`, `ticket_taken`, `ticket_assigned`, `ticket_resolved`, `ticket_comment_added`
+- `organization_invitation_received`, `organization_member_removed`, `organization_role_updated`
 - `info`, `success`, `warning`, `error`
 
 **Environment Variables** (`.env`):
@@ -446,7 +474,7 @@ VITE_REVERB_SCHEME=http
 **Integration Points:**
 - `App.jsx`: Wrapped with `<RealtimeProvider>`
 - `Header.jsx`: Includes `<NotificationsPanel />`
-- `Projects.jsx`, `Tasks.jsx`, `Teams.jsx`: Use `registerRefresh` for auto-reload
+- Pages (Projects, Tasks, Teams, Tickets, Organizations): Use `registerRefresh` for auto-reload
 
 ### ✅ Custom Confirmation Modal (ConfirmModal)
 

@@ -398,6 +398,69 @@ const TaskDetailModal = ({
               </div>
             )}
 
+            {/* Etiquetas */}
+            {currentTask.tags && currentTask.tags.length > 0 && (
+              <div className='flex items-start gap-3 p-3 bg-gray-50 rounded-lg sm:col-span-2'>
+                <div className='w-5 h-5 flex items-center justify-center text-gray-500'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='20'
+                    height='20'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                  >
+                    <path d='M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z' />
+                    <circle cx='7.5' cy='7.5' r='.5' fill='currentColor' />
+                  </svg>
+                </div>
+                <div className='flex-1'>
+                  <p className='text-xs text-gray-500 mb-2'>Etiquetas</p>
+                  <div className='flex flex-wrap gap-2'>
+                    {currentTask.tags.map((tag) => {
+                      const colorClasses = {
+                        red: { bg: "bg-red-100", text: "text-red-700" },
+                        orange: {
+                          bg: "bg-orange-100",
+                          text: "text-orange-700",
+                        },
+                        yellow: {
+                          bg: "bg-yellow-100",
+                          text: "text-yellow-700",
+                        },
+                        green: { bg: "bg-green-100", text: "text-green-700" },
+                        teal: { bg: "bg-teal-100", text: "text-teal-700" },
+                        blue: { bg: "bg-blue-100", text: "text-blue-700" },
+                        indigo: {
+                          bg: "bg-indigo-100",
+                          text: "text-indigo-700",
+                        },
+                        purple: {
+                          bg: "bg-purple-100",
+                          text: "text-purple-700",
+                        },
+                        pink: { bg: "bg-pink-100", text: "text-pink-700" },
+                        gray: { bg: "bg-gray-100", text: "text-gray-700" },
+                      };
+                      const colors =
+                        colorClasses[tag.color] || colorClasses.gray;
+                      return (
+                        <span
+                          key={tag.id}
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${colors.bg} ${colors.text}`}
+                        >
+                          {tag.name}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Usuarios asignados */}
             {((currentTask.assigned_users &&
               currentTask.assigned_users.length > 0) ||

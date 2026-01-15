@@ -216,6 +216,12 @@ export const projectsAPI = {
       method: "DELETE",
     });
   },
+
+  getCollaboratorStats: async (projectId, collaboratorId) => {
+    return await request(
+      `/projects/${projectId}/collaborators/${collaboratorId}/stats`
+    );
+  },
 };
 
 // Tasks API
@@ -294,6 +300,49 @@ export const checklistAPI = {
     return await request(`/tasks/${taskId}/checklist/reorder`, {
       method: "POST",
       body: JSON.stringify({ items }),
+    });
+  },
+};
+
+// Project Tags API
+export const projectTagsAPI = {
+  // Obtener colores disponibles (globales)
+  getAvailableColors: async () => {
+    return await request("/tags/colors");
+  },
+
+  // Obtener tags de un proyecto
+  getAll: async (projectId) => {
+    return await request(`/projects/${projectId}/tags`);
+  },
+
+  // Crear o actualizar un tag (upsert por color)
+  create: async (projectId, tagData) => {
+    return await request(`/projects/${projectId}/tags`, {
+      method: "POST",
+      body: JSON.stringify(tagData),
+    });
+  },
+
+  // Actualizar un tag existente
+  update: async (projectId, tagId, tagData) => {
+    return await request(`/projects/${projectId}/tags/${tagId}`, {
+      method: "PUT",
+      body: JSON.stringify(tagData),
+    });
+  },
+
+  // Eliminar un tag
+  delete: async (projectId, tagId) => {
+    return await request(`/projects/${projectId}/tags/${tagId}`, {
+      method: "DELETE",
+    });
+  },
+
+  // Inicializar tags por defecto para un proyecto
+  initializeDefaults: async (projectId) => {
+    return await request(`/projects/${projectId}/tags/initialize`, {
+      method: "POST",
     });
   },
 };
@@ -424,6 +473,10 @@ export const teamsAPI = {
 
   getStats: async (teamId) => {
     return await request(`/teams/${teamId}/stats`);
+  },
+
+  getMemberStats: async (teamId, memberId) => {
+    return await request(`/teams/${teamId}/members/${memberId}/stats`);
   },
 };
 
@@ -574,6 +627,10 @@ export const organizationsAPI = {
   // Members
   getMembers: async (orgId) => {
     return await request(`/organizations/${orgId}/members`);
+  },
+
+  getMemberStats: async (orgId, memberId) => {
+    return await request(`/organizations/${orgId}/members/${memberId}/stats`);
   },
 
   updateMember: async (orgId, userId, memberData) => {

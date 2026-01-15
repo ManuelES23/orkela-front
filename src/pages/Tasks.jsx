@@ -592,6 +592,72 @@ const Tasks = () => {
                             </span>
                           )}
 
+                          {/* Etiquetas */}
+                          {task.tags && task.tags.length > 0 && (
+                            <div className='flex flex-wrap items-center gap-1'>
+                              {task.tags.slice(0, 4).map((tag) => {
+                                const colorClasses = {
+                                  red: {
+                                    bg: "bg-red-100",
+                                    text: "text-red-700",
+                                  },
+                                  orange: {
+                                    bg: "bg-orange-100",
+                                    text: "text-orange-700",
+                                  },
+                                  yellow: {
+                                    bg: "bg-yellow-100",
+                                    text: "text-yellow-700",
+                                  },
+                                  green: {
+                                    bg: "bg-green-100",
+                                    text: "text-green-700",
+                                  },
+                                  teal: {
+                                    bg: "bg-teal-100",
+                                    text: "text-teal-700",
+                                  },
+                                  blue: {
+                                    bg: "bg-blue-100",
+                                    text: "text-blue-700",
+                                  },
+                                  indigo: {
+                                    bg: "bg-indigo-100",
+                                    text: "text-indigo-700",
+                                  },
+                                  purple: {
+                                    bg: "bg-purple-100",
+                                    text: "text-purple-700",
+                                  },
+                                  pink: {
+                                    bg: "bg-pink-100",
+                                    text: "text-pink-700",
+                                  },
+                                  gray: {
+                                    bg: "bg-gray-100",
+                                    text: "text-gray-700",
+                                  },
+                                };
+                                const colors =
+                                  colorClasses[tag.color] || colorClasses.gray;
+                                return (
+                                  <span
+                                    key={tag.id}
+                                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}
+                                    title={tag.name}
+                                  >
+                                    {tag.name}
+                                  </span>
+                                );
+                              })}
+                              {task.tags.length > 4 && (
+                                <span className='px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600'>
+                                  +{task.tags.length - 4}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           {/* Fecha con indicador de vencimiento */}
                           {(() => {
                             const days = getDaysUntilDue(task.due_date);

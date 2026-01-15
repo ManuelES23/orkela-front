@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Layout from "../components/layout/Layout";
 import TicketModal from "../components/modals/TicketModal";
 import TicketDetailModal from "../components/modals/TicketDetailModal";
@@ -35,14 +35,21 @@ import {
   UserPlus,
   ArrowLeft,
   Crown,
+  ChevronDown,
+  Filter,
+  Building2,
+  PenLine,
+  ListFilter,
 } from "lucide-react";
-import { ticketsAPI } from "../utils/api";
+import { ticketsAPI, teamsAPI } from "../utils/api";
 
 const Tickets = () => {
   const { success, error: showError, info } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const [activeTab, setActiveTab] = useState("all");
   const [activeFilter, setActiveFilter] = useState("all"); // all, created, assigned, inbox, team
+  const [selectedTeamId, setSelectedTeamId] = useState(""); // Filtro por equipo específico
+  const [userTeams, setUserTeams] = useState([]); // Equipos del usuario
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -57,6 +64,44 @@ const Tickets = () => {
   });
   const [deleting, setDeleting] = useState(false);
   const [processingTicketId, setProcessingTicketId] = useState(null);
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+  const [teamDropdownOpen, setTeamDropdownOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
+  const teamDropdownRef = useRef(null);
+
+  // Cerrar dropdowns al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target)
+      ) {
+        setFilterDropdownOpen(false);
+      }
+      if (
+        teamDropdownRef.current &&
+        !teamDropdownRef.current.contains(event.target)
+      ) {
+        setTeamDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Cargar equipos del usuario al montar
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const teamsData = await teamsAPI.getAll();
+        console.log("Equipos cargados:", teamsData);
+        setUserTeams(teamsData);
+      } catch (err) {
+        console.error("Error al cargar equipos:", err);
+      }
+    };
+    fetchTeams();
+  }, []);
 
   const loadTickets = useCallback(async () => {
     try {
@@ -69,6 +114,10 @@ const Tickets = () => {
       }
       if (activeFilter !== "all") {
         filters.filter = activeFilter;
+      }
+      // Filtro por equipo específico
+      if (selectedTeamId) {
+        filters.team_id = selectedTeamId;
       }
 
       const [ticketsData, statsData] = await Promise.all([
@@ -84,7 +133,7 @@ const Tickets = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, activeFilter]);
+  }, [activeTab, activeFilter, selectedTeamId]);
 
   useEffect(() => {
     loadTickets();
@@ -263,10 +312,10 @@ const Tickets = () => {
       {/* Stats Cards */}
       {stats && (
         <FadeIn delay={0.1}>
-          <div className='grid grid-cols-2 md:grid-cols-5 gap-4 mb-6'>
+          <div className='grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6'>
             {/* Buzón del equipo - destacado */}
             <div
-              className={`bg-white rounded-xl p-4 shadow-sm border-2 cursor-pointer transition-all ${
+              className={`bg-white rounded-xl p-3 sm:p-4 shadow-sm border-2 cursor-pointer transition-all ${
                 activeFilter === "inbox"
                   ? "border-purple-500 ring-2 ring-purple-200"
                   : "border-purple-200 hover:border-purple-400"
@@ -275,65 +324,73 @@ const Tickets = () => {
             >
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm text-gray-500'>Buzón Equipo</p>
-                  <p className='text-2xl font-bold text-purple-600'>
+                  <p className='text-xs sm:text-sm text-gray-500'>
+                    Buzón Equipo
+                  </p>
+                  <p className='text-xl sm:text-2xl font-bold text-purple-600'>
                     {stats.inbox || 0}
                   </p>
                 </div>
-                <div className='p-3 bg-purple-50 rounded-lg'>
-                  <Inbox className='w-6 h-6 text-purple-600' />
+                <div className='p-2 sm:p-3 bg-purple-50 rounded-lg'>
+                  <Inbox className='w-5 h-5 sm:w-6 sm:h-6 text-purple-600' />
                 </div>
               </div>
             </div>
-            <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-100'>
+            <div className='bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm text-gray-500'>Mis Asignados</p>
-                  <p className='text-2xl font-bold text-indigo-600'>
+                  <p className='text-xs sm:text-sm text-gray-500'>
+                    Mis Asignados
+                  </p>
+                  <p className='text-xl sm:text-2xl font-bold text-indigo-600'>
                     {stats.assigned_to_me || 0}
                   </p>
                 </div>
-                <div className='p-3 bg-indigo-50 rounded-lg'>
-                  <User className='w-6 h-6 text-indigo-600' />
+                <div className='p-2 sm:p-3 bg-indigo-50 rounded-lg'>
+                  <User className='w-5 h-5 sm:w-6 sm:h-6 text-indigo-600' />
                 </div>
               </div>
             </div>
-            <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-100'>
+            <div className='bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm text-gray-500'>Creados por mí</p>
-                  <p className='text-2xl font-bold text-blue-600'>
+                  <p className='text-xs sm:text-sm text-gray-500'>
+                    Creados por mí
+                  </p>
+                  <p className='text-xl sm:text-2xl font-bold text-blue-600'>
                     {stats.created_by_me || 0}
                   </p>
                 </div>
-                <div className='p-3 bg-blue-50 rounded-lg'>
-                  <Ticket className='w-6 h-6 text-blue-600' />
+                <div className='p-2 sm:p-3 bg-blue-50 rounded-lg'>
+                  <Ticket className='w-5 h-5 sm:w-6 sm:h-6 text-blue-600' />
                 </div>
               </div>
             </div>
-            <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-100'>
+            <div className='bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm text-gray-500'>Resueltos</p>
-                  <p className='text-2xl font-bold text-green-600'>
+                  <p className='text-xs sm:text-sm text-gray-500'>Resueltos</p>
+                  <p className='text-xl sm:text-2xl font-bold text-green-600'>
                     {stats.resolved}
                   </p>
                 </div>
-                <div className='p-3 bg-green-50 rounded-lg'>
-                  <CheckCircle2 className='w-6 h-6 text-green-600' />
+                <div className='p-2 sm:p-3 bg-green-50 rounded-lg'>
+                  <CheckCircle2 className='w-5 h-5 sm:w-6 sm:h-6 text-green-600' />
                 </div>
               </div>
             </div>
-            <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-100'>
+            <div className='bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm text-gray-500'>Alta Prioridad</p>
-                  <p className='text-2xl font-bold text-red-600'>
+                  <p className='text-xs sm:text-sm text-gray-500'>
+                    Alta Prioridad
+                  </p>
+                  <p className='text-xl sm:text-2xl font-bold text-red-600'>
                     {stats.high_priority}
                   </p>
                 </div>
-                <div className='p-3 bg-red-50 rounded-lg'>
-                  <Flag className='w-6 h-6 text-red-600' />
+                <div className='p-2 sm:p-3 bg-red-50 rounded-lg'>
+                  <Flag className='w-5 h-5 sm:w-6 sm:h-6 text-red-600' />
                 </div>
               </div>
             </div>
@@ -344,7 +401,7 @@ const Tickets = () => {
       {/* Barra de acciones */}
       <FadeIn delay={0.2}>
         <div className='flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6'>
-          <div className='flex gap-3 flex-1 w-full md:w-auto'>
+          <div className='flex gap-3 flex-1 w-full md:w-auto flex-wrap'>
             <div className='relative flex-1 md:flex-initial'>
               <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
               <input
@@ -356,18 +413,214 @@ const Tickets = () => {
               />
             </div>
 
-            {/* Filtro de tickets */}
-            <select
-              value={activeFilter}
-              onChange={(e) => setActiveFilter(e.target.value)}
-              className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none bg-white'
-            >
-              <option value='all'>Todos mis tickets</option>
-              <option value='inbox'>📥 Buzón de equipo</option>
-              <option value='assigned'>👤 Asignados a mí</option>
-              <option value='created'>✍️ Creados por mí</option>
-              <option value='team'>👥 Todos del equipo</option>
-            </select>
+            {/* Filtro de tickets - Dropdown personalizado con iconos */}
+            <div className='relative' ref={filterDropdownRef}>
+              <button
+                type='button'
+                onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none min-w-[180px] justify-between'
+              >
+                <span className='flex items-center gap-2'>
+                  {activeFilter === "all" && (
+                    <ListFilter className='w-4 h-4 text-gray-500' />
+                  )}
+                  {activeFilter === "inbox" && (
+                    <Inbox className='w-4 h-4 text-purple-500' />
+                  )}
+                  {activeFilter === "assigned" && (
+                    <User className='w-4 h-4 text-blue-500' />
+                  )}
+                  {activeFilter === "created" && (
+                    <PenLine className='w-4 h-4 text-green-500' />
+                  )}
+                  {activeFilter === "team" && (
+                    <Users className='w-4 h-4 text-indigo-500' />
+                  )}
+                  <span className='text-gray-700'>
+                    {activeFilter === "all" && "Todos mis tickets"}
+                    {activeFilter === "inbox" && "Buzón de equipo"}
+                    {activeFilter === "assigned" && "Asignados a mí"}
+                    {activeFilter === "created" && "Creados por mí"}
+                    {activeFilter === "team" && "Todos del equipo"}
+                  </span>
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform ${
+                    filterDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {filterDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.15 }}
+                    className='absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden'
+                  >
+                    {[
+                      {
+                        value: "all",
+                        label: "Todos mis tickets",
+                        icon: ListFilter,
+                        color: "text-gray-500",
+                      },
+                      {
+                        value: "inbox",
+                        label: "Buzón de equipo",
+                        icon: Inbox,
+                        color: "text-purple-500",
+                      },
+                      {
+                        value: "assigned",
+                        label: "Asignados a mí",
+                        icon: User,
+                        color: "text-blue-500",
+                      },
+                      {
+                        value: "created",
+                        label: "Creados por mí",
+                        icon: PenLine,
+                        color: "text-green-500",
+                      },
+                      {
+                        value: "team",
+                        label: "Todos del equipo",
+                        icon: Users,
+                        color: "text-indigo-500",
+                      },
+                    ].map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = activeFilter === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type='button'
+                          onClick={() => {
+                            setActiveFilter(option.value);
+                            setFilterDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                            isSelected
+                              ? "bg-indigo-50 text-indigo-700"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          <Icon
+                            className={`w-4 h-4 ${
+                              isSelected ? "text-indigo-600" : option.color
+                            }`}
+                          />
+                          <span className={isSelected ? "font-medium" : ""}>
+                            {option.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Filtro por equipo específico - Dropdown personalizado con iconos */}
+            {userTeams.length > 0 && (
+              <div className='relative' ref={teamDropdownRef}>
+                <button
+                  type='button'
+                  onClick={() => setTeamDropdownOpen(!teamDropdownOpen)}
+                  className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none min-w-[160px] justify-between'
+                >
+                  <span className='flex items-center gap-2'>
+                    <Building2 className='w-4 h-4 text-indigo-500' />
+                    <span className='text-gray-700 truncate max-w-[120px]'>
+                      {selectedTeamId
+                        ? userTeams.find(
+                            (t) => t.id.toString() === selectedTeamId
+                          )?.name || "Equipo"
+                        : userTeams.length > 1
+                        ? "Todos los equipos"
+                        : userTeams[0]?.name}
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform ${
+                      teamDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {teamDropdownOpen && userTeams.length > 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.15 }}
+                      className='absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden max-h-64 overflow-y-auto'
+                    >
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setSelectedTeamId("");
+                          setTeamDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                          !selectedTeamId
+                            ? "bg-indigo-50 text-indigo-700"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        <Users
+                          className={`w-4 h-4 ${
+                            !selectedTeamId
+                              ? "text-indigo-600"
+                              : "text-gray-500"
+                          }`}
+                        />
+                        <span className={!selectedTeamId ? "font-medium" : ""}>
+                          Todos los equipos
+                        </span>
+                      </button>
+                      {userTeams.map((team) => {
+                        const isSelected =
+                          selectedTeamId === team.id.toString();
+                        return (
+                          <button
+                            key={team.id}
+                            type='button'
+                            onClick={() => {
+                              setSelectedTeamId(team.id.toString());
+                              setTeamDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                              isSelected
+                                ? "bg-indigo-50 text-indigo-700"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            <div
+                              className={`w-4 h-4 rounded ${
+                                team.color || "bg-indigo-500"
+                              }`}
+                              title={team.name}
+                            />
+                            <span
+                              className={`truncate ${
+                                isSelected ? "font-medium" : ""
+                              }`}
+                            >
+                              {team.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
 
           <motion.button
@@ -389,10 +642,46 @@ const Tickets = () => {
             <Inbox className='w-5 h-5 text-purple-600' />
             <span className='text-purple-700 font-medium'>
               Buzón del equipo
+              {selectedTeamId &&
+                userTeams.find((t) => t.id.toString() === selectedTeamId)
+                  ?.name && (
+                  <span className='ml-1'>
+                    (
+                    {
+                      userTeams.find((t) => t.id.toString() === selectedTeamId)
+                        ?.name
+                    }
+                    )
+                  </span>
+                )}
             </span>
             <span className='text-purple-600 text-sm'>
               — Tickets sin asignar que puedes tomar
             </span>
+          </div>
+        </FadeIn>
+      )}
+
+      {/* Indicador de equipo filtrado */}
+      {selectedTeamId && activeFilter !== "inbox" && (
+        <FadeIn delay={0.25}>
+          <div className='mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Users className='w-5 h-5 text-indigo-600' />
+              <span className='text-indigo-700 font-medium'>
+                Filtrando por:{" "}
+                {
+                  userTeams.find((t) => t.id.toString() === selectedTeamId)
+                    ?.name
+                }
+              </span>
+            </div>
+            <button
+              onClick={() => setSelectedTeamId("")}
+              className='text-indigo-600 hover:text-indigo-800 text-sm font-medium hover:underline'
+            >
+              Ver todos los equipos
+            </button>
           </div>
         </FadeIn>
       )}
@@ -517,10 +806,10 @@ const Tickets = () => {
                           : "border-gray-200"
                       }`}
                     >
-                      <div className='flex items-start gap-4'>
-                        {/* Icono de tipo */}
+                      <div className='flex flex-col sm:flex-row items-start gap-3 sm:gap-4'>
+                        {/* Icono de tipo - oculto en móvil */}
                         <div
-                          className={`p-2 rounded-lg ${
+                          className={`hidden sm:flex p-2 rounded-lg ${
                             ticket.is_in_inbox ? "bg-purple-100" : "bg-gray-50"
                           } ${typeConfig[ticket.type]?.color}`}
                         >
@@ -528,10 +817,10 @@ const Tickets = () => {
                         </div>
 
                         {/* Contenido */}
-                        <div className='flex-1 min-w-0'>
-                          <div className='flex items-start justify-between gap-4 mb-2'>
+                        <div className='flex-1 min-w-0 w-full'>
+                          <div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-2'>
                             <div className='flex-1'>
-                              <div className='flex items-center gap-2 mb-1'>
+                              <div className='flex flex-wrap items-center gap-2 mb-1'>
                                 <span className='text-xs text-gray-400'>
                                   #{ticket.id}
                                 </span>
@@ -541,16 +830,17 @@ const Tickets = () => {
                                     En buzón
                                   </span>
                                 )}
-                                <h3 className='font-semibold text-gray-900'>
+                                <h3 className='font-semibold text-gray-900 text-sm sm:text-base'>
                                   {ticket.title}
                                 </h3>
                               </div>
-                              <p className='text-sm text-gray-600 line-clamp-2'>
+                              <p className='text-xs sm:text-sm text-gray-600 line-clamp-2'>
                                 {ticket.description}
                               </p>
                             </div>
 
-                            <div className='flex items-center gap-2'>
+                            {/* Badges y acciones - se apilan en móvil */}
+                            <div className='flex flex-wrap items-center gap-2'>
                               {/* Estado */}
                               <span
                                 className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
@@ -590,8 +880,8 @@ const Tickets = () => {
                                 </motion.button>
                               )}
 
-                              {/* Acciones */}
-                              <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                              {/* Acciones - siempre visibles en móvil */}
+                              <div className='flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -666,9 +956,9 @@ const Tickets = () => {
                               </span>
                             )}
 
-                            {/* Equipo */}
+                            {/* Equipo - destacado para fácil identificación */}
                             {ticket.team && (
-                              <span className='flex items-center gap-1 text-gray-600'>
+                              <span className='flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-lg font-medium'>
                                 <Users className='w-4 h-4' />
                                 {ticket.team.name}
                                 {ticket.is_team_leader && (

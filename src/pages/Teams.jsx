@@ -24,6 +24,10 @@ import {
   Inbox,
   ArrowRight,
   Info,
+  Ticket,
+  CheckSquare,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 import { teamsAPI, teamInvitationsAPI } from "../utils/api";
 
@@ -293,7 +297,7 @@ const Teams = () => {
                         </div>
 
                         {team.can_edit && (
-                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                          <div className='flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'>
                             <button
                               onClick={(e) => handleEdit(team, e)}
                               className='p-1.5 hover:bg-blue-50 rounded transition'
@@ -313,21 +317,74 @@ const Teams = () => {
                         )}
                       </div>
 
-                      {/* Estadísticas */}
-                      <div className='flex items-center gap-4 mb-4'>
+                      {/* Estadísticas principales */}
+                      <div className='grid grid-cols-2 gap-3 mb-4'>
+                        {/* Miembros */}
                         <div className='flex items-center gap-2 text-gray-600'>
+                          <Users className='w-4 h-4' />
                           <span className='text-sm'>
                             {team.member_count || 0} miembros
                           </span>
                         </div>
+                        {/* Proyectos */}
                         <div className='flex items-center gap-2 text-gray-600'>
                           <FolderKanban className='w-4 h-4' />
                           <span className='text-sm'>
-                            {team.projects?.length || team.project_count || 0}{" "}
-                            proyectos
+                            {team.project_count || 0} proyectos
+                          </span>
+                        </div>
+                        {/* Tickets */}
+                        <div className='flex items-center gap-2 text-gray-600'>
+                          <Ticket className='w-4 h-4' />
+                          <span className='text-sm'>
+                            {team.ticket_count || 0} tickets
+                          </span>
+                          {team.open_tickets > 0 && (
+                            <span className='px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full'>
+                              {team.open_tickets} abiertos
+                            </span>
+                          )}
+                        </div>
+                        {/* Tareas */}
+                        <div className='flex items-center gap-2 text-gray-600'>
+                          <CheckSquare className='w-4 h-4' />
+                          <span className='text-sm'>
+                            {team.task_count || 0} tareas
                           </span>
                         </div>
                       </div>
+
+                      {/* Barra de progreso de tareas */}
+                      {team.task_count > 0 && (
+                        <div className='mb-4'>
+                          <div className='flex items-center justify-between text-xs text-gray-500 mb-1'>
+                            <span className='flex items-center gap-1'>
+                              <CheckCircle className='w-3 h-3 text-green-500' />
+                              {team.completed_tasks || 0} completadas
+                            </span>
+                            <span className='flex items-center gap-1'>
+                              <Clock className='w-3 h-3 text-yellow-500' />
+                              {team.pending_tasks || 0} pendientes
+                            </span>
+                          </div>
+                          <div className='w-full bg-gray-200 rounded-full h-1.5'>
+                            <div
+                              className='bg-green-500 h-1.5 rounded-full transition-all duration-300'
+                              style={{
+                                width: `${
+                                  team.task_count > 0
+                                    ? Math.round(
+                                        ((team.completed_tasks || 0) /
+                                          team.task_count) *
+                                          100
+                                      )
+                                    : 0
+                                }%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
                       {/* Ir al equipo */}
                       <div className='pt-4 border-t border-gray-100 flex items-center justify-between'>

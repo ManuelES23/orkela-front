@@ -122,8 +122,25 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
     setCurrentMonth(new Date());
   };
 
-  // Obtener tareas visibles en el mes actual
-  const visibleTasks = tasks.filter((task) => getTaskPosition(task) !== null);
+  // Ordenar tareas por fecha de inicio/vencimiento y luego filtrar las visibles
+  const sortedTasks = [...tasks].sort((a, b) => {
+    const dateA = a.start_date
+      ? new Date(a.start_date)
+      : a.due_date
+      ? new Date(a.due_date)
+      : new Date();
+    const dateB = b.start_date
+      ? new Date(b.start_date)
+      : b.due_date
+      ? new Date(b.due_date)
+      : new Date();
+    return dateA - dateB;
+  });
+
+  // Obtener tareas visibles en el mes actual (ya ordenadas)
+  const visibleTasks = sortedTasks.filter(
+    (task) => getTaskPosition(task) !== null
+  );
 
   // Marcar el día de hoy
   const today = new Date();
@@ -208,13 +225,13 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
           </div>
 
           {/* Filas de tareas */}
-          {tasks.length === 0 ? (
+          {sortedTasks.length === 0 ? (
             <div className='flex items-center justify-center py-12 text-gray-500'>
               <p>No hay tareas en este proyecto</p>
             </div>
           ) : (
             <div>
-              {tasks.map((task, index) => {
+              {sortedTasks.map((task, index) => {
                 const position = getTaskPosition(task);
 
                 return (

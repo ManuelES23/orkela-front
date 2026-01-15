@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
+import Select from "react-select";
 import TicketModal from "../components/modals/TicketModal";
 import TicketDetailModal from "../components/modals/TicketDetailModal";
 import ProjectModal from "../components/modals/ProjectModal";
@@ -9,6 +10,7 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
+import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import {
@@ -42,12 +44,17 @@ import {
   XCircle,
   PauseCircle,
   PlayCircle,
+  Sparkles,
+  TrendingUp,
+  X,
+  CheckSquare,
 } from "lucide-react";
 import {
   teamsAPI,
   teamInvitationsAPI,
   ticketsAPI,
   projectsAPI,
+  organizationsAPI,
 } from "../utils/api";
 
 const TeamDetail = () => {
@@ -56,6 +63,7 @@ const TeamDetail = () => {
   const { user } = useAuth();
   const { success, error: showError, info } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
+  const { isOrganizationContext, organizationId } = useUserContext();
 
   // Estado general
   const [team, setTeam] = useState(null);
@@ -83,6 +91,11 @@ const TeamDetail = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [sendingInvite, setSendingInvite] = useState(false);
 
+  // Estado para selector de miembros de organización
+  const [orgMembers, setOrgMembers] = useState([]);
+  const [selectedOrgMember, setSelectedOrgMember] = useState(null);
+  const [loadingOrgMembers, setLoadingOrgMembers] = useState(false);
+
   // Estado para stats
   const [stats, setStats] = useState(null);
 
@@ -94,6 +107,14 @@ const TeamDetail = () => {
     itemId: null,
   });
   const [deleting, setDeleting] = useState(false);
+
+  // Modal de estadísticas de miembro
+  const [memberStatsModal, setMemberStatsModal] = useState({
+    isOpen: false,
+    member: null,
+  });
+  const [memberStats, setMemberStats] = useState(null);
+  const [loadingMemberStats, setLoadingMemberStats] = useState(false);
 
   // Cargar datos del equipo (sin cambiar loading, eso lo maneja loadAllData)
   const loadTeam = useCallback(async () => {
@@ -336,17 +357,92 @@ const TeamDetail = () => {
     }
   };
 
+  // Abrir modal de estadísticas de miembro
+  const handleOpenMemberStats = async (member) => {
+    setMemberStatsModal({ isOpen: true, member });
+    setMemberStats(null);
+    setLoadingMemberStats(true);
+    try {
+      const stats = await teamsAPI.getMemberStats(id, member.id);
+      setMemberStats(stats);
+    } catch (err) {
+      showError(err.message || "No se pudieron cargar las estadísticas");
+    } finally {
+      setLoadingMemberStats(false);
+    }
+  };
+
+  // Cerrar modal de estadísticas de miembro
+  const handleCloseMemberStats = () => {
+    setMemberStatsModal({ isOpen: false, member: null });
+    setMemberStats(null);
+  };
+
+  // Cargar miembros de la organización disponibles para invitar
+  const loadOrgMembers = useCallback(async () => {
+    if (!isOrganizationContext || !organizationId) return;
+
+    setLoadingOrgMembers(true);
+    try {
+      const allMembers = await organizationsAPI.getMembers(organizationId);
+      // Filtrar miembros que ya son parte del equipo
+      const currentMemberIds = members.map((m) => m.id);
+      const availableMembers = allMembers.filter(
+        (m) => !currentMemberIds.includes(m.id)
+      );
+      setOrgMembers(availableMembers);
+    } catch (err) {
+      console.error("Error al cargar miembros de organización:", err);
+    } finally {
+      setLoadingOrgMembers(false);
+    }
+  }, [isOrganizationContext, organizationId, members]);
+
+  // Cargar miembros de org cuando se vaya al tab de miembros
+  useEffect(() => {
+    if (activeTab === "members" && isOrganizationContext && organizationId) {
+      loadOrgMembers();
+    }
+  }, [activeTab, isOrganizationContext, organizationId, loadOrgMembers]);
+
   // Enviar invitación
   const handleSendInvite = async (e) => {
     e.preventDefault();
-    if (!inviteEmail.trim()) return;
+
+    // En modo organización, solo se permite invitar miembros de la org (no externos)
+    if (isOrganizationContext) {
+      if (!selectedOrgMember) return;
+
+      setSendingInvite(true);
+      try {
+        await teamInvitationsAPI.sendInvitation(id, selectedOrgMember.email);
+        success(`Invitación enviada a ${selectedOrgMember.name}`);
+        setSelectedOrgMember(null);
+        loadMembers();
+        loadOrgMembers(); // Recargar lista de miembros disponibles
+      } catch (err) {
+        showError(err.message || "No se pudo enviar la invitación");
+      } finally {
+        setSendingInvite(false);
+      }
+      return;
+    }
+
+    // Modo personal: invitar por email
+    const emailToInvite = inviteEmail.trim();
+    if (!emailToInvite) return;
 
     setSendingInvite(true);
     try {
-      await teamInvitationsAPI.sendInvitation(id, inviteEmail);
-      success(`Invitación enviada a ${inviteEmail}`);
+      await teamInvitationsAPI.sendInvitation(id, emailToInvite);
+      success(`Invitación enviada a ${emailToInvite}`);
       setInviteEmail("");
+      setSelectedOrgMember(null);
       loadMembers();
+      // Recargar org members para actualizar lista
+      if (isOrganizationContext) {
+        loadOrgMembers();
+      }
     } catch (err) {
       showError(err.message || "No se pudo enviar la invitación");
     } finally {
@@ -475,34 +571,36 @@ const TeamDetail = () => {
 
           {/* Info del equipo */}
           <div
-            className={`p-6 rounded-xl ${
+            className={`p-4 sm:p-6 rounded-xl ${
               team.color || "bg-indigo-500"
             } text-white shadow-lg`}
           >
-            <div className='flex items-center gap-4'>
-              <div className='w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center'>
-                <Users className='w-8 h-8' />
+            <div className='flex flex-col sm:flex-row sm:items-center gap-4'>
+              <div className='w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-white/20 flex items-center justify-center'>
+                <Users className='w-6 h-6 sm:w-8 sm:h-8' />
               </div>
               <div className='flex-1'>
-                <h1 className='text-2xl font-bold'>{team.name}</h1>
-                <p className='text-white/80 mt-1'>
+                <h1 className='text-xl sm:text-2xl font-bold'>{team.name}</h1>
+                <p className='text-white/80 mt-1 text-sm sm:text-base'>
                   {team.description || "Sin descripción"}
                 </p>
               </div>
-              <div className='flex gap-6 text-center'>
+              <div className='flex gap-4 sm:gap-6 text-center'>
                 <div>
-                  <p className='text-3xl font-bold'>
+                  <p className='text-2xl sm:text-3xl font-bold'>
                     {team.member_count || members.length}
                   </p>
-                  <p className='text-sm text-white/80'>Miembros</p>
+                  <p className='text-xs sm:text-sm text-white/80'>Miembros</p>
                 </div>
                 <div>
-                  <p className='text-3xl font-bold'>{projects.length}</p>
-                  <p className='text-sm text-white/80'>Proyectos</p>
+                  <p className='text-2xl sm:text-3xl font-bold'>
+                    {projects.length}
+                  </p>
+                  <p className='text-xs sm:text-sm text-white/80'>Proyectos</p>
                 </div>
                 <div>
-                  <p className='text-3xl font-bold'>{inboxCount}</p>
-                  <p className='text-sm text-white/80'>En buzón</p>
+                  <p className='text-2xl sm:text-3xl font-bold'>{inboxCount}</p>
+                  <p className='text-xs sm:text-sm text-white/80'>En buzón</p>
                 </div>
               </div>
             </div>
@@ -512,17 +610,17 @@ const TeamDetail = () => {
 
       {/* Tabs de navegación */}
       <FadeIn delay={0.1}>
-        <div className='flex gap-2 mb-6 border-b border-gray-200'>
+        <div className='flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto'>
           <button
             onClick={() => setActiveTab("inbox")}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
               activeTab === "inbox"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
             <Inbox className='w-4 h-4' />
-            Buzón de Tickets
+            <span className='hidden xs:inline'>Buzón de</span> Tickets
             {inboxCount > 0 && (
               <span className='px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full'>
                 {inboxCount}
@@ -531,7 +629,7 @@ const TeamDetail = () => {
           </button>
           <button
             onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
               activeTab === "projects"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-gray-600 hover:text-gray-900"
@@ -542,7 +640,7 @@ const TeamDetail = () => {
           </button>
           <button
             onClick={() => setActiveTab("members")}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
               activeTab === "members"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-gray-600 hover:text-gray-900"
@@ -553,14 +651,15 @@ const TeamDetail = () => {
           </button>
           <button
             onClick={() => setActiveTab("stats")}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
               activeTab === "stats"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
             <BarChart3 className='w-4 h-4' />
-            Estadísticas
+            <span className='hidden xs:inline'>Estadísticas</span>
+            <span className='xs:hidden'>Stats</span>
           </button>
         </div>
       </FadeIn>
@@ -647,7 +746,7 @@ const TeamDetail = () => {
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`bg-white rounded-lg shadow-sm border p-4 cursor-pointer hover:shadow-md transition group ${
+                      className={`bg-white rounded-lg shadow-sm border p-3 sm:p-4 cursor-pointer hover:shadow-md transition group ${
                         isInInbox
                           ? "border-l-4 border-l-yellow-400"
                           : "border-gray-200"
@@ -657,9 +756,9 @@ const TeamDetail = () => {
                         setIsTicketDetailModalOpen(true);
                       }}
                     >
-                      <div className='flex items-start gap-4'>
+                      <div className='flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4'>
                         <div
-                          className={`p-2 rounded-lg ${
+                          className={`p-2 rounded-lg w-fit ${
                             statusColors[ticket.status]?.split(" ")[1] ||
                             "bg-gray-50"
                           }`}
@@ -668,18 +767,18 @@ const TeamDetail = () => {
                         </div>
 
                         <div className='flex-1 min-w-0'>
-                          <div className='flex items-start justify-between gap-4 mb-2'>
+                          <div className='flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-2'>
                             <div>
-                              <h3 className='font-semibold text-gray-900'>
+                              <h3 className='font-semibold text-gray-900 text-sm sm:text-base'>
                                 #{ticket.id} - {ticket.title}
                               </h3>
-                              <p className='text-sm text-gray-600 line-clamp-1 mt-1'>
+                              <p className='text-sm text-gray-600 line-clamp-2 sm:line-clamp-1 mt-1'>
                                 {ticket.description || "Sin descripción"}
                               </p>
                             </div>
 
                             {/* Acciones */}
-                            <div className='flex items-center gap-2'>
+                            <div className='flex items-center gap-2 mt-2 sm:mt-0'>
                               {isInInbox && (
                                 <motion.button
                                   whileHover={{ scale: 1.1 }}
@@ -722,7 +821,7 @@ const TeamDetail = () => {
                                   setSelectedTicket(ticket);
                                   setIsTicketDetailModalOpen(true);
                                 }}
-                                className='p-2 hover:bg-gray-100 rounded-lg opacity-0 group-hover:opacity-100 transition'
+                                className='p-2 hover:bg-gray-100 rounded-lg sm:opacity-0 sm:group-hover:opacity-100 transition'
                               >
                                 <Eye className='w-4 h-4 text-gray-600' />
                               </button>
@@ -855,7 +954,7 @@ const TeamDetail = () => {
                               {project.name}
                             </h3>
                             {project.can_edit && (
-                              <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition'>
+                              <div className='flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition'>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -939,32 +1038,147 @@ const TeamDetail = () => {
                   <UserPlus className='w-5 h-5 text-indigo-600' />
                   Invitar nuevo miembro
                 </h3>
-                <form onSubmit={handleSendInvite} className='flex gap-3'>
-                  <div className='relative flex-1'>
-                    <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                    <input
-                      type='email'
-                      placeholder='Email del nuevo miembro...'
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-                      required
-                    />
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type='submit'
-                    disabled={sendingInvite}
-                    className='px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center gap-2'
-                  >
-                    {sendingInvite ? (
-                      <Loader2 className='w-4 h-4 animate-spin' />
-                    ) : (
-                      <Mail className='w-4 h-4' />
-                    )}
-                    Enviar invitación
-                  </motion.button>
+
+                {/* Formulario con selector de organización cuando aplique */}
+                <form onSubmit={handleSendInvite} className='space-y-4'>
+                  {isOrganizationContext ? (
+                    <>
+                      {/* Selector de miembros de organización */}
+                      <div>
+                        <label className='block text-sm font-medium text-gray-700 mb-2'>
+                          Seleccionar miembro de la organización
+                        </label>
+                        <Select
+                          value={
+                            selectedOrgMember
+                              ? {
+                                  value: selectedOrgMember.id,
+                                  label: selectedOrgMember.name,
+                                  email: selectedOrgMember.email,
+                                }
+                              : null
+                          }
+                          onChange={(option) => {
+                            if (option) {
+                              setSelectedOrgMember({
+                                id: option.value,
+                                name: option.label,
+                                email: option.email,
+                              });
+                              setInviteEmail("");
+                            } else {
+                              setSelectedOrgMember(null);
+                            }
+                          }}
+                          options={orgMembers.map((member) => ({
+                            value: member.id,
+                            label: member.name,
+                            email: member.email,
+                          }))}
+                          placeholder={
+                            loadingOrgMembers
+                              ? "Cargando miembros..."
+                              : "Buscar miembro..."
+                          }
+                          isLoading={loadingOrgMembers}
+                          isClearable
+                          noOptionsMessage={() =>
+                            orgMembers.length === 0
+                              ? "No hay miembros disponibles"
+                              : "No se encontraron resultados"
+                          }
+                          formatOptionLabel={(option) => (
+                            <div className='flex items-center gap-3'>
+                              <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-600'>
+                                {option.label.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div className='text-sm font-medium'>
+                                  {option.label}
+                                </div>
+                                <div className='text-xs text-gray-500'>
+                                  {option.email}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          styles={{
+                            control: (base, state) => ({
+                              ...base,
+                              borderColor: state.isFocused
+                                ? "#6366f1"
+                                : "#d1d5db",
+                              boxShadow: state.isFocused
+                                ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
+                                : "none",
+                              "&:hover": {
+                                borderColor: state.isFocused
+                                  ? "#6366f1"
+                                  : "#9ca3af",
+                              },
+                              borderRadius: "0.5rem",
+                              minHeight: "42px",
+                            }),
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: "0.5rem",
+                              zIndex: 20,
+                            }),
+                          }}
+                        />
+                      </div>
+
+                      {/* Mensaje informativo */}
+                      <p className='text-sm text-gray-500 text-center'>
+                        Solo puedes invitar miembros de tu organización
+                      </p>
+
+                      {/* Botón de enviar */}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        type='submit'
+                        disabled={sendingInvite || !selectedOrgMember}
+                        className='w-full px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center gap-2'
+                      >
+                        {sendingInvite ? (
+                          <Loader2 className='w-4 h-4 animate-spin' />
+                        ) : (
+                          <Mail className='w-4 h-4' />
+                        )}
+                        Enviar invitación
+                      </motion.button>
+                    </>
+                  ) : (
+                    /* Formulario simple para modo personal */
+                    <div className='flex gap-3'>
+                      <div className='relative flex-1'>
+                        <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                        <input
+                          type='email'
+                          placeholder='Email del nuevo miembro...'
+                          value={inviteEmail}
+                          onChange={(e) => setInviteEmail(e.target.value)}
+                          className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                          required
+                        />
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        type='submit'
+                        disabled={sendingInvite || !inviteEmail.trim()}
+                        className='px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center gap-2'
+                      >
+                        {sendingInvite ? (
+                          <Loader2 className='w-4 h-4 animate-spin' />
+                        ) : (
+                          <Mail className='w-4 h-4' />
+                        )}
+                        Enviar invitación
+                      </motion.button>
+                    </div>
+                  )}
                 </form>
               </div>
             )}
@@ -1003,9 +1217,18 @@ const TeamDetail = () => {
                         </span>
                       </div>
                     </div>
-                    <span className='text-sm text-gray-500 capitalize'>
-                      {member.role || "Miembro"}
-                    </span>
+                    <div className='flex items-center gap-3'>
+                      <button
+                        onClick={() => handleOpenMemberStats(member)}
+                        className='p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors'
+                        title='Ver estadísticas'
+                      >
+                        <BarChart3 className='w-4 h-4' />
+                      </button>
+                      <span className='text-sm text-gray-500 capitalize'>
+                        {member.role || "Miembro"}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1232,6 +1455,245 @@ const TeamDetail = () => {
         type='danger'
         loading={deleting}
       />
+
+      {/* Modal de estadísticas de miembro */}
+      <AnimatePresence>
+        {memberStatsModal.isOpen && (
+          <div className='fixed inset-0 z-50 flex items-center justify-center p-4'>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className='absolute inset-0 bg-black/50'
+              onClick={handleCloseMemberStats}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className='relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
+            >
+              {/* Header */}
+              <div className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between'>
+                <div className='flex items-center gap-3'>
+                  <div className='w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
+                    {memberStatsModal.member?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className='text-lg font-semibold text-gray-900'>
+                      {memberStatsModal.member?.name}
+                    </h3>
+                    <p className='text-sm text-gray-500'>
+                      Estadísticas en {team?.name}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseMemberStats}
+                  className='p-2 hover:bg-gray-100 rounded-lg'
+                >
+                  <X className='w-5 h-5 text-gray-500' />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className='p-6'>
+                {loadingMemberStats ? (
+                  <div className='flex flex-col items-center justify-center py-12'>
+                    <Loader2 className='w-8 h-8 animate-spin text-indigo-600 mb-3' />
+                    <p className='text-gray-500'>Cargando estadísticas...</p>
+                  </div>
+                ) : memberStats ? (
+                  <div className='space-y-6'>
+                    {/* Productividad */}
+                    <div className='bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl p-5 text-white'>
+                      <div className='flex items-center gap-2 mb-4'>
+                        <Sparkles className='w-5 h-5' />
+                        <h4 className='font-semibold'>
+                          Productividad en el equipo
+                        </h4>
+                      </div>
+
+                      {/* Barra de progreso principal */}
+                      <div className='mb-4'>
+                        <div className='flex justify-between items-center mb-2'>
+                          <span className='text-sm text-indigo-100'>
+                            Tareas completadas
+                          </span>
+                          <span className='font-bold'>
+                            {memberStats.tasks?.completed || 0}/
+                            {(memberStats.tasks?.completed || 0) +
+                              (memberStats.tasks?.pending || 0)}
+                          </span>
+                        </div>
+                        <div className='w-full bg-white/20 rounded-full h-3'>
+                          <div
+                            className='bg-white h-3 rounded-full transition-all duration-500'
+                            style={{
+                              width: `${
+                                memberStats.productivity?.percentage || 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Métricas de productividad */}
+                      <div className='grid grid-cols-3 gap-3'>
+                        <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
+                          <p className='text-2xl font-bold'>
+                            {memberStats.productivity?.percentage || 0}%
+                          </p>
+                          <p className='text-xs text-indigo-100'>Completado</p>
+                        </div>
+                        <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
+                          <div className='flex items-center justify-center gap-1'>
+                            <TrendingUp className='w-4 h-4' />
+                            <p className='text-2xl font-bold'>
+                              {memberStats.productivity?.completed_this_week ||
+                                0}
+                            </p>
+                          </div>
+                          <p className='text-xs text-indigo-100'>Esta semana</p>
+                        </div>
+                        <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
+                          <p className='text-2xl font-bold'>
+                            {memberStats.productivity?.avg_project_progress ||
+                              0}
+                            %
+                          </p>
+                          <p className='text-xs text-indigo-100'>
+                            Avg. Progreso
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Proyectos */}
+                    <div className='bg-blue-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <FolderKanban className='w-5 h-5 text-blue-600' />
+                        <h4 className='font-semibold text-blue-900'>
+                          Proyectos del equipo
+                        </h4>
+                      </div>
+                      <div className='grid grid-cols-3 gap-4'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600'>
+                            {memberStats.projects?.owned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Propios</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600'>
+                            {memberStats.projects?.collaborating || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Colabora</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600'>
+                            {memberStats.projects?.total || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Total</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tareas */}
+                    <div className='bg-green-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <CheckSquare className='w-5 h-5 text-green-600' />
+                        <h4 className='font-semibold text-green-900'>
+                          Tareas del equipo
+                        </h4>
+                        {memberStats.tasks?.completion_rate > 0 && (
+                          <span className='ml-auto text-sm font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full'>
+                            {memberStats.tasks.completion_rate}% completado
+                          </span>
+                        )}
+                      </div>
+                      <div className='grid grid-cols-4 gap-3'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStats.tasks?.created || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Creadas</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStats.tasks?.assigned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Asignadas</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStats.tasks?.completed || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Completadas</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-yellow-600'>
+                            {memberStats.tasks?.pending || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Pendientes</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tickets */}
+                    <div className='bg-orange-50 rounded-xl p-4'>
+                      <div className='flex items-center gap-2 mb-3'>
+                        <Ticket className='w-5 h-5 text-orange-600' />
+                        <h4 className='font-semibold text-orange-900'>
+                          Tickets del equipo
+                        </h4>
+                        {memberStats.tickets?.resolution_rate > 0 && (
+                          <span className='ml-auto text-sm font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full'>
+                            {memberStats.tickets.resolution_rate}% resueltos
+                          </span>
+                        )}
+                      </div>
+                      <div className='grid grid-cols-4 gap-3'>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-orange-600'>
+                            {memberStats.tickets?.created || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Creados</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-orange-600'>
+                            {memberStats.tickets?.assigned || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Asignados</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600'>
+                            {memberStats.tickets?.resolved || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Resueltos</p>
+                        </div>
+                        <div className='bg-white rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-red-600'>
+                            {memberStats.tickets?.open || 0}
+                          </p>
+                          <p className='text-xs text-gray-500'>Abiertos</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='text-center py-12'>
+                    <BarChart3 className='w-12 h-12 text-gray-300 mx-auto mb-3' />
+                    <p className='text-gray-500'>
+                      No se pudieron cargar las estadísticas
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 };

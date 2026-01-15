@@ -24,7 +24,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4'>
+        <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 pb-16 sm:pb-4'>
           {/* Backdrop animado */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -46,7 +46,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
               stiffness: 300,
               duration: 0.3,
             }}
-            className={`relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl ${sizes[size]} w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col`}
+            className={`relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl ${sizes[size]} w-full max-h-[calc(100vh-5rem)] sm:max-h-[90vh] overflow-hidden flex flex-col`}
           >
             {/* Header con gradiente */}
             <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-linear-to-r from-gray-50 to-white'>

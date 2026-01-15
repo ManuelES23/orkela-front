@@ -63,7 +63,7 @@ const ConfirmModal = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className='fixed inset-0 z-50 flex items-center justify-center p-4'
+            className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'
           >
             <div className='bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden'>
               {/* Header */}

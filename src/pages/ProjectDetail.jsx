@@ -50,8 +50,16 @@ import {
   tasksAPI,
   invitationsAPI,
   organizationsAPI,
-  exportAPI,
 } from "../utils/api";
+import {
+  exportProjectDetailToPdf,
+  exportProjectDetailToExcel,
+  exportProjectGanttToPdf,
+} from "../utils/exportService.jsx";
+import {
+  ProjectDetailPdf,
+  ProjectGanttPdf,
+} from "../components/exports/PdfDocuments";
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -127,15 +135,15 @@ const ProjectDetail = () => {
     try {
       switch (type) {
         case "pdf":
-          await exportAPI.projectDetailPdf(project.id, project.name);
+          await exportProjectDetailToPdf(project, ProjectDetailPdf);
           success("PDF del proyecto descargado");
           break;
         case "excel":
-          await exportAPI.projectDetailExcel(project.id, project.name);
+          exportProjectDetailToExcel(project);
           success("Excel del proyecto descargado");
           break;
         case "gantt":
-          await exportAPI.projectGanttPdf(project.id, project.name);
+          await exportProjectGanttToPdf(project, tasks, ProjectGanttPdf);
           success("Diagrama Gantt descargado");
           break;
       }

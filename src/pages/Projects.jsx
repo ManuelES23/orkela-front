@@ -32,7 +32,17 @@ import {
   ChevronDown,
   Loader2,
 } from "lucide-react";
-import { projectsAPI, exportAPI } from "../utils/api";
+import { projectsAPI } from "../utils/api";
+import {
+  exportProjectsToPdf,
+  exportProjectsToExcel,
+  exportProjectsToCsv,
+  exportAllProjectsGanttToPdf,
+} from "../utils/exportService.jsx";
+import {
+  ProjectsListPdf,
+  AllProjectsGanttPdf,
+} from "../components/exports/PdfDocuments";
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -75,19 +85,19 @@ const Projects = () => {
     try {
       switch (type) {
         case "pdf":
-          await exportAPI.projectsListPdf();
+          await exportProjectsToPdf(projects, ProjectsListPdf);
           success("PDF de proyectos descargado");
           break;
         case "excel":
-          await exportAPI.projectsListExcel();
+          exportProjectsToExcel(projects);
           success("Excel de proyectos descargado");
           break;
         case "csv":
-          await exportAPI.projectsListCsv();
+          exportProjectsToCsv(projects);
           success("CSV de proyectos descargado");
           break;
         case "gantt":
-          await exportAPI.allProjectsGanttPdf();
+          await exportAllProjectsGanttToPdf(projects, AllProjectsGanttPdf);
           success("Diagrama Gantt descargado");
           break;
       }

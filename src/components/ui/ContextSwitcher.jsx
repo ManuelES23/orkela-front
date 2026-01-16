@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -13,6 +13,12 @@ import { useNotification } from "../../context/NotificationContext";
 
 const ContextSwitcher = ({ isCompact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+  const buttonRef = useRef(null);
   const {
     user,
     switchContext,
@@ -21,6 +27,18 @@ const ContextSwitcher = ({ isCompact = false }) => {
     getActiveContext,
   } = useAuth();
   const { success, error: showError } = useNotification();
+
+  // Calcular posición del dropdown cuando se abre
+  useEffect(() => {
+    if (isOpen && buttonRef.current && !isCompact) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.top - 8, // Posicionar encima del botón con 8px de margen
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [isOpen, isCompact]);
 
   // Solo mostrar si el usuario tiene múltiples contextos
   if (!user || !hasMultipleContexts()) {
@@ -139,6 +157,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
   return (
     <div className='relative'>
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         disabled={switchingContext}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 border ${getContextColor(
@@ -168,7 +187,14 @@ const ContextSwitcher = ({ isCompact = false }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className='absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50'
+            style={{
+              position: "fixed",
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              width: dropdownPosition.width,
+              transform: "translateY(-100%)",
+            }}
+            className='bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[200]'
           >
             <div className='px-3 py-2 border-b border-gray-100'>
               <p className='text-xs text-gray-500 font-medium'>
@@ -223,7 +249,10 @@ const ContextSwitcher = ({ isCompact = false }) => {
 
       {/* Overlay para cerrar el menú al hacer clic fuera */}
       {isOpen && (
-        <div className='fixed inset-0 z-40' onClick={() => setIsOpen(false)} />
+        <div
+          className='fixed inset-0 z-[199]'
+          onClick={() => setIsOpen(false)}
+        />
       )}
     </div>
   );

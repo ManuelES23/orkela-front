@@ -1313,7 +1313,7 @@ const TeamDetail = () => {
                   <h3 className='font-semibold text-gray-900 mb-4'>
                     Estado de tickets
                   </h3>
-                  <div className='grid grid-cols-2 md:grid-cols-5 gap-4'>
+                  <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                     <div className='text-center p-3 bg-blue-50 rounded-lg'>
                       <p className='text-xl font-bold text-blue-600'>
                         {stats.tickets?.open || 0}
@@ -1334,15 +1334,10 @@ const TeamDetail = () => {
                     </div>
                     <div className='text-center p-3 bg-green-50 rounded-lg'>
                       <p className='text-xl font-bold text-green-600'>
-                        {stats.tickets?.resolved || 0}
+                        {(stats.tickets?.resolved || 0) +
+                          (stats.tickets?.closed || 0)}
                       </p>
                       <p className='text-xs text-gray-600'>Resueltos</p>
-                    </div>
-                    <div className='text-center p-3 bg-gray-50 rounded-lg'>
-                      <p className='text-xl font-bold text-gray-600'>
-                        {stats.tickets?.closed || 0}
-                      </p>
-                      <p className='text-xs text-gray-600'>Cerrados</p>
                     </div>
                   </div>
                 </div>

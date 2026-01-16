@@ -207,7 +207,7 @@ const NotificationsPanel = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className='absolute right-0 mt-2 w-96 sm:w-120 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
+            className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 md:w-120 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
           >
             {/* Header */}
             <div className='px-4 py-3 bg-linear-to-r from-indigo-50 to-white border-b border-gray-100'>

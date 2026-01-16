@@ -136,36 +136,60 @@ const Tasks = () => {
 
   const handleToggleStatus = async (taskId, currentStatus) => {
     const newStatus = currentStatus === "done" ? "todo" : "done";
+    await handleChangeStatus(taskId, currentStatus, newStatus);
+  };
 
-    console.log(`Toggle task ${taskId}: ${currentStatus} -> ${newStatus}`);
+  // Función para cambiar el estado de una tarea a cualquier estado
+  const handleChangeStatus = async (taskId, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
+
+    // Guardar estado original para posible rollback
+    const originalTask = tasks.find((task) => task.id === taskId);
 
     // Actualización optimista - actualizar UI inmediatamente
+    // Si se marca como completada, también auto-completar las subtareas
     setTasks((prevTasks) => {
-      const updated = prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      );
-      console.log(
-        "Tasks updated optimistically:",
-        updated.find((t) => t.id === taskId)?.status
-      );
+      const updated = prevTasks.map((task) => {
+        if (task.id !== taskId) return task;
+
+        const updatedTask = { ...task, status: newStatus };
+
+        // Auto-completar subtareas si se marca como done
+        if (newStatus === "done" && task.checklist_items?.length > 0) {
+          updatedTask.checklist_items = task.checklist_items.map((item) => ({
+            ...item,
+            is_completed: true,
+          }));
+        }
+
+        return updatedTask;
+      });
       return updated;
     });
 
     try {
-      const response = await tasksAPI.update(taskId, { status: newStatus });
-      console.log("API response:", response.status);
-      success(
-        newStatus === "done"
-          ? "Tarea completada"
-          : "Tarea marcada como pendiente"
-      );
+      // El backend devuelve la tarea actualizada con checklist_items
+      const updatedTask = await tasksAPI.update(taskId, { status: newStatus });
+
+      // Actualizar con los datos reales del backend
+      setTasks((prevTasks) => {
+        return prevTasks.map((task) => {
+          if (task.id !== taskId) return task;
+          return { ...task, ...updatedTask };
+        });
+      });
+
+      const statusMessages = {
+        done: "Tarea completada",
+        "in-progress": "Tarea en progreso",
+        todo: "Tarea marcada como pendiente",
+      };
+      success(statusMessages[newStatus] || "Estado actualizado");
     } catch (err) {
-      // Revertir en caso de error
+      // Revertir en caso de error - restaurar tarea original completa
       console.error("Error, reverting...", err);
       setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === taskId ? { ...task, status: currentStatus } : task
-        )
+        prevTasks.map((task) => (task.id === taskId ? originalTask : task))
       );
       showError(err.message || "No se pudo actualizar el estado de la tarea");
     }
@@ -818,9 +842,44 @@ const Tasks = () => {
                               </button>
                             )}
 
-                          <span className='text-gray-500 text-xs'>
-                            {statusLabels[task.status]}
-                          </span>
+                          {/* Selector de Estado */}
+                          {canEditOrDeleteTask(task) ? (
+                            <select
+                              value={task.status}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleChangeStatus(
+                                  task.id,
+                                  task.status,
+                                  e.target.value
+                                );
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className={`text-xs font-medium px-2 py-1 rounded-lg border cursor-pointer transition-colors ${
+                                task.status === "done"
+                                  ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                                  : task.status === "in-progress"
+                                  ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                                  : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                              }`}
+                            >
+                              <option value='todo'>Por hacer</option>
+                              <option value='in-progress'>En progreso</option>
+                              <option value='done'>Completada</option>
+                            </select>
+                          ) : (
+                            <span
+                              className={`text-xs font-medium px-2 py-1 rounded-lg ${
+                                task.status === "done"
+                                  ? "bg-green-50 text-green-700"
+                                  : task.status === "in-progress"
+                                  ? "bg-blue-50 text-blue-700"
+                                  : "bg-gray-50 text-gray-700"
+                              }`}
+                            >
+                              {statusLabels[task.status]}
+                            </span>
+                          )}
                         </div>
 
                         {/* Lista expandible de Checklist */}

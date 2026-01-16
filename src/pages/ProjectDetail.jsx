@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Select from "react-select";
 import Layout from "../components/layout/Layout";
@@ -40,12 +40,17 @@ import {
   X,
   Tag,
   ChevronDown,
+  Download,
+  FileText,
+  FileSpreadsheet,
+  GanttChartIcon,
 } from "lucide-react";
 import {
   projectsAPI,
   tasksAPI,
   invitationsAPI,
   organizationsAPI,
+  exportAPI,
 } from "../utils/api";
 
 const ProjectDetail = () => {
@@ -95,6 +100,53 @@ const ProjectDetail = () => {
 
   // Estado para gestión de etiquetas
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+
+  // Estados para exportación
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const exportMenuRef = useRef(null);
+
+  // Click outside para cerrar menú de exportación
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(event.target)
+      ) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Función para exportar
+  const handleExport = async (type) => {
+    if (!project) return;
+    setExporting(true);
+    try {
+      switch (type) {
+        case "pdf":
+          await exportAPI.projectDetailPdf(project.id, project.name);
+          success("PDF del proyecto descargado");
+          break;
+        case "excel":
+          await exportAPI.projectDetailExcel(project.id, project.name);
+          success("Excel del proyecto descargado");
+          break;
+        case "gantt":
+          await exportAPI.projectGanttPdf(project.id, project.name);
+          success("Diagrama Gantt descargado");
+          break;
+      }
+    } catch (err) {
+      console.error("Error exporting:", err);
+      showError(err.message || "Error al exportar");
+    } finally {
+      setExporting(false);
+      setExportMenuOpen(false);
+    }
+  };
 
   // Función para cargar datos con indicador de carga (carga inicial)
   const loadProjectData = useCallback(async () => {
@@ -203,38 +255,61 @@ const ProjectDetail = () => {
 
   const handleToggleComplete = async (task) => {
     const newStatus = task.status === "done" ? "todo" : "done";
-    const originalStatus = task.status;
+    const originalTask = { ...task };
+
+    // Función helper para actualizar una tarea con auto-complete de subtareas
+    const updateTaskWithChecklist = (t, targetId, status) => {
+      if (t.id !== targetId) return t;
+      const updatedTask = { ...t, status };
+      // Auto-completar subtareas si se marca como done
+      if (status === "done" && t.checklist_items?.length > 0) {
+        updatedTask.checklist_items = t.checklist_items.map((item) => ({
+          ...item,
+          is_completed: true,
+        }));
+      }
+      return updatedTask;
+    };
 
     // Actualización optimista - actualizar AMBOS estados inmediatamente
     setProject((prev) => ({
       ...prev,
       tasks: prev.tasks.map((t) =>
-        t.id === task.id ? { ...t, status: newStatus } : t
+        updateTaskWithChecklist(t, task.id, newStatus)
       ),
     }));
     setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t))
+      prev.map((t) => updateTaskWithChecklist(t, task.id, newStatus))
     );
 
     try {
-      await tasksAPI.update(task.id, { status: newStatus });
+      // El backend devuelve la tarea actualizada con checklist_items
+      const updatedTask = await tasksAPI.update(task.id, { status: newStatus });
+
+      // Actualizar con los datos reales del backend
+      setProject((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === task.id ? { ...t, ...updatedTask } : t
+        ),
+      }));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, ...updatedTask } : t))
+      );
+
       success(
         newStatus === "done"
           ? "Tarea completada"
           : "Tarea marcada como pendiente"
       );
     } catch (err) {
-      // Revertir en caso de error - ambos estados
+      // Revertir en caso de error - restaurar tarea original completa
       setProject((prev) => ({
         ...prev,
-        tasks: prev.tasks.map((t) =>
-          t.id === task.id ? { ...t, status: originalStatus } : t
-        ),
+        tasks: prev.tasks.map((t) => (t.id === task.id ? originalTask : t)),
       }));
       setTasks((prev) =>
-        prev.map((t) =>
-          t.id === task.id ? { ...t, status: originalStatus } : t
-        )
+        prev.map((t) => (t.id === task.id ? originalTask : t))
       );
       showError(err.message || "Error al actualizar la tarea");
       console.error("Error updating task:", err);
@@ -242,39 +317,62 @@ const ProjectDetail = () => {
   };
 
   const handleChangeStatus = async (task, newStatus) => {
-    const originalStatus = task.status;
+    const originalTask = { ...task };
     const statusLabels = {
       todo: "Por hacer",
       "in-progress": "En Progreso",
       done: "Completada",
     };
 
+    // Función helper para actualizar una tarea con auto-complete de subtareas
+    const updateTaskWithChecklist = (t, targetId, status) => {
+      if (t.id !== targetId) return t;
+      const updatedTask = { ...t, status };
+      // Auto-completar subtareas si se marca como done
+      if (status === "done" && t.checklist_items?.length > 0) {
+        updatedTask.checklist_items = t.checklist_items.map((item) => ({
+          ...item,
+          is_completed: true,
+        }));
+      }
+      return updatedTask;
+    };
+
     // Actualización optimista - actualizar AMBOS estados inmediatamente
     setProject((prev) => ({
       ...prev,
       tasks: prev.tasks.map((t) =>
-        t.id === task.id ? { ...t, status: newStatus } : t
+        updateTaskWithChecklist(t, task.id, newStatus)
       ),
     }));
     setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t))
+      prev.map((t) => updateTaskWithChecklist(t, task.id, newStatus))
     );
 
     try {
-      await tasksAPI.update(task.id, { status: newStatus });
-      success(`Estado cambiado a: ${statusLabels[newStatus]}`);
-    } catch (err) {
-      // Revertir en caso de error - ambos estados
+      // El backend devuelve la tarea actualizada con checklist_items
+      const updatedTask = await tasksAPI.update(task.id, { status: newStatus });
+
+      // Actualizar con los datos reales del backend
       setProject((prev) => ({
         ...prev,
         tasks: prev.tasks.map((t) =>
-          t.id === task.id ? { ...t, status: originalStatus } : t
+          t.id === task.id ? { ...t, ...updatedTask } : t
         ),
       }));
       setTasks((prev) =>
-        prev.map((t) =>
-          t.id === task.id ? { ...t, status: originalStatus } : t
-        )
+        prev.map((t) => (t.id === task.id ? { ...t, ...updatedTask } : t))
+      );
+
+      success(`Estado cambiado a: ${statusLabels[newStatus]}`);
+    } catch (err) {
+      // Revertir en caso de error - restaurar tarea original completa
+      setProject((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) => (t.id === task.id ? originalTask : t)),
+      }));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? originalTask : t))
       );
       showError(err.message || "Error al cambiar el estado");
       console.error("Error changing status:", err);
@@ -617,6 +715,72 @@ const ProjectDetail = () => {
           </button>
 
           <div className='flex items-center gap-2 w-full sm:w-auto'>
+            {/* Botón de Exportar con menú dropdown */}
+            <div className='relative' ref={exportMenuRef}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setExportMenuOpen(!exportMenuOpen)}
+                disabled={exporting}
+                className='flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-all shadow-sm text-sm disabled:opacity-50'
+              >
+                {exporting ? (
+                  <Loader2 className='w-4 h-4 animate-spin' />
+                ) : (
+                  <Download className='w-4 h-4' />
+                )}
+                <span className='hidden xs:inline'>Exportar</span>
+                <ChevronDown
+                  className={`w-3 h-3 transition-transform ${
+                    exportMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </motion.button>
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {exportMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className='absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50'
+                  >
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                      Exportar Proyecto
+                    </div>
+                    <button
+                      onClick={() => handleExport("pdf")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <FileText className='w-4 h-4 text-red-500' />
+                      PDF con tareas
+                    </button>
+                    <button
+                      onClick={() => handleExport("excel")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <FileSpreadsheet className='w-4 h-4 text-green-600' />
+                      Excel con tareas
+                    </button>
+
+                    <div className='border-t border-gray-100 my-2' />
+
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                      Diagrama Gantt
+                    </div>
+                    <button
+                      onClick={() => handleExport("gantt")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <GanttChartIcon className='w-4 h-4 text-purple-500' />
+                      Exportar Gantt a PDF
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {project.can_edit && (
               <motion.button
                 whileHover={{ scale: 1.05 }}

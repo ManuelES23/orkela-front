@@ -290,8 +290,9 @@ const TaskDetailModal = ({
               <div className='flex gap-2'>
                 <button
                   onClick={() => {
+                    // No llamar onClose() aquí - el callback onEdit ya maneja el cierre
+                    // para evitar que se borre selectedTask antes de abrir el modal de edición
                     onEdit(currentTask);
-                    onClose();
                   }}
                   className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
                   title='Editar tarea'
@@ -300,8 +301,8 @@ const TaskDetailModal = ({
                 </button>
                 <button
                   onClick={() => {
+                    // No llamar onClose() aquí - el callback onDelete ya maneja el cierre
                     onDelete(currentTask.id);
-                    onClose();
                   }}
                   className='p-2 hover:bg-red-50 rounded-lg transition-colors'
                   title='Eliminar tarea'

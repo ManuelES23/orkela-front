@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import ProjectModal from "../components/modals/ProjectModal";
@@ -25,8 +25,14 @@ import {
   AlertCircle,
   Flag,
   ListTodo,
+  Download,
+  FileText,
+  FileSpreadsheet,
+  FileDown,
+  ChevronDown,
+  Loader2,
 } from "lucide-react";
-import { projectsAPI } from "../utils/api";
+import { projectsAPI, exportAPI } from "../utils/api";
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -45,6 +51,54 @@ const Projects = () => {
     projectId: null,
   });
   const [deleting, setDeleting] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const exportMenuRef = useRef(null);
+
+  // Cerrar menú de exportación al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(event.target)
+      ) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Funciones de exportación
+  const handleExport = async (type) => {
+    setExporting(true);
+    try {
+      switch (type) {
+        case "pdf":
+          await exportAPI.projectsListPdf();
+          success("PDF de proyectos descargado");
+          break;
+        case "excel":
+          await exportAPI.projectsListExcel();
+          success("Excel de proyectos descargado");
+          break;
+        case "csv":
+          await exportAPI.projectsListCsv();
+          success("CSV de proyectos descargado");
+          break;
+        case "gantt":
+          await exportAPI.allProjectsGanttPdf();
+          success("Diagrama Gantt descargado");
+          break;
+      }
+    } catch (err) {
+      console.error("Error exporting:", err);
+      showError(err.message || "Error al exportar");
+    } finally {
+      setExporting(false);
+      setExportMenuOpen(false);
+    }
+  };
 
   // Función para cargar proyectos con indicador de carga (carga inicial)
   const loadProjects = useCallback(async () => {
@@ -260,15 +314,90 @@ const Projects = () => {
             </motion.button>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleNewProject}
-            className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg'
-          >
-            <Plus className='w-5 h-5' />
-            <span>Nuevo Proyecto</span>
-          </motion.button>
+          <div className='flex gap-2'>
+            {/* Botón de Exportar con menú dropdown */}
+            <div className='relative' ref={exportMenuRef}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setExportMenuOpen(!exportMenuOpen)}
+                disabled={exporting || projects.length === 0}
+                className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {exporting ? (
+                  <Loader2 className='w-4 h-4 animate-spin' />
+                ) : (
+                  <Download className='w-4 h-4' />
+                )}
+                <span className='hidden sm:inline'>Exportar</span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    exportMenuOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </motion.button>
+
+              {/* Dropdown Menu */}
+              <AnimatePresence>
+                {exportMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className='absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50'
+                  >
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                      Lista de Proyectos
+                    </div>
+                    <button
+                      onClick={() => handleExport("pdf")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <FileText className='w-4 h-4 text-red-500' />
+                      Exportar a PDF
+                    </button>
+                    <button
+                      onClick={() => handleExport("excel")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <FileSpreadsheet className='w-4 h-4 text-green-600' />
+                      Exportar a Excel
+                    </button>
+                    <button
+                      onClick={() => handleExport("csv")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <FileDown className='w-4 h-4 text-blue-500' />
+                      Exportar a CSV
+                    </button>
+
+                    <div className='border-t border-gray-100 my-2' />
+
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                      Diagrama Gantt
+                    </div>
+                    <button
+                      onClick={() => handleExport("gantt")}
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                    >
+                      <GanttChartIcon className='w-4 h-4 text-purple-500' />
+                      Gantt de todos los proyectos
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNewProject}
+              className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg'
+            >
+              <Plus className='w-5 h-5' />
+              <span>Nuevo Proyecto</span>
+            </motion.button>
+          </div>
         </div>
       </FadeIn>
 

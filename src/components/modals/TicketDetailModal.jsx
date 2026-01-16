@@ -581,7 +581,7 @@ const TicketDetailModal = ({
             <h3 className='font-semibold text-gray-900 mb-2'>Descripción</h3>
             <div className='p-4 bg-white border border-gray-200 rounded-lg'>
               <p className='text-gray-700 whitespace-pre-wrap'>
-                {ticket.description}
+                {ticket.description || "Sin descripción"}
               </p>
             </div>
           </div>
@@ -666,7 +666,6 @@ const TicketDetailModal = ({
                   ))}
                 </AnimatePresence>
               )}
-              }
             </div>
 
             {/* Nuevo comentario */}

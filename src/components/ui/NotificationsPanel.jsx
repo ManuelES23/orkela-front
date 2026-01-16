@@ -21,6 +21,11 @@ import {
   MailCheck,
   MailX,
   ListTodo,
+  Ticket,
+  MessageSquare,
+  Inbox,
+  UserCheck,
+  RotateCcw,
 } from "lucide-react";
 import { useRealtime } from "../../context/RealtimeContext";
 import { formatDistanceToNow } from "../../utils/dateUtils";
@@ -119,6 +124,22 @@ const NotificationsPanel = () => {
       case "organization_role_updated":
         return <Building2 className='w-4 h-4 text-indigo-500' />;
 
+      // Tickets
+      case "ticket_created":
+        return <Ticket className='w-4 h-4 text-orange-500' />;
+      case "ticket_taken":
+        return <UserCheck className='w-4 h-4 text-blue-500' />;
+      case "ticket_assigned":
+        return <UserCheck className='w-4 h-4 text-indigo-500' />;
+      case "ticket_status_changed":
+        return <RefreshCw className='w-4 h-4 text-blue-500' />;
+      case "ticket_resolved":
+        return <CheckCircle className='w-4 h-4 text-green-600' />;
+      case "ticket_returned_to_inbox":
+        return <Inbox className='w-4 h-4 text-yellow-500' />;
+      case "ticket_comment_added":
+        return <MessageSquare className='w-4 h-4 text-blue-500' />;
+
       default:
         return <Mail className='w-4 h-4 text-gray-500' />;
     }
@@ -164,6 +185,21 @@ const NotificationsPanel = () => {
         return "bg-orange-50";
       case "organization_role_updated":
         return "bg-indigo-50";
+
+      // Tickets
+      case "ticket_created":
+        return "bg-orange-50";
+      case "ticket_taken":
+      case "ticket_assigned":
+        return "bg-blue-50";
+      case "ticket_status_changed":
+        return "bg-indigo-50";
+      case "ticket_resolved":
+        return "bg-green-50";
+      case "ticket_returned_to_inbox":
+        return "bg-yellow-50";
+      case "ticket_comment_added":
+        return "bg-blue-50";
 
       default:
         return "bg-gray-100";

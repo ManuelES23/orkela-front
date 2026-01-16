@@ -103,6 +103,7 @@ const Tickets = () => {
     fetchTeams();
   }, []);
 
+  // Función para cargar tickets con indicador de carga (carga inicial)
   const loadTickets = useCallback(async () => {
     try {
       setLoading(true);
@@ -135,15 +136,42 @@ const Tickets = () => {
     }
   }, [activeTab, activeFilter, selectedTeamId]);
 
+  // Función para refrescar tickets silenciosamente (sin spinner, para tiempo real)
+  const refreshTicketsSilently = useCallback(async () => {
+    try {
+      const filters = {};
+      if (activeTab !== "all") {
+        filters.status = activeTab;
+      }
+      if (activeFilter !== "all") {
+        filters.filter = activeFilter;
+      }
+      if (selectedTeamId) {
+        filters.team_id = selectedTeamId;
+      }
+
+      const [ticketsData, statsData] = await Promise.all([
+        ticketsAPI.getAll(filters),
+        ticketsAPI.getStats(),
+      ]);
+
+      setTickets(ticketsData);
+      setStats(statsData);
+    } catch (err) {
+      console.error("Error refreshing tickets:", err);
+      // No mostrar error en actualización silenciosa
+    }
+  }, [activeTab, activeFilter, selectedTeamId]);
+
   useEffect(() => {
     loadTickets();
   }, [loadTickets]);
 
-  // Registrar callback para tiempo real
+  // Registrar callback para tiempo real (silencioso)
   useEffect(() => {
-    registerRefresh("tickets", loadTickets);
+    registerRefresh("tickets", refreshTicketsSilently);
     return () => unregisterRefresh("tickets");
-  }, [registerRefresh, unregisterRefresh, loadTickets]);
+  }, [registerRefresh, unregisterRefresh, refreshTicketsSilently]);
 
   // Tomar un ticket del buzón
   const handleTakeTicket = async (e, ticketId) => {

@@ -30,6 +30,7 @@ import {
   CalendarClock,
 } from "lucide-react";
 import { tasksAPI, checklistAPI } from "../utils/api";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const Tasks = () => {
   const { user } = useAuth();
@@ -190,7 +191,7 @@ const Tasks = () => {
       // Revertir en caso de error - restaurar tarea original completa
       console.error("Error, reverting...", err);
       setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === taskId ? originalTask : task))
+        prevTasks.map((task) => (task.id === taskId ? originalTask : task)),
       );
       showError(err.message || "No se pudo actualizar el estado de la tarea");
     }
@@ -226,11 +227,11 @@ const Tasks = () => {
               checklist_items: task.checklist_items.map((item) =>
                 item.id === itemId
                   ? { ...item, is_completed: !item.is_completed }
-                  : item
+                  : item,
               ),
             }
-          : task
-      )
+          : task,
+      ),
     );
 
     try {
@@ -253,7 +254,7 @@ const Tasks = () => {
     // Los usuarios asignados pueden editar/eliminar
     if (task.assigned_users && task.assigned_users.length > 0) {
       return task.assigned_users.some(
-        (assignedUser) => assignedUser.id === user.id
+        (assignedUser) => assignedUser.id === user.id,
       );
     }
 
@@ -288,7 +289,7 @@ const Tasks = () => {
     if (!dueDate) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
+    const due = parseLocalDate(dueDate);
     due.setHours(0, 0, 0, 0);
     const diffTime = due - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -450,8 +451,8 @@ const Tasks = () => {
               activeTab === "today"
                 ? "border-orange-500 text-orange-600"
                 : taskCounts.dueToday > 0
-                ? "border-transparent text-orange-600 hover:text-orange-700 bg-orange-50 rounded-t-lg"
-                : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-transparent text-orange-600 hover:text-orange-700 bg-orange-50 rounded-t-lg"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
             <Clock className='w-4 h-4' />
@@ -468,8 +469,8 @@ const Tasks = () => {
               activeTab === "upcoming"
                 ? "border-yellow-500 text-yellow-600"
                 : taskCounts.dueSoon > 0
-                ? "border-transparent text-yellow-600 hover:text-yellow-700 bg-yellow-50 rounded-t-lg"
-                : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-transparent text-yellow-600 hover:text-yellow-700 bg-yellow-50 rounded-t-lg"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
             <CalendarClock className='w-4 h-4' />
@@ -748,9 +749,9 @@ const Tasks = () => {
                                 className={`flex items-center gap-1 ${dateStyle} ${bgStyle}`}
                               >
                                 {icon}
-                                {new Date(task.due_date).toLocaleDateString(
-                                  "es-ES"
-                                )}
+                                {parseLocalDate(
+                                  task.due_date,
+                                ).toLocaleDateString("es-ES")}
                                 {badge}
                               </div>
                             );
@@ -815,7 +816,7 @@ const Tasks = () => {
                                 <span className='text-xs'>
                                   {
                                     task.checklist_items.filter(
-                                      (item) => item.is_completed
+                                      (item) => item.is_completed,
                                     ).length
                                   }
                                   /{task.checklist_items.length}
@@ -827,7 +828,7 @@ const Tasks = () => {
                                     style={{
                                       width: `${
                                         (task.checklist_items.filter(
-                                          (item) => item.is_completed
+                                          (item) => item.is_completed,
                                         ).length /
                                           task.checklist_items.length) *
                                         100
@@ -852,7 +853,7 @@ const Tasks = () => {
                                 handleChangeStatus(
                                   task.id,
                                   task.status,
-                                  e.target.value
+                                  e.target.value,
                                 );
                               }}
                               onClick={(e) => e.stopPropagation()}
@@ -860,8 +861,8 @@ const Tasks = () => {
                                 task.status === "done"
                                   ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                                   : task.status === "in-progress"
-                                  ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                                  : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                    ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
                               }`}
                             >
                               <option value='todo'>Por hacer</option>
@@ -874,8 +875,8 @@ const Tasks = () => {
                                 task.status === "done"
                                   ? "bg-green-50 text-green-700"
                                   : task.status === "in-progress"
-                                  ? "bg-blue-50 text-blue-700"
-                                  : "bg-gray-50 text-gray-700"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "bg-gray-50 text-gray-700"
                               }`}
                             >
                               {statusLabels[task.status]}
@@ -902,7 +903,7 @@ const Tasks = () => {
                                       handleToggleChecklistItem(
                                         task.id,
                                         item.id,
-                                        e
+                                        e,
                                       )
                                     }
                                     className='flex items-center gap-2 text-sm w-full text-left py-1 px-2 -mx-2 rounded hover:bg-gray-100 transition-colors'

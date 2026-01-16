@@ -57,6 +57,7 @@ import {
   exportProjectDetailToExcel,
   exportProjectGanttToPdf,
 } from "../utils/exportService.jsx";
+import { parseLocalDate } from "../utils/dateUtils";
 import {
   ProjectDetailPdf,
   ProjectGanttPdf,
@@ -245,7 +246,7 @@ const ProjectDetail = () => {
         err.message ||
           (confirmModal.type === "project"
             ? "Error al eliminar el proyecto"
-            : "Error al eliminar la tarea")
+            : "Error al eliminar la tarea"),
       );
       console.error("Error deleting:", err);
     } finally {
@@ -284,11 +285,11 @@ const ProjectDetail = () => {
     setProject((prev) => ({
       ...prev,
       tasks: prev.tasks.map((t) =>
-        updateTaskWithChecklist(t, task.id, newStatus)
+        updateTaskWithChecklist(t, task.id, newStatus),
       ),
     }));
     setTasks((prev) =>
-      prev.map((t) => updateTaskWithChecklist(t, task.id, newStatus))
+      prev.map((t) => updateTaskWithChecklist(t, task.id, newStatus)),
     );
 
     try {
@@ -299,17 +300,17 @@ const ProjectDetail = () => {
       setProject((prev) => ({
         ...prev,
         tasks: prev.tasks.map((t) =>
-          t.id === task.id ? { ...t, ...updatedTask } : t
+          t.id === task.id ? { ...t, ...updatedTask } : t,
         ),
       }));
       setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? { ...t, ...updatedTask } : t))
+        prev.map((t) => (t.id === task.id ? { ...t, ...updatedTask } : t)),
       );
 
       success(
         newStatus === "done"
           ? "Tarea completada"
-          : "Tarea marcada como pendiente"
+          : "Tarea marcada como pendiente",
       );
     } catch (err) {
       // Revertir en caso de error - restaurar tarea original completa
@@ -318,7 +319,7 @@ const ProjectDetail = () => {
         tasks: prev.tasks.map((t) => (t.id === task.id ? originalTask : t)),
       }));
       setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? originalTask : t))
+        prev.map((t) => (t.id === task.id ? originalTask : t)),
       );
       showError(err.message || "Error al actualizar la tarea");
       console.error("Error updating task:", err);
@@ -351,11 +352,11 @@ const ProjectDetail = () => {
     setProject((prev) => ({
       ...prev,
       tasks: prev.tasks.map((t) =>
-        updateTaskWithChecklist(t, task.id, newStatus)
+        updateTaskWithChecklist(t, task.id, newStatus),
       ),
     }));
     setTasks((prev) =>
-      prev.map((t) => updateTaskWithChecklist(t, task.id, newStatus))
+      prev.map((t) => updateTaskWithChecklist(t, task.id, newStatus)),
     );
 
     try {
@@ -366,11 +367,11 @@ const ProjectDetail = () => {
       setProject((prev) => ({
         ...prev,
         tasks: prev.tasks.map((t) =>
-          t.id === task.id ? { ...t, ...updatedTask } : t
+          t.id === task.id ? { ...t, ...updatedTask } : t,
         ),
       }));
       setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? { ...t, ...updatedTask } : t))
+        prev.map((t) => (t.id === task.id ? { ...t, ...updatedTask } : t)),
       );
 
       success(`Estado cambiado a: ${statusLabels[newStatus]}`);
@@ -381,7 +382,7 @@ const ProjectDetail = () => {
         tasks: prev.tasks.map((t) => (t.id === task.id ? originalTask : t)),
       }));
       setTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? originalTask : t))
+        prev.map((t) => (t.id === task.id ? originalTask : t)),
       );
       showError(err.message || "Error al cambiar el estado");
       console.error("Error changing status:", err);
@@ -423,7 +424,7 @@ const ProjectDetail = () => {
       // Filtrar los miembros que ya están en el proyecto
       const currentMemberIds = getAllProjectMembers().map((m) => m.id);
       const availableMembers = members.filter(
-        (m) => !currentMemberIds.includes(m.id)
+        (m) => !currentMemberIds.includes(m.id),
       );
       setOrgMembers(availableMembers);
     } catch (err) {
@@ -642,7 +643,7 @@ const ProjectDetail = () => {
   const getDaysRemaining = () => {
     if (!project?.due_date) return null;
     const today = new Date();
-    const dueDate = new Date(project.due_date);
+    const dueDate = parseLocalDate(project.due_date);
     const diffTime = dueDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -678,7 +679,7 @@ const ProjectDetail = () => {
 
   const completedTasks = tasks.filter((t) => t.status === "done").length;
   const inProgressTasks = tasks.filter(
-    (t) => t.status === "in-progress"
+    (t) => t.status === "in-progress",
   ).length;
   const pendingTasks = tasks.filter((t) => t.status === "todo").length;
 
@@ -1150,15 +1151,15 @@ const ProjectDetail = () => {
                           task.priority === "high"
                             ? "bg-red-100 text-red-700"
                             : task.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-green-100 text-green-700"
                         }`}
                       >
                         {task.priority === "high"
                           ? "Alta"
                           : task.priority === "medium"
-                          ? "Media"
-                          : "Baja"}
+                            ? "Media"
+                            : "Baja"}
                       </span>
 
                       {/* Dropdown de estado */}
@@ -1171,8 +1172,8 @@ const ProjectDetail = () => {
                           task.status === "done"
                             ? "bg-green-100 text-green-700"
                             : task.status === "in-progress"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-100 text-gray-700"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700"
                         }`}
                       >
                         <option value='todo'>Por hacer</option>

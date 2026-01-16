@@ -16,6 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { teamsAPI, teamInvitationsAPI } from "../../utils/api";
+import { parseLocalDate } from "../../utils/dateUtils";
 
 const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
   const { success, error: showError } = useNotification();
@@ -230,7 +231,9 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                     {project.due_date && (
                       <div className='flex items-center gap-1 text-xs text-gray-500'>
                         <Calendar className='w-3 h-3' />
-                        {new Date(project.due_date).toLocaleDateString("es-ES")}
+                        {parseLocalDate(project.due_date).toLocaleDateString(
+                          "es-ES",
+                        )}
                       </div>
                     )}
                   </div>

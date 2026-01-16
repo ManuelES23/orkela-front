@@ -57,6 +57,7 @@ import {
   projectsAPI,
   organizationsAPI,
 } from "../utils/api";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const TeamDetail = () => {
   const { id } = useParams();
@@ -389,7 +390,7 @@ const TeamDetail = () => {
       // Filtrar miembros que ya son parte del equipo
       const currentMemberIds = members.map((m) => m.id);
       const availableMembers = allMembers.filter(
-        (m) => !currentMemberIds.includes(m.id)
+        (m) => !currentMemberIds.includes(m.id),
       );
       setOrgMembers(availableMembers);
     } catch (err) {
@@ -494,7 +495,9 @@ const TeamDetail = () => {
   const filteredTickets = tickets.filter(
     (ticket) =>
       ticket.title.toLowerCase().includes(ticketSearchTerm.toLowerCase()) ||
-      ticket.description?.toLowerCase().includes(ticketSearchTerm.toLowerCase())
+      ticket.description
+        ?.toLowerCase()
+        .includes(ticketSearchTerm.toLowerCase()),
   );
 
   // Filtrar proyectos por búsqueda
@@ -503,7 +506,7 @@ const TeamDetail = () => {
       project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
       project.description
         ?.toLowerCase()
-        .includes(projectSearchTerm.toLowerCase())
+        .includes(projectSearchTerm.toLowerCase()),
   );
 
   // Contar tickets en el buzón
@@ -864,7 +867,7 @@ const TeamDetail = () => {
                             <span className='text-gray-400'>
                               <Clock className='w-3 h-3 inline mr-1' />
                               {new Date(ticket.created_at).toLocaleDateString(
-                                "es-ES"
+                                "es-ES",
                               )}
                             </span>
                           </div>
@@ -1008,9 +1011,9 @@ const TeamDetail = () => {
                             {project.due_date && (
                               <span className='flex items-center gap-1'>
                                 <Calendar className='w-3 h-3' />
-                                {new Date(project.due_date).toLocaleDateString(
-                                  "es-ES"
-                                )}
+                                {parseLocalDate(
+                                  project.due_date,
+                                ).toLocaleDateString("es-ES")}
                               </span>
                             )}
                           </div>

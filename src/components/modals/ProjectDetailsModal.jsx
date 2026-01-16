@@ -12,6 +12,7 @@ import {
   FolderOpen,
   ListChecks,
 } from "lucide-react";
+import { parseLocalDate } from "../../utils/dateUtils";
 
 const ProjectDetailsModal = ({
   isOpen,
@@ -67,7 +68,7 @@ const ProjectDetailsModal = ({
 
   const formatDate = (dateString) => {
     if (!dateString) return "No definida";
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString("es-ES", {
       day: "2-digit",
       month: "short",
@@ -78,7 +79,7 @@ const ProjectDetailsModal = ({
   const getDaysRemaining = () => {
     if (!project.due_date) return null;
     const today = new Date();
-    const dueDate = new Date(project.due_date);
+    const dueDate = parseLocalDate(project.due_date);
     const diffTime = dueDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -361,8 +362,8 @@ const ProjectDetailsModal = ({
                                   task.status === "completed"
                                     ? "bg-green-500"
                                     : task.status === "in_progress"
-                                    ? "bg-blue-500"
-                                    : "bg-gray-400"
+                                      ? "bg-blue-500"
+                                      : "bg-gray-400"
                                 }`}
                               />
                               <span className='text-sm text-gray-900'>
@@ -374,15 +375,15 @@ const ProjectDetailsModal = ({
                                 task.priority === "high"
                                   ? "bg-red-100 text-red-700"
                                   : task.priority === "medium"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-green-100 text-green-700"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-green-100 text-green-700"
                               }`}
                             >
                               {task.priority === "high"
                                 ? "Alta"
                                 : task.priority === "medium"
-                                ? "Media"
-                                : "Baja"}
+                                  ? "Media"
+                                  : "Baja"}
                             </span>
                           </div>
                         ))}

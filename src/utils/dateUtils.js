@@ -3,13 +3,43 @@
  */
 
 /**
+ * Parsea un string de fecha (YYYY-MM-DD) a un objeto Date en zona horaria local
+ * Evita el problema de UTC donde "2026-01-16" se convierte en "2026-01-15" en zonas horarias negativas
+ * @param {Date|string} date - La fecha a parsear
+ * @returns {Date} - Objeto Date en zona horaria local
+ */
+export const parseLocalDate = (date) => {
+  if (!date) return new Date();
+
+  // Si ya es un objeto Date, devolverlo tal cual
+  if (date instanceof Date) return date;
+
+  // Si es un string de fecha en formato YYYY-MM-DD o YYYY-MM-DDTHH:MM:SS
+  if (typeof date === "string") {
+    // Extraer solo la parte de la fecha (ignorar la hora si existe)
+    const datePart = date.split("T")[0];
+    const parts = datePart.split("-");
+
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // Los meses en JS son 0-indexed
+      const day = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    }
+  }
+
+  // Fallback: intentar parsear normalmente
+  return new Date(date);
+};
+
+/**
  * Formatea la distancia desde una fecha hasta ahora en español
  * @param {Date|string} date - La fecha a formatear
  * @returns {string} - La distancia formateada (ej: "hace 5 minutos")
  */
 export const formatDistanceToNow = (date) => {
   const now = new Date();
-  const past = new Date(date);
+  const past = parseLocalDate(date);
   const diffInSeconds = Math.floor((now - past) / 1000);
 
   if (diffInSeconds < 60) {
@@ -54,7 +84,7 @@ export const formatDistanceToNow = (date) => {
  * @returns {string} - La fecha formateada
  */
 export const formatDate = (date, options = {}) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   const defaultOptions = {
     day: "numeric",
     month: "short",
@@ -71,7 +101,7 @@ export const formatDate = (date, options = {}) => {
  * @returns {string} - La fecha con hora formateada
  */
 export const formatDateTime = (date) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   return d.toLocaleString("es-ES", {
     day: "numeric",
     month: "short",
@@ -87,7 +117,7 @@ export const formatDateTime = (date) => {
  * @returns {boolean}
  */
 export const isToday = (date) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   const today = new Date();
   return d.toDateString() === today.toDateString();
 };
@@ -98,7 +128,7 @@ export const isToday = (date) => {
  * @returns {boolean}
  */
 export const isTomorrow = (date) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   return d.toDateString() === tomorrow.toDateString();
@@ -110,7 +140,7 @@ export const isTomorrow = (date) => {
  * @returns {boolean}
  */
 export const isPast = (date) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   return d < now;

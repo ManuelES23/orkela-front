@@ -61,12 +61,12 @@ const GanttChart = ({ projects }) => {
       const start = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
-        1
+        1,
       );
       const end = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
-        0
+        0,
       );
       return { start, end, days: end.getDate() };
     } else {
@@ -191,7 +191,8 @@ const GanttChart = ({ projects }) => {
     if (!endDate) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const end = new Date(endDate);
+    const end = parseDateString(endDate);
+    if (!end) return null;
     end.setHours(0, 0, 0, 0);
     return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
   };
@@ -207,7 +208,7 @@ const GanttChart = ({ projects }) => {
         const getProjectStartDate = (project) => {
           // Obtener tareas del proyecto
           const projectTasks = tasksData.filter(
-            (t) => t.project_id === project.id
+            (t) => t.project_id === project.id,
           );
 
           // Si hay tareas con fechas, usar la fecha más temprana
@@ -241,7 +242,7 @@ const GanttChart = ({ projects }) => {
       sortedProjects.forEach((project) => {
         // Obtener tareas del proyecto
         const projectTasks = tasksData.filter(
-          (t) => t.project_id === project.id
+          (t) => t.project_id === project.id,
         );
 
         // Calcular fechas del proyecto basándose en las tareas
@@ -283,7 +284,7 @@ const GanttChart = ({ projects }) => {
         // Color basado en estado del proyecto
         const projectColors = getStatusColor(
           project.status,
-          projectDaysRemaining
+          projectDaysRemaining,
         );
 
         itemList.push({
@@ -300,7 +301,7 @@ const GanttChart = ({ projects }) => {
           priority: project.priority,
           tasksCount: projectTasks.length,
           completedTasks: projectTasks.filter(
-            (t) => t.status === "done" || t.status === "completed"
+            (t) => t.status === "done" || t.status === "completed",
           ).length,
           team: project.users?.length || 0,
           type: "project",
@@ -315,13 +316,13 @@ const GanttChart = ({ projects }) => {
             const dateA = a.start_date
               ? parseDateString(a.start_date)
               : a.due_date
-              ? parseDateString(a.due_date)
-              : new Date();
+                ? parseDateString(a.due_date)
+                : new Date();
             const dateB = b.start_date
               ? parseDateString(b.start_date)
               : b.due_date
-              ? parseDateString(b.due_date)
-              : new Date();
+                ? parseDateString(b.due_date)
+                : new Date();
             return dateA - dateB;
           });
 
@@ -329,12 +330,12 @@ const GanttChart = ({ projects }) => {
             const taskStart = task.start_date
               ? parseDateString(task.start_date)
               : task.due_date
-              ? (() => {
-                  const d = parseDateString(task.due_date);
-                  d.setDate(d.getDate() - 3);
-                  return d;
-                })()
-              : null;
+                ? (() => {
+                    const d = parseDateString(task.due_date);
+                    d.setDate(d.getDate() - 3);
+                    return d;
+                  })()
+                : null;
             const taskEnd = parseDateString(task.due_date);
 
             if (!taskStart || !taskEnd) return;
@@ -346,7 +347,7 @@ const GanttChart = ({ projects }) => {
             const taskColors = getStatusColor(
               task.status,
               taskDaysRemaining,
-              task.is_urgent
+              task.is_urgent,
             );
 
             itemList.push({
@@ -378,13 +379,13 @@ const GanttChart = ({ projects }) => {
         const dateA = a.start_date
           ? parseDateString(a.start_date)
           : a.due_date
-          ? parseDateString(a.due_date)
-          : new Date();
+            ? parseDateString(a.due_date)
+            : new Date();
         const dateB = b.start_date
           ? parseDateString(b.start_date)
           : b.due_date
-          ? parseDateString(b.due_date)
-          : new Date();
+            ? parseDateString(b.due_date)
+            : new Date();
         return dateA - dateB;
       });
 
@@ -392,12 +393,12 @@ const GanttChart = ({ projects }) => {
         const taskStart = task.start_date
           ? parseDateString(task.start_date)
           : task.due_date
-          ? (() => {
-              const d = parseDateString(task.due_date);
-              d.setDate(d.getDate() - 3);
-              return d;
-            })()
-          : null;
+            ? (() => {
+                const d = parseDateString(task.due_date);
+                d.setDate(d.getDate() - 3);
+                return d;
+              })()
+            : null;
         const taskEnd = parseDateString(task.due_date);
 
         if (!taskStart || !taskEnd) return;
@@ -409,7 +410,7 @@ const GanttChart = ({ projects }) => {
         const taskColors = getStatusColor(
           task.status,
           taskDaysRemaining,
-          task.is_urgent
+          task.is_urgent,
         );
 
         itemList.push({
@@ -477,7 +478,7 @@ const GanttChart = ({ projects }) => {
 
     const startOffset = Math.max(
       0,
-      (visibleStart - start) / (1000 * 60 * 60 * 24)
+      (visibleStart - start) / (1000 * 60 * 60 * 24),
     );
     const duration =
       Math.ceil((visibleEnd - visibleStart) / (1000 * 60 * 60 * 24)) + 1;
@@ -527,7 +528,7 @@ const GanttChart = ({ projects }) => {
     (d) =>
       d.getDate() === today.getDate() &&
       d.getMonth() === today.getMonth() &&
-      d.getFullYear() === today.getFullYear()
+      d.getFullYear() === today.getFullYear(),
   );
 
   // Formatear título del periodo
@@ -854,10 +855,10 @@ const GanttChart = ({ projects }) => {
                                     item.status === "completed"
                                       ? "text-green-600"
                                       : daysRemaining < 0
-                                      ? "text-red-600"
-                                      : daysRemaining <= 3
-                                      ? "text-yellow-600"
-                                      : ""
+                                        ? "text-red-600"
+                                        : daysRemaining <= 3
+                                          ? "text-yellow-600"
+                                          : ""
                                   }`}
                                 >
                                   {item.status === "done" ||
@@ -872,8 +873,8 @@ const GanttChart = ({ projects }) => {
                                       {daysRemaining < 0
                                         ? `${Math.abs(daysRemaining)}d atraso`
                                         : daysRemaining === 0
-                                        ? "Hoy"
-                                        : `${daysRemaining}d`}
+                                          ? "Hoy"
+                                          : `${daysRemaining}d`}
                                     </>
                                   )}
                                 </span>
@@ -888,26 +889,26 @@ const GanttChart = ({ projects }) => {
                                   item.status === "completed"
                                     ? "bg-green-100 text-green-700"
                                     : item.status === "in-progress"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : item.status === "active"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-600"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : item.status === "active"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-gray-100 text-gray-600"
                                 }`}
                               >
                                 {item.status === "done" ||
                                 item.status === "completed"
                                   ? "Completado"
                                   : item.status === "in-progress"
-                                  ? "En progreso"
-                                  : item.status === "active"
-                                  ? "Activo"
-                                  : item.status === "todo"
-                                  ? "Pendiente"
-                                  : item.status}
+                                    ? "En progreso"
+                                    : item.status === "active"
+                                      ? "Activo"
+                                      : item.status === "todo"
+                                        ? "Pendiente"
+                                        : item.status}
                               </span>
                               <span
                                 className={`px-1.5 py-0.5 rounded text-[10px] font-medium flex items-center gap-0.5 ${getPriorityBadgeColor(
-                                  item.priority
+                                  item.priority,
                                 )}`}
                               >
                                 <Flag className='w-2.5 h-2.5' />
@@ -915,8 +916,8 @@ const GanttChart = ({ projects }) => {
                                 item.priority === "urgent"
                                   ? "Alta"
                                   : item.priority === "medium"
-                                  ? "Media"
-                                  : "Baja"}
+                                    ? "Media"
+                                    : "Baja"}
                               </span>
                             </div>
                           </div>
@@ -981,8 +982,8 @@ const GanttChart = ({ projects }) => {
                                 barStyle.isStartCut
                                   ? "rounded-r-md"
                                   : barStyle.isEndCut
-                                  ? "rounded-l-md"
-                                  : "rounded-md"
+                                    ? "rounded-l-md"
+                                    : "rounded-md"
                               }`}
                             >
                               {/* Fondo - Para proyectos con progreso o tareas completas */}
@@ -1000,8 +1001,8 @@ const GanttChart = ({ projects }) => {
                                       barStyle.isStartCut
                                         ? "rounded-r-md border-l-0"
                                         : barStyle.isEndCut
-                                        ? "rounded-l-md border-r-0"
-                                        : "rounded-md"
+                                          ? "rounded-l-md border-r-0"
+                                          : "rounded-md"
                                     }`}
                                   />
                                   {/* Progreso del proyecto */}
@@ -1040,8 +1041,8 @@ const GanttChart = ({ projects }) => {
                                       barStyle.isStartCut
                                         ? "rounded-r-md border-l-0"
                                         : barStyle.isEndCut
-                                        ? "rounded-l-md border-r-0"
-                                        : "rounded-md"
+                                          ? "rounded-l-md border-r-0"
+                                          : "rounded-md"
                                     }`}
                                   />
                                 </>
@@ -1075,8 +1076,8 @@ const GanttChart = ({ projects }) => {
                                       item.status === "completed"
                                         ? "✓"
                                         : item.status === "in-progress"
-                                        ? "En curso"
-                                        : ""}
+                                          ? "En curso"
+                                          : ""}
                                     </span>
                                   </>
                                 )}
@@ -1097,7 +1098,7 @@ const GanttChart = ({ projects }) => {
                                       {
                                         day: "numeric",
                                         month: "short",
-                                      }
+                                      },
                                     )}
                                   </div>
                                   <div>
@@ -1116,8 +1117,8 @@ const GanttChart = ({ projects }) => {
                                       item.status === "completed"
                                         ? "Completada"
                                         : item.status === "in-progress"
-                                        ? "En progreso"
-                                        : "Pendiente"}
+                                          ? "En progreso"
+                                          : "Pendiente"}
                                     </div>
                                   )}
                                 </div>

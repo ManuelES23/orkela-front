@@ -26,6 +26,7 @@ import {
   Flame,
 } from "lucide-react";
 import { projectsAPI, tasksAPI, teamsAPI } from "../utils/api";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -74,14 +75,14 @@ const Dashboard = () => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const completedThisWeek = tasks.filter(
-      (t) => t.status === "done" && new Date(t.updated_at) >= oneWeekAgo
+      (t) => t.status === "done" && new Date(t.updated_at) >= oneWeekAgo,
     ).length;
 
     const avgProgress =
       activeProjects.length > 0
         ? Math.round(
             activeProjects.reduce((acc, p) => acc + (p.progress || 0), 0) /
-              activeProjects.length
+              activeProjects.length,
           )
         : 0;
 
@@ -103,7 +104,7 @@ const Dashboard = () => {
 
     const getDays = (dueDate) => {
       if (!dueDate) return null;
-      const due = new Date(dueDate);
+      const due = parseLocalDate(dueDate);
       due.setHours(0, 0, 0, 0);
       return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
     };
@@ -477,15 +478,15 @@ const Dashboard = () => {
                                 project.priority === "high"
                                   ? "bg-red-100 text-red-700"
                                   : project.priority === "medium"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-green-100 text-green-700"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-green-100 text-green-700"
                               }`}
                             >
                               {project.priority === "high"
                                 ? "Alta"
                                 : project.priority === "medium"
-                                ? "Media"
-                                : "Baja"}
+                                  ? "Media"
+                                  : "Baja"}
                             </span>
                           </div>
                         </div>

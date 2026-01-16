@@ -38,7 +38,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
       return new Date(
         parseInt(parts[0]),
         parseInt(parts[1]) - 1,
-        parseInt(parts[2])
+        parseInt(parts[2]),
       );
     };
 
@@ -46,12 +46,12 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
     const monthStart = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
-      1
+      1,
     );
     const monthEnd = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth() + 1,
-      0
+      0,
     );
 
     // Usar start_date si existe, sino estimar 3 días antes
@@ -73,11 +73,11 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
     const totalDays = daysInMonth.length;
     const startDay = Math.max(
       0,
-      (effectiveStart - monthStart) / (1000 * 60 * 60 * 24)
+      (effectiveStart - monthStart) / (1000 * 60 * 60 * 24),
     );
     const endDay = Math.min(
       totalDays,
-      (effectiveEnd - monthStart) / (1000 * 60 * 60 * 24) + 1
+      (effectiveEnd - monthStart) / (1000 * 60 * 60 * 24) + 1,
     );
 
     const left = (startDay / totalDays) * 100;
@@ -93,8 +93,15 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
 
     // Verificar si está vencida
     if (task.due_date) {
-      const dueDate = new Date(task.due_date);
+      // Parsear fecha como local para evitar desfase de timezone
+      const parts = task.due_date.split("T")[0].split("-");
+      const dueDate = new Date(
+        parseInt(parts[0]),
+        parseInt(parts[1]) - 1,
+        parseInt(parts[2]),
+      );
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       if (dueDate < today) return "bg-red-500";
     }
 
@@ -122,24 +129,35 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
     setCurrentMonth(new Date());
   };
 
+  // Función auxiliar para parsear fechas como local
+  const parseDateLocal = (dateStr) => {
+    if (!dateStr) return null;
+    const parts = dateStr.split("T")[0].split("-");
+    return new Date(
+      parseInt(parts[0]),
+      parseInt(parts[1]) - 1,
+      parseInt(parts[2]),
+    );
+  };
+
   // Ordenar tareas por fecha de inicio/vencimiento y luego filtrar las visibles
   const sortedTasks = [...tasks].sort((a, b) => {
     const dateA = a.start_date
-      ? new Date(a.start_date)
+      ? parseDateLocal(a.start_date)
       : a.due_date
-      ? new Date(a.due_date)
-      : new Date();
+        ? parseDateLocal(a.due_date)
+        : new Date();
     const dateB = b.start_date
-      ? new Date(b.start_date)
+      ? parseDateLocal(b.start_date)
       : b.due_date
-      ? new Date(b.due_date)
-      : new Date();
+        ? parseDateLocal(b.due_date)
+        : new Date();
     return dateA - dateB;
   });
 
   // Obtener tareas visibles en el mes actual (ya ordenadas)
   const visibleTasks = sortedTasks.filter(
-    (task) => getTaskPosition(task) !== null
+    (task) => getTaskPosition(task) !== null,
   );
 
   // Marcar el día de hoy
@@ -247,7 +265,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                       <div className='flex items-center gap-2'>
                         <span
                           className={`w-2 h-2 rounded-full shrink-0 ${getBarColor(
-                            task
+                            task,
                           )}`}
                         />
                         <span
@@ -284,13 +302,13 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                           animate={{ width: position.width }}
                           transition={{ duration: 0.5, delay: index * 0.05 }}
                           className={`absolute top-1/2 -translate-y-1/2 h-6 rounded-full ${getBarColor(
-                            task
+                            task,
                           )} shadow-sm flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity`}
                           style={{ left: position.left }}
                           title={`${task.title}${
                             task.due_date
                               ? ` - Vence: ${new Date(
-                                  task.due_date
+                                  task.due_date,
                                 ).toLocaleDateString("es-ES")}`
                               : ""
                           }`}

@@ -34,6 +34,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { projectsAPI } from "../utils/api";
+import { parseLocalDate } from "../utils/dateUtils";
 import {
   exportProjectsToPdf,
   exportProjectsToExcel,
@@ -234,18 +235,18 @@ const Projects = () => {
     const tasks = project.tasks || [];
     const total = tasks.length;
     const completed = tasks.filter(
-      (t) => t.status === "done" || t.status === "completed"
+      (t) => t.status === "done" || t.status === "completed",
     ).length;
     const inProgress = tasks.filter(
-      (t) => t.status === "in-progress" || t.status === "in_progress"
+      (t) => t.status === "in-progress" || t.status === "in_progress",
     ).length;
     const pending = tasks.filter(
-      (t) => t.status === "todo" || t.status === "pending"
+      (t) => t.status === "todo" || t.status === "pending",
     ).length;
     const overdue = tasks.filter((t) => {
       if (!t.due_date) return false;
       return (
-        new Date(t.due_date) < new Date() &&
+        parseLocalDate(t.due_date) < new Date() &&
         t.status !== "done" &&
         t.status !== "completed"
       );
@@ -259,7 +260,7 @@ const Projects = () => {
     if (!dueDate) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
+    const due = parseLocalDate(dueDate);
     due.setHours(0, 0, 0, 0);
     const diffTime = due - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -533,12 +534,12 @@ const Projects = () => {
                                   {project.status === "active"
                                     ? "Activo"
                                     : project.status === "on_hold"
-                                    ? "En pausa"
-                                    : project.status === "completed"
-                                    ? "Completado"
-                                    : project.status === "cancelled"
-                                    ? "Cancelado"
-                                    : project.status}
+                                      ? "En pausa"
+                                      : project.status === "completed"
+                                        ? "Completado"
+                                        : project.status === "cancelled"
+                                          ? "Cancelado"
+                                          : project.status}
                                 </span>
                                 {project.priority && (
                                   <span
@@ -695,7 +696,7 @@ const Projects = () => {
                                   ? [
                                       teamOwner,
                                       ...teamMembers.filter(
-                                        (m) => m.id !== teamOwner.id
+                                        (m) => m.id !== teamOwner.id,
                                       ),
                                     ]
                                   : teamMembers;
@@ -805,14 +806,13 @@ const Projects = () => {
                             <Calendar className='w-4 h-4 text-gray-400' />
                             <span className='text-gray-600'>
                               {project.due_date
-                                ? new Date(project.due_date).toLocaleDateString(
-                                    "es-ES",
-                                    {
-                                      day: "numeric",
-                                      month: "short",
-                                      year: "numeric",
-                                    }
-                                  )
+                                ? parseLocalDate(
+                                    project.due_date,
+                                  ).toLocaleDateString("es-ES", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })
                                 : "Sin fecha límite"}
                             </span>
                           </div>
@@ -822,19 +822,19 @@ const Projects = () => {
                                 daysRemaining < 0
                                   ? "bg-red-100 text-red-700"
                                   : daysRemaining <= 3
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : daysRemaining <= 7
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-gray-100 text-gray-600"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : daysRemaining <= 7
+                                      ? "bg-blue-100 text-blue-700"
+                                      : "bg-gray-100 text-gray-600"
                               }`}
                             >
                               {daysRemaining < 0
                                 ? `Vencido hace ${Math.abs(daysRemaining)} días`
                                 : daysRemaining === 0
-                                ? "Vence hoy"
-                                : daysRemaining === 1
-                                ? "Vence mañana"
-                                : `${daysRemaining} días`}
+                                  ? "Vence hoy"
+                                  : daysRemaining === 1
+                                    ? "Vence mañana"
+                                    : `${daysRemaining} días`}
                             </span>
                           )}
                         </div>

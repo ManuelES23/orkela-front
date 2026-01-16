@@ -19,6 +19,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { checklistAPI, tasksAPI } from "../../utils/api";
+import { parseLocalDate } from "../../utils/dateUtils";
 import { useNotification } from "../../context/NotificationContext";
 import { useRealtime } from "../../context/RealtimeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -126,7 +127,7 @@ const TaskDetailModal = ({
     if (!dueDate) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
+    const due = parseLocalDate(dueDate);
     due.setHours(0, 0, 0, 0);
     const diffTime = due - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -140,7 +141,7 @@ const TaskDetailModal = ({
     // Optimistic update
     const originalItems = [...checklistItems];
     const updatedItems = checklistItems.map((item) =>
-      item.id === itemId ? { ...item, is_completed: !item.is_completed } : item
+      item.id === itemId ? { ...item, is_completed: !item.is_completed } : item,
     );
     setChecklistItems(updatedItems);
 
@@ -150,7 +151,7 @@ const TaskDetailModal = ({
       success(
         checklistItems.find((i) => i.id === itemId)?.is_completed
           ? "Subtarea desmarcada"
-          : "Subtarea completada"
+          : "Subtarea completada",
       );
 
       // Notificar al componente padre para actualizar el estado global
@@ -190,7 +191,7 @@ const TaskDetailModal = ({
       const newItem = await checklistAPI.create(task.id, textToAdd);
       // Reemplazar el item temporal con el real
       setChecklistItems((prev) =>
-        prev.map((item) => (item.id === tempId ? newItem : item))
+        prev.map((item) => (item.id === tempId ? newItem : item)),
       );
       success("Subtarea agregada");
 
@@ -218,7 +219,7 @@ const TaskDetailModal = ({
     // Los usuarios asignados pueden editar/eliminar
     if (currentTask.assigned_users && currentTask.assigned_users.length > 0) {
       return currentTask.assigned_users.some(
-        (assignedUser) => assignedUser.id === user.id
+        (assignedUser) => assignedUser.id === user.id,
       );
     }
 
@@ -234,7 +235,7 @@ const TaskDetailModal = ({
   const isCompleted =
     currentTask.status === "done" || currentTask.status === "completed";
   const completedCount = checklistItems.filter(
-    (item) => item.is_completed
+    (item) => item.is_completed,
   ).length;
   const totalCount = checklistItems.length;
   const progressPercent =
@@ -348,10 +349,10 @@ const TaskDetailModal = ({
                   days !== null && days < 0 && !isCompleted
                     ? "bg-red-50"
                     : days === 0 && !isCompleted
-                    ? "bg-orange-50"
-                    : days !== null && days <= 3 && !isCompleted
-                    ? "bg-yellow-50"
-                    : "bg-gray-50"
+                      ? "bg-orange-50"
+                      : days !== null && days <= 3 && !isCompleted
+                        ? "bg-yellow-50"
+                        : "bg-gray-50"
                 }`}
               >
                 {days !== null && days < 0 && !isCompleted ? (
@@ -370,29 +371,29 @@ const TaskDetailModal = ({
                       days !== null && days < 0 && !isCompleted
                         ? "text-red-700"
                         : days === 0 && !isCompleted
-                        ? "text-orange-700"
-                        : days !== null && days <= 3 && !isCompleted
-                        ? "text-yellow-700"
-                        : "text-gray-900"
+                          ? "text-orange-700"
+                          : days !== null && days <= 3 && !isCompleted
+                            ? "text-yellow-700"
+                            : "text-gray-900"
                     }`}
                   >
-                    {new Date(currentTask.due_date).toLocaleDateString(
+                    {parseLocalDate(currentTask.due_date).toLocaleDateString(
                       "es-ES",
                       {
                         day: "numeric",
                         month: "long",
                         year: "numeric",
-                      }
+                      },
                     )}
                     {days !== null && !isCompleted && (
                       <span className='ml-2 text-xs'>
                         {days < 0
                           ? `(Vencida hace ${Math.abs(days)} días)`
                           : days === 0
-                          ? "(Vence hoy)"
-                          : days === 1
-                          ? "(Vence mañana)"
-                          : `(Vence en ${days} días)`}
+                            ? "(Vence hoy)"
+                            : days === 1
+                              ? "(Vence mañana)"
+                              : `(Vence en ${days} días)`}
                       </span>
                     )}
                   </p>

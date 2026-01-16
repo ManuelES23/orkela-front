@@ -41,6 +41,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { organizationsAPI } from "../utils/api";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const OrganizationDetail = () => {
   const { id } = useParams();
@@ -107,7 +108,7 @@ const OrganizationDetail = () => {
         err.message?.includes("403")
       ) {
         showError(
-          "Solo el administrador de la organización puede acceder a esta vista"
+          "Solo el administrador de la organización puede acceder a esta vista",
         );
         navigate("/dashboard");
       } else {
@@ -234,9 +235,8 @@ const OrganizationDetail = () => {
 
         // Cargar invitaciones si tiene permisos
         if (orgData?.can_manage) {
-          const invitationsData = await organizationsAPI.getPendingInvitations(
-            id
-          );
+          const invitationsData =
+            await organizationsAPI.getPendingInvitations(id);
           setPendingInvitations(invitationsData);
         }
       } catch (err) {
@@ -246,7 +246,7 @@ const OrganizationDetail = () => {
           err.message?.includes("403")
         ) {
           showError(
-            "Solo el administrador de la organización puede acceder a esta vista"
+            "Solo el administrador de la organización puede acceder a esta vista",
           );
           navigate("/dashboard");
         } else {
@@ -787,7 +787,7 @@ const OrganizationDetail = () => {
                             </p>
                             {getRoleBadge(
                               member.role,
-                              member.id === organization.owner_id
+                              member.id === organization.owner_id,
                             )}
                           </div>
                           <p className='text-sm text-gray-500'>
@@ -819,7 +819,7 @@ const OrganizationDetail = () => {
                                 onChange={(e) =>
                                   handleUpdateMemberRole(
                                     member.id,
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className='text-sm border border-gray-300 rounded-lg px-2 py-1'
@@ -1020,15 +1020,15 @@ const OrganizationDetail = () => {
                           project.priority === "high"
                             ? "bg-red-100 text-red-700"
                             : project.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-green-100 text-green-700"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-green-100 text-green-700"
                         }`}
                       >
                         {project.priority === "high"
                           ? "Alta"
                           : project.priority === "medium"
-                          ? "Media"
-                          : "Baja"}
+                            ? "Media"
+                            : "Baja"}
                       </span>
                     </div>
 
@@ -1038,13 +1038,13 @@ const OrganizationDetail = () => {
                         <Calendar className='w-4 h-4' />
                         <span>
                           Vence:{" "}
-                          {new Date(project.due_date).toLocaleDateString(
+                          {parseLocalDate(project.due_date).toLocaleDateString(
                             "es-ES",
                             {
                               day: "numeric",
                               month: "short",
                               year: "numeric",
-                            }
+                            },
                           )}
                         </span>
                       </div>

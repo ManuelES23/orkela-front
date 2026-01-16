@@ -104,9 +104,31 @@ const baseStyles = StyleSheet.create({
 // UTILIDADES
 // ========================================
 
+/**
+ * Parsea una fecha string "YYYY-MM-DD" como fecha local (no UTC)
+ * Evita el problema de timezone donde new Date("2025-01-16") se interpreta como UTC
+ * y en zonas horarias negativas (ej: México UTC-6) muestra el día anterior.
+ */
+const parseDateString = (dateString) => {
+  if (!dateString) return null;
+  // Si ya es un objeto Date, retornarlo
+  if (dateString instanceof Date) return dateString;
+  // Si es string en formato YYYY-MM-DD, parsearlo como fecha local
+  if (
+    typeof dateString === "string" &&
+    dateString.match(/^\d{4}-\d{2}-\d{2}$/)
+  ) {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  // Para otros formatos, usar el constructor por defecto
+  return new Date(dateString);
+};
+
 const formatDate = (date) => {
   if (!date) return "Sin fecha";
-  return new Date(date).toLocaleDateString("es-ES", {
+  const parsedDate = parseDateString(date);
+  return parsedDate.toLocaleDateString("es-ES", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -321,7 +343,7 @@ const detailStyles = StyleSheet.create({
 export const ProjectDetailPdf = ({ project }) => {
   const completedTasks =
     project.tasks?.filter(
-      (t) => t.status === "done" || t.status === "completed"
+      (t) => t.status === "done" || t.status === "completed",
     ).length || 0;
   const totalTasks = project.tasks?.length || 0;
 
@@ -631,11 +653,11 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
 
   tasksWithDates.forEach((task) => {
     const start = task.start_date
-      ? new Date(task.start_date)
-      : new Date(task.due_date);
+      ? parseDateString(task.start_date)
+      : parseDateString(task.due_date);
     const end = task.due_date
-      ? new Date(task.due_date)
-      : new Date(task.start_date);
+      ? parseDateString(task.due_date)
+      : parseDateString(task.start_date);
     if (start < minDate) minDate = new Date(start);
     if (end > maxDate) maxDate = new Date(end);
   });
@@ -649,16 +671,16 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
   // Calcular posición de barra
   const getBarStyle = (task) => {
     const start = task.start_date
-      ? new Date(task.start_date)
-      : new Date(task.due_date);
+      ? parseDateString(task.start_date)
+      : parseDateString(task.due_date);
     const end = task.due_date
-      ? new Date(task.due_date)
-      : new Date(task.start_date);
+      ? parseDateString(task.due_date)
+      : parseDateString(task.start_date);
 
     const startOffset = Math.ceil((start - minDate) / (1000 * 60 * 60 * 24));
     const duration = Math.max(
       1,
-      Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+      Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1,
     );
 
     const leftPercent = (startOffset / totalDays) * 100;
@@ -777,7 +799,7 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
 export const AllProjectsGanttPdf = ({ projects }) => {
   // Filtrar proyectos con tareas que tienen fechas
   const projectsWithTasks = projects.filter(
-    (p) => p.tasks && p.tasks.some((t) => t.start_date || t.due_date)
+    (p) => p.tasks && p.tasks.some((t) => t.start_date || t.due_date),
   );
 
   if (projectsWithTasks.length === 0) {
@@ -814,11 +836,11 @@ export const AllProjectsGanttPdf = ({ projects }) => {
     project.tasks.forEach((task) => {
       if (task.start_date || task.due_date) {
         const start = task.start_date
-          ? new Date(task.start_date)
-          : new Date(task.due_date);
+          ? parseDateString(task.start_date)
+          : parseDateString(task.due_date);
         const end = task.due_date
-          ? new Date(task.due_date)
-          : new Date(task.start_date);
+          ? parseDateString(task.due_date)
+          : parseDateString(task.start_date);
         if (start < minDate) minDate = new Date(start);
         if (end > maxDate) maxDate = new Date(end);
       }
@@ -831,16 +853,16 @@ export const AllProjectsGanttPdf = ({ projects }) => {
 
   const getBarStyle = (task) => {
     const start = task.start_date
-      ? new Date(task.start_date)
-      : new Date(task.due_date);
+      ? parseDateString(task.start_date)
+      : parseDateString(task.due_date);
     const end = task.due_date
-      ? new Date(task.due_date)
-      : new Date(task.start_date);
+      ? parseDateString(task.due_date)
+      : parseDateString(task.start_date);
 
     const startOffset = Math.ceil((start - minDate) / (1000 * 60 * 60 * 24));
     const duration = Math.max(
       1,
-      Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+      Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1,
     );
 
     const leftPercent = (startOffset / totalDays) * 100;
@@ -885,7 +907,7 @@ export const AllProjectsGanttPdf = ({ projects }) => {
         {/* Gantt por proyecto */}
         {projectsWithTasks.map((project) => {
           const tasksWithDates = project.tasks.filter(
-            (t) => t.start_date || t.due_date
+            (t) => t.start_date || t.due_date,
           );
           if (tasksWithDates.length === 0) return null;
 

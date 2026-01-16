@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
+import UserAvatar from "../ui/UserAvatar";
 import { useNotification } from "../../context/NotificationContext";
 import { motion } from "framer-motion";
 import {
@@ -123,9 +124,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
             <div className='space-y-2'>
               {/* Owner */}
               <div className='flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100'>
-                <div className='w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-sm font-medium'>
-                  {teamDetails.user?.name?.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar user={teamDetails.user} size='md' />
                 <div className='flex-1'>
                   <p className='font-semibold text-gray-900'>
                     {teamDetails.user?.name}
@@ -146,9 +145,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                   key={member.id}
                   className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
                 >
-                  <div className='w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white flex items-center justify-center text-sm font-medium'>
-                    {member.name?.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar user={member} size='md' />
                   <div className='flex-1'>
                     <p className='font-medium text-gray-900'>{member.name}</p>
                     <p className='text-xs text-gray-500'>{member.email}</p>

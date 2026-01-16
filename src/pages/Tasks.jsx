@@ -3,6 +3,7 @@ import Layout from "../components/layout/Layout";
 import TaskModal from "../components/modals/TaskModal";
 import TaskDetailModal from "../components/modals/TaskDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { useAuth } from "../context/AuthContext";
@@ -763,13 +764,12 @@ const Tasks = () => {
                                   {task.assigned_users
                                     .slice(0, 3)
                                     .map((user) => (
-                                      <div
+                                      <UserAvatar
                                         key={user.id}
-                                        className='w-6 h-6 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-medium text-white border-2 border-white'
-                                        title={user.name}
-                                      >
-                                        {user.name.charAt(0).toUpperCase()}
-                                      </div>
+                                        user={user}
+                                        size='sm'
+                                        showBorder
+                                      />
                                     ))}
                                   {task.assigned_users.length > 3 && (
                                     <div className='w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border-2 border-white'>
@@ -790,9 +790,10 @@ const Tasks = () => {
                             task.assigned_users.length === 0) &&
                             task.assigned_user && (
                               <div className='flex items-center gap-2'>
-                                <div className='w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
-                                  {task.assigned_user.name.charAt(0)}
-                                </div>
+                                <UserAvatar
+                                  user={task.assigned_user}
+                                  size='sm'
+                                />
                                 <span className='text-gray-700'>
                                   {task.assigned_user.name}
                                 </span>

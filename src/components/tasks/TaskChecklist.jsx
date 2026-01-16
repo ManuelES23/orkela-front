@@ -73,6 +73,8 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
             item.id === tempId ? { ...newItem, tempId } : item
           )
         );
+        // Notificar al padre que hubo un cambio exitoso (para actualizar progreso)
+        onUpdate?.();
       } catch (err) {
         console.error("Error adding checklist item:", err);
         // Remover el item temporal si falló
@@ -110,6 +112,8 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
 
       try {
         await checklistAPI.toggle(taskId, itemId);
+        // Notificar al padre que hubo un cambio exitoso (para actualizar progreso)
+        onUpdate?.();
       } catch (err) {
         console.error("Error toggling checklist item:", err);
         // Revertir si hay error
@@ -135,6 +139,8 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
 
       try {
         await checklistAPI.delete(taskId, itemId);
+        // Notificar al padre que hubo un cambio exitoso (para actualizar progreso)
+        onUpdate?.();
       } catch (err) {
         console.error("Error deleting checklist item:", err);
         // Revertir si hay error

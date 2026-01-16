@@ -850,19 +850,32 @@ const GanttChart = ({ projects }) => {
                               {daysRemaining !== null && (
                                 <span
                                   className={`${
-                                    daysRemaining < 0
+                                    item.status === "done" ||
+                                    item.status === "completed"
+                                      ? "text-green-600"
+                                      : daysRemaining < 0
                                       ? "text-red-600"
                                       : daysRemaining <= 3
                                       ? "text-yellow-600"
                                       : ""
                                   }`}
                                 >
-                                  <Clock className='w-3 h-3 inline mr-0.5' />
-                                  {daysRemaining < 0
-                                    ? `${Math.abs(daysRemaining)}d atraso`
-                                    : daysRemaining === 0
-                                    ? "Hoy"
-                                    : `${daysRemaining}d`}
+                                  {item.status === "done" ||
+                                  item.status === "completed" ? (
+                                    <>
+                                      <CheckCircle className='w-3 h-3 inline mr-0.5' />
+                                      Completado
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Clock className='w-3 h-3 inline mr-0.5' />
+                                      {daysRemaining < 0
+                                        ? `${Math.abs(daysRemaining)}d atraso`
+                                        : daysRemaining === 0
+                                        ? "Hoy"
+                                        : `${daysRemaining}d`}
+                                    </>
+                                  )}
                                 </span>
                               )}
                             </div>

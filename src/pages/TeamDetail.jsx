@@ -7,6 +7,7 @@ import TicketDetailModal from "../components/modals/TicketDetailModal";
 import ProjectModal from "../components/modals/ProjectModal";
 import TeamModal from "../components/modals/TeamModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
@@ -1074,6 +1075,7 @@ const TeamDetail = () => {
                             value: member.id,
                             label: member.name,
                             email: member.email,
+                            avatar: member.avatar,
                           }))}
                           placeholder={
                             loadingOrgMembers
@@ -1089,9 +1091,13 @@ const TeamDetail = () => {
                           }
                           formatOptionLabel={(option) => (
                             <div className='flex items-center gap-3'>
-                              <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-medium text-indigo-600'>
-                                {option.label.charAt(0).toUpperCase()}
-                              </div>
+                              <UserAvatar
+                                user={{
+                                  name: option.label,
+                                  avatar: option.avatar,
+                                }}
+                                size='sm'
+                              />
                               <div>
                                 <div className='text-sm font-medium'>
                                   {option.label}
@@ -1197,9 +1203,7 @@ const TeamDetail = () => {
                     className='px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition'
                   >
                     <div className='flex items-center gap-4'>
-                      <div className='w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-semibold'>
-                        {member.name.charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar user={member} size='md' />
                       <div>
                         <div className='flex items-center gap-2'>
                           <span className='font-medium text-gray-900'>
@@ -1471,9 +1475,7 @@ const TeamDetail = () => {
               {/* Header */}
               <div className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
-                    {memberStatsModal.member?.name?.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar user={memberStatsModal.member} size='md' />
                   <div>
                     <h3 className='text-lg font-semibold text-gray-900'>
                       {memberStatsModal.member?.name}

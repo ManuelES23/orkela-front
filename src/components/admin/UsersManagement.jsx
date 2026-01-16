@@ -6,7 +6,6 @@ import {
   Edit,
   Trash2,
   Shield,
-  UserCircle,
   Mail,
   Calendar,
   MoreVertical,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
 import ConfirmModal from "../ui/ConfirmModal";
+import UserAvatar from "../ui/UserAvatar";
 import { adminUsersAPI, adminOrganizationsAPI } from "../../utils/adminAPI";
 
 const UsersManagement = ({ onStatsUpdate }) => {
@@ -240,9 +240,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
                 >
                   <td className='py-4 px-4'>
                     <div className='flex items-center gap-3'>
-                      <div className='w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center'>
-                        <UserCircle className='w-6 h-6 text-indigo-600' />
-                      </div>
+                      <UserAvatar user={user} size='md' />
                       <div>
                         <p className='font-medium text-gray-900'>{user.name}</p>
                         <p className='text-sm text-gray-500 flex items-center gap-1'>

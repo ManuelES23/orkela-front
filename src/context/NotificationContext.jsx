@@ -108,7 +108,7 @@ export const NotificationProvider = ({ children }) => {
 
 const NotificationContainer = ({ notifications, onRemove }) => {
   return (
-    <div className='fixed top-4 right-4 z-[100] space-y-3 max-w-md w-full pointer-events-none'>
+    <div className='fixed top-4 right-2 left-2 sm:left-auto sm:right-4 z-[100] space-y-2 sm:space-y-3 sm:max-w-sm md:max-w-md sm:w-full pointer-events-none'>
       <AnimatePresence mode='popLayout'>
         {notifications.map((notification) => (
           <Notification
@@ -200,20 +200,20 @@ const Notification = ({ notification, onClose }) => {
         stiffness: 400,
         damping: 25,
       }}
-      className={`${bgColor} ${borderColor} border rounded-xl shadow-xl ${glowColor} shadow-lg ring-1 ${ringColor} overflow-hidden pointer-events-auto`}
+      className={`${bgColor} ${borderColor} border rounded-lg sm:rounded-xl shadow-xl ${glowColor} shadow-lg ring-1 ${ringColor} overflow-hidden pointer-events-auto`}
     >
       {/* Barra de color superior */}
-      <div className={`h-1 bg-gradient-to-r ${gradient}`} />
+      <div className={`h-0.5 sm:h-1 bg-gradient-to-r ${gradient}`} />
 
-      <div className='p-4 flex items-start gap-3'>
+      <div className='p-2.5 sm:p-4 flex items-start gap-2 sm:gap-3'>
         {/* Ícono con fondo */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 500, delay: 0.1 }}
-          className={`${iconBg} p-2 rounded-full shrink-0`}
+          className={`${iconBg} p-1.5 sm:p-2 rounded-full shrink-0`}
         >
-          <Icon className={`w-5 h-5 ${iconColor}`} />
+          <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
         </motion.div>
 
         {/* Contenido */}
@@ -222,7 +222,7 @@ const Notification = ({ notification, onClose }) => {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.15 }}
-            className={`${titleColor} font-semibold text-sm`}
+            className={`${titleColor} font-semibold text-xs sm:text-sm`}
           >
             {title}
           </motion.p>
@@ -230,7 +230,7 @@ const Notification = ({ notification, onClose }) => {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className={`${textColor} text-sm mt-0.5 leading-relaxed`}
+            className={`${textColor} text-xs sm:text-sm mt-0.5 leading-relaxed line-clamp-2`}
           >
             {message}
           </motion.p>
@@ -241,9 +241,9 @@ const Notification = ({ notification, onClose }) => {
           whileHover={{ scale: 1.1, rotate: 90 }}
           whileTap={{ scale: 0.9 }}
           onClick={onClose}
-          className='text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1.5 rounded-full transition-colors shrink-0'
+          className='text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 sm:p-1.5 rounded-full transition-colors shrink-0'
         >
-          <X className='w-4 h-4' />
+          <X className='w-3.5 h-3.5 sm:w-4 sm:h-4' />
         </motion.button>
       </div>
 

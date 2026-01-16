@@ -4,6 +4,7 @@ import Layout from "../components/layout/Layout";
 import ProjectModal from "../components/modals/ProjectModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import GanttChart from "../components/GanttChart";
+import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -767,15 +768,12 @@ const Projects = () => {
                               <>
                                 <div className='flex -space-x-2'>
                                   {project.users.slice(0, 4).map((user) => (
-                                    <div
+                                    <UserAvatar
                                       key={user.id}
-                                      className='w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-white flex items-center justify-center'
-                                      title={user.name}
-                                    >
-                                      <span className='text-[10px] font-medium text-white'>
-                                        {user.name.charAt(0).toUpperCase()}
-                                      </span>
-                                    </div>
+                                      user={user}
+                                      size='sm'
+                                      showBorder
+                                    />
                                   ))}
                                   {project.users.length > 4 && (
                                     <div className='w-7 h-7 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center'>

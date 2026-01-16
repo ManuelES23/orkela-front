@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Modal from "../ui/Modal";
+import UserAvatar from "../ui/UserAvatar";
 import Select from "react-select";
 import { useNotification } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
@@ -438,6 +439,7 @@ const TicketDetailModal = ({
                                 value: m.id,
                                 label: m.name,
                                 email: m.email,
+                                avatar: m.avatar,
                               }))}
                               value={selectedMember}
                               onChange={setSelectedMember}
@@ -452,9 +454,13 @@ const TicketDetailModal = ({
                               }}
                               formatOptionLabel={(option) => (
                                 <div className='flex items-center gap-2'>
-                                  <div className='w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs'>
-                                    {option.label.charAt(0).toUpperCase()}
-                                  </div>
+                                  <UserAvatar
+                                    user={{
+                                      name: option.label,
+                                      avatar: option.avatar,
+                                    }}
+                                    size='xs'
+                                  />
                                   <span>{option.label}</span>
                                 </div>
                               )}
@@ -636,9 +642,7 @@ const TicketDetailModal = ({
                     >
                       <div className='flex items-start justify-between mb-1'>
                         <div className='flex items-center gap-2'>
-                          <div className='w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium'>
-                            {comment.user?.name?.charAt(0).toUpperCase() || "?"}
-                          </div>
+                          <UserAvatar user={comment.user} size='sm' />
                           <div>
                             <span className='font-medium text-gray-900 text-sm'>
                               {comment.user?.name}
@@ -662,6 +666,7 @@ const TicketDetailModal = ({
                   ))}
                 </AnimatePresence>
               )}
+              }
             </div>
 
             {/* Nuevo comentario */}

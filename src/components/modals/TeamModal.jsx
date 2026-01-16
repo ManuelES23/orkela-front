@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import Select from "react-select";
+import UserAvatar from "../ui/UserAvatar";
 import {
   Users,
   Type,
@@ -100,6 +101,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
     value: member.id,
     label: member.name,
     email: member.email,
+    avatar: member.avatar,
   }));
 
   // Valores seleccionados para react-select
@@ -123,9 +125,10 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
       }`}
     >
       <div className='flex items-center gap-2'>
-        <span className='w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-sm font-medium'>
-          {data.label.charAt(0).toUpperCase()}
-        </span>
+        <UserAvatar
+          user={{ name: data.label, avatar: data.avatar }}
+          size='sm'
+        />
         <div>
           <div className='text-sm font-medium text-gray-900'>{data.label}</div>
           <div className='text-xs text-gray-500'>{data.email}</div>
@@ -138,9 +141,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
   // Componente personalizado para los tags seleccionados
   const CustomMultiValue = ({ data, removeProps }) => (
     <div className='flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm m-0.5'>
-      <span className='w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-medium'>
-        {data.label.charAt(0).toUpperCase()}
-      </span>
+      <UserAvatar user={{ name: data.label, avatar: data.avatar }} size='xs' />
       <span>{data.label}</span>
       <button
         {...removeProps}

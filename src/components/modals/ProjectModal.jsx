@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
+import UserAvatar from "../ui/UserAvatar";
 import { useNotification } from "../../context/NotificationContext";
 import {
   FolderKanban,
@@ -327,9 +328,7 @@ const ProjectModal = ({
                           key={user.id}
                           className='flex items-center gap-2 p-2 bg-gray-50 rounded'
                         >
-                          <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
-                            {user.name.charAt(0).toUpperCase()}
-                          </div>
+                          <UserAvatar user={user} size='sm' />
                           <div className='flex-1'>
                             <p className='text-sm font-medium text-gray-900'>
                               {user.name}

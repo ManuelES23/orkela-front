@@ -6,6 +6,7 @@ import ProjectModal from "../components/modals/ProjectModal";
 import TaskModal from "../components/modals/TaskModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Modal from "../components/ui/Modal";
+import UserAvatar from "../components/ui/UserAvatar";
 import ProjectGantt from "../components/tasks/ProjectGantt";
 import ProjectCalendar from "../components/tasks/ProjectCalendar";
 import TagManager from "../components/tasks/TagManager";
@@ -1191,13 +1192,12 @@ const ProjectDetail = () => {
                         task.assigned_users.length > 0 && (
                           <div className='flex -space-x-1'>
                             {task.assigned_users.slice(0, 3).map((user) => (
-                              <div
+                              <UserAvatar
                                 key={user.id}
-                                className='w-6 h-6 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-medium text-white border-2 border-white'
-                                title={user.name}
-                              >
-                                {user.name.charAt(0).toUpperCase()}
-                              </div>
+                                user={user}
+                                size='xs'
+                                showBorder
+                              />
                             ))}
                             {task.assigned_users.length > 3 && (
                               <div className='w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-gray-700 border-2 border-white'>
@@ -1453,6 +1453,7 @@ const ProjectDetail = () => {
                                     value: member.id,
                                     label: member.name,
                                     email: member.email,
+                                    avatar: member.avatar,
                                   }))}
                                   placeholder={
                                     loadingOrgMembers
@@ -1468,9 +1469,13 @@ const ProjectDetail = () => {
                                   }
                                   formatOptionLabel={(option) => (
                                     <div className='flex items-center gap-2'>
-                                      <div className='w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
-                                        {option.label.charAt(0).toUpperCase()}
-                                      </div>
+                                      <UserAvatar
+                                        user={{
+                                          name: option.label,
+                                          avatar: option.avatar,
+                                        }}
+                                        size='xs'
+                                      />
                                       <div>
                                         <div className='text-sm font-medium'>
                                           {option.label}
@@ -1597,16 +1602,16 @@ const ProjectDetail = () => {
                         className='flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
                       >
                         <div className='flex items-center gap-3'>
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium ${
+                          <UserAvatar
+                            user={member}
+                            size='md'
+                            className={
                               member.role === "team_owner" ||
                               member.role === "team_member"
-                                ? "bg-linear-to-br from-purple-500 to-pink-600"
-                                : "bg-linear-to-br from-indigo-500 to-purple-600"
-                            }`}
-                          >
-                            {member.name?.charAt(0).toUpperCase()}
-                          </div>
+                                ? "ring-2 ring-purple-300"
+                                : ""
+                            }
+                          />
                           <div>
                             <div className='flex items-center gap-2'>
                               <span className='font-medium text-gray-900'>
@@ -1736,11 +1741,10 @@ const ProjectDetail = () => {
               {/* Header */}
               <div className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium'>
-                    {collaboratorStatsModal.collaborator?.name
-                      ?.charAt(0)
-                      .toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    user={collaboratorStatsModal.collaborator}
+                    size='md'
+                  />
                   <div>
                     <h3 className='text-lg font-semibold text-gray-900'>
                       {collaboratorStatsModal.collaborator?.name}

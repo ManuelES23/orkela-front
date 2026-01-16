@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Modal from "../ui/Modal";
+import UserAvatar from "../ui/UserAvatar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -478,9 +479,7 @@ const TaskDetailModal = ({
                           key={user.id}
                           className='flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-200'
                         >
-                          <div className='w-6 h-6 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-medium text-white'>
-                            {user.name.charAt(0).toUpperCase()}
-                          </div>
+                          <UserAvatar user={user} size='xs' />
                           <span className='text-sm text-gray-700'>
                             {user.name}
                           </span>
@@ -488,9 +487,10 @@ const TaskDetailModal = ({
                       ))
                     ) : currentTask.assigned_user ? (
                       <div className='flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-200'>
-                        <div className='w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
-                          {currentTask.assigned_user.name.charAt(0)}
-                        </div>
+                        <UserAvatar
+                          user={currentTask.assigned_user}
+                          size='xs'
+                        />
                         <span className='text-sm text-gray-700'>
                           {currentTask.assigned_user.name}
                         </span>

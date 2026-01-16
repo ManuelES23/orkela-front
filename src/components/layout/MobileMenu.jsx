@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { getAssetUrl } from "../../utils/assetUrl";
+import UserAvatar from "../ui/UserAvatar";
 import {
   X,
   Settings,
@@ -94,16 +94,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
             {/* User Info */}
             <div className='px-6 py-4 border-b border-gray-100'>
               <div className='flex items-center gap-3'>
-                <img
-                  src={
-                    getAssetUrl(user?.avatar) ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      user?.name || "U"
-                    )}&background=6366f1&color=fff`
-                  }
-                  alt={user?.name}
-                  className='w-12 h-12 rounded-full'
-                />
+                <UserAvatar user={user} size='lg' />
                 <div className='flex-1'>
                   <p className='font-semibold text-gray-900'>{user?.name}</p>
                   <p className='text-sm text-gray-500'>{user?.email}</p>

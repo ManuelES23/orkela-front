@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
+import UserAvatar from "../components/ui/UserAvatar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   StaggerContainer,
@@ -218,9 +219,7 @@ const Team = () => {
                       <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-4'>
                           {/* Avatar */}
-                          <div className='w-14 h-14 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white shadow-md'>
-                            {member.name.charAt(0).toUpperCase()}
-                          </div>
+                          <UserAvatar user={member} size='xl' />
 
                           {/* Info */}
                           <div>

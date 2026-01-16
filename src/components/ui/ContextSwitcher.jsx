@@ -10,14 +10,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useNotification } from "../../context/NotificationContext";
+import { getAssetUrl } from "../../utils/assetUrl";
 
 const ContextSwitcher = ({ isCompact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({
-    top: 0,
-    left: 0,
-    width: 0,
-  });
+  const [isMobile, setIsMobile] = useState(false);
+  const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const {
     user,
@@ -28,17 +26,15 @@ const ContextSwitcher = ({ isCompact = false }) => {
   } = useAuth();
   const { success, error: showError } = useNotification();
 
-  // Calcular posición del dropdown cuando se abre
+  // Detectar si es móvil
   useEffect(() => {
-    if (isOpen && buttonRef.current && !isCompact) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.top - 8, // Posicionar encima del botón con 8px de margen
-        left: rect.left,
-        width: rect.width,
-      });
-    }
-  }, [isOpen, isCompact]);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Solo mostrar si el usuario tiene múltiples contextos
   if (!user || !hasMultipleContexts()) {
@@ -92,6 +88,33 @@ const ContextSwitcher = ({ isCompact = false }) => {
 
   const ActiveIcon = getContextIcon(activeContext?.type);
 
+  // Renderizar el ícono/logo de un contexto
+  const renderContextIcon = (ctx, size = "w-5 h-5") => {
+    // Si es organización y tiene logo, mostrar el logo
+    if (ctx?.type === "organization" && ctx?.logo) {
+      return (
+        <img
+          src={getAssetUrl(ctx.logo)}
+          alt={ctx.name}
+          className={`${size} rounded-full object-cover`}
+        />
+      );
+    }
+    // Si no hay logo, mostrar inicial para organización
+    if (ctx?.type === "organization") {
+      return (
+        <div
+          className={`${size} rounded-full bg-purple-600 flex items-center justify-center text-white font-semibold text-xs`}
+        >
+          {ctx?.name?.charAt(0).toUpperCase() || "O"}
+        </div>
+      );
+    }
+    // Para modo personal, mostrar ícono de usuario
+    const Icon = getContextIcon(ctx?.type);
+    return <Icon className={size} />;
+  };
+
   // Versión compacta para sidebar colapsado
   if (isCompact) {
     return (
@@ -108,7 +131,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
           {switchingContext ? (
             <Loader2 className='w-5 h-5 animate-spin' />
           ) : (
-            <ActiveIcon className='w-5 h-5' />
+            renderContextIcon(activeContext, "w-5 h-5")
           )}
         </button>
 
@@ -126,7 +149,6 @@ const ContextSwitcher = ({ isCompact = false }) => {
                 </p>
               </div>
               {availableContexts.map((ctx) => {
-                const Icon = getContextIcon(ctx.type);
                 const isActive = ctx.id === user.active_context;
 
                 return (
@@ -140,7 +162,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
                         : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    <Icon className='w-4 h-4' />
+                    {renderContextIcon(ctx, "w-4 h-4")}
                     <span className='text-sm flex-1'>{ctx.name}</span>
                     {isActive && <Check className='w-4 h-4 text-green-500' />}
                   </button>
@@ -168,7 +190,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
         {switchingContext ? (
           <Loader2 className='w-5 h-5 animate-spin' />
         ) : (
-          <ActiveIcon className='w-5 h-5' />
+          renderContextIcon(activeContext, "w-5 h-5")
         )}
         <div className='flex-1 text-left'>
           <p className='text-xs text-gray-500'>Modo actual</p>
@@ -183,77 +205,67 @@ const ContextSwitcher = ({ isCompact = false }) => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            style={{
-              position: "fixed",
-              top: dropdownPosition.top,
-              left: dropdownPosition.left,
-              width: dropdownPosition.width,
-              transform: "translateY(-100%)",
-            }}
-            className='bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[200]'
-          >
-            <div className='px-3 py-2 border-b border-gray-100'>
-              <p className='text-xs text-gray-500 font-medium'>
-                Seleccionar modo de trabajo
-              </p>
-            </div>
-            {availableContexts.map((ctx) => {
-              const Icon = getContextIcon(ctx.type);
-              const isActive = ctx.id === user.active_context;
+          <>
+            {/* Overlay para cerrar el menú al hacer clic fuera */}
+            <div
+              className='fixed inset-0 z-[199]'
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              ref={dropdownRef}
+              initial={{ opacity: 0, y: isMobile ? 10 : -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: isMobile ? 10 : -10 }}
+              className={`absolute z-[200] bg-white rounded-lg shadow-xl border border-gray-200 py-1 w-full ${
+                isMobile ? "top-full mt-2" : "bottom-full mb-2"
+              }`}
+            >
+              <div className='px-3 py-2 border-b border-gray-100'>
+                <p className='text-xs text-gray-500 font-medium'>
+                  Seleccionar modo de trabajo
+                </p>
+              </div>
+              {availableContexts.map((ctx) => {
+                const isActive = ctx.id === user.active_context;
 
-              return (
-                <button
-                  key={ctx.id}
-                  onClick={() => handleSwitchContext(ctx.id)}
-                  disabled={switchingContext}
-                  className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all duration-200 ${
-                    isActive
-                      ? "bg-gray-50 text-gray-900"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  <div
-                    className={`p-2 rounded-lg ${
-                      ctx.type === "organization"
-                        ? "bg-purple-100"
-                        : "bg-indigo-100"
+                return (
+                  <button
+                    key={ctx.id}
+                    onClick={() => handleSwitchContext(ctx.id)}
+                    disabled={switchingContext}
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all duration-200 ${
+                      isActive
+                        ? "bg-gray-50 text-gray-900"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    <Icon
-                      className={`w-4 h-4 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         ctx.type === "organization"
-                          ? "text-purple-600"
-                          : "text-indigo-600"
+                          ? "bg-purple-100"
+                          : "bg-indigo-100"
                       }`}
-                    />
-                  </div>
-                  <div className='flex-1'>
-                    <p className='text-sm font-medium'>{ctx.name}</p>
-                    {ctx.description && (
-                      <p className='text-xs text-gray-500'>{ctx.description}</p>
+                    >
+                      {renderContextIcon(ctx, "w-4 h-4")}
+                    </div>
+                    <div className='flex-1'>
+                      <p className='text-sm font-medium'>{ctx.name}</p>
+                      {ctx.description && (
+                        <p className='text-xs text-gray-500'>
+                          {ctx.description}
+                        </p>
+                      )}
+                    </div>
+                    {isActive && (
+                      <Check className='w-5 h-5 text-green-500 shrink-0' />
                     )}
-                  </div>
-                  {isActive && (
-                    <Check className='w-5 h-5 text-green-500 shrink-0' />
-                  )}
-                </button>
-              );
-            })}
-          </motion.div>
+                  </button>
+                );
+              })}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-
-      {/* Overlay para cerrar el menú al hacer clic fuera */}
-      {isOpen && (
-        <div
-          className='fixed inset-0 z-[199]'
-          onClick={() => setIsOpen(false)}
-        />
-      )}
     </div>
   );
 };

@@ -1,10 +1,4 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 // ========================================
 // ESTILOS COMPARTIDOS
@@ -181,7 +175,7 @@ const projectsListStyles = StyleSheet.create({
 
 export const ProjectsListPdf = ({ projects }) => (
   <Document>
-    <Page size="A4" orientation="landscape" style={baseStyles.page}>
+    <Page size='A4' orientation='landscape' style={baseStyles.page}>
       {/* Header */}
       <View style={baseStyles.header}>
         <Text style={baseStyles.title}>Lista de Proyectos</Text>
@@ -333,7 +327,7 @@ export const ProjectDetailPdf = ({ project }) => {
 
   return (
     <Document>
-      <Page size="A4" style={baseStyles.page}>
+      <Page size='A4' style={baseStyles.page}>
         {/* Header */}
         <View style={baseStyles.header}>
           <Text style={baseStyles.title}>{project.name}</Text>
@@ -608,14 +602,22 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
   if (tasksWithDates.length === 0) {
     return (
       <Document>
-        <Page size="A4" orientation="landscape" style={baseStyles.page}>
+        <Page size='A4' orientation='landscape' style={baseStyles.page}>
           <View style={baseStyles.header}>
-            <Text style={baseStyles.title}>Diagrama Gantt - {project.name}</Text>
+            <Text style={baseStyles.title}>
+              Diagrama Gantt - {project.name}
+            </Text>
             <Text style={baseStyles.subtitle}>
               Generado el {formatDate(new Date())}
             </Text>
           </View>
-          <Text style={{ textAlign: "center", marginTop: 50, color: colors.secondary }}>
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 50,
+              color: colors.secondary,
+            }}
+          >
             No hay tareas con fechas definidas para mostrar en el diagrama.
           </Text>
         </Page>
@@ -628,8 +630,12 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
   let maxDate = new Date();
 
   tasksWithDates.forEach((task) => {
-    const start = task.start_date ? new Date(task.start_date) : new Date(task.due_date);
-    const end = task.due_date ? new Date(task.due_date) : new Date(task.start_date);
+    const start = task.start_date
+      ? new Date(task.start_date)
+      : new Date(task.due_date);
+    const end = task.due_date
+      ? new Date(task.due_date)
+      : new Date(task.start_date);
     if (start < minDate) minDate = new Date(start);
     if (end > maxDate) maxDate = new Date(end);
   });
@@ -642,11 +648,18 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
 
   // Calcular posición de barra
   const getBarStyle = (task) => {
-    const start = task.start_date ? new Date(task.start_date) : new Date(task.due_date);
-    const end = task.due_date ? new Date(task.due_date) : new Date(task.start_date);
+    const start = task.start_date
+      ? new Date(task.start_date)
+      : new Date(task.due_date);
+    const end = task.due_date
+      ? new Date(task.due_date)
+      : new Date(task.start_date);
 
     const startOffset = Math.ceil((start - minDate) / (1000 * 60 * 60 * 24));
-    const duration = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+    const duration = Math.max(
+      1,
+      Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+    );
 
     const leftPercent = (startOffset / totalDays) * 100;
     const widthPercent = (duration / totalDays) * 100;
@@ -676,12 +689,13 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
 
   return (
     <Document>
-      <Page size="A4" orientation="landscape" style={baseStyles.page}>
+      <Page size='A4' orientation='landscape' style={baseStyles.page}>
         {/* Header */}
         <View style={baseStyles.header}>
           <Text style={baseStyles.title}>Diagrama Gantt - {project.name}</Text>
           <Text style={baseStyles.subtitle}>
-            Generado el {formatDate(new Date())} • {tasksWithDates.length} tareas
+            Generado el {formatDate(new Date())} • {tasksWithDates.length}{" "}
+            tareas
           </Text>
         </View>
 
@@ -715,15 +729,30 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
         {/* Leyenda */}
         <View style={ganttStyles.legend}>
           <View style={ganttStyles.legendItem}>
-            <View style={[ganttStyles.legendColor, { backgroundColor: colors.secondary }]} />
+            <View
+              style={[
+                ganttStyles.legendColor,
+                { backgroundColor: colors.secondary },
+              ]}
+            />
             <Text style={ganttStyles.legendText}>Pendiente</Text>
           </View>
           <View style={ganttStyles.legendItem}>
-            <View style={[ganttStyles.legendColor, { backgroundColor: colors.warning }]} />
+            <View
+              style={[
+                ganttStyles.legendColor,
+                { backgroundColor: colors.warning },
+              ]}
+            />
             <Text style={ganttStyles.legendText}>En Progreso</Text>
           </View>
           <View style={ganttStyles.legendItem}>
-            <View style={[ganttStyles.legendColor, { backgroundColor: colors.success }]} />
+            <View
+              style={[
+                ganttStyles.legendColor,
+                { backgroundColor: colors.success },
+              ]}
+            />
             <Text style={ganttStyles.legendText}>Completada</Text>
           </View>
         </View>
@@ -754,14 +783,22 @@ export const AllProjectsGanttPdf = ({ projects }) => {
   if (projectsWithTasks.length === 0) {
     return (
       <Document>
-        <Page size="A4" orientation="landscape" style={baseStyles.page}>
+        <Page size='A4' orientation='landscape' style={baseStyles.page}>
           <View style={baseStyles.header}>
-            <Text style={baseStyles.title}>Diagrama Gantt - Todos los Proyectos</Text>
+            <Text style={baseStyles.title}>
+              Diagrama Gantt - Todos los Proyectos
+            </Text>
             <Text style={baseStyles.subtitle}>
               Generado el {formatDate(new Date())}
             </Text>
           </View>
-          <Text style={{ textAlign: "center", marginTop: 50, color: colors.secondary }}>
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 50,
+              color: colors.secondary,
+            }}
+          >
             No hay proyectos con tareas fechadas para mostrar.
           </Text>
         </Page>
@@ -776,8 +813,12 @@ export const AllProjectsGanttPdf = ({ projects }) => {
   projectsWithTasks.forEach((project) => {
     project.tasks.forEach((task) => {
       if (task.start_date || task.due_date) {
-        const start = task.start_date ? new Date(task.start_date) : new Date(task.due_date);
-        const end = task.due_date ? new Date(task.due_date) : new Date(task.start_date);
+        const start = task.start_date
+          ? new Date(task.start_date)
+          : new Date(task.due_date);
+        const end = task.due_date
+          ? new Date(task.due_date)
+          : new Date(task.start_date);
         if (start < minDate) minDate = new Date(start);
         if (end > maxDate) maxDate = new Date(end);
       }
@@ -789,11 +830,18 @@ export const AllProjectsGanttPdf = ({ projects }) => {
   const totalDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
 
   const getBarStyle = (task) => {
-    const start = task.start_date ? new Date(task.start_date) : new Date(task.due_date);
-    const end = task.due_date ? new Date(task.due_date) : new Date(task.start_date);
+    const start = task.start_date
+      ? new Date(task.start_date)
+      : new Date(task.due_date);
+    const end = task.due_date
+      ? new Date(task.due_date)
+      : new Date(task.start_date);
 
     const startOffset = Math.ceil((start - minDate) / (1000 * 60 * 60 * 24));
-    const duration = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+    const duration = Math.max(
+      1,
+      Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+    );
 
     const leftPercent = (startOffset / totalDays) * 100;
     const widthPercent = (duration / totalDays) * 100;
@@ -822,12 +870,15 @@ export const AllProjectsGanttPdf = ({ projects }) => {
 
   return (
     <Document>
-      <Page size="A4" orientation="landscape" style={baseStyles.page}>
+      <Page size='A4' orientation='landscape' style={baseStyles.page}>
         {/* Header */}
         <View style={baseStyles.header}>
-          <Text style={baseStyles.title}>Diagrama Gantt - Todos los Proyectos</Text>
+          <Text style={baseStyles.title}>
+            Diagrama Gantt - Todos los Proyectos
+          </Text>
           <Text style={baseStyles.subtitle}>
-            Generado el {formatDate(new Date())} • {projectsWithTasks.length} proyectos
+            Generado el {formatDate(new Date())} • {projectsWithTasks.length}{" "}
+            proyectos
           </Text>
         </View>
 
@@ -866,7 +917,9 @@ export const AllProjectsGanttPdf = ({ projects }) => {
                 {tasksWithDates.map((task) => (
                   <View key={task.id} style={ganttStyles.ganttRow}>
                     <View style={ganttStyles.ganttLabel}>
-                      <Text style={ganttStyles.ganttLabelText}>{task.title}</Text>
+                      <Text style={ganttStyles.ganttLabelText}>
+                        {task.title}
+                      </Text>
                     </View>
                     <View style={ganttStyles.ganttTimeline}>
                       <View style={[ganttStyles.ganttBar, getBarStyle(task)]} />
@@ -881,15 +934,30 @@ export const AllProjectsGanttPdf = ({ projects }) => {
         {/* Leyenda */}
         <View style={ganttStyles.legend}>
           <View style={ganttStyles.legendItem}>
-            <View style={[ganttStyles.legendColor, { backgroundColor: colors.secondary }]} />
+            <View
+              style={[
+                ganttStyles.legendColor,
+                { backgroundColor: colors.secondary },
+              ]}
+            />
             <Text style={ganttStyles.legendText}>Pendiente</Text>
           </View>
           <View style={ganttStyles.legendItem}>
-            <View style={[ganttStyles.legendColor, { backgroundColor: colors.warning }]} />
+            <View
+              style={[
+                ganttStyles.legendColor,
+                { backgroundColor: colors.warning },
+              ]}
+            />
             <Text style={ganttStyles.legendText}>En Progreso</Text>
           </View>
           <View style={ganttStyles.legendItem}>
-            <View style={[ganttStyles.legendColor, { backgroundColor: colors.success }]} />
+            <View
+              style={[
+                ganttStyles.legendColor,
+                { backgroundColor: colors.success },
+              ]}
+            />
             <Text style={ganttStyles.legendText}>Completada</Text>
           </View>
         </View>

@@ -619,7 +619,18 @@ const ganttStyles = StyleSheet.create({
 export const ProjectGanttPdf = ({ project, tasks }) => {
   // Calcular rango de fechas
   const taskList = tasks || project.tasks || [];
-  const tasksWithDates = taskList.filter((t) => t.start_date || t.due_date);
+  const tasksWithDates = taskList
+    .filter((t) => t.start_date || t.due_date)
+    // Ordenar tareas por fecha de inicio (igual que en el Gantt web)
+    .sort((a, b) => {
+      const startA = a.start_date
+        ? parseDateString(a.start_date)
+        : parseDateString(a.due_date);
+      const startB = b.start_date
+        ? parseDateString(b.start_date)
+        : parseDateString(b.due_date);
+      return startA - startB;
+    });
 
   if (tasksWithDates.length === 0) {
     return (
@@ -797,10 +808,33 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
 // ========================================
 
 export const AllProjectsGanttPdf = ({ projects }) => {
-  // Filtrar proyectos con tareas que tienen fechas
-  const projectsWithTasks = projects.filter(
-    (p) => p.tasks && p.tasks.some((t) => t.start_date || t.due_date),
-  );
+  // Filtrar proyectos con tareas que tienen fechas y ordenar por fecha de inicio
+  const projectsWithTasks = projects
+    .filter(
+      (p) => p.tasks && p.tasks.some((t) => t.start_date || t.due_date),
+    )
+    // Ordenar proyectos por la fecha de inicio más temprana de sus tareas (igual que en el Gantt web)
+    .sort((a, b) => {
+      const getProjectStartDate = (project) => {
+        const tasksWithDates = project.tasks.filter(
+          (t) => t.start_date || t.due_date,
+        );
+        if (tasksWithDates.length > 0) {
+          const taskDates = tasksWithDates.map((t) => {
+            return t.start_date
+              ? parseDateString(t.start_date)
+              : parseDateString(t.due_date);
+          });
+          return new Date(Math.min(...taskDates.map((d) => d.getTime())));
+        }
+        return project.due_date
+          ? parseDateString(project.due_date)
+          : new Date();
+      };
+      const dateA = getProjectStartDate(a);
+      const dateB = getProjectStartDate(b);
+      return dateA - dateB;
+    });
 
   if (projectsWithTasks.length === 0) {
     return (
@@ -906,9 +940,18 @@ export const AllProjectsGanttPdf = ({ projects }) => {
 
         {/* Gantt por proyecto */}
         {projectsWithTasks.map((project) => {
-          const tasksWithDates = project.tasks.filter(
-            (t) => t.start_date || t.due_date,
-          );
+          const tasksWithDates = project.tasks
+            .filter((t) => t.start_date || t.due_date)
+            // Ordenar tareas por fecha de inicio (igual que en el Gantt web)
+            .sort((a, b) => {
+              const startA = a.start_date
+                ? parseDateString(a.start_date)
+                : parseDateString(a.due_date);
+              const startB = b.start_date
+                ? parseDateString(b.start_date)
+                : parseDateString(b.due_date);
+              return startA - startB;
+            });
           if (tasksWithDates.length === 0) return null;
 
           return (

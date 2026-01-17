@@ -388,7 +388,6 @@ const TaskModal = ({
             <TaskChecklist
               taskId={task?.id}
               items={checklistItems}
-              onUpdate={onSuccess}
               onLocalChange={handleChecklistChange}
             />
           </div>

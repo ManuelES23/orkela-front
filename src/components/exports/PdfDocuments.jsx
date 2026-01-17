@@ -810,9 +810,7 @@ export const ProjectGanttPdf = ({ project, tasks }) => {
 export const AllProjectsGanttPdf = ({ projects }) => {
   // Filtrar proyectos con tareas que tienen fechas y ordenar por fecha de inicio
   const projectsWithTasks = projects
-    .filter(
-      (p) => p.tasks && p.tasks.some((t) => t.start_date || t.due_date),
-    )
+    .filter((p) => p.tasks && p.tasks.some((t) => t.start_date || t.due_date))
     // Ordenar proyectos por la fecha de inicio más temprana de sus tareas (igual que en el Gantt web)
     .sort((a, b) => {
       const getProjectStartDate = (project) => {

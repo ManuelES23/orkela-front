@@ -179,7 +179,7 @@ const TaskModal = ({
 
   // Valores seleccionados para react-select
   const selectedMembers = memberOptions.filter((option) =>
-    formData.assigned_user_ids.includes(option.value)
+    formData.assigned_user_ids.includes(option.value),
   );
 
   // Manejar cambio en react-select
@@ -280,7 +280,7 @@ const TaskModal = ({
 
   const getSelectedUsers = () => {
     return projectMembers.filter((member) =>
-      formData.assigned_user_ids.includes(member.id)
+      formData.assigned_user_ids.includes(member.id),
     );
   };
 
@@ -452,8 +452,8 @@ const TaskModal = ({
                 !formData.project_id
                   ? "Selecciona un proyecto primero"
                   : loadingMembers
-                  ? "Cargando miembros..."
-                  : "Buscar y seleccionar miembros..."
+                    ? "Cargando miembros..."
+                    : "Buscar y seleccionar miembros..."
               }
               noOptionsMessage={() => "No hay miembros en este proyecto"}
               components={{
@@ -571,8 +571,8 @@ const TaskModal = ({
               {loading
                 ? "Guardando..."
                 : task
-                ? "Guardar Cambios"
-                : "Crear Tarea"}
+                  ? "Guardar Cambios"
+                  : "Crear Tarea"}
             </button>
             <button
               type='button'

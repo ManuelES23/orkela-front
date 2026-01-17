@@ -47,9 +47,23 @@ const GanttChart = ({ projects }) => {
     loadTasks();
   }, []);
 
-  // Parsear fecha de string "YYYY-MM-DD"
+  // Parsear fecha de string "YYYY-MM-DD" o objeto Date
   const parseDateString = (dateStr) => {
     if (!dateStr) return null;
+    
+    // Si ya es un objeto Date, devolverlo
+    if (dateStr instanceof Date) return dateStr;
+    
+    // Asegurar que es un string
+    if (typeof dateStr !== 'string') {
+      // Intentar convertir a string si es posible
+      try {
+        dateStr = String(dateStr);
+      } catch {
+        return null;
+      }
+    }
+    
     const cleanDate = dateStr.split("T")[0];
     const [year, month, day] = cleanDate.split("-").map(Number);
     return new Date(year, month - 1, day);

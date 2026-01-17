@@ -27,7 +27,6 @@ import {
   Flame,
 } from "lucide-react";
 import { projectsAPI, tasksAPI, teamsAPI } from "../utils/api";
-import { parseLocalDate } from "../utils/dateUtils";
 
 const Dashboard = () => {
   const { user } = useAuth();

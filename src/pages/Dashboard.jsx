@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
+import { parseLocalDate } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -153,7 +154,7 @@ const Dashboard = () => {
     if (!dateString) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     date.setHours(0, 0, 0, 0);
     return Math.ceil((date - today) / (1000 * 60 * 60 * 24));
   };

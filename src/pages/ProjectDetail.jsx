@@ -632,7 +632,7 @@ const ProjectDetail = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "No definida";
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString("es-ES", {
       day: "2-digit",
       month: "short",

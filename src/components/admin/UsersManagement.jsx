@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { parseLocalDate } from "../../utils/dateUtils";
 import {
   Plus,
   Search,
@@ -123,7 +124,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Nunca";
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString("es-ES", {
       day: "2-digit",
       month: "short",

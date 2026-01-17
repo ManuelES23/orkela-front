@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { parseLocalDate } from "../../utils/dateUtils";
 import {
   Plus,
   Key,
@@ -77,7 +78,7 @@ const LicensesManagement = ({ onStatsUpdate }) => {
 
   const getStatusBadge = (license) => {
     const daysUntilExpiry = Math.ceil(
-      (new Date(license.expiry_date) - new Date()) / (1000 * 60 * 60 * 24)
+      (parseLocalDate(license.expiry_date) - new Date()) / (1000 * 60 * 60 * 24)
     );
 
     if (license.status === "expired" || daysUntilExpiry < 0) {
@@ -117,7 +118,7 @@ const LicensesManagement = ({ onStatsUpdate }) => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString("es-ES", {
       day: "2-digit",
       month: "short",

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { AlertCircle, Clock, Zap, Calendar, TrendingDown, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { parseLocalDate } from "../utils/dateUtils";
 
 const AlertsPanel = ({ projects, tasks }) => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const AlertsPanel = ({ projects, tasks }) => {
   // Calcular días hasta vencimiento
   const getDaysUntil = (dateString) => {
     if (!dateString) return null;
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     const diffTime = date - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
@@ -47,7 +48,7 @@ const AlertsPanel = ({ projects, tasks }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
   };
 

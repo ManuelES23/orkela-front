@@ -65,7 +65,7 @@ const LicensesManagement = ({ onStatsUpdate }) => {
       setLicenses(mockLicenses);
 
       const activeCount = mockLicenses.filter(
-        (l) => l.status === "active"
+        (l) => l.status === "active",
       ).length;
       onStatsUpdate?.((prev) => ({ ...prev, activeLicenses: activeCount }));
     } catch (err) {
@@ -78,7 +78,8 @@ const LicensesManagement = ({ onStatsUpdate }) => {
 
   const getStatusBadge = (license) => {
     const daysUntilExpiry = Math.ceil(
-      (parseLocalDate(license.expiry_date) - new Date()) / (1000 * 60 * 60 * 24)
+      (parseLocalDate(license.expiry_date) - new Date()) /
+        (1000 * 60 * 60 * 24),
     );
 
     if (license.status === "expired" || daysUntilExpiry < 0) {
@@ -209,8 +210,8 @@ const LicensesManagement = ({ onStatsUpdate }) => {
                         usagePercent > 80
                           ? "bg-red-500"
                           : usagePercent > 50
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
+                            ? "bg-yellow-500"
+                            : "bg-green-500"
                       }`}
                       style={{ width: `${usagePercent}%` }}
                     ></div>

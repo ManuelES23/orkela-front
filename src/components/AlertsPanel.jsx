@@ -27,18 +27,21 @@ const AlertsPanel = ({ projects, tasks }) => {
   };
 
   // Proyectos vencidos o por vencer (7 días)
+  // Excluir proyectos completados, cancelados o con 100% de progreso
   const urgentProjects = projects
     .filter((p) => {
       if (p.status === "completed" || p.status === "cancelled") return false;
+      if (p.progress === 100) return false; // Proyecto con 100% progreso no es urgente
       const days = getDaysUntil(p.due_date);
       return days !== null && days <= 7;
     })
     .sort((a, b) => getDaysUntil(a.due_date) - getDaysUntil(b.due_date));
 
   // Tareas urgentes o por vencer
+  // Excluir tareas completadas (done o completed)
   const urgentTasks = tasks
     .filter((t) => {
-      if (t.status === "completed") return false;
+      if (t.status === "completed" || t.status === "done") return false;
       const days = getDaysUntil(t.due_date);
       return t.is_urgent || (days !== null && days <= 3);
     })
@@ -50,9 +53,11 @@ const AlertsPanel = ({ projects, tasks }) => {
     });
 
   // Proyectos con bajo progreso
+  // Excluir proyectos completados, cancelados o con 100% de progreso
   const lowProgressProjects = projects
     .filter((p) => {
       if (p.status === "completed" || p.status === "cancelled") return false;
+      if (p.progress === 100) return false;
       const days = getDaysUntil(p.due_date);
       // Proyectos con menos del 30% de progreso y que vencen en menos de 30 días
       return p.progress < 30 && days !== null && days > 0 && days <= 30;

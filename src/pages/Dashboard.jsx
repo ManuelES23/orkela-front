@@ -12,6 +12,7 @@ import {
 import {
   FolderKanban,
   CheckCircle2,
+  CheckCircle,
   Users,
   Clock,
   Loader2,
@@ -397,8 +398,13 @@ const Dashboard = () => {
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   {recentProjects.map((project, index) => {
                     const days = getDaysUntil(project.due_date);
-                    const isOverdue = days !== null && days < 0;
-                    const isDueSoon = days !== null && days >= 0 && days <= 7;
+                    // Solo mostrar como vencido si no está completado y no tiene 100% de progreso
+                    const isCompleted =
+                      project.status === "completed" || project.progress === 100;
+                    const isOverdue =
+                      days !== null && days < 0 && !isCompleted;
+                    const isDueSoon =
+                      days !== null && days >= 0 && days <= 7 && !isCompleted;
 
                     return (
                       <motion.div
@@ -429,7 +435,12 @@ const Dashboard = () => {
                                 {project.name}
                               </h3>
                               <div className='flex items-center gap-2 mt-1'>
-                                {isOverdue ? (
+                                {isCompleted ? (
+                                  <span className='text-xs text-green-600 font-medium flex items-center gap-1'>
+                                    <CheckCircle className='w-3 h-3' />
+                                    Completado
+                                  </span>
+                                ) : isOverdue ? (
                                   <span className='text-xs text-red-600 font-medium flex items-center gap-1'>
                                     <AlertTriangle className='w-3 h-3' />
                                     Vencido

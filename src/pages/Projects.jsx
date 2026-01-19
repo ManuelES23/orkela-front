@@ -819,22 +819,30 @@ const Projects = () => {
                           {daysRemaining !== null && (
                             <span
                               className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                daysRemaining < 0
-                                  ? "bg-red-100 text-red-700"
-                                  : daysRemaining <= 3
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : daysRemaining <= 7
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-gray-100 text-gray-600"
+                                // Si el proyecto está completado o tiene 100% de progreso, no mostrar como vencido
+                                project.status === "completed" ||
+                                project.progress === 100
+                                  ? "bg-green-100 text-green-700"
+                                  : daysRemaining < 0
+                                    ? "bg-red-100 text-red-700"
+                                    : daysRemaining <= 3
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : daysRemaining <= 7
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-gray-100 text-gray-600"
                               }`}
                             >
-                              {daysRemaining < 0
-                                ? `Vencido hace ${Math.abs(daysRemaining)} días`
-                                : daysRemaining === 0
-                                  ? "Vence hoy"
-                                  : daysRemaining === 1
-                                    ? "Vence mañana"
-                                    : `${daysRemaining} días`}
+                              {// Si el proyecto está completado o tiene 100% de progreso, mostrar "Completado"
+                              project.status === "completed" ||
+                              project.progress === 100
+                                ? "Completado"
+                                : daysRemaining < 0
+                                  ? `Vencido hace ${Math.abs(daysRemaining)} días`
+                                  : daysRemaining === 0
+                                    ? "Vence hoy"
+                                    : daysRemaining === 1
+                                      ? "Vence mañana"
+                                      : `${daysRemaining} días`}
                             </span>
                           )}
                         </div>

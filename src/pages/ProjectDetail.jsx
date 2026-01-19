@@ -642,6 +642,16 @@ const ProjectDetail = () => {
 
   const getDaysRemaining = () => {
     if (!project?.due_date) return null;
+
+    // Si el proyecto está completado o tiene 100% de progreso, mostrar como completado
+    if (project.status === "completed" || project.progress === 100) {
+      return {
+        label: "Completado",
+        color: "text-green-600",
+        bgColor: "bg-green-50",
+      };
+    }
+
     const today = new Date();
     const dueDate = parseLocalDate(project.due_date);
     const diffTime = dueDate - today;

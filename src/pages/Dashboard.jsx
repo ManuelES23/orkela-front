@@ -400,9 +400,9 @@ const Dashboard = () => {
                     const days = getDaysUntil(project.due_date);
                     // Solo mostrar como vencido si no está completado y no tiene 100% de progreso
                     const isCompleted =
-                      project.status === "completed" || project.progress === 100;
-                    const isOverdue =
-                      days !== null && days < 0 && !isCompleted;
+                      project.status === "completed" ||
+                      project.progress === 100;
+                    const isOverdue = days !== null && days < 0 && !isCompleted;
                     const isDueSoon =
                       days !== null && days >= 0 && days <= 7 && !isCompleted;
 

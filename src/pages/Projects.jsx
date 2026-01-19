@@ -832,17 +832,19 @@ const Projects = () => {
                                         : "bg-gray-100 text-gray-600"
                               }`}
                             >
-                              {// Si el proyecto está completado o tiene 100% de progreso, mostrar "Completado"
-                              project.status === "completed" ||
-                              project.progress === 100
-                                ? "Completado"
-                                : daysRemaining < 0
-                                  ? `Vencido hace ${Math.abs(daysRemaining)} días`
-                                  : daysRemaining === 0
-                                    ? "Vence hoy"
-                                    : daysRemaining === 1
-                                      ? "Vence mañana"
-                                      : `${daysRemaining} días`}
+                              {
+                                // Si el proyecto está completado o tiene 100% de progreso, mostrar "Completado"
+                                project.status === "completed" ||
+                                project.progress === 100
+                                  ? "Completado"
+                                  : daysRemaining < 0
+                                    ? `Vencido hace ${Math.abs(daysRemaining)} días`
+                                    : daysRemaining === 0
+                                      ? "Vence hoy"
+                                      : daysRemaining === 1
+                                        ? "Vence mañana"
+                                        : `${daysRemaining} días`
+                              }
                             </span>
                           )}
                         </div>

@@ -45,7 +45,7 @@ export default function Settings() {
         mail_host: data.mail_host || "",
         mail_port: data.mail_port || "587",
         mail_username: data.mail_username || "",
-        mail_password: data.mail_password || "",
+        mail_password: "", // El backend nunca devuelve la contraseña (ver has_password)
         mail_encryption: data.mail_encryption || "tls",
         mail_from_address: data.mail_from_address || "",
         mail_from_name: data.mail_from_name || "Orkela",

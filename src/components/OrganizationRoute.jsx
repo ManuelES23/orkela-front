@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useUserContext } from "../hooks/useOrganizationPermissions";
 
 /**
  * OrganizationRoute - Componente de ruta protegida para funcionalidades
@@ -7,10 +8,12 @@ import { useAuth } from "../context/AuthContext";
  *
  * Redirige a /dashboard si:
  * - El usuario no tiene organización (ni directa ni por pivot)
- * - El usuario tiene organización pero está en modo personal
+ * - El usuario tiene organización pero está en modo personal (o en modo
+ *   de otra organización sin datos cargados)
  */
 const OrganizationRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const { isOrganizationContext } = useUserContext();
 
   if (loading) {
     return (
@@ -25,11 +28,8 @@ const OrganizationRoute = ({ children }) => {
     return <Navigate to='/login' />;
   }
 
-  // Verificar si tiene organización (directa o por pivot)
-  const hasOrganization = user.organization_id || user.organization;
-
-  // Si el usuario no tiene organización O no está en modo organización, redirigir al dashboard
-  if (!hasOrganization || user.active_context !== "organization") {
+  // Si el usuario no está activamente en modo organización, redirigir al dashboard
+  if (!isOrganizationContext) {
     return <Navigate to='/dashboard' />;
   }
 

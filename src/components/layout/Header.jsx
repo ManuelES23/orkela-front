@@ -2,15 +2,13 @@ import { Search, Building2 } from "lucide-react";
 import NotificationsPanel from "../ui/NotificationsPanel";
 import InvitationsPanel from "../ui/InvitationsPanel";
 import { useAuth } from "../../context/AuthContext";
+import { useUserContext } from "../../hooks/useOrganizationPermissions";
 
 const Header = ({ title, subtitle }) => {
   const { user } = useAuth();
 
   // Solo mostrar indicador si está en modo organización activo
-  const isInOrganizationMode =
-    user?.organization_id &&
-    user?.organization &&
-    user?.active_context === "organization";
+  const { isOrganizationContext: isInOrganizationMode } = useUserContext();
 
   return (
     <header className='bg-white border-b border-gray-200 sticky top-0 z-30'>

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useUserContext } from "../../hooks/useOrganizationPermissions";
 import UserAvatar from "../ui/UserAvatar";
 import {
   X,
@@ -21,10 +22,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
-  const isInOrganizationMode =
-    user?.organization_id &&
-    user?.organization &&
-    user?.active_context === "organization";
+  const { isOrganizationContext: isInOrganizationMode } = useUserContext();
 
   const menuItems = isSuperAdmin
     ? [

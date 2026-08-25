@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
+import { useUserContext } from "../../hooks/useOrganizationPermissions";
 import ContextSwitcher from "../ui/ContextSwitcher";
 import UserAvatar from "../ui/UserAvatar";
 import { motionTokens } from "../animations/variants";
@@ -53,12 +54,10 @@ const Sidebar = () => {
   // Si es superadmin, solo mostrar el menú de administración
   const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
 
-  // Determinar si está en modo organización activo (no solo si tiene organización)
-  // El usuario debe tener organización Y estar en contexto de organización
-  const isInOrganizationMode =
-    user?.organization_id &&
-    user?.organization &&
-    user?.active_context === "organization";
+  // Determinar si está en modo organización activo (no solo si tiene
+  // organización) - centralizado en useUserContext() para que el switch
+  // entre varias empresas no rompa este cálculo en cada layout.
+  const { isOrganizationContext: isInOrganizationMode } = useUserContext();
 
   const menuItems = isSuperAdmin
     ? [

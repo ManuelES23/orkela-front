@@ -113,7 +113,7 @@ export const useOrganizationPermissions = (organization = null) => {
 
 /**
  * Hook para obtener el contexto actual del usuario
- * (personal vs organization)
+ * (personal vs organización específica)
  */
 export const useUserContext = () => {
   const { user, getActiveContext } = useAuth();
@@ -121,9 +121,21 @@ export const useUserContext = () => {
   return useMemo(() => {
     const activeContext = getActiveContext();
 
+    // `active_context` ya NO es un string binario 'personal'|'organization':
+    // cuando el usuario está en modo organización, su valor es el id
+    // (string) de la empresa activa. "Modo organización" pasa a ser
+    // "cualquier valor que no sea 'personal'", siempre que además haya
+    // datos de esa organización realmente cargados.
+    const isOrganizationContext = Boolean(
+      user?.organization_id &&
+        user?.organization &&
+        user?.active_context &&
+        user.active_context !== "personal"
+    );
+
     return {
-      isPersonalContext: user?.active_context === "personal",
-      isOrganizationContext: user?.active_context === "organization",
+      isPersonalContext: !isOrganizationContext,
+      isOrganizationContext,
       activeContextId: user?.active_context || "personal",
       activeContextName: activeContext?.name || "Personal",
       hasOrganization: !!user?.organization_id,

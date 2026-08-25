@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useUserContext } from "../../hooks/useOrganizationPermissions";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -18,10 +19,7 @@ const BottomNav = ({ onMenuClick }) => {
   const [activeTab, setActiveTab] = useState(location.pathname);
 
   const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
-  const isInOrganizationMode =
-    user?.organization_id &&
-    user?.organization &&
-    user?.active_context === "organization";
+  const { isOrganizationContext: isInOrganizationMode } = useUserContext();
 
   // Menú principal para usuarios normales
   const mainMenuItems = isSuperAdmin

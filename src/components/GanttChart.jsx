@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Clock,
   Users,
-  TrendingUp,
   FolderKanban,
   ListChecks,
   UserCircle,
@@ -19,6 +18,8 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { tasksAPI } from "../utils/api";
+import AnimatedNumber from "./ui/AnimatedNumber";
+import ProgressRing from "./ui/ProgressRing";
 
 const GanttChart = ({ projects }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -477,6 +478,75 @@ const GanttChart = ({ projects }) => {
     statusFilter,
   ]);
 
+  // Clasificar un item en uno de los 4 grupos de estado (Atrasados / En
+  // progreso / Próximos / Completados) para la vista agrupada
+  const classifyGroup = (item) => {
+    if (item.status === "done" || item.status === "completed") return "done";
+    const daysRemaining = getDaysRemaining(item.endDate);
+    if (daysRemaining !== null && daysRemaining < 0) return "late";
+    if (
+      item.status === "in-progress" ||
+      item.status === "in_progress" ||
+      item.status === "active"
+    )
+      return "progress";
+    return "upcoming";
+  };
+
+  const GROUP_META = {
+    late: { label: "Atrasados", stripe: "bg-red-500", text: "text-red-700" },
+    progress: {
+      label: "En progreso",
+      stripe: "bg-brand-600",
+      text: "text-brand-700",
+    },
+    upcoming: { label: "Próximos", stripe: "bg-gray-400", text: "text-gray-600" },
+    done: { label: "Completados", stripe: "bg-green-500", text: "text-green-700" },
+  };
+
+  // Fondo de la barra según el grupo (más coherente con la franja de
+  // métricas y las cabeceras de sección que con el estado granular)
+  const getBarFill = (groupKey) => {
+    switch (groupKey) {
+      case "late":
+        return "bg-linear-to-r from-red-400 to-red-600";
+      case "progress":
+        return "bg-linear-to-r from-brand-500 to-accent-500";
+      case "done":
+        return "bg-linear-to-r from-green-400 to-green-600";
+      default:
+        return "bg-gray-400";
+    }
+  };
+
+  // Agrupar los items de nivel superior por estado, conservando las
+  // subtareas de un proyecto expandido dentro del mismo grupo que su padre
+  const groupedSections = useMemo(() => {
+    const buckets = { late: [], progress: [], upcoming: [], done: [] };
+    let currentGroupKey = null;
+
+    items.forEach((item) => {
+      const isSubtask = item.type === "task" && item.parentProjectId;
+      if (!isSubtask) {
+        currentGroupKey = classifyGroup(item);
+        buckets[currentGroupKey].push({ item, groupKey: currentGroupKey });
+      } else if (currentGroupKey) {
+        buckets[currentGroupKey].push({ item, groupKey: currentGroupKey });
+      }
+    });
+
+    return ["late", "progress", "upcoming", "done"]
+      .map((key) => ({
+        key,
+        ...GROUP_META[key],
+        rows: buckets[key],
+        topLevelCount: buckets[key].filter(
+          ({ item }) => !(item.type === "task" && item.parentProjectId),
+        ).length,
+      }))
+      .filter((group) => group.rows.length > 0);
+  }, [items]);
+
   // Calcular posición y ancho de la barra
   const getBarStyle = (item) => {
     const { start, end, days } = dateRange;
@@ -572,8 +642,8 @@ const GanttChart = ({ projects }) => {
         {/* Fila superior: Título y navegación */}
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
-            <div className='p-2 bg-indigo-100 rounded-lg'>
-              <Calendar className='w-5 h-5 text-indigo-600' />
+            <div className='p-2 bg-brand-100 rounded-lg'>
+              <Calendar className='w-5 h-5 text-brand-600' />
             </div>
             <div>
               <h2 className='text-lg font-semibold text-gray-900'>
@@ -587,7 +657,7 @@ const GanttChart = ({ projects }) => {
           <div className='flex items-center gap-2'>
             <button
               onClick={goToToday}
-              className='px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition'
+              className='px-3 py-1.5 text-sm font-medium text-brand-600 hover:bg-brand-50 rounded-lg transition'
             >
               Hoy
             </button>
@@ -623,7 +693,7 @@ const GanttChart = ({ projects }) => {
               onClick={() => setViewMode("projects")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 viewMode === "projects"
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -634,7 +704,7 @@ const GanttChart = ({ projects }) => {
               onClick={() => setViewMode("tasks")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 viewMode === "tasks"
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -649,7 +719,7 @@ const GanttChart = ({ projects }) => {
               onClick={() => setTimeScale("month")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeScale === "month"
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -660,7 +730,7 @@ const GanttChart = ({ projects }) => {
               onClick={() => setTimeScale("week")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeScale === "week"
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -677,7 +747,7 @@ const GanttChart = ({ projects }) => {
               placeholder='Buscar...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+              className='w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
 
@@ -685,7 +755,7 @@ const GanttChart = ({ projects }) => {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none'
+            className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
           >
             <option value='all'>Todas las prioridades</option>
             <option value='high'>Alta</option>
@@ -697,7 +767,7 @@ const GanttChart = ({ projects }) => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none'
+            className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
           >
             <option value='all'>Todos los estados</option>
             <option value='active'>Activos</option>
@@ -705,6 +775,38 @@ const GanttChart = ({ projects }) => {
           </select>
         </div>
       </div>
+
+      {/* Franja de métricas por estado */}
+      {!loading && items.length > 0 && (
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-gray-200 bg-gray-50/60'>
+          {["late", "progress", "upcoming", "done"].map((key) => {
+            const meta = GROUP_META[key];
+            const group = groupedSections.find((g) => g.key === key);
+            return (
+              <div
+                key={key}
+                className={`bg-white border border-gray-200 border-l-4 rounded-lg px-3.5 py-2.5 ${
+                  key === "late"
+                    ? "border-l-red-500"
+                    : key === "progress"
+                      ? "border-l-brand-600"
+                      : key === "done"
+                        ? "border-l-green-500"
+                        : "border-l-gray-400"
+                }`}
+              >
+                <AnimatedNumber
+                  value={group?.topLevelCount || 0}
+                  className='block font-mono text-xl font-bold text-gray-900'
+                />
+                <span className='text-xs font-medium text-gray-500'>
+                  {meta.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Contenido del Gantt */}
       <div className='overflow-x-auto'>
@@ -724,12 +826,12 @@ const GanttChart = ({ projects }) => {
                   <div
                     key={index}
                     className={`flex-1 min-w-7.5 text-center border-r border-gray-100 ${
-                      isToday ? "bg-indigo-100" : isWeekend ? "bg-gray-100" : ""
+                      isToday ? "bg-brand-100" : isWeekend ? "bg-gray-100" : ""
                     } ${isFirstOfMonth ? "border-l-2 border-l-gray-300" : ""}`}
                   >
                     <div
                       className={`text-[10px] font-medium ${
-                        isToday ? "text-indigo-700" : "text-gray-500"
+                        isToday ? "text-brand-700" : "text-gray-500"
                       }`}
                     >
                       {day
@@ -739,7 +841,7 @@ const GanttChart = ({ projects }) => {
                     </div>
                     <div
                       className={`text-xs font-semibold ${
-                        isToday ? "text-indigo-700" : "text-gray-700"
+                        isToday ? "text-brand-700" : "text-gray-700"
                       }`}
                     >
                       {day.getDate()}
@@ -754,7 +856,7 @@ const GanttChart = ({ projects }) => {
           <div className='divide-y divide-gray-100'>
             {loading ? (
               <div className='p-8 text-center'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto'></div>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto'></div>
                 <p className='mt-2 text-gray-500 text-sm'>Cargando...</p>
               </div>
             ) : items.length === 0 ? (
@@ -768,30 +870,43 @@ const GanttChart = ({ projects }) => {
                 </p>
               </div>
             ) : (
-              <AnimatePresence>
-                {items.map((item, index) => {
-                  const barStyle = getBarStyle(item);
-                  const daysRemaining = getDaysRemaining(item.endDate);
-                  const isTask = item.type === "task";
-                  const isSubTask = isTask && item.parentProjectId;
+              groupedSections.map((group) => (
+                <div key={group.key}>
+                  {/* Cabecera de sección */}
+                  <div className='flex items-center gap-2 px-3 py-1.5 bg-gray-50'>
+                    <span className={`w-1 h-4 rounded-full ${group.stripe}`} />
+                    <span className={`text-xs font-semibold ${group.text}`}>
+                      {group.label}
+                    </span>
+                    <span className='text-[11px] font-mono text-gray-400'>
+                      {group.topLevelCount}
+                    </span>
+                  </div>
 
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ delay: index * 0.02 }}
-                      className={`flex hover:bg-gray-50 transition-colors ${
-                        isSubTask ? "bg-gray-50/50" : ""
-                      }`}
-                    >
-                      {/* Info del item */}
-                      <div
-                        className={`w-72 shrink-0 p-3 border-r border-gray-200 ${
-                          isSubTask ? "pl-8" : ""
-                        }`}
-                      >
+                  <AnimatePresence>
+                    {group.rows.map(({ item, groupKey }, index) => {
+                      const barStyle = getBarStyle(item);
+                      const daysRemaining = getDaysRemaining(item.endDate);
+                      const isTask = item.type === "task";
+                      const isSubTask = isTask && item.parentProjectId;
+
+                      return (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ delay: index * 0.02 }}
+                          className={`flex hover:bg-gray-50 transition-colors border-l-4 ${
+                            group.stripe.replace("bg-", "border-l-")
+                          } ${isSubTask ? "bg-gray-50/50" : ""}`}
+                        >
+                          {/* Info del item */}
+                          <div
+                            className={`w-72 shrink-0 p-3 border-r border-gray-200 ${
+                              isSubTask ? "pl-8" : ""
+                            }`}
+                          >
                         <div className='flex items-start gap-2'>
                           {/* Indicador de color / expandir */}
                           {item.type === "project" ? (
@@ -799,7 +914,7 @@ const GanttChart = ({ projects }) => {
                               onClick={() => toggleProject(item.projectId)}
                               className={`w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                                 item.isExpanded
-                                  ? "bg-indigo-100 text-indigo-600"
+                                  ? "bg-brand-100 text-brand-600"
                                   : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                               }`}
                             >
@@ -841,8 +956,14 @@ const GanttChart = ({ projects }) => {
                                     <Users className='w-3 h-3' />
                                     {item.team}
                                   </span>
-                                  <span className='flex items-center gap-0.5'>
-                                    <TrendingUp className='w-3 h-3' />
+                                  <span className='flex items-center gap-1'>
+                                    <ProgressRing
+                                      percentage={item.progress}
+                                      size={14}
+                                      strokeWidth={2.5}
+                                      color='var(--color-brand-600)'
+                                      trackColor='#e5e7eb'
+                                    />
                                     {item.progress}%
                                   </span>
                                 </>
@@ -964,14 +1085,14 @@ const GanttChart = ({ projects }) => {
                         {/* Línea de hoy */}
                         {todayIndex >= 0 && (
                           <div
-                            className='absolute top-0 bottom-0 w-0.5 bg-indigo-500 z-10'
+                            className='absolute top-0 bottom-0 w-0.5 bg-brand-500 z-10'
                             style={{
                               left: `${
                                 ((todayIndex + 0.5) / daysArray.length) * 100
                               }%`,
                             }}
                           >
-                            <div className='absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-indigo-500 rounded-full' />
+                            <div className='absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-brand-500 rounded-full' />
                           </div>
                         )}
 
@@ -1005,7 +1126,7 @@ const GanttChart = ({ projects }) => {
                                 <>
                                   {/* Fondo base del proyecto */}
                                   <div
-                                    className={`absolute inset-0 ${item.colors.bg} opacity-20`}
+                                    className={`absolute inset-0 ${getBarFill(groupKey)} opacity-20`}
                                   />
                                   {/* Borde del proyecto */}
                                   <div
@@ -1027,9 +1148,9 @@ const GanttChart = ({ projects }) => {
                                       delay: index * 0.02 + 0.3,
                                       duration: 0.5,
                                     }}
-                                    className={`absolute inset-y-0 left-0 ${
-                                      item.colors.bg
-                                    } opacity-60 ${
+                                    className={`absolute inset-y-0 left-0 ${getBarFill(
+                                      groupKey,
+                                    )} opacity-60 ${
                                       barStyle.isStartCut ? "" : "rounded-l-md"
                                     }`}
                                   />
@@ -1038,9 +1159,9 @@ const GanttChart = ({ projects }) => {
                                 <>
                                   {/* Barra sólida para tareas - color según estado */}
                                   <div
-                                    className={`absolute inset-0 ${
-                                      item.colors.bg
-                                    } ${
+                                    className={`absolute inset-0 ${getBarFill(
+                                      groupKey,
+                                    )} ${
                                       item.status === "done" ||
                                       item.status === "completed"
                                         ? "opacity-80"
@@ -1143,9 +1264,11 @@ const GanttChart = ({ projects }) => {
                         )}
                       </div>
                     </motion.div>
-                  );
-                })}
-              </AnimatePresence>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              ))
             )}
           </div>
 
@@ -1158,7 +1281,7 @@ const GanttChart = ({ projects }) => {
                 <span>Completado</span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <div className='w-4 h-2 bg-blue-500 rounded' />
+                <div className='w-4 h-2 bg-linear-to-r from-brand-500 to-accent-500 rounded' />
                 <span>En progreso</span>
               </div>
               <div className='flex items-center gap-1.5'>
@@ -1174,7 +1297,7 @@ const GanttChart = ({ projects }) => {
                 <span>Atrasado</span>
               </div>
               <div className='flex items-center gap-1.5 ml-2 pl-2 border-l border-gray-300'>
-                <div className='w-0.5 h-4 bg-indigo-500 rounded' />
+                <div className='w-0.5 h-4 bg-brand-500 rounded' />
                 <span>Hoy</span>
               </div>
               <div className='ml-auto text-gray-400'>

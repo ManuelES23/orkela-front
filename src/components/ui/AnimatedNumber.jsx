@@ -1,32 +1,64 @@
-import { useEffect } from "react";
-import { motion, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 /**
- * Número que cuenta hacia su valor final con un spring en vez de aparecer
- * de golpe. Respeta prefers-reduced-motion mostrando el valor final directo.
+ * Número que, cuando cambia mientras el componente ya está montado, cuenta
+ * suavemente hacia el nuevo valor en vez de saltar de golpe. En el montaje
+ * (o si el componente se remonta) muestra el valor correcto de inmediato,
+ * sin animar desde cero — así nunca se queda "pegado" en 0 si el padre se
+ * remonta antes de que una animación termine. Respeta prefers-reduced-motion
+ * mostrando el valor final directo, sin pasar por el estado animado.
+ *
+ * Nota: implementado con un bucle requestAnimationFrame propio en vez de
+ * framer-motion's useSpring — en esta combinación de React 19 (StrictMode)
+ * + framer-motion 12 el spring nunca llegaba a reflejar el valor final.
  */
 const AnimatedNumber = ({ value = 0, suffix = "", className = "" }) => {
   const prefersReducedMotion = useReducedMotion();
-  const spring = useSpring(prefersReducedMotion ? value : 0, {
-    stiffness: 90,
-    damping: 20,
-  });
-  const display = useTransform(spring, (v) => `${Math.round(v)}${suffix}`);
+  const [display, setDisplay] = useState(value);
+  const prevValueRef = useRef(value);
+  const rafRef = useRef(null);
 
   useEffect(() => {
-    spring.set(value);
-  }, [value, spring]);
+    if (prefersReducedMotion) {
+      prevValueRef.current = value;
+      return undefined;
+    }
+    if (prevValueRef.current === value) {
+      return undefined;
+    }
 
-  if (prefersReducedMotion) {
-    return (
-      <span className={className}>
-        {value}
-        {suffix}
-      </span>
-    );
-  }
+    const from = prevValueRef.current;
+    const to = value;
+    prevValueRef.current = value;
 
-  return <motion.span className={className}>{display}</motion.span>;
+    const duration = 600;
+    const start = performance.now();
+    const easeOutQuad = (t) => t * (2 - t);
+
+    const tick = (now) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+      setDisplay(Math.round(from + (to - from) * easeOutQuad(t)));
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [value, prefersReducedMotion]);
+
+  const shown = prefersReducedMotion ? value : display;
+
+  return (
+    <span className={className}>
+      {shown}
+      {suffix}
+    </span>
+  );
 };
 
 export default AnimatedNumber;

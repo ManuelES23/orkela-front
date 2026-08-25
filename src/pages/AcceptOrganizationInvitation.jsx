@@ -62,8 +62,9 @@ const AcceptOrganizationInvitation = () => {
       // Cambiar contexto
       await switchContext(contextType);
 
-      // Navegar según el contexto elegido
-      if (contextType === "organization") {
+      // Navegar según el contexto elegido. Cualquier contexto que no sea
+      // "personal" es un workspace de organización (id concreto).
+      if (contextType !== "personal") {
         navigate(`/organizations/${organizationId}`);
       } else {
         navigate("/dashboard");
@@ -245,7 +246,13 @@ const AcceptOrganizationInvitation = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => handleContextSelection("organization")}
+            onClick={() =>
+              // Cambiar al workspace de la organización RECIÉN aceptada, no al
+              // legacy "organization" (que resuelve la organización previa).
+              handleContextSelection(
+                organizationId ? String(organizationId) : "organization"
+              )
+            }
             disabled={switchingContext}
             className='w-full p-4 border-2 border-brand-200 rounded-xl hover:border-brand-500 hover:bg-brand-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
           >

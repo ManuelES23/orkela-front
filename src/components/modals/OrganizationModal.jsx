@@ -250,7 +250,7 @@ const OrganizationModal = ({
     >
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
           <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
@@ -285,7 +285,7 @@ const OrganizationModal = ({
                 name='plan'
                 value={formData.plan}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white'
               >
                 {plans.map((plan) => (
                   <option key={plan.value} value={plan.value}>
@@ -386,7 +386,7 @@ const OrganizationModal = ({
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all'
                 placeholder='Ej: Mi Empresa S.A.'
               />
             </div>
@@ -402,7 +402,7 @@ const OrganizationModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none'
+              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
               placeholder='Describe brevemente tu organización...'
             />
           </div>
@@ -420,7 +420,7 @@ const OrganizationModal = ({
                   name='website'
                   value={formData.website}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='https://...'
                 />
               </div>
@@ -437,7 +437,7 @@ const OrganizationModal = ({
                   name='email'
                   value={formData.email}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='contacto@empresa.com'
                 />
               </div>
@@ -457,7 +457,7 @@ const OrganizationModal = ({
                   name='phone'
                   value={formData.phone}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='+34 612 345 678'
                 />
               </div>
@@ -474,7 +474,7 @@ const OrganizationModal = ({
                   name='address'
                   value={formData.address}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='Calle Principal 123'
                 />
               </div>
@@ -492,7 +492,7 @@ const OrganizationModal = ({
                 name='city'
                 value={formData.city}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 placeholder='Madrid'
               />
             </div>
@@ -506,7 +506,7 @@ const OrganizationModal = ({
                 name='country'
                 value={formData.country}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 placeholder='España'
               />
             </div>
@@ -524,7 +524,7 @@ const OrganizationModal = ({
                   name='industry'
                   value={formData.industry}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none bg-white'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none bg-white'
                 >
                   <option value=''>Seleccionar...</option>
                   {industries.map((industry) => (
@@ -546,7 +546,7 @@ const OrganizationModal = ({
                   name='size'
                   value={formData.size}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none bg-white'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none bg-white'
                 >
                   <option value=''>Seleccionar...</option>
                   {sizes.map((size) => (
@@ -564,7 +564,7 @@ const OrganizationModal = ({
             <button
               type='submit'
               disabled={loading}
-              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+              className='flex-1 bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
             >
               {loading ? (
                 <>

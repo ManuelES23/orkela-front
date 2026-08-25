@@ -106,7 +106,7 @@ const LicensesManagement = ({ onStatsUpdate }) => {
   const getTypeBadge = (type) => {
     const types = {
       Enterprise: {
-        color: "bg-purple-100 text-purple-700",
+        color: "bg-accent-100 text-accent-700",
         label: "Enterprise",
       },
       Professional: {
@@ -130,7 +130,7 @@ const LicensesManagement = ({ onStatsUpdate }) => {
   if (loading) {
     return (
       <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600'></div>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
       </div>
     );
   }
@@ -149,104 +149,90 @@ const LicensesManagement = ({ onStatsUpdate }) => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md'
+          className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
         >
           <Plus className='w-5 h-5' />
           <span>Nueva Licencia</span>
         </motion.button>
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+      <div className='bg-white border border-gray-200 rounded-xl divide-y divide-gray-100'>
         {licenses.map((license, index) => {
           const statusBadge = getStatusBadge(license);
           const typeBadge = getTypeBadge(license.type);
           const StatusIcon = statusBadge.icon;
-          const usagePercent =
-            (license.current_users / license.max_users) * 100;
+          const usagePercent = Math.min(
+            100,
+            (license.current_users / license.max_users) * 100,
+          );
+          const barColor =
+            usagePercent > 80
+              ? "bg-red-500"
+              : usagePercent > 50
+                ? "bg-yellow-500"
+                : "bg-green-500";
 
           return (
             <motion.div
               key={license.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className='bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all'
+              transition={{ delay: index * 0.05 }}
+              className='flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors'
             >
-              <div className='flex items-start justify-between mb-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-3 bg-indigo-100 rounded-lg'>
-                    <Key className='w-6 h-6 text-indigo-600' />
-                  </div>
-                  <div>
-                    <p className='font-mono text-sm font-semibold text-gray-900'>
-                      {license.key}
-                    </p>
-                    <span
-                      className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${typeBadge.color}`}
-                    >
-                      {typeBadge.label}
-                    </span>
-                  </div>
+              {/* Identidad */}
+              <div className='flex items-center gap-3 sm:w-64 shrink-0'>
+                <div className='w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center shrink-0'>
+                  <Key className='w-4 h-4 text-brand-600' />
                 </div>
-                <span
-                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${statusBadge.color}`}
-                >
-                  <StatusIcon className='w-4 h-4' />
-                  {statusBadge.label}
+                <p className='font-mono text-sm font-semibold text-gray-900 truncate'>
+                  {license.key}
+                </p>
+              </div>
+
+              {/* Uso */}
+              <div className='flex items-center gap-2 sm:w-40 shrink-0'>
+                <div className='flex-1 bg-gray-200 rounded-full h-1.5'>
+                  <div
+                    className={`h-1.5 rounded-full transition-all ${barColor}`}
+                    style={{ width: `${usagePercent}%` }}
+                  ></div>
+                </div>
+                <span className='text-xs text-gray-500 shrink-0'>
+                  {license.current_users}/{license.max_users}
                 </span>
               </div>
 
-              <div className='space-y-3 mb-4'>
-                <div>
-                  <div className='flex justify-between text-sm mb-1'>
-                    <span className='text-gray-600'>Usuarios</span>
-                    <span className='font-medium text-gray-900'>
-                      {license.current_users} / {license.max_users}
-                    </span>
-                  </div>
-                  <div className='w-full bg-gray-200 rounded-full h-2'>
-                    <div
-                      className={`h-2 rounded-full transition-all ${
-                        usagePercent > 80
-                          ? "bg-red-500"
-                          : usagePercent > 50
-                            ? "bg-yellow-500"
-                            : "bg-green-500"
-                      }`}
-                      style={{ width: `${usagePercent}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className='grid grid-cols-2 gap-4 text-sm'>
-                  <div>
-                    <p className='text-gray-600'>Proyectos máx.</p>
-                    <p className='font-semibold text-gray-900'>
-                      {license.max_projects}
-                    </p>
-                  </div>
-                  <div>
-                    <p className='text-gray-600'>Vencimiento</p>
-                    <p className='font-semibold text-gray-900'>
-                      {formatDate(license.expiry_date)}
-                    </p>
-                  </div>
-                </div>
+              {/* Metadatos */}
+              <div className='flex items-center flex-wrap gap-2 flex-1 text-sm'>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeBadge.color}`}
+                >
+                  {typeBadge.label}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.color}`}
+                >
+                  <StatusIcon className='w-3 h-3' />
+                  {statusBadge.label}
+                </span>
+                <span className='text-xs text-gray-500'>
+                  {license.max_projects} proyectos máx.
+                </span>
+                <span className='flex items-center gap-1 text-xs text-gray-400'>
+                  <Calendar className='w-3 h-3' />
+                  Vence {formatDate(license.expiry_date)}
+                </span>
               </div>
 
-              <div className='flex items-center justify-between pt-4 border-t border-gray-200'>
-                <div className='flex items-center gap-1 text-xs text-gray-500'>
-                  <Calendar className='w-3 h-3' />
-                  Emitida: {formatDate(license.issued_date)}
-                </div>
-                <div className='flex gap-2'>
-                  <button className='p-2 hover:bg-blue-50 rounded-lg transition'>
-                    <Edit className='w-4 h-4 text-blue-600' />
-                  </button>
-                  <button className='p-2 hover:bg-red-50 rounded-lg transition'>
-                    <Trash2 className='w-4 h-4 text-red-600' />
-                  </button>
-                </div>
+              {/* Acciones */}
+              <div className='flex items-center gap-1 shrink-0'>
+                <button className='p-2 hover:bg-blue-50 rounded-lg transition'>
+                  <Edit className='w-4 h-4 text-blue-600' />
+                </button>
+                <button className='p-2 hover:bg-red-50 rounded-lg transition'>
+                  <Trash2 className='w-4 h-4 text-red-600' />
+                </button>
               </div>
             </motion.div>
           );

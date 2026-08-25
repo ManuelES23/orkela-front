@@ -93,15 +93,15 @@ const RemovedFromOrgModal = ({
 
                   <ul className='space-y-2 text-sm text-gray-600'>
                     <li className='flex items-center gap-2'>
-                      <div className='w-1.5 h-1.5 bg-indigo-500 rounded-full' />
+                      <div className='w-1.5 h-1.5 bg-brand-500 rounded-full' />
                       Acceder a tus proyectos personales
                     </li>
                     <li className='flex items-center gap-2'>
-                      <div className='w-1.5 h-1.5 bg-indigo-500 rounded-full' />
+                      <div className='w-1.5 h-1.5 bg-brand-500 rounded-full' />
                       Ver equipos donde colaboras
                     </li>
                     <li className='flex items-center gap-2'>
-                      <div className='w-1.5 h-1.5 bg-indigo-500 rounded-full' />
+                      <div className='w-1.5 h-1.5 bg-brand-500 rounded-full' />
                       Crear y gestionar tus propios recursos
                     </li>
                   </ul>
@@ -112,7 +112,7 @@ const RemovedFromOrgModal = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleContinue}
-                  className='w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-indigo-600 to-indigo-700 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg shadow-indigo-200'
+                  className='w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-brand-600 to-brand-700 text-white rounded-xl font-semibold hover:from-brand-700 hover:to-brand-800 transition-all shadow-lg shadow-brand-200'
                 >
                   <User className='w-5 h-5' />
                   Continuar en Modo Personal

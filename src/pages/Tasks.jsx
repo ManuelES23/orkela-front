@@ -9,6 +9,9 @@ import { useRealtime } from "../context/RealtimeContext";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
+import ProgressRing from "../components/ui/ProgressRing";
+import AnimatedNumber from "../components/ui/AnimatedNumber";
+import { motionTokens } from "../components/animations/variants";
 import {
   Plus,
   Search,
@@ -20,7 +23,6 @@ import {
   Edit,
   Trash2,
   Loader2,
-  ListTodo,
   CheckSquare,
   Square,
   ChevronDown,
@@ -284,6 +286,13 @@ const Tasks = () => {
     done: "Completada",
   };
 
+  const statusTabs = [
+    { key: "all", label: "Todas" },
+    { key: "todo", label: "Por hacer" },
+    { key: "in-progress", label: "En progreso" },
+    { key: "done", label: "Completadas" },
+  ];
+
   // Función para calcular días hasta vencimiento
   const getDaysUntilDue = (dueDate) => {
     if (!dueDate) return null;
@@ -370,7 +379,7 @@ const Tasks = () => {
                 placeholder='Buscar tareas...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
             <motion.button
@@ -387,7 +396,7 @@ const Tasks = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleNewTask}
-            className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition w-full md:w-auto justify-center'
+            className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition w-full md:w-auto justify-center'
           >
             <Plus className='w-5 h-5' />
             Nueva Tarea
@@ -395,115 +404,140 @@ const Tasks = () => {
         </div>
       </FadeIn>
 
-      {/* Tabs */}
-      <FadeIn delay={0.2}>
-        <div className='flex flex-wrap gap-2 mb-6 border-b border-gray-200'>
-          {/* Tabs de estado */}
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-              activeTab === "all"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Todas ({tasks.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("todo")}
-            className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-              activeTab === "todo"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Por hacer ({tasks.filter((t) => t.status === "todo").length})
-          </button>
-          <button
-            onClick={() => setActiveTab("in-progress")}
-            className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-              activeTab === "in-progress"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            En progreso (
-            {tasks.filter((t) => t.status === "in-progress").length})
-          </button>
-          <button
-            onClick={() => setActiveTab("done")}
-            className={`px-4 py-2 border-b-2 font-medium transition-colors ${
-              activeTab === "done"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Completadas ({tasks.filter((t) => t.status === "done").length})
-          </button>
-
-          {/* Separador */}
-          <div className='border-l border-gray-300 mx-2 h-8 self-center' />
-
-          {/* Tabs de fecha */}
-          <button
-            onClick={() => setActiveTab("today")}
-            className={`px-4 py-2 border-b-2 font-medium flex items-center gap-1.5 transition-colors ${
+      {/* Franja resumen - contadores animados por urgencia */}
+      <FadeIn delay={0.15}>
+        <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6'>
+          {/* Vencen hoy */}
+          <motion.button
+            type='button'
+            onClick={() =>
+              setActiveTab(activeTab === "today" ? "all" : "today")
+            }
+            whileHover={{ y: -2 }}
+            transition={motionTokens.springSnappy}
+            className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               activeTab === "today"
-                ? "border-orange-500 text-orange-600"
-                : taskCounts.dueToday > 0
-                  ? "border-transparent text-orange-600 hover:text-orange-700 bg-orange-50 rounded-t-lg"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
+                ? "bg-orange-50 border-orange-300 ring-1 ring-orange-300"
+                : "bg-white border-gray-200 hover:border-orange-200"
             }`}
           >
-            <Clock className='w-4 h-4' />
-            Hoy
-            {taskCounts.dueToday > 0 && (
-              <span className='ml-1 px-1.5 py-0.5 text-xs font-bold bg-orange-500 text-white rounded-full'>
-                {taskCounts.dueToday}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("upcoming")}
-            className={`px-4 py-2 border-b-2 font-medium flex items-center gap-1.5 transition-colors ${
+            <div className='w-10 h-10 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0'>
+              <Clock className='w-5 h-5' />
+            </div>
+            <div>
+              <p className='text-2xl font-bold text-gray-900 leading-none font-mono'>
+                <AnimatedNumber value={taskCounts.dueToday} />
+              </p>
+              <p className='text-xs font-medium text-gray-500 mt-1'>
+                Vencen hoy
+              </p>
+            </div>
+          </motion.button>
+
+          {/* Próximas */}
+          <motion.button
+            type='button'
+            onClick={() =>
+              setActiveTab(activeTab === "upcoming" ? "all" : "upcoming")
+            }
+            whileHover={{ y: -2 }}
+            transition={motionTokens.springSnappy}
+            className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               activeTab === "upcoming"
-                ? "border-yellow-500 text-yellow-600"
-                : taskCounts.dueSoon > 0
-                  ? "border-transparent text-yellow-600 hover:text-yellow-700 bg-yellow-50 rounded-t-lg"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
+                ? "bg-yellow-50 border-yellow-300 ring-1 ring-yellow-300"
+                : "bg-white border-gray-200 hover:border-yellow-200"
             }`}
           >
-            <CalendarClock className='w-4 h-4' />
-            Próximas
-            {taskCounts.dueSoon > 0 && (
-              <span className='ml-1 px-1.5 py-0.5 text-xs font-bold bg-yellow-500 text-white rounded-full'>
-                {taskCounts.dueSoon}
-              </span>
-            )}
-          </button>
-          {taskCounts.overdue > 0 && (
-            <button
-              onClick={() => setActiveTab("overdue")}
-              className={`px-4 py-2 border-b-2 font-medium flex items-center gap-1.5 transition-colors ${
-                activeTab === "overdue"
-                  ? "border-red-500 text-red-600"
-                  : "border-transparent text-red-600 hover:text-red-700 bg-red-50 rounded-t-lg animate-pulse"
+            <div className='w-10 h-10 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center shrink-0'>
+              <CalendarClock className='w-5 h-5' />
+            </div>
+            <div>
+              <p className='text-2xl font-bold text-gray-900 leading-none font-mono'>
+                <AnimatedNumber value={taskCounts.dueSoon} />
+              </p>
+              <p className='text-xs font-medium text-gray-500 mt-1'>
+                Próximas (3 días)
+              </p>
+            </div>
+          </motion.button>
+
+          {/* Vencidas */}
+          <motion.button
+            type='button'
+            onClick={() =>
+              taskCounts.overdue > 0 &&
+              setActiveTab(activeTab === "overdue" ? "all" : "overdue")
+            }
+            whileHover={taskCounts.overdue > 0 ? { y: -2 } : undefined}
+            transition={motionTokens.springSnappy}
+            className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
+              taskCounts.overdue === 0
+                ? "bg-green-50 border-green-200 cursor-default"
+                : activeTab === "overdue"
+                  ? "bg-red-50 border-red-300 ring-1 ring-red-300"
+                  : "bg-white border-gray-200 hover:border-red-200 animate-pulse"
+            }`}
+          >
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                taskCounts.overdue === 0
+                  ? "bg-green-100 text-green-600"
+                  : "bg-red-100 text-red-600"
               }`}
             >
-              <AlertTriangle className='w-4 h-4' />
-              Vencidas
-              <span className='ml-1 px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full'>
-                {taskCounts.overdue}
-              </span>
-            </button>
-          )}
+              <AlertTriangle className='w-5 h-5' />
+            </div>
+            <div>
+              <p className='text-2xl font-bold text-gray-900 leading-none font-mono'>
+                <AnimatedNumber value={taskCounts.overdue} />
+              </p>
+              <p className='text-xs font-medium text-gray-500 mt-1'>
+                {taskCounts.overdue === 0 ? "¡Todo al día!" : "Vencidas"}
+              </p>
+            </div>
+          </motion.button>
+        </div>
+      </FadeIn>
+
+      {/* Tabs de estado - píldoras con indicador deslizante */}
+      <FadeIn delay={0.2}>
+        <div className='flex flex-wrap gap-1 mb-6 p-1 bg-gray-100 rounded-xl w-fit'>
+          {statusTabs.map((tab) => {
+            const count =
+              tab.key === "all"
+                ? tasks.length
+                : tasks.filter((t) => t.status === tab.key).length;
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  active
+                    ? "text-brand-700"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId='tasks-status-tab'
+                    transition={motionTokens.springSnappy}
+                    className='absolute inset-0 rounded-lg bg-white shadow-sm'
+                  />
+                )}
+                <span className='relative'>
+                  {tab.label} ({count})
+                </span>
+              </button>
+            );
+          })}
         </div>
       </FadeIn>
 
       {/* Loading y Error States */}
       {loading && (
         <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
         </div>
       )}
 
@@ -803,46 +837,45 @@ const Tasks = () => {
 
                           {/* Indicador de Checklist - Clickeable para expandir */}
                           {task.checklist_items &&
-                            task.checklist_items.length > 0 && (
-                              <button
-                                type='button'
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleChecklist(task.id);
-                                }}
-                                className='flex items-center gap-1 text-gray-600 hover:text-indigo-600 transition-colors'
-                              >
-                                <ListTodo className='w-4 h-4' />
-                                <span className='text-xs'>
-                                  {
-                                    task.checklist_items.filter(
-                                      (item) => item.is_completed,
-                                    ).length
-                                  }
-                                  /{task.checklist_items.length}
-                                </span>
-                                {/* Mini barra de progreso */}
-                                <div className='w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden'>
-                                  <div
-                                    className='h-full bg-green-500 rounded-full transition-all duration-300'
-                                    style={{
-                                      width: `${
-                                        (task.checklist_items.filter(
-                                          (item) => item.is_completed,
-                                        ).length /
-                                          task.checklist_items.length) *
-                                        100
-                                      }%`,
-                                    }}
+                            task.checklist_items.length > 0 &&
+                            (() => {
+                              const completedCount =
+                                task.checklist_items.filter(
+                                  (item) => item.is_completed,
+                                ).length;
+                              const totalCount = task.checklist_items.length;
+                              const pct = Math.round(
+                                (completedCount / totalCount) * 100,
+                              );
+                              return (
+                                <button
+                                  type='button'
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleChecklist(task.id);
+                                  }}
+                                  className='flex items-center gap-1.5 text-gray-600 hover:text-brand-600 transition-colors'
+                                >
+                                  <ProgressRing
+                                    percentage={pct}
+                                    size={22}
+                                    strokeWidth={2.5}
+                                    color={
+                                      pct === 100 ? "#22c55e" : "#7c3aed"
+                                    }
+                                    trackColor='#e5e7eb'
                                   />
-                                </div>
-                                {expandedChecklists[task.id] ? (
-                                  <ChevronUp className='w-3 h-3' />
-                                ) : (
-                                  <ChevronDown className='w-3 h-3' />
-                                )}
-                              </button>
-                            )}
+                                  <span className='text-xs'>
+                                    {completedCount}/{totalCount}
+                                  </span>
+                                  {expandedChecklists[task.id] ? (
+                                    <ChevronUp className='w-3 h-3' />
+                                  ) : (
+                                    <ChevronDown className='w-3 h-3' />
+                                  )}
+                                </button>
+                              );
+                            })()}
 
                           {/* Selector de Estado */}
                           {canEditOrDeleteTask(task) ? (

@@ -43,20 +43,20 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
 
     if (type === "organization") {
       return isSelected
-        ? `${baseStyles} border-purple-500 bg-purple-50 ring-2 ring-purple-200`
-        : `${baseStyles} border-gray-200 hover:border-purple-300 hover:bg-purple-50/50`;
+        ? `${baseStyles} border-accent-500 bg-accent-50 ring-2 ring-accent-200`
+        : `${baseStyles} border-gray-200 hover:border-accent-300 hover:bg-accent-50/50`;
     }
     return isSelected
-      ? `${baseStyles} border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200`
-      : `${baseStyles} border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50`;
+      ? `${baseStyles} border-brand-500 bg-brand-50 ring-2 ring-brand-200`
+      : `${baseStyles} border-gray-200 hover:border-brand-300 hover:bg-brand-50/50`;
   };
 
   const getIconBgColor = (type) => {
-    return type === "organization" ? "bg-purple-100" : "bg-indigo-100";
+    return type === "organization" ? "bg-accent-100" : "bg-brand-100";
   };
 
   const getIconColor = (type) => {
-    return type === "organization" ? "text-purple-600" : "text-indigo-600";
+    return type === "organization" ? "text-accent-600" : "text-brand-600";
   };
 
   return (
@@ -82,7 +82,7 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
             <div className='bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden'>
               {/* Header */}
               <div className='p-6 pb-4 text-center border-b border-gray-100'>
-                <div className='w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4'>
+                <div className='w-16 h-16 bg-gradient-to-br from-brand-500 to-accent-600 rounded-2xl flex items-center justify-center mx-auto mb-4'>
                   <User className='w-8 h-8 text-white' />
                 </div>
                 <h2 className='text-2xl font-bold text-gray-900 mb-2'>
@@ -168,7 +168,7 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
                 <button
                   onClick={handleContinue}
                   disabled={!selectedContext || loading}
-                  className='w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='w-full flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {loading ? (
                     <>

@@ -75,7 +75,7 @@ const NotificationsPanel = () => {
 
       case "task_updated":
       case "task_status_changed":
-        return <RefreshCw className='w-4 h-4 text-indigo-500' />;
+        return <RefreshCw className='w-4 h-4 text-brand-500' />;
 
       case "task_completed":
         return <CheckCircle className='w-4 h-4 text-green-600' />;
@@ -84,7 +84,7 @@ const NotificationsPanel = () => {
         return <ListTodo className='w-4 h-4 text-green-600' />;
 
       case "checklist_item_updated":
-        return <ListTodo className='w-4 h-4 text-indigo-500' />;
+        return <ListTodo className='w-4 h-4 text-brand-500' />;
 
       case "task_due_soon":
         return <Clock className='w-4 h-4 text-yellow-500' />;
@@ -102,7 +102,7 @@ const NotificationsPanel = () => {
       case "team_invitation_received":
         return <MailPlus className='w-4 h-4 text-purple-500' />;
       case "organization_invitation_received":
-        return <Building2 className='w-4 h-4 text-indigo-500' />;
+        return <Building2 className='w-4 h-4 text-brand-500' />;
 
       // Invitaciones aceptadas
       case "project_invitation_accepted":
@@ -122,7 +122,7 @@ const NotificationsPanel = () => {
       case "organization_member_left":
         return <Building2 className='w-4 h-4 text-orange-500' />;
       case "organization_role_updated":
-        return <Building2 className='w-4 h-4 text-indigo-500' />;
+        return <Building2 className='w-4 h-4 text-brand-500' />;
 
       // Tickets
       case "ticket_created":
@@ -130,7 +130,7 @@ const NotificationsPanel = () => {
       case "ticket_taken":
         return <UserCheck className='w-4 h-4 text-blue-500' />;
       case "ticket_assigned":
-        return <UserCheck className='w-4 h-4 text-indigo-500' />;
+        return <UserCheck className='w-4 h-4 text-brand-500' />;
       case "ticket_status_changed":
         return <RefreshCw className='w-4 h-4 text-blue-500' />;
       case "ticket_resolved":
@@ -169,7 +169,7 @@ const NotificationsPanel = () => {
       case "task_updated":
       case "task_status_changed":
       case "checklist_item_updated":
-        return "bg-indigo-50";
+        return "bg-brand-50";
 
       case "task_due_soon":
         return "bg-yellow-50";
@@ -184,7 +184,7 @@ const NotificationsPanel = () => {
       case "organization_member_left":
         return "bg-orange-50";
       case "organization_role_updated":
-        return "bg-indigo-50";
+        return "bg-brand-50";
 
       // Tickets
       case "ticket_created":
@@ -193,7 +193,7 @@ const NotificationsPanel = () => {
       case "ticket_assigned":
         return "bg-blue-50";
       case "ticket_status_changed":
-        return "bg-indigo-50";
+        return "bg-brand-50";
       case "ticket_resolved":
         return "bg-green-50";
       case "ticket_returned_to_inbox":
@@ -246,7 +246,7 @@ const NotificationsPanel = () => {
             className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 md:w-120 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
           >
             {/* Header */}
-            <div className='px-4 py-3 bg-linear-to-r from-indigo-50 to-white border-b border-gray-100'>
+            <div className='px-4 py-3 bg-linear-to-r from-brand-50 to-white border-b border-gray-100'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
                   <h3 className='font-semibold text-gray-900'>
@@ -262,7 +262,7 @@ const NotificationsPanel = () => {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className='p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
+                      className='p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors'
                       title='Marcar todas como leídas'
                     >
                       <CheckCheck className='w-4 h-4' />
@@ -330,7 +330,7 @@ const NotificationsPanel = () => {
                             </p>
                           </div>
                           {!notification.read && (
-                            <span className='w-2 h-2 bg-indigo-500 rounded-full shrink-0 mt-2' />
+                            <span className='w-2 h-2 bg-brand-500 rounded-full shrink-0 mt-2' />
                           )}
                         </div>
                       </motion.div>

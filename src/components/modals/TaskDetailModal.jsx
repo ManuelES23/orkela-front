@@ -246,7 +246,7 @@ const TaskDetailModal = ({
     <Modal isOpen={isOpen} onClose={onClose} title='Detalle de Tarea' size='lg'>
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando tarea...</p>
           <p className='text-gray-400 text-sm mt-1'>
             Preparando detalles de la tarea
@@ -584,14 +584,14 @@ const TaskDetailModal = ({
                   }}
                   placeholder='Agregar subtarea...'
                   disabled={addingItem}
-                  className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed'
+                  className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed'
                 />
               </div>
               <button
                 type='button'
                 onClick={handleAddItem}
                 disabled={!newItemText.trim() || addingItem}
-                className='px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1'
+                className='px-3 py-2 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1'
               >
                 {addingItem ? (
                   <Loader2 className='w-4 h-4 animate-spin' />

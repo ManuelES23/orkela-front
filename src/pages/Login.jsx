@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { LogIn, Mail, Lock, Loader2, Info } from "lucide-react";
-import { motion } from "framer-motion";
-import {
-  FadeIn,
-  ScaleIn,
-  SlideInLeft,
-} from "../components/animations/MotionComponents";
+import { LogIn, Mail, Lock, Info, AlertCircle } from "lucide-react";
+import AuthShell from "../components/auth/AuthShell";
+import AuthInput from "../components/auth/AuthInput";
+import Button from "../components/ui/Button";
+import { motionTokens, shakeVariants } from "../components/animations/variants";
 import ContextSelectionModal from "../components/modals/ContextSelectionModal";
 
 const Login = () => {
@@ -24,6 +23,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [shakeKey, setShakeKey] = useState(0);
   const [showContextModal, setShowContextModal] = useState(false);
   const [pendingUser, setPendingUser] = useState(null);
   const [contextLoading, setContextLoading] = useState(false);
@@ -73,7 +73,9 @@ const Login = () => {
       // Si no tiene múltiples contextos, navegar directamente
       navigateToDestination(userData);
     } catch (err) {
+      console.error("Error al iniciar sesión:", err);
       setError("Error al iniciar sesión. Verifica tus credenciales.");
+      setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
@@ -103,180 +105,122 @@ const Login = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 flex items-center justify-center p-4 relative overflow-hidden'>
-      {/* Elementos decorativos animados */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          rotate: [0, 90, 0],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          repeatType: "reverse",
-        }}
-        className='absolute top-10 right-10 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70'
-      />
-      <motion.div
-        animate={{
-          scale: [1, 1.3, 1],
-          rotate: [0, -90, 0],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          repeatType: "reverse",
-        }}
-        className='absolute bottom-10 left-10 w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70'
-      />
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, type: "spring" }}
-        className='max-w-md w-full relative z-10'
-      >
-        {/* Logo y título */}
-        <FadeIn delay={0.2} className='text-center mb-8'>
-          <ScaleIn delay={0.3}>
-            <div className='inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4 shadow-lg'>
-              <LogIn className='w-8 h-8 text-white' />
+    <AuthShell
+      badge='Tiempo real, sin fricción'
+      heading='Organiza tus proyectos con claridad'
+      description='Equipos, tareas y tickets en un solo lugar — con notificaciones al instante.'
+      formHeader={
+        <div className='mb-9'>
+          <h2 className='text-3xl font-extrabold text-gray-900 mb-2 tracking-tight'>
+            Bienvenido de nuevo
+          </h2>
+          <p className='text-gray-500 text-base'>
+            Inicia sesión para continuar en tu espacio de trabajo.
+          </p>
+        </div>
+      }
+    >
+      <AnimatePresence>
+        {invitationMessage && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: motionTokens.duration.base }}
+            className='overflow-hidden'
+          >
+            <div className='mb-4 p-3 bg-brand-50 border border-brand-200 rounded-lg flex items-start gap-2'>
+              <Info className='w-5 h-5 text-brand-600 shrink-0 mt-0.5' />
+              <p className='text-brand-700 text-sm'>{invitationMessage}</p>
             </div>
-          </ScaleIn>
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className='text-3xl font-bold text-gray-900 mb-2'
-          >
-            Orkela Projects
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className='text-gray-600'
-          >
-            Gestiona tus proyectos de manera eficiente
-          </motion.p>
-        </FadeIn>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Formulario */}
-        <SlideInLeft delay={0.6}>
-          <div className='bg-white rounded-2xl shadow-xl p-8'>
-            <h2 className='text-2xl font-semibold text-gray-900 mb-6'>
-              Iniciar Sesión
-            </h2>
-
-            {/* Mensaje de invitación */}
-            {invitationMessage && (
-              <div className='mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-start gap-2'>
-                <Info className='w-5 h-5 text-indigo-600 shrink-0 mt-0.5' />
-                <p className='text-indigo-700 text-sm'>{invitationMessage}</p>
-              </div>
-            )}
-
-            {error && (
-              <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm'>
+      <motion.form
+        key={shakeKey}
+        variants={shakeVariants}
+        initial='initial'
+        animate={shakeKey > 0 ? "shake" : "initial"}
+        onSubmit={handleSubmit}
+        className='space-y-6'
+        noValidate
+      >
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: motionTokens.duration.fast }}
+              className='overflow-hidden'
+            >
+              <div
+                role='alert'
+                className='mb-1 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-2'
+              >
+                <AlertCircle className='w-4 h-4 shrink-0 mt-0.5' />
                 {error}
               </div>
-            )}
-
-            <form onSubmit={handleSubmit} className='space-y-5'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Correo Electrónico
-                </label>
-                <div className='relative'>
-                  <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                  <input
-                    type='email'
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
-                    placeholder='tu@email.com'
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Contraseña
-                </label>
-                <div className='relative'>
-                  <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                  <input
-                    type='password'
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition'
-                    placeholder='••••••••'
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className='flex items-center justify-between text-sm'>
-                <label className='flex items-center'>
-                  <input
-                    type='checkbox'
-                    className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
-                  />
-                  <span className='ml-2 text-gray-600'>Recordarme</span>
-                </label>
-                <a
-                  href='#'
-                  className='text-indigo-600 hover:text-indigo-700 font-medium'
-                >
-                  ¿Olvidaste tu contraseña?
-                </a>
-              </div>
-
-              <button
-                type='submit'
-                disabled={loading}
-                className='w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 hover:shadow-lg'
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className='w-5 h-5 animate-spin' />
-                    Iniciando sesión...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className='w-5 h-5' />
-                    Iniciar Sesión
-                  </>
-                )}
-              </button>
-            </form>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className='mt-6 text-center'
-            >
-              <p className='text-gray-600'>
-                ¿No tienes una cuenta?{" "}
-                <Link
-                  to='/register'
-                  className='text-indigo-600 hover:text-indigo-700 font-semibold'
-                >
-                  Regístrate aquí
-                </Link>
-              </p>
             </motion.div>
-          </div>
-        </SlideInLeft>
+          )}
+        </AnimatePresence>
 
-        {/* Footer */}
-        <FadeIn delay={0.9}>
-          <p className='text-center text-gray-500 text-sm mt-8'>
-            © 2025 Orkela Projects. Todos los derechos reservados.
-          </p>
-        </FadeIn>
-      </motion.div>
+        <AuthInput
+          label='Correo electrónico'
+          icon={Mail}
+          type='email'
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder='tu@empresa.com'
+          autoComplete='email'
+          required
+        />
+
+        <div>
+          <AuthInput
+            label='Contraseña'
+            icon={Lock}
+            type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder='••••••••'
+            autoComplete='current-password'
+            required
+          />
+          <div className='flex justify-end mt-2.5'>
+            <a href='#' className='text-sm font-semibold text-brand-600 hover:text-brand-700'>
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+        </div>
+
+        <label className='flex items-center gap-2.5 text-base text-gray-600'>
+          <input
+            type='checkbox'
+            className='w-[18px] h-[18px] rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+          />
+          Recordarme en este dispositivo
+        </label>
+
+        <Button
+          type='submit'
+          variant='brand'
+          size='xl'
+          loading={loading}
+          loadingText='Iniciando sesión...'
+          className='w-full'
+        >
+          <LogIn className='w-5 h-5' />
+          Iniciar sesión
+        </Button>
+
+        <p className='text-center text-base text-gray-500 pt-1'>
+          ¿No tienes cuenta?{" "}
+          <Link to='/register' className='font-semibold text-brand-600 hover:text-brand-700'>
+            Regístrate gratis
+          </Link>
+        </p>
+      </motion.form>
 
       {/* Modal de selección de contexto */}
       <ContextSelectionModal
@@ -285,7 +229,7 @@ const Login = () => {
         onSelect={handleContextSelect}
         loading={contextLoading}
       />
-    </div>
+    </AuthShell>
   );
 };
 

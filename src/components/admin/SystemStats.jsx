@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -6,7 +6,6 @@ import {
   FolderKanban,
   CheckCircle,
   Activity,
-  Calendar,
   Clock,
 } from "lucide-react";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
@@ -39,30 +38,17 @@ ChartJS.register(
 );
 
 const SystemStats = () => {
-  const [stats, setStats] = useState({
-    dailyActiveUsers: [],
-    projectsCreated: [],
-    tasksCompleted: [],
-    usersByRole: [],
+  // Simulación de datos estadísticos
+  const [stats] = useState({
+    dailyActiveUsers: [12, 19, 15, 22, 18, 25, 20],
+    projectsCreated: [3, 5, 2, 8, 4, 6, 7],
+    tasksCompleted: [15, 22, 18, 30, 25, 28, 32],
+    usersByRole: [
+      { role: "Super Admin", count: 2 },
+      { role: "Admin", count: 5 },
+      { role: "Usuario", count: 15 },
+    ],
   });
-
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
-    // Simulación de datos estadísticos
-    setStats({
-      dailyActiveUsers: [12, 19, 15, 22, 18, 25, 20],
-      projectsCreated: [3, 5, 2, 8, 4, 6, 7],
-      tasksCompleted: [15, 22, 18, 30, 25, 28, 32],
-      usersByRole: [
-        { role: "Super Admin", count: 2 },
-        { role: "Admin", count: 5 },
-        { role: "Usuario", count: 15 },
-      ],
-    });
-  };
 
   // Datos para gráfico de usuarios activos
   const activeUsersData = {
@@ -71,8 +57,8 @@ const SystemStats = () => {
       {
         label: "Usuarios Activos",
         data: stats.dailyActiveUsers,
-        borderColor: "rgb(79, 70, 229)",
-        backgroundColor: "rgba(79, 70, 229, 0.1)",
+        borderColor: "rgb(124, 58, 237)",
+        backgroundColor: "rgba(124, 58, 237, 0.12)",
         fill: true,
         tension: 0.4,
       },
@@ -86,7 +72,7 @@ const SystemStats = () => {
       {
         label: "Proyectos Creados",
         data: stats.projectsCreated,
-        backgroundColor: "rgba(34, 197, 94, 0.8)",
+        backgroundColor: "rgba(217, 70, 239, 0.8)",
       },
     ],
   };
@@ -110,7 +96,7 @@ const SystemStats = () => {
       {
         data: stats.usersByRole.map((u) => u.count),
         backgroundColor: [
-          "rgba(147, 51, 234, 0.8)",
+          "rgba(217, 70, 239, 0.8)",
           "rgba(59, 130, 246, 0.8)",
           "rgba(107, 114, 128, 0.8)",
         ],
@@ -154,28 +140,28 @@ const SystemStats = () => {
         </p>
       </div>
 
-      {/* Gráficos principales */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        {/* Usuarios activos */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className='bg-white border border-gray-200 rounded-xl p-6'
-        >
-          <div className='flex items-center gap-3 mb-4'>
-            <div className='p-2 bg-indigo-100 rounded-lg'>
-              <Users className='w-5 h-5 text-indigo-600' />
-            </div>
-            <div>
-              <h4 className='font-semibold text-gray-900'>Usuarios Activos</h4>
-              <p className='text-sm text-gray-600'>Última semana</p>
-            </div>
+      {/* Gráfico protagonista: usuarios activos */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className='bg-white border border-gray-200 rounded-xl p-6'
+      >
+        <div className='flex items-center gap-3 mb-4'>
+          <div className='p-2 bg-brand-100 rounded-lg'>
+            <Users className='w-5 h-5 text-brand-600' />
           </div>
-          <div style={{ height: "250px" }}>
-            <Line data={activeUsersData} options={chartOptions} />
+          <div>
+            <h4 className='font-semibold text-gray-900'>Usuarios Activos</h4>
+            <p className='text-sm text-gray-600'>Última semana</p>
           </div>
-        </motion.div>
+        </div>
+        <div style={{ height: "300px" }}>
+          <Line data={activeUsersData} options={chartOptions} />
+        </div>
+      </motion.div>
 
+      {/* Gráficos secundarios */}
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         {/* Proyectos creados */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -184,15 +170,15 @@ const SystemStats = () => {
           className='bg-white border border-gray-200 rounded-xl p-6'
         >
           <div className='flex items-center gap-3 mb-4'>
-            <div className='p-2 bg-green-100 rounded-lg'>
-              <FolderKanban className='w-5 h-5 text-green-600' />
+            <div className='p-2 bg-accent-100 rounded-lg'>
+              <FolderKanban className='w-5 h-5 text-accent-600' />
             </div>
             <div>
-              <h4 className='font-semibold text-gray-900'>Proyectos Creados</h4>
+              <h4 className='font-semibold text-gray-900'>Proyectos</h4>
               <p className='text-sm text-gray-600'>Última semana</p>
             </div>
           </div>
-          <div style={{ height: "250px" }}>
+          <div style={{ height: "200px" }}>
             <Bar data={projectsData} options={chartOptions} />
           </div>
         </motion.div>
@@ -209,13 +195,11 @@ const SystemStats = () => {
               <CheckCircle className='w-5 h-5 text-blue-600' />
             </div>
             <div>
-              <h4 className='font-semibold text-gray-900'>
-                Tareas Completadas
-              </h4>
+              <h4 className='font-semibold text-gray-900'>Tareas</h4>
               <p className='text-sm text-gray-600'>Última semana</p>
             </div>
           </div>
-          <div style={{ height: "250px" }}>
+          <div style={{ height: "200px" }}>
             <Bar data={tasksData} options={chartOptions} />
           </div>
         </motion.div>
@@ -228,17 +212,15 @@ const SystemStats = () => {
           className='bg-white border border-gray-200 rounded-xl p-6'
         >
           <div className='flex items-center gap-3 mb-4'>
-            <div className='p-2 bg-purple-100 rounded-lg'>
-              <Activity className='w-5 h-5 text-purple-600' />
+            <div className='p-2 bg-gray-100 rounded-lg'>
+              <Activity className='w-5 h-5 text-gray-600' />
             </div>
             <div>
-              <h4 className='font-semibold text-gray-900'>
-                Distribución de Roles
-              </h4>
+              <h4 className='font-semibold text-gray-900'>Roles</h4>
               <p className='text-sm text-gray-600'>Usuarios por rol</p>
             </div>
           </div>
-          <div style={{ height: "250px" }}>
+          <div style={{ height: "200px" }}>
             <Doughnut data={rolesData} options={doughnutOptions} />
           </div>
         </motion.div>
@@ -246,28 +228,28 @@ const SystemStats = () => {
 
       {/* Métricas adicionales */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6'>
+        <div className='bg-white border border-gray-200 border-l-4 border-l-brand-500 rounded-xl p-6'>
           <div className='flex items-center justify-between mb-2'>
-            <Activity className='w-8 h-8 text-blue-600' />
+            <Activity className='w-8 h-8 text-brand-600' />
           </div>
-          <h3 className='text-3xl font-bold text-blue-900 mb-1'>98.5%</h3>
-          <p className='text-blue-700 text-sm'>Tiempo de actividad</p>
+          <h3 className='text-3xl font-bold text-gray-900 mb-1'>98.5%</h3>
+          <p className='text-gray-500 text-sm'>Tiempo de actividad</p>
         </div>
 
-        <div className='bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6'>
+        <div className='bg-white border border-gray-200 border-l-4 border-l-green-500 rounded-xl p-6'>
           <div className='flex items-center justify-between mb-2'>
             <TrendingUp className='w-8 h-8 text-green-600' />
           </div>
-          <h3 className='text-3xl font-bold text-green-900 mb-1'>+24%</h3>
-          <p className='text-green-700 text-sm'>Crecimiento mensual</p>
+          <h3 className='text-3xl font-bold text-gray-900 mb-1'>+24%</h3>
+          <p className='text-gray-500 text-sm'>Crecimiento mensual</p>
         </div>
 
-        <div className='bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6'>
+        <div className='bg-white border border-gray-200 border-l-4 border-l-accent-500 rounded-xl p-6'>
           <div className='flex items-center justify-between mb-2'>
-            <Clock className='w-8 h-8 text-purple-600' />
+            <Clock className='w-8 h-8 text-accent-600' />
           </div>
-          <h3 className='text-3xl font-bold text-purple-900 mb-1'>2.4h</h3>
-          <p className='text-purple-700 text-sm'>Promedio de uso diario</p>
+          <h3 className='text-3xl font-bold text-gray-900 mb-1'>2.4h</h3>
+          <p className='text-gray-500 text-sm'>Promedio de uso diario</p>
         </div>
       </div>
     </div>

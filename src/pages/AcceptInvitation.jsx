@@ -2,15 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { invitationsAPI } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
-import {
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Mail,
-  UserPlus,
-  LogIn,
-  AlertTriangle,
-} from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
+import AuthStatusScreen from "../components/auth/AuthStatusScreen";
+import Button from "../components/ui/Button";
 
 const AcceptInvitation = () => {
   const { token } = useParams();
@@ -21,6 +15,25 @@ const AcceptInvitation = () => {
   const [project, setProject] = useState(null);
   const [invitationInfo, setInvitationInfo] = useState(null);
   const isProcessing = useRef(false);
+
+  const acceptInvitation = async () => {
+    setStatus("accepting");
+    try {
+      const response = await invitationsAPI.acceptInvitation(token);
+      setStatus("success");
+      setMessage(response.message);
+      setProject(response.project);
+
+      // Redirigir al proyecto después de 3 segundos
+      setTimeout(() => {
+        navigate(`/projects/${response.project.id}`);
+      }, 3000);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err.message || "Error al aceptar la invitación");
+      isProcessing.current = false;
+    }
+  };
 
   // Paso 1: Obtener info de la invitación (público, sin auth)
   useEffect(() => {
@@ -35,7 +48,6 @@ const AcceptInvitation = () => {
 
         // Si el usuario ya está autenticado, proceder a aceptar
         if (user) {
-          setStatus("accepting");
           await acceptInvitation();
         } else {
           // Redirigir según si el usuario existe o no
@@ -78,141 +90,100 @@ const AcceptInvitation = () => {
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
     if (user && invitationInfo && status === "redirecting") {
-      setStatus("accepting");
       acceptInvitation();
     }
   }, [user, invitationInfo, status]);
 
-  const acceptInvitation = async () => {
-    try {
-      const response = await invitationsAPI.acceptInvitation(token);
-      setStatus("success");
-      setMessage(response.message);
-      setProject(response.project);
-
-      // Redirigir al proyecto después de 3 segundos
-      setTimeout(() => {
-        navigate(`/projects/${response.project.id}`);
-      }, 3000);
-    } catch (err) {
-      setStatus("error");
-      setMessage(err.message || "Error al aceptar la invitación");
-      isProcessing.current = false;
-    }
-  };
-
   // Estado: Verificando invitación
   if (status === "checking" || status === "loading") {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100'>
-        <div className='max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center'>
-          <Loader2 className='w-16 h-16 text-indigo-600 mx-auto mb-4 animate-spin' />
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-            Verificando invitación...
-          </h2>
-          <p className='text-gray-600'>Por favor espera un momento</p>
-        </div>
-      </div>
+      <AuthStatusScreen
+        statusKey='checking'
+        tone='loading'
+        icon={Loader2}
+        spin
+        title='Verificando invitación...'
+      >
+        <p className='text-gray-500'>Por favor espera un momento</p>
+      </AuthStatusScreen>
     );
   }
 
   // Estado: Redirigiendo a login/register
   if (status === "redirecting" && invitationInfo) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100'>
-        <div className='max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center'>
-          <Mail className='w-16 h-16 text-indigo-600 mx-auto mb-4' />
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-            Invitación a Proyecto
-          </h2>
-          <p className='text-gray-600 mb-2'>
-            Has sido invitado a unirte al proyecto:
-          </p>
-          <p className='font-semibold text-indigo-600 text-lg mb-4'>
-            {invitationInfo.project?.name}
-          </p>
-          <p className='text-gray-600 mb-4'>
-            por{" "}
-            <span className='font-medium'>
-              {invitationInfo.invited_by?.name}
-            </span>
-          </p>
+      <AuthStatusScreen statusKey='redirecting' tone='info' icon={Mail} title='Invitación a proyecto'>
+        <p className='text-gray-500 mb-2'>Has sido invitado a unirte al proyecto:</p>
+        <p className='font-semibold text-brand-600 text-lg mb-4'>
+          {invitationInfo.project?.name}
+        </p>
+        <p className='text-gray-500 mb-4'>
+          por <span className='font-medium'>{invitationInfo.invited_by?.name}</span>
+        </p>
 
-          <div className='flex items-center justify-center gap-2 text-indigo-600 mb-4'>
-            <Loader2 className='w-5 h-5 animate-spin' />
-            <span>
-              {invitationInfo.user_exists
-                ? "Redirigiendo a iniciar sesión..."
-                : "Redirigiendo a crear cuenta..."}
-            </span>
-          </div>
-
-          <div className='bg-gray-50 rounded-lg p-3'>
-            <p className='text-sm text-gray-600'>
-              Email de la invitación:{" "}
-              <span className='font-medium'>{invitationInfo.email}</span>
-            </p>
-          </div>
+        <div className='flex items-center justify-center gap-2 text-brand-600 mb-4'>
+          <Loader2 className='w-5 h-5 animate-spin' />
+          <span>
+            {invitationInfo.user_exists
+              ? "Redirigiendo a iniciar sesión..."
+              : "Redirigiendo a crear cuenta..."}
+          </span>
         </div>
-      </div>
+
+        <div className='bg-gray-50 rounded-lg p-3'>
+          <p className='text-sm text-gray-600'>
+            Email de la invitación: <span className='font-medium'>{invitationInfo.email}</span>
+          </p>
+        </div>
+      </AuthStatusScreen>
     );
   }
 
   // Estado: Aceptando invitación (usuario autenticado)
   if (status === "accepting") {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center'>
-          <Loader2 className='w-16 h-16 text-indigo-600 mx-auto mb-4 animate-spin' />
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-            Procesando invitación...
-          </h2>
-          <p className='text-gray-600'>Uniéndote al proyecto</p>
-        </div>
-      </div>
+      <AuthStatusScreen
+        statusKey='accepting'
+        tone='loading'
+        icon={Loader2}
+        spin
+        title='Procesando invitación...'
+      >
+        <p className='text-gray-500'>Uniéndote al proyecto</p>
+      </AuthStatusScreen>
     );
   }
 
   // Estado: Éxito
   if (status === "success") {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center'>
-          <CheckCircle className='w-16 h-16 text-green-600 mx-auto mb-4' />
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-            ¡Invitación Aceptada!
-          </h2>
-          <p className='text-gray-600 mb-6'>{message}</p>
-          {project && (
-            <div className='bg-gray-50 rounded-lg p-4 mb-4'>
-              <p className='text-sm text-gray-600'>Te uniste al proyecto:</p>
-              <p className='font-semibold text-gray-900 mt-1'>{project.name}</p>
-            </div>
-          )}
-          <p className='text-sm text-gray-500'>
-            Redirigiendo al proyecto en 3 segundos...
-          </p>
-        </div>
-      </div>
+      <AuthStatusScreen
+        statusKey='success'
+        tone='success'
+        icon={CheckCircle}
+        title='¡Invitación aceptada!'
+      >
+        <p className='text-gray-500 mb-6'>{message}</p>
+        {project && (
+          <div className='bg-gray-50 rounded-lg p-4 mb-4'>
+            <p className='text-sm text-gray-600'>Te uniste al proyecto:</p>
+            <p className='font-semibold text-gray-900 mt-1'>{project.name}</p>
+          </div>
+        )}
+        <p className='text-sm text-gray-400'>Redirigiendo al proyecto en 3 segundos...</p>
+      </AuthStatusScreen>
     );
   }
 
   // Estado: Error
   if (status === "error") {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center'>
-          <XCircle className='w-16 h-16 text-red-600 mx-auto mb-4' />
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>Error</h2>
-          <p className='text-gray-600 mb-6'>{message}</p>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className='w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition'
-          >
-            Ir al Dashboard
-          </button>
-        </div>
-      </div>
+      <AuthStatusScreen statusKey='error' tone='error' icon={XCircle} title='Error'>
+        <p className='text-gray-500 mb-6'>{message}</p>
+        <Button variant='brand' className='w-full' onClick={() => navigate("/dashboard")}>
+          Ir al dashboard
+        </Button>
+      </AuthStatusScreen>
     );
   }
 

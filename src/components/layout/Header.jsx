@@ -24,7 +24,7 @@ const Header = ({ title, subtitle }) => {
               </h1>
               {/* Indicador de organización - solo en modo organización */}
               {isInOrganizationMode && (
-                <span className='hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium'>
+                <span className='hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 text-brand-700 rounded-full text-xs font-medium'>
                   <Building2 className='w-3.5 h-3.5' />
                   <span className='hidden md:inline'>
                     {user.organization.name}
@@ -47,7 +47,7 @@ const Header = ({ title, subtitle }) => {
               <input
                 type='text'
                 placeholder='Buscar...'
-                className='pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                className='pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
 

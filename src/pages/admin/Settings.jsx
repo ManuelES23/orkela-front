@@ -14,6 +14,33 @@ import Button from "../../components/ui/Button";
 import settingsAPI from "../../utils/settingsAPI";
 import { useNotification } from "../../context/NotificationContext";
 
+// Proveedores SMTP comunes — al elegir un chip se precargan servidor/puerto/
+// encriptación; usuario, contraseña y remitente los completa la persona.
+const SMTP_PROVIDERS = [
+  {
+    key: "microsoft365",
+    label: "Microsoft 365",
+    host: "smtp.office365.com",
+    port: "587",
+    encryption: "tls",
+  },
+  {
+    key: "gmail",
+    label: "Gmail",
+    host: "smtp.gmail.com",
+    port: "587",
+    encryption: "tls",
+  },
+  {
+    key: "sendgrid",
+    label: "SendGrid",
+    host: "smtp.sendgrid.net",
+    port: "587",
+    encryption: "tls",
+  },
+  { key: "custom", label: "Personalizado", host: null, port: null },
+];
+
 export default function Settings() {
   const { success, error: showError } = useNotification();
   const [loading, setLoading] = useState(true);
@@ -30,6 +57,7 @@ export default function Settings() {
     mail_from_name: "Orkela",
   });
   const [testEmail, setTestEmail] = useState("");
+  const [selectedProvider, setSelectedProvider] = useState("custom");
 
   useEffect(() => {
     loadConfig();
@@ -50,11 +78,26 @@ export default function Settings() {
         mail_from_address: data.mail_from_address || "",
         mail_from_name: data.mail_from_name || "Orkela",
       });
+      // Detectar si el host coincide con un proveedor conocido
+      const matched = SMTP_PROVIDERS.find((p) => p.host === data.mail_host);
+      setSelectedProvider(matched ? matched.key : "custom");
     } catch (err) {
       showError("Error al cargar la configuración");
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelectProvider = (provider) => {
+    setSelectedProvider(provider.key);
+    if (provider.host !== null) {
+      setConfig((prev) => ({
+        ...prev,
+        mail_host: provider.host,
+        mail_port: provider.port,
+        mail_encryption: provider.encryption,
+      }));
     }
   };
 
@@ -98,7 +141,7 @@ export default function Settings() {
         subtitle='Gestiona las configuraciones del sistema'
       >
         <div className='flex items-center justify-center h-64'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
         </div>
       </Layout>
     );
@@ -109,13 +152,60 @@ export default function Settings() {
       title='Configuración'
       subtitle='Gestiona las configuraciones del sistema'
     >
+      {/* Banner de estado */}
+      <div className='relative overflow-hidden rounded-2xl p-5 sm:p-6 mb-6 text-white shadow-lg bg-linear-to-br from-brand-600 to-accent-600'>
+        <div className='absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 pointer-events-none' />
+        <div className='relative flex items-center gap-4'>
+          <div className='w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0'>
+            <Mail className='w-5 h-5' />
+          </div>
+          <div className='min-w-0'>
+            {config.mail_host ? (
+              <>
+                <p className='font-semibold truncate'>
+                  SMTP configurado — {config.mail_host}:{config.mail_port} (
+                  {config.mail_encryption.toUpperCase()})
+                </p>
+                <p className='text-sm text-white/80 truncate'>
+                  Remitente: {config.mail_from_address || "sin definir"}
+                  {config.mail_from_name ? ` · ${config.mail_from_name}` : ""}
+                </p>
+              </>
+            ) : (
+              <p className='font-semibold'>
+                SMTP sin configurar — elegí un proveedor o completá el
+                formulario
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Chips de proveedores comunes */}
+      <div className='flex flex-wrap gap-2 mb-6'>
+        {SMTP_PROVIDERS.map((provider) => (
+          <button
+            key={provider.key}
+            type='button'
+            onClick={() => handleSelectProvider(provider)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              selectedProvider === provider.key
+                ? "bg-brand-100 text-brand-700 border-brand-300"
+                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+            }`}
+          >
+            {provider.label}
+          </button>
+        ))}
+      </div>
+
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Formulario de configuración */}
         <div className='lg:col-span-2'>
           <Card>
             <Card.Header>
               <div className='flex items-center gap-2'>
-                <Mail className='w-5 h-5 text-indigo-600' />
+                <Mail className='w-5 h-5 text-brand-600' />
                 <h3 className='text-lg font-semibold'>
                   Configuración de Email (SMTP)
                 </h3>
@@ -134,10 +224,14 @@ export default function Settings() {
                       <input
                         type='text'
                         value={config.mail_host}
-                        onChange={(e) =>
-                          setConfig({ ...config, mail_host: e.target.value })
-                        }
-                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                        onChange={(e) => {
+                          setConfig({ ...config, mail_host: e.target.value });
+                          const matched = SMTP_PROVIDERS.find(
+                            (p) => p.host === e.target.value,
+                          );
+                          setSelectedProvider(matched ? matched.key : "custom");
+                        }}
+                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         placeholder='smtp.office365.com'
                         required
                       />
@@ -154,7 +248,7 @@ export default function Settings() {
                       onChange={(e) =>
                         setConfig({ ...config, mail_port: e.target.value })
                       }
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                       placeholder='587'
                       required
                     />
@@ -171,7 +265,7 @@ export default function Settings() {
                     onChange={(e) =>
                       setConfig({ ...config, mail_encryption: e.target.value })
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                     required
                   >
                     <option value='tls'>TLS</option>
@@ -196,7 +290,7 @@ export default function Settings() {
                             mail_username: e.target.value,
                           })
                         }
-                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         placeholder='tu-email@empresa.com'
                         required
                       />
@@ -218,7 +312,7 @@ export default function Settings() {
                             mail_password: e.target.value,
                           })
                         }
-                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         placeholder='••••••••'
                       />
                     </div>
@@ -243,7 +337,7 @@ export default function Settings() {
                           mail_from_address: e.target.value,
                         })
                       }
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                       placeholder='noreply@orkela.com'
                       required
                     />
@@ -259,7 +353,7 @@ export default function Settings() {
                       onChange={(e) =>
                         setConfig({ ...config, mail_from_name: e.target.value })
                       }
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                       placeholder='Orkela'
                       required
                     />
@@ -292,7 +386,7 @@ export default function Settings() {
           <Card>
             <Card.Header>
               <div className='flex items-center gap-2'>
-                <Send className='w-5 h-5 text-indigo-600' />
+                <Send className='w-5 h-5 text-brand-600' />
                 <h3 className='text-lg font-semibold'>Probar Configuración</h3>
               </div>
             </Card.Header>
@@ -311,7 +405,7 @@ export default function Settings() {
                     type='email'
                     value={testEmail}
                     onChange={(e) => setTestEmail(e.target.value)}
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                     placeholder='test@ejemplo.com'
                   />
                 </div>

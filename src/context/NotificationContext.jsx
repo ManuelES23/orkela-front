@@ -164,7 +164,7 @@ const Notification = ({ notification, onClose }) => {
     },
     info: {
       icon: Info,
-      gradient: "from-blue-500 to-indigo-600",
+      gradient: "from-blue-500 to-brand-600",
       bgColor: "bg-white",
       borderColor: "border-blue-200",
       iconBg: "bg-blue-100",

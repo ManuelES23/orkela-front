@@ -12,6 +12,8 @@ import {
 } from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
+import ProgressRing from "../components/ui/ProgressRing";
+import { motionTokens } from "../components/animations/variants";
 import {
   Plus,
   Search,
@@ -21,15 +23,36 @@ import {
   Loader2,
   FolderKanban,
   Mail,
-  Inbox,
   ArrowRight,
   Info,
   Ticket,
   CheckSquare,
-  Clock,
-  CheckCircle,
 } from "lucide-react";
 import { teamsAPI, teamInvitationsAPI } from "../utils/api";
+
+// Paleta de colores de equipo (mismos valores que el selector en TeamModal) —
+// se usa solo para derivar el tinte de fondo de cada tarjeta a partir del
+// dato guardado (team.color, una clase Tailwind literal), nunca se reasigna.
+const TEAM_COLOR_HEX = {
+  "bg-indigo-500": "#6366f1",
+  "bg-blue-500": "#3b82f6",
+  "bg-cyan-500": "#06b6d4",
+  "bg-teal-500": "#14b8a6",
+  "bg-green-500": "#22c55e",
+  "bg-lime-500": "#84cc16",
+  "bg-emerald-500": "#10b981",
+  "bg-yellow-500": "#eab308",
+  "bg-amber-500": "#f59e0b",
+  "bg-orange-500": "#f97316",
+  "bg-red-500": "#ef4444",
+  "bg-rose-500": "#f43f5e",
+  "bg-pink-500": "#ec4899",
+  "bg-purple-500": "#a855f7",
+  "bg-violet-500": "#8b5cf6",
+  "bg-slate-500": "#64748b",
+};
+const getTeamHex = (team) =>
+  TEAM_COLOR_HEX[team.color] || TEAM_COLOR_HEX["bg-indigo-500"];
 
 const Teams = () => {
   const navigate = useNavigate();
@@ -186,7 +209,7 @@ const Teams = () => {
               placeholder='Buscar equipos...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+              className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
 
@@ -196,7 +219,7 @@ const Teams = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleNewTeam}
-              className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition w-full md:w-auto justify-center'
+              className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition w-full md:w-auto justify-center'
             >
               <Plus className='w-5 h-5' />
               Nuevo Equipo
@@ -221,7 +244,7 @@ const Teams = () => {
       {/* Loading y Error States */}
       {loading && (
         <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
         </div>
       )}
 
@@ -245,7 +268,7 @@ const Teams = () => {
               {!searchTerm && (
                 <button
                   onClick={handleNewTeam}
-                  className='mt-4 text-indigo-600 hover:text-indigo-700 font-medium'
+                  className='mt-4 text-brand-600 hover:text-brand-700 font-medium'
                 >
                   Crear tu primer equipo
                 </button>
@@ -254,161 +277,135 @@ const Teams = () => {
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               <AnimatePresence mode='popLayout'>
-                {filteredTeams.map((team) => (
-                  <motion.div
-                    key={team.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    whileHover={{ scale: 1.02, y: -4 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20,
-                    }}
-                    onClick={() => handleViewTeam(team)}
-                    className='bg-white rounded-xl shadow-sm border border-gray-200 cursor-pointer group hover:border-indigo-300 transition-colors overflow-hidden'
-                  >
-                    {/* Barra de color superior */}
-                    <div className={`h-1.5 ${team.color || "bg-indigo-500"}`} />
+                {filteredTeams.map((team) => {
+                  const hex = getTeamHex(team);
+                  const pct =
+                    team.task_count > 0
+                      ? Math.round(
+                          ((team.completed_tasks || 0) / team.task_count) *
+                            100,
+                        )
+                      : 0;
 
-                    {/* Header del equipo */}
-                    <div className='p-6'>
-                      <div className='flex items-start justify-between mb-4'>
-                        <div className='flex-1'>
-                          <div className='flex items-center gap-3 mb-1'>
-                            <div
-                              className={`w-10 h-10 rounded-lg ${
-                                team.color || "bg-indigo-500"
-                              } flex items-center justify-center shadow-sm`}
-                            >
-                              <Users className='w-5 h-5 text-white' />
-                            </div>
-                            <h3 className='font-semibold text-gray-900 text-lg'>
-                              {team.name}
-                            </h3>
-                          </div>
-                          {team.description && (
-                            <p className='text-sm text-gray-600 line-clamp-2'>
-                              {team.description}
-                            </p>
-                          )}
-                        </div>
-
-                        {team.can_edit && (
-                          <div className='flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity'>
-                            <button
-                              onClick={(e) => handleEdit(team, e)}
-                              className='p-1.5 hover:bg-blue-50 rounded transition'
-                            >
-                              <Edit className='w-4 h-4 text-blue-600' />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDeleteConfirm(team.id);
-                              }}
-                              className='p-1.5 hover:bg-red-50 rounded transition'
-                            >
-                              <Trash2 className='w-4 h-4 text-red-600' />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Estadísticas principales */}
-                      <div className='grid grid-cols-2 gap-3 mb-4'>
-                        {/* Miembros */}
-                        <div className='flex items-center gap-2 text-gray-600'>
-                          <Users className='w-4 h-4' />
-                          <span className='text-sm'>
-                            {team.member_count || 0} miembros
-                          </span>
-                        </div>
-                        {/* Proyectos */}
-                        <div className='flex items-center gap-2 text-gray-600'>
-                          <FolderKanban className='w-4 h-4' />
-                          <span className='text-sm'>
-                            {team.project_count || 0} proyectos
-                          </span>
-                        </div>
-                        {/* Tickets */}
-                        <div className='flex items-center gap-2 text-gray-600'>
-                          <Ticket className='w-4 h-4' />
-                          <span className='text-sm'>
-                            {team.ticket_count || 0} tickets
-                          </span>
-                          {team.open_tickets > 0 && (
-                            <span className='px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full'>
-                              {team.open_tickets} abiertos
-                            </span>
-                          )}
-                        </div>
-                        {/* Tareas */}
-                        <div className='flex items-center gap-2 text-gray-600'>
-                          <CheckSquare className='w-4 h-4' />
-                          <span className='text-sm'>
-                            {team.task_count || 0} tareas
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Barra de progreso de tareas */}
-                      {team.task_count > 0 && (
-                        <div className='mb-4'>
-                          <div className='flex items-center justify-between text-xs text-gray-500 mb-1'>
-                            <span className='flex items-center gap-1'>
-                              <CheckCircle className='w-3 h-3 text-green-500' />
-                              {team.completed_tasks || 0} completadas
-                            </span>
-                            <span className='flex items-center gap-1'>
-                              <Clock className='w-3 h-3 text-yellow-500' />
-                              {team.pending_tasks || 0} pendientes
-                            </span>
-                          </div>
-                          <div className='w-full bg-gray-200 rounded-full h-1.5'>
-                            <div
-                              className='bg-green-500 h-1.5 rounded-full transition-all duration-300'
-                              style={{
-                                width: `${
-                                  team.task_count > 0
-                                    ? Math.round(
-                                        ((team.completed_tasks || 0) /
-                                          team.task_count) *
-                                          100
-                                      )
-                                    : 0
-                                }%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Ir al equipo */}
-                      <div className='pt-4 border-t border-gray-100 flex items-center justify-between'>
-                        {team.is_owner && invitingTeamId !== team.id && (
+                  return (
+                    <motion.div
+                      key={team.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      transition={motionTokens.springSoft}
+                      onClick={() => handleViewTeam(team)}
+                      style={{
+                        background: `linear-gradient(160deg, ${hex}14, #fff 55%)`,
+                        borderColor: `${hex}33`,
+                      }}
+                      className='rounded-2xl border cursor-pointer group transition-shadow hover:shadow-lg p-6 relative overflow-hidden'
+                    >
+                      {/* Acciones */}
+                      {team.can_edit && (
+                        <div className='absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                          <button
+                            onClick={(e) => handleEdit(team, e)}
+                            className='p-1.5 bg-white/80 hover:bg-blue-50 rounded transition'
+                          >
+                            <Edit className='w-4 h-4 text-blue-600' />
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setInvitingTeamId(team.id);
+                              openDeleteConfirm(team.id);
                             }}
-                            className='flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm font-medium'
+                            className='p-1.5 bg-white/80 hover:bg-red-50 rounded transition'
                           >
-                            <Mail className='w-4 h-4' />
-                            Invitar
+                            <Trash2 className='w-4 h-4 text-red-600' />
                           </button>
-                        )}
+                        </div>
+                      )}
 
-                        {invitingTeamId === team.id && (
+                      {/* Icono de identidad */}
+                      <div
+                        className='w-12 h-12 rounded-xl flex items-center justify-center shadow-sm mb-4'
+                        style={{ background: hex }}
+                      >
+                        <Users className='w-6 h-6 text-white' />
+                      </div>
+
+                      <h3 className='font-bold text-gray-900 text-lg mb-1'>
+                        {team.name}
+                      </h3>
+                      {team.description && (
+                        <p className='text-sm text-gray-600 line-clamp-2 mb-4'>
+                          {team.description}
+                        </p>
+                      )}
+
+                      {/* Estadísticas como píldoras */}
+                      <div className='flex flex-wrap gap-2 mb-4'>
+                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
+                          <Users className='w-3.5 h-3.5 text-gray-400' />
+                          {team.member_count || 0}
+                        </span>
+                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
+                          <FolderKanban className='w-3.5 h-3.5 text-gray-400' />
+                          {team.project_count || 0}
+                        </span>
+                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
+                          <Ticket className='w-3.5 h-3.5 text-gray-400' />
+                          {team.ticket_count || 0}
+                          {team.open_tickets > 0 && (
+                            <span className='px-1.5 py-0.5 -mr-1 text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full'>
+                              {team.open_tickets}
+                            </span>
+                          )}
+                        </span>
+                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
+                          <CheckSquare className='w-3.5 h-3.5 text-gray-400' />
+                          {team.task_count || 0}
+                        </span>
+                      </div>
+
+                      {/* Progreso de tareas */}
+                      {team.task_count > 0 && (
+                        <div
+                          className='flex items-center justify-between pt-4 border-t mb-3'
+                          style={{ borderColor: `${hex}26` }}
+                        >
+                          <span className='text-xs text-gray-500'>
+                            {pct}% completado
+                          </span>
+                          <ProgressRing
+                            percentage={pct}
+                            size={32}
+                            strokeWidth={3.5}
+                            color={hex}
+                            trackColor='#e5e7eb'
+                          />
+                        </div>
+                      )}
+
+                      {/* Acciones */}
+                      <div
+                        className={`flex items-center gap-2 ${
+                          team.task_count > 0
+                            ? ""
+                            : "pt-4 border-t"
+                        }`}
+                        style={
+                          team.task_count > 0
+                            ? undefined
+                            : { borderColor: `${hex}26` }
+                        }
+                      >
+                        {invitingTeamId === team.id ? (
                           <div className='flex gap-2 flex-1'>
                             <input
                               type='email'
                               placeholder='Email...'
                               value={inviteEmail}
                               onChange={(e) => setInviteEmail(e.target.value)}
-                              className='flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                              className='flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                               onClick={(e) => e.stopPropagation()}
                             />
                             <button
@@ -416,7 +413,7 @@ const Teams = () => {
                                 e.stopPropagation();
                                 handleSendInvite(team.id);
                               }}
-                              className='px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition'
+                              className='px-3 py-1.5 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition shrink-0'
                             >
                               Enviar
                             </button>
@@ -426,23 +423,35 @@ const Teams = () => {
                                 setInvitingTeamId(null);
                                 setInviteEmail("");
                               }}
-                              className='px-2 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition'
+                              className='px-2 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg bg-white hover:bg-gray-50 transition shrink-0'
                             >
                               ✕
                             </button>
                           </div>
-                        )}
-
-                        {invitingTeamId !== team.id && (
-                          <span className='flex items-center gap-1 text-sm text-gray-500 group-hover:text-indigo-600 transition-colors'>
-                            Ver equipo
-                            <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
-                          </span>
+                        ) : (
+                          <>
+                            {team.is_owner && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setInvitingTeamId(team.id);
+                                }}
+                                className='flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-brand-700 transition-colors'
+                              >
+                                <Mail className='w-4 h-4' />
+                                Invitar
+                              </button>
+                            )}
+                            <span className='ml-auto flex items-center gap-1 text-sm text-gray-500 group-hover:text-brand-700 transition-colors'>
+                              Ver equipo
+                              <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
+                            </span>
+                          </>
                         )}
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           )}

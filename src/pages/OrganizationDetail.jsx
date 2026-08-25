@@ -394,7 +394,7 @@ const OrganizationDetail = () => {
       );
     }
     const roles = {
-      admin: { bg: "bg-purple-100", text: "text-purple-700", icon: Shield },
+      admin: { bg: "bg-accent-100", text: "text-accent-700", icon: Shield },
       manager: { bg: "bg-blue-100", text: "text-blue-700", icon: Briefcase },
       member: { bg: "bg-gray-100", text: "text-gray-700", icon: Users },
     };
@@ -423,7 +423,7 @@ const OrganizationDetail = () => {
     return (
       <div className='min-h-screen flex items-center justify-center bg-gray-50'>
         <div className='flex flex-col items-center gap-4'>
-          <Loader2 className='w-10 h-10 animate-spin text-indigo-600' />
+          <Loader2 className='w-10 h-10 animate-spin text-brand-600' />
           <p className='text-gray-600 font-medium'>Cargando organización...</p>
         </div>
       </div>
@@ -439,7 +439,7 @@ const OrganizationDetail = () => {
           </p>
           <button
             onClick={() => navigate("/dashboard")}
-            className='text-indigo-600 hover:text-indigo-800 font-medium'
+            className='text-brand-600 hover:text-brand-800 font-medium'
           >
             Volver al dashboard
           </button>
@@ -455,30 +455,37 @@ const OrganizationDetail = () => {
     >
       {/* Header con info de la org */}
       <FadeIn>
-        <div className='bg-white rounded-xl border border-gray-200 overflow-hidden mb-6'>
-          {/* Banner */}
-          <div className='h-32 bg-linear-to-br from-indigo-500 to-purple-600 relative'>
+        <div className='mb-6'>
+          {/* Botón volver y acciones */}
+          <div className='flex items-center justify-between mb-4'>
             <button
               onClick={() => navigate("/organizations")}
-              className='absolute top-4 left-4 p-2 bg-white/90 hover:bg-white rounded-lg transition-colors'
+              className='flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors'
             >
-              <ArrowLeft className='w-5 h-5 text-gray-700' />
+              <ArrowLeft className='w-5 h-5' />
+              Volver a organizaciones
             </button>
 
             {organization.can_manage && (
-              <div className='absolute top-4 right-4 flex gap-2'>
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className='p-2 bg-white/90 hover:bg-white rounded-lg transition-colors'
-                >
-                  <Edit className='w-5 h-5 text-gray-700' />
-                </button>
-              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsEditModalOpen(true)}
+                className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+              >
+                <Edit className='w-4 h-4' />
+                Editar
+              </motion.button>
             )}
+          </div>
 
-            {/* Logo */}
-            <div className='absolute -bottom-10 left-6'>
-              <div className='w-20 h-20 bg-white rounded-xl shadow-lg flex items-center justify-center border-4 border-white overflow-hidden'>
+          {/* Hero de la organización */}
+          <div className='relative overflow-hidden p-5 sm:p-7 rounded-2xl text-white shadow-lg bg-linear-to-br from-brand-600 to-accent-600'>
+            {/* Blob decorativo */}
+            <div className='absolute -bottom-16 -left-10 w-52 h-52 rounded-full bg-white/8 pointer-events-none' />
+
+            <div className='relative flex items-center gap-4'>
+              <div className='w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 overflow-hidden'>
                 {organization.logo ? (
                   <img
                     src={getAssetUrl(organization.logo)}
@@ -486,31 +493,25 @@ const OrganizationDetail = () => {
                     className='w-full h-full object-cover'
                   />
                 ) : (
-                  <Building2 className='w-10 h-10 text-indigo-600' />
+                  <Building2 className='w-7 h-7 sm:w-8 sm:h-8' />
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Info */}
-          <div className='pt-14 px-6 pb-6'>
-            <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4'>
-              <div>
-                <h1 className='text-2xl font-bold text-gray-900'>
+              <div className='flex-1 min-w-0'>
+                <h1 className='text-xl sm:text-2xl font-bold'>
                   {organization.name}
                 </h1>
                 {organization.description && (
-                  <p className='text-gray-500 mt-1 max-w-2xl'>
+                  <p className='text-white/80 mt-1 text-sm sm:text-base line-clamp-2'>
                     {organization.description}
                   </p>
                 )}
-                <div className='flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600'>
+                <div className='flex flex-wrap items-center gap-4 mt-2 text-sm text-white/80'>
                   {organization.website && (
                     <a
                       href={organization.website}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='flex items-center gap-1 hover:text-indigo-600'
+                      className='flex items-center gap-1 hover:text-white'
                     >
                       <Globe className='w-4 h-4' />
                       {organization.website.replace(/^https?:\/\//, "")}
@@ -530,53 +531,46 @@ const OrganizationDetail = () => {
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Stats rápidos */}
-              <div className='flex gap-6 bg-gray-50 rounded-lg px-6 py-4'>
-                <div className='text-center'>
-                  <p className='text-2xl font-bold text-gray-900'>
-                    {organization.active_members_count || 0}
-                  </p>
-                  <p className='text-xs text-gray-500'>Miembros</p>
-                </div>
-                <div className='text-center'>
-                  <p className='text-2xl font-bold text-gray-900'>
-                    {organization.teams_count || 0}
-                  </p>
-                  <p className='text-xs text-gray-500'>Equipos</p>
-                </div>
-                <div className='text-center'>
-                  <p className='text-2xl font-bold text-gray-900'>
-                    {organization.projects_count || 0}
-                  </p>
-                  <p className='text-xs text-gray-500'>Proyectos</p>
-                </div>
-              </div>
+            <div className='relative flex flex-wrap gap-2 mt-5'>
+              <span className='inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-medium'>
+                <Users className='w-4 h-4' />
+                {organization.active_members_count || 0} miembros
+              </span>
+              <span className='inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-medium'>
+                <Shield className='w-4 h-4' />
+                {organization.teams_count || 0} equipos
+              </span>
+              <span className='inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-medium'>
+                <FolderKanban className='w-4 h-4' />
+                {organization.projects_count || 0} proyectos
+              </span>
             </div>
           </div>
+        </div>
+      </FadeIn>
 
-          {/* Tabs */}
-          <div className='border-t border-gray-200 px-6'>
-            <div className='flex gap-1 overflow-x-auto'>
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? "border-indigo-600 text-indigo-600"
-                        : "border-transparent text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    <Icon className='w-4 h-4' />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+      {/* Tabs */}
+      <FadeIn delay={0.1}>
+        <div className='flex gap-2 mb-6 overflow-x-auto'>
+          {tabs.map((tab) => {
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm shrink-0 whitespace-nowrap transition-colors ${
+                  active
+                    ? "bg-linear-to-r from-brand-600 to-accent-600 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <tab.icon className='w-4 h-4' />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
       </FadeIn>
 
@@ -590,7 +584,7 @@ const OrganizationDetail = () => {
             exit={{ opacity: 0, y: -10 }}
           >
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
-              <div className='bg-white rounded-xl border border-gray-200 p-6'>
+              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
                   <div className='p-3 bg-blue-100 rounded-lg'>
                     <Users className='w-6 h-6 text-blue-600' />
@@ -604,10 +598,10 @@ const OrganizationDetail = () => {
                 </div>
               </div>
 
-              <div className='bg-white rounded-xl border border-gray-200 p-6'>
+              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
-                  <div className='p-3 bg-purple-100 rounded-lg'>
-                    <Shield className='w-6 h-6 text-purple-600' />
+                  <div className='p-3 bg-accent-100 rounded-lg'>
+                    <Shield className='w-6 h-6 text-accent-600' />
                   </div>
                   <div>
                     <p className='text-2xl font-bold text-gray-900'>
@@ -618,7 +612,7 @@ const OrganizationDetail = () => {
                 </div>
               </div>
 
-              <div className='bg-white rounded-xl border border-gray-200 p-6'>
+              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
                   <div className='p-3 bg-green-100 rounded-lg'>
                     <FolderKanban className='w-6 h-6 text-green-600' />
@@ -632,7 +626,7 @@ const OrganizationDetail = () => {
                 </div>
               </div>
 
-              <div className='bg-white rounded-xl border border-gray-200 p-6'>
+              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
                   <div className='p-3 bg-orange-100 rounded-lg'>
                     <Ticket className='w-6 h-6 text-orange-600' />
@@ -721,7 +715,7 @@ const OrganizationDetail = () => {
                 {organization.can_manage && (
                   <button
                     onClick={() => setIsInviteModalOpen(true)}
-                    className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+                    className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
                   >
                     <UserPlus className='w-4 h-4' />
                     Invitar
@@ -805,7 +799,7 @@ const OrganizationDetail = () => {
                         {/* Botón de estadísticas - visible para todos */}
                         <button
                           onClick={() => handleOpenMemberStats(member)}
-                          className='p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors'
+                          className='p-2 text-brand-500 hover:bg-brand-50 rounded-lg transition-colors'
                           title='Ver estadísticas'
                         >
                           <BarChart3 className='w-4 h-4' />
@@ -860,7 +854,7 @@ const OrganizationDetail = () => {
           >
             {loadingTeams ? (
               <div className='bg-white rounded-xl border border-gray-200 p-8 text-center'>
-                <Loader2 className='w-8 h-8 animate-spin text-indigo-500 mx-auto mb-3' />
+                <Loader2 className='w-8 h-8 animate-spin text-brand-500 mx-auto mb-3' />
                 <p className='text-gray-500'>Cargando equipos...</p>
               </div>
             ) : teams.length === 0 ? (
@@ -874,7 +868,7 @@ const OrganizationDetail = () => {
                 </p>
                 <button
                   onClick={() => navigate("/teams")}
-                  className='px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+                  className='px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
                 >
                   Crear equipo
                 </button>
@@ -949,7 +943,7 @@ const OrganizationDetail = () => {
           >
             {loadingProjects ? (
               <div className='bg-white rounded-xl border border-gray-200 p-8 text-center'>
-                <Loader2 className='w-8 h-8 animate-spin text-indigo-500 mx-auto mb-3' />
+                <Loader2 className='w-8 h-8 animate-spin text-brand-500 mx-auto mb-3' />
                 <p className='text-gray-500'>Cargando proyectos...</p>
               </div>
             ) : projects.length === 0 ? (
@@ -963,7 +957,7 @@ const OrganizationDetail = () => {
                 </p>
                 <button
                   onClick={() => navigate("/projects")}
-                  className='px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+                  className='px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
                 >
                   Crear proyecto
                 </button>
@@ -1004,7 +998,7 @@ const OrganizationDetail = () => {
                       </div>
                       <div className='w-full bg-gray-200 rounded-full h-2'>
                         <div
-                          className='bg-indigo-600 h-2 rounded-full transition-all'
+                          className='bg-linear-to-r from-brand-600 to-accent-600 h-2 rounded-full transition-all'
                           style={{ width: `${project.progress || 0}%` }}
                         />
                       </div>
@@ -1095,7 +1089,7 @@ const OrganizationDetail = () => {
                     <p className='text-gray-600 capitalize'>
                       {organization.plan}
                     </p>
-                    <button className='mt-3 text-indigo-600 font-medium text-sm hover:underline'>
+                    <button className='mt-3 text-brand-600 font-medium text-sm hover:underline'>
                       Mejorar plan →
                     </button>
                   </div>
@@ -1184,7 +1178,7 @@ const OrganizationDetail = () => {
                         email: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500'
+                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500'
                     placeholder='email@ejemplo.com'
                   />
                 </div>
@@ -1228,7 +1222,7 @@ const OrganizationDetail = () => {
                   <button
                     type='submit'
                     disabled={sendingInvite}
-                    className='flex-1 bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2'
+                    className='flex-1 bg-linear-to-r from-brand-600 to-accent-600 text-white py-2 rounded-lg font-medium hover:shadow-md hover:shadow-brand-600/20 disabled:opacity-50 flex items-center justify-center gap-2'
                   >
                     {sendingInvite ? (
                       <Loader2 className='w-4 h-4 animate-spin' />
@@ -1308,13 +1302,13 @@ const OrganizationDetail = () => {
               <div className='p-6'>
                 {memberStatsModal.loading ? (
                   <div className='flex flex-col items-center justify-center py-12'>
-                    <Loader2 className='w-8 h-8 animate-spin text-indigo-600 mb-3' />
+                    <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
                     <p className='text-gray-500'>Cargando estadísticas...</p>
                   </div>
                 ) : memberStatsModal.stats ? (
                   <div className='space-y-6'>
                     {/* Productividad */}
-                    <div className='bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl p-5 text-white'>
+                    <div className='bg-linear-to-br from-brand-600 to-accent-600 rounded-xl p-5 text-white'>
                       <div className='flex items-center gap-2 mb-4'>
                         <Sparkles className='w-5 h-5' />
                         <h4 className='font-semibold'>Productividad</h4>
@@ -1323,7 +1317,7 @@ const OrganizationDetail = () => {
                       {/* Barra de progreso principal */}
                       <div className='mb-4'>
                         <div className='flex justify-between items-center mb-2'>
-                          <span className='text-sm text-indigo-100'>
+                          <span className='text-sm text-white/70'>
                             Tareas completadas
                           </span>
                           <span className='font-bold'>
@@ -1353,7 +1347,7 @@ const OrganizationDetail = () => {
                               0}
                             %
                           </p>
-                          <p className='text-xs text-indigo-100'>Completado</p>
+                          <p className='text-xs text-white/70'>Completado</p>
                         </div>
                         <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
                           <div className='flex items-center justify-center gap-1'>
@@ -1363,7 +1357,7 @@ const OrganizationDetail = () => {
                                 ?.completed_this_week || 0}
                             </p>
                           </div>
-                          <p className='text-xs text-indigo-100'>Esta semana</p>
+                          <p className='text-xs text-white/70'>Esta semana</p>
                         </div>
                         <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
                           <p className='text-2xl font-bold'>
@@ -1371,7 +1365,7 @@ const OrganizationDetail = () => {
                               ?.avg_project_progress || 0}
                             %
                           </p>
-                          <p className='text-xs text-indigo-100'>
+                          <p className='text-xs text-white/70'>
                             Avg. Progreso
                           </p>
                         </div>
@@ -1493,28 +1487,28 @@ const OrganizationDetail = () => {
                     </div>
 
                     {/* Equipos */}
-                    <div className='bg-purple-50 rounded-xl p-4'>
+                    <div className='bg-accent-50 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
-                        <Users className='w-5 h-5 text-purple-600' />
-                        <h4 className='font-semibold text-purple-900'>
+                        <Users className='w-5 h-5 text-accent-600' />
+                        <h4 className='font-semibold text-accent-900'>
                           Equipos
                         </h4>
                       </div>
                       <div className='grid grid-cols-3 gap-4'>
                         <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-purple-600'>
+                          <p className='text-2xl font-bold text-accent-600'>
                             {memberStatsModal.stats.teams?.owned || 0}
                           </p>
                           <p className='text-xs text-gray-500'>Lidera</p>
                         </div>
                         <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-purple-600'>
+                          <p className='text-2xl font-bold text-accent-600'>
                             {memberStatsModal.stats.teams?.member_of || 0}
                           </p>
                           <p className='text-xs text-gray-500'>Miembro</p>
                         </div>
                         <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-purple-600'>
+                          <p className='text-2xl font-bold text-accent-600'>
                             {memberStatsModal.stats.teams?.total || 0}
                           </p>
                           <p className='text-xs text-gray-500'>Total</p>

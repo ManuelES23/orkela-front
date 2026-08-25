@@ -9,6 +9,18 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "../components/animations/MotionComponents";
+import ProgressRing from "../components/ui/ProgressRing";
+import AnimatedNumber from "../components/ui/AnimatedNumber";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Filler,
+} from "chart.js";
 import {
   FolderKanban,
   CheckCircle2,
@@ -28,6 +40,16 @@ import {
   Flame,
 } from "lucide-react";
 import { projectsAPI, tasksAPI, teamsAPI } from "../utils/api";
+
+// Registrar componentes de Chart.js (mismo patrón que admin/SystemStats)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Filler
+);
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -96,8 +118,59 @@ const Dashboard = () => {
       completedThisWeek,
       avgProgress,
       totalTeams: teams.length,
+      // Ratios reales para los anillos de progreso (no valores inventados)
+      completionRate:
+        completedTasks.length + pendingTasks.length > 0
+          ? Math.round(
+              (completedTasks.length /
+                (completedTasks.length + pendingTasks.length)) *
+                100,
+            )
+          : 0,
+      urgentRate:
+        pendingTasks.length > 0
+          ? Math.round((urgentTasks.length / pendingTasks.length) * 100)
+          : 0,
+      activeRate:
+        projects.length > 0
+          ? Math.round((activeProjects.length / projects.length) * 100)
+          : 0,
     };
   }, [projects, tasks, teams]);
+
+  // Tareas completadas por semana (últimas 8 semanas) para la curva de tendencia
+  const weeklyCompletion = useMemo(() => {
+    const weeks = [];
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    for (let i = 7; i >= 0; i--) {
+      const weekEnd = new Date(now);
+      weekEnd.setDate(weekEnd.getDate() - i * 7);
+      const weekStart = new Date(weekEnd);
+      weekStart.setDate(weekStart.getDate() - 6);
+
+      const count = tasks.filter((t) => {
+        if (t.status !== "done" || !t.updated_at) return false;
+        const updated = new Date(t.updated_at);
+        return updated >= weekStart && updated <= weekEnd;
+      }).length;
+
+      weeks.push({
+        label: weekStart.toLocaleDateString("es-ES", { day: "numeric", month: "short" }),
+        count,
+      });
+    }
+    return weeks;
+  }, [tasks]);
+
+  const weeklyAvg =
+    weeklyCompletion.length > 0
+      ? (
+          weeklyCompletion.reduce((acc, w) => acc + w.count, 0) /
+          weeklyCompletion.length
+        ).toFixed(1)
+      : "0";
 
   const tasksByDeadline = useMemo(() => {
     const today = new Date();
@@ -159,11 +232,71 @@ const Dashboard = () => {
     return Math.ceil((date - today) / (1000 * 60 * 60 * 24));
   };
 
+  const chartData = {
+    labels: weeklyCompletion.map((w) => w.label),
+    datasets: [
+      {
+        data: weeklyCompletion.map((w) => w.count),
+        borderColor: "#7c3aed",
+        backgroundColor: (ctx) => {
+          const { chart } = ctx;
+          const { chartArea } = chart;
+          if (!chartArea) return "rgba(124, 58, 237, 0.15)";
+          const gradient = chart.ctx.createLinearGradient(
+            0,
+            chartArea.top,
+            0,
+            chartArea.bottom,
+          );
+          gradient.addColorStop(0, "rgba(124, 58, 237, 0.22)");
+          gradient.addColorStop(1, "rgba(124, 58, 237, 0)");
+          return gradient;
+        },
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: (ctx) =>
+          ctx.dataIndex === weeklyCompletion.length - 1 ? 5 : 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: "#7c3aed",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        backgroundColor: "#1e1730",
+        padding: 10,
+        cornerRadius: 8,
+        displayColors: false,
+        callbacks: {
+          label: (ctx) => `${ctx.parsed.y} completadas`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: "#9992ab", font: { size: 11 } },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: "#f0ebf9" },
+        ticks: { color: "#9992ab", font: { size: 11 }, precision: 0 },
+      },
+    },
+  };
+
   if (loading) {
     return (
       <Layout title='Dashboard' subtitle='Cargando...'>
         <div className='flex justify-center items-center py-24'>
-          <Loader2 className='w-10 h-10 animate-spin text-indigo-600' />
+          <Loader2 className='w-10 h-10 animate-spin text-brand-600' />
         </div>
       </Layout>
     );
@@ -206,7 +339,7 @@ const Dashboard = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/projects")}
-              className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors'
+              className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-lg shadow-brand-600/25 hover:brightness-105 transition-all'
             >
               <Plus className='w-4 h-4' />
               Nuevo Proyecto
@@ -267,88 +400,86 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* Estadísticas */}
+      {/* Anillos de progreso */}
       <StaggerContainer className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-8'>
         <StaggerItem>
           <motion.div
-            whileHover={{ y: -4, scale: 1.02 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer'
+            whileHover={{ y: -4 }}
+            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/projects")}
           >
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20'>
-                <FolderKanban className='w-6 h-6 text-white' />
-              </div>
-              <span className='text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium'>
-                {stats.activeProjects} activos
-              </span>
+            <ProgressRing percentage={stats.avgProgress} color='#7c3aed' size={52} />
+            <div>
+              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+                <AnimatedNumber value={stats.avgProgress} suffix='%' />
+              </h3>
+              <p className='text-sm text-gray-500'>Progreso medio</p>
             </div>
-            <h3 className='text-2xl font-bold text-gray-900'>
-              {stats.totalProjects}
-            </h3>
-            <p className='text-sm text-gray-500'>Proyectos totales</p>
           </motion.div>
         </StaggerItem>
 
         <StaggerItem>
           <motion.div
-            whileHover={{ y: -4, scale: 1.02 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer'
+            whileHover={{ y: -4 }}
+            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/tasks")}
           >
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-12 h-12 bg-linear-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/20'>
-                <CheckCircle2 className='w-6 h-6 text-white' />
-              </div>
-              <span className='text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium'>
-                +{stats.completedThisWeek} esta semana
-              </span>
+            <ProgressRing percentage={stats.completionRate} color='#16a34a' size={52} />
+            <div>
+              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+                <AnimatedNumber value={stats.completedTasks} />
+              </h3>
+              <p className='text-sm text-gray-500'>Completadas</p>
             </div>
-            <h3 className='text-2xl font-bold text-gray-900'>
-              {stats.completedTasks}
-            </h3>
-            <p className='text-sm text-gray-500'>Tareas completadas</p>
           </motion.div>
         </StaggerItem>
 
         <StaggerItem>
           <motion.div
-            whileHover={{ y: -4, scale: 1.02 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer'
+            whileHover={{ y: -4 }}
+            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/tasks")}
           >
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-12 h-12 bg-linear-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20'>
-                <Clock className='w-6 h-6 text-white' />
-              </div>
-              {stats.urgentTasks > 0 && (
-                <span className='text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium animate-pulse'>
-                  {stats.urgentTasks} urgente{stats.urgentTasks > 1 ? "s" : ""}
-                </span>
-              )}
+            <ProgressRing
+              percentage={stats.urgentRate}
+              color={stats.urgentRate > 40 ? "#dc2626" : "#f97316"}
+              size={52}
+            />
+            <div>
+              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+                <AnimatedNumber value={stats.pendingTasks} />
+              </h3>
+              <p className='text-sm text-gray-500'>
+                Pendientes
+                {stats.urgentTasks > 0 && (
+                  <span className='text-red-600 font-medium'>
+                    {" "}
+                    · {stats.urgentTasks} urgente
+                    {stats.urgentTasks > 1 ? "s" : ""}
+                  </span>
+                )}
+              </p>
             </div>
-            <h3 className='text-2xl font-bold text-gray-900'>
-              {stats.pendingTasks}
-            </h3>
-            <p className='text-sm text-gray-500'>Tareas pendientes</p>
           </motion.div>
         </StaggerItem>
 
         <StaggerItem>
           <motion.div
-            whileHover={{ y: -4, scale: 1.02 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer'
+            whileHover={{ y: -4 }}
+            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/teams")}
           >
-            <div className='flex items-center justify-between mb-3'>
-              <div className='w-12 h-12 bg-linear-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20'>
-                <Users className='w-6 h-6 text-white' />
-              </div>
+            <ProgressRing
+              percentage={stats.totalTeams > 0 ? 100 : 0}
+              color='#c026d3'
+              size={52}
+            />
+            <div>
+              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+                <AnimatedNumber value={stats.totalTeams} />
+              </h3>
+              <p className='text-sm text-gray-500'>Equipos</p>
             </div>
-            <h3 className='text-2xl font-bold text-gray-900'>
-              {stats.totalTeams}
-            </h3>
-            <p className='text-sm text-gray-500'>Equipos</p>
           </motion.div>
         </StaggerItem>
       </StaggerContainer>
@@ -360,8 +491,8 @@ const Dashboard = () => {
           <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
             <div className='p-5 border-b border-gray-100 flex items-center justify-between'>
               <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center'>
-                  <FolderKanban className='w-5 h-5 text-indigo-600' />
+                <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                  <FolderKanban className='w-5 h-5 text-brand-600' />
                 </div>
                 <div>
                   <h2 className='text-lg font-semibold text-gray-900'>
@@ -374,7 +505,7 @@ const Dashboard = () => {
               </div>
               <button
                 onClick={() => navigate("/projects")}
-                className='text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1'
+                className='text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1'
               >
                 Ver todos <ChevronRight className='w-4 h-4' />
               </button>
@@ -389,7 +520,7 @@ const Dashboard = () => {
                   <p className='text-gray-500'>No tienes proyectos aún</p>
                   <button
                     onClick={() => navigate("/projects")}
-                    className='mt-3 text-indigo-600 hover:text-indigo-700 font-medium'
+                    className='mt-3 text-brand-600 hover:text-brand-700 font-medium'
                   >
                     Crear tu primer proyecto
                   </button>
@@ -418,20 +549,20 @@ const Dashboard = () => {
                       >
                         <div
                           className={`h-1.5 ${
-                            project.color || "bg-indigo-500"
+                            project.color || "bg-brand-500"
                           }`}
                         />
                         <div className='p-4'>
                           <div className='flex items-start gap-3 mb-3'>
                             <div
                               className={`w-10 h-10 rounded-lg ${
-                                project.color || "bg-indigo-500"
+                                project.color || "bg-brand-500"
                               } flex items-center justify-center text-white font-bold shrink-0`}
                             >
                               {project.name?.charAt(0).toUpperCase() || "P"}
                             </div>
                             <div className='flex-1 min-w-0'>
-                              <h3 className='font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors'>
+                              <h3 className='font-semibold text-gray-900 truncate group-hover:text-brand-600 transition-colors'>
                                 {project.name}
                               </h3>
                               <div className='flex items-center gap-2 mt-1'>
@@ -461,7 +592,7 @@ const Dashboard = () => {
                           <div className='mb-3'>
                             <div className='flex items-center justify-between text-xs mb-1'>
                               <span className='text-gray-500'>Progreso</span>
-                              <span className='font-medium text-gray-700'>
+                              <span className='font-medium text-gray-700 tabular-nums'>
                                 {project.progress || 0}%
                               </span>
                             </div>
@@ -474,7 +605,7 @@ const Dashboard = () => {
                                   delay: index * 0.1,
                                 }}
                                 className={`h-2 rounded-full ${
-                                  project.color || "bg-indigo-500"
+                                  project.color || "bg-brand-500"
                                 }`}
                               />
                             </div>
@@ -509,44 +640,25 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Progreso General */}
+          {/* Tendencia de tareas completadas */}
           <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5'>
-            <div className='flex items-center gap-3 mb-4'>
-              <div className='w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center'>
-                <BarChart3 className='w-5 h-5 text-emerald-600' />
-              </div>
-              <div>
-                <h2 className='text-lg font-semibold text-gray-900'>
-                  Progreso General
-                </h2>
-                <p className='text-sm text-gray-500'>
-                  Resumen de tus proyectos activos
-                </p>
+            <div className='flex items-center justify-between mb-4'>
+              <div className='flex items-center gap-3'>
+                <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                  <BarChart3 className='w-5 h-5 text-brand-600' />
+                </div>
+                <div>
+                  <h2 className='text-lg font-semibold text-gray-900'>
+                    Tareas completadas · últimas 8 semanas
+                  </h2>
+                  <p className='text-sm text-gray-500'>
+                    Promedio: <span className='tabular-nums'>{weeklyAvg}</span>/semana
+                  </p>
+                </div>
               </div>
             </div>
-            <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-              <div className='text-center p-4 bg-gray-50 rounded-xl'>
-                <div className='text-3xl font-bold text-gray-900'>
-                  {stats.avgProgress}%
-                </div>
-                <div className='text-sm text-gray-500'>
-                  Promedio de progreso
-                </div>
-              </div>
-              <div className='text-center p-4 bg-gray-50 rounded-xl'>
-                <div className='text-3xl font-bold text-green-600'>
-                  {stats.completedThisWeek}
-                </div>
-                <div className='text-sm text-gray-500'>
-                  Completadas esta semana
-                </div>
-              </div>
-              <div className='text-center p-4 bg-gray-50 rounded-xl'>
-                <div className='text-3xl font-bold text-indigo-600'>
-                  {stats.activeProjects}
-                </div>
-                <div className='text-sm text-gray-500'>Proyectos activos</div>
-              </div>
+            <div className='h-48'>
+              <Line data={chartData} options={chartOptions} />
             </div>
           </div>
         </div>
@@ -557,12 +669,12 @@ const Dashboard = () => {
           <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
             <div className='p-4 border-b border-gray-100 flex items-center justify-between'>
               <div className='flex items-center gap-2'>
-                <CalendarClock className='w-5 h-5 text-indigo-600' />
+                <CalendarClock className='w-5 h-5 text-brand-600' />
                 <h2 className='font-semibold text-gray-900'>Próximas Tareas</h2>
               </div>
               <button
                 onClick={() => navigate("/tasks")}
-                className='text-xs text-indigo-600 hover:text-indigo-700 font-medium'
+                className='text-xs text-brand-600 hover:text-brand-700 font-medium'
               >
                 Ver todas
               </button>
@@ -665,7 +777,7 @@ const Dashboard = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className='bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl p-5 text-white'>
+          <div className='bg-linear-to-br from-brand-600 to-accent-600 rounded-xl p-5 text-white'>
             <div className='flex items-center gap-2 mb-4'>
               <Sparkles className='w-5 h-5' />
               <h2 className='font-semibold'>Tu Productividad</h2>
@@ -674,7 +786,7 @@ const Dashboard = () => {
               <div>
                 <div className='flex items-center justify-between text-sm mb-1'>
                   <span className='text-white/80'>Tareas completadas</span>
-                  <span className='font-bold'>
+                  <span className='font-bold tabular-nums'>
                     {stats.completedTasks}/
                     {stats.completedTasks + stats.pendingTasks}
                   </span>
@@ -697,13 +809,13 @@ const Dashboard = () => {
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2'>
                 <div className='bg-white/10 rounded-lg p-3 text-center'>
-                  <div className='text-2xl font-bold'>
+                  <div className='text-2xl font-bold tabular-nums'>
                     {stats.completedThisWeek}
                   </div>
                   <div className='text-xs text-white/70'>Esta semana</div>
                 </div>
                 <div className='bg-white/10 rounded-lg p-3 text-center'>
-                  <div className='text-2xl font-bold'>{stats.avgProgress}%</div>
+                  <div className='text-2xl font-bold tabular-nums'>{stats.avgProgress}%</div>
                   <div className='text-xs text-white/70'>Promedio</div>
                 </div>
               </div>
@@ -715,12 +827,12 @@ const Dashboard = () => {
             <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
               <div className='p-4 border-b border-gray-100 flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
-                  <Users className='w-5 h-5 text-purple-600' />
+                  <Users className='w-5 h-5 text-accent-600' />
                   <h2 className='font-semibold text-gray-900'>Tus Equipos</h2>
                 </div>
                 <button
                   onClick={() => navigate("/teams")}
-                  className='text-xs text-purple-600 hover:text-purple-700 font-medium'
+                  className='text-xs text-accent-600 hover:text-accent-700 font-medium'
                 >
                   Ver todos
                 </button>
@@ -735,7 +847,7 @@ const Dashboard = () => {
                   >
                     <div
                       className={`w-8 h-8 rounded-lg ${
-                        team.color || "bg-purple-500"
+                        team.color || "bg-accent-500"
                       } flex items-center justify-center text-white text-sm font-bold`}
                     >
                       {team.name?.charAt(0).toUpperCase() || "T"}

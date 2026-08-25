@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import ContextSwitcher from "../ui/ContextSwitcher";
 import UserAvatar from "../ui/UserAvatar";
+import { motionTokens } from "../animations/variants";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -11,8 +13,7 @@ import {
   UsersRound,
   Settings,
   LogOut,
-  Menu,
-  X,
+  Search,
   ChevronDown,
   Shield,
   FileText,
@@ -22,11 +23,32 @@ import {
   Building2,
 } from "lucide-react";
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+// Rail colapsado vs. panel expandido (overlay al hacer hover/foco, no empuja el contenido)
+const RAIL_WIDTH = 80;
+const PANEL_WIDTH = 256;
+
+const Sidebar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const sidebarRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const isOpen = isExpanded;
+
+  const collapse = () => {
+    setIsExpanded(false);
+    setSearchQuery("");
+  };
+
+  const handleBlur = (e) => {
+    // Solo colapsar si el foco salió del sidebar por completo (no entre sus propios hijos)
+    if (!sidebarRef.current?.contains(e.relatedTarget)) {
+      collapse();
+    }
+  };
 
   // Si es superadmin, solo mostrar el menú de administración
   const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
@@ -83,12 +105,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const isActive = (path) => location.pathname === path;
 
+  // Lista corta (< 10 ítems): filtrar en cada render sale más barato que memoizar.
+  const q = searchQuery.trim().toLowerCase();
+  const filteredItems = q
+    ? menuItems.filter((item) => item.label.toLowerCase().includes(q))
+    : menuItems;
+
   return (
     <>
-      {/* Sidebar */}
-      <aside
-        className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 ease-in-out z-40 shadow-lg ${
-          isOpen ? "w-64" : "w-20"
+      {/* Sidebar - rail colapsado por defecto, expande como overlay al pasar el mouse o enfocar con teclado */}
+      <motion.aside
+        ref={sidebarRef}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={collapse}
+        onFocus={() => setIsExpanded(true)}
+        onBlur={handleBlur}
+        animate={{ width: isOpen ? PANEL_WIDTH : RAIL_WIDTH }}
+        transition={motionTokens.springSnappy}
+        className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 overflow-hidden ${
+          isOpen ? "shadow-xl" : "shadow-lg"
         }`}
       >
         {/* Header del Sidebar */}
@@ -108,34 +143,61 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               className='h-12 w-12 object-contain mx-auto'
             />
           )}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className='p-2 hover:bg-indigo-50 rounded-lg transition-all duration-200 hover:scale-110'
+        </div>
+
+        {/* Buscador de secciones */}
+        <div className='px-3 pt-3'>
+          <div
+            className={`flex items-center gap-2 rounded-lg bg-gray-50 border border-gray-200 ${
+              isOpen ? "px-3 py-2" : "justify-center py-2"
+            }`}
           >
-            {isOpen ? (
-              <X className='w-5 h-5 transition-transform' />
-            ) : (
-              <Menu className='w-5 h-5 transition-transform' />
+            <Search className='w-4 h-4 text-gray-400 shrink-0' />
+            {isOpen && (
+              <input
+                type='text'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder='Buscar...'
+                aria-label='Buscar en el menú'
+                className='w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none'
+              />
             )}
-          </button>
+          </div>
         </div>
 
         {/* Navegación */}
         <nav className='p-3 space-y-1'>
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 ${
-                isActive(item.path)
-                  ? "bg-indigo-50 text-indigo-600 shadow-sm"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <item.icon className='w-5 h-5 shrink-0' />
-              {isOpen && <span className='font-medium'>{item.label}</span>}
-            </Link>
-          ))}
+          {filteredItems.length === 0 && isOpen && (
+            <p className='px-3 py-2 text-sm text-gray-400'>Sin resultados</p>
+          )}
+          {filteredItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                aria-label={item.label}
+                className={`relative flex items-center gap-3 px-3 py-3 rounded-lg transition-colors duration-200 ${
+                  !isOpen && "justify-center"
+                } ${active ? "text-brand-700" : "text-gray-700 hover:bg-gray-50"}`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId='sidebar-active-pill'
+                    transition={motionTokens.springSnappy}
+                    className='absolute inset-0 rounded-lg bg-linear-to-r from-brand-50 to-accent-50 shadow-sm'
+                  />
+                )}
+                <item.icon className='relative w-5 h-5 shrink-0' />
+                {isOpen && (
+                  <span className='relative font-medium whitespace-nowrap'>
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Usuario */}
@@ -182,7 +244,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             )}
           </div>
         </div>
-      </aside>
+      </motion.aside>
     </>
   );
 };

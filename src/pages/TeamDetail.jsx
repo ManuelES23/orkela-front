@@ -59,6 +59,30 @@ import {
 } from "../utils/api";
 import { parseLocalDate } from "../utils/dateUtils";
 
+// Paleta de colores de equipo (mismos valores que el selector en TeamModal) —
+// se usa solo para derivar el degradado del header a partir del dato guardado
+// (team.color, una clase Tailwind literal), nunca se reasigna.
+const TEAM_COLOR_HEX = {
+  "bg-indigo-500": "#6366f1",
+  "bg-blue-500": "#3b82f6",
+  "bg-cyan-500": "#06b6d4",
+  "bg-teal-500": "#14b8a6",
+  "bg-green-500": "#22c55e",
+  "bg-lime-500": "#84cc16",
+  "bg-emerald-500": "#10b981",
+  "bg-yellow-500": "#eab308",
+  "bg-amber-500": "#f59e0b",
+  "bg-orange-500": "#f97316",
+  "bg-red-500": "#ef4444",
+  "bg-rose-500": "#f43f5e",
+  "bg-pink-500": "#ec4899",
+  "bg-purple-500": "#a855f7",
+  "bg-violet-500": "#8b5cf6",
+  "bg-slate-500": "#64748b",
+};
+const getTeamHex = (team) =>
+  TEAM_COLOR_HEX[team?.color] || TEAM_COLOR_HEX["bg-indigo-500"];
+
 const TeamDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -517,7 +541,7 @@ const TeamDetail = () => {
     return (
       <div className='min-h-screen flex items-center justify-center bg-gray-50'>
         <div className='flex flex-col items-center gap-4'>
-          <Loader2 className='w-10 h-10 animate-spin text-indigo-600' />
+          <Loader2 className='w-10 h-10 animate-spin text-brand-600' />
           <p className='text-gray-600 font-medium'>Cargando equipo...</p>
         </div>
       </div>
@@ -531,7 +555,7 @@ const TeamDetail = () => {
           <p className='text-gray-500 mb-4'>No se pudo cargar el equipo</p>
           <button
             onClick={() => navigate("/teams")}
-            className='text-indigo-600 hover:text-indigo-800 font-medium'
+            className='text-brand-600 hover:text-brand-800 font-medium'
           >
             Volver a equipos
           </button>
@@ -539,6 +563,15 @@ const TeamDetail = () => {
       </div>
     );
   }
+
+  const teamHex = getTeamHex(team);
+
+  const tabsCfg = [
+    { key: "inbox", label: "Buzón", icon: Inbox, count: inboxCount },
+    { key: "projects", label: "Proyectos", icon: FolderKanban, count: projects.length },
+    { key: "members", label: "Miembros", icon: Users, count: members.length },
+    { key: "stats", label: "Estadísticas", icon: BarChart3 },
+  ];
 
   return (
     <Layout
@@ -575,38 +608,42 @@ const TeamDetail = () => {
 
           {/* Info del equipo */}
           <div
-            className={`p-4 sm:p-6 rounded-xl ${
-              team.color || "bg-indigo-500"
-            } text-white shadow-lg`}
+            style={{
+              background: `linear-gradient(135deg, ${teamHex}, color-mix(in srgb, ${teamHex} 65%, black))`,
+            }}
+            className='relative overflow-hidden p-5 sm:p-7 rounded-2xl text-white shadow-lg'
           >
-            <div className='flex flex-col sm:flex-row sm:items-center gap-4'>
-              <div className='w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-white/20 flex items-center justify-center'>
-                <Users className='w-6 h-6 sm:w-8 sm:h-8' />
+            {/* Blob decorativo */}
+            <div
+              className='absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none'
+              style={{ background: "rgba(255,255,255,0.08)" }}
+            />
+
+            <div className='relative flex items-center gap-4'>
+              <div className='w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 flex items-center justify-center shrink-0'>
+                <Users className='w-7 h-7 sm:w-8 sm:h-8' />
               </div>
-              <div className='flex-1'>
+              <div className='flex-1 min-w-0'>
                 <h1 className='text-xl sm:text-2xl font-bold'>{team.name}</h1>
                 <p className='text-white/80 mt-1 text-sm sm:text-base'>
                   {team.description || "Sin descripción"}
                 </p>
               </div>
-              <div className='flex gap-4 sm:gap-6 text-center'>
-                <div>
-                  <p className='text-2xl sm:text-3xl font-bold'>
-                    {team.member_count || members.length}
-                  </p>
-                  <p className='text-xs sm:text-sm text-white/80'>Miembros</p>
-                </div>
-                <div>
-                  <p className='text-2xl sm:text-3xl font-bold'>
-                    {projects.length}
-                  </p>
-                  <p className='text-xs sm:text-sm text-white/80'>Proyectos</p>
-                </div>
-                <div>
-                  <p className='text-2xl sm:text-3xl font-bold'>{inboxCount}</p>
-                  <p className='text-xs sm:text-sm text-white/80'>En buzón</p>
-                </div>
-              </div>
+            </div>
+
+            <div className='relative flex flex-wrap gap-2 mt-5'>
+              <span className='inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-medium'>
+                <Users className='w-4 h-4' />
+                {team.member_count || members.length} miembros
+              </span>
+              <span className='inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-medium'>
+                <FolderKanban className='w-4 h-4' />
+                {projects.length} proyectos
+              </span>
+              <span className='inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-medium'>
+                <Inbox className='w-4 h-4' />
+                {inboxCount} en buzón
+              </span>
             </div>
           </div>
         </div>
@@ -614,57 +651,26 @@ const TeamDetail = () => {
 
       {/* Tabs de navegación */}
       <FadeIn delay={0.1}>
-        <div className='flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto'>
-          <button
-            onClick={() => setActiveTab("inbox")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-              activeTab === "inbox"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Inbox className='w-4 h-4' />
-            <span className='hidden xs:inline'>Buzón de</span> Tickets
-            {inboxCount > 0 && (
-              <span className='px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full'>
-                {inboxCount}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-              activeTab === "projects"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <FolderKanban className='w-4 h-4' />
-            Proyectos ({projects.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("members")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-              activeTab === "members"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Users className='w-4 h-4' />
-            Miembros ({members.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("stats")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-              activeTab === "stats"
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <BarChart3 className='w-4 h-4' />
-            <span className='hidden xs:inline'>Estadísticas</span>
-            <span className='xs:hidden'>Stats</span>
-          </button>
+        <div className='flex gap-2 mb-6 overflow-x-auto'>
+          {tabsCfg.map((tab) => {
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={active ? { background: teamHex } : undefined}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm shrink-0 whitespace-nowrap transition-colors ${
+                  active
+                    ? "text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <tab.icon className='w-4 h-4' />
+                {tab.label}
+                {tab.count !== undefined && ` (${tab.count})`}
+              </button>
+            );
+          })}
         </div>
       </FadeIn>
 
@@ -688,13 +694,13 @@ const TeamDetail = () => {
                     placeholder='Buscar tickets...'
                     value={ticketSearchTerm}
                     onChange={(e) => setTicketSearchTerm(e.target.value)}
-                    className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                    className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                   />
                 </div>
                 <select
                   value={ticketFilter}
                   onChange={(e) => setTicketFilter(e.target.value)}
-                  className='px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none'
+                  className='px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
                 >
                   <option value='all'>Todos</option>
                   <option value='inbox'>Sin asignar</option>
@@ -703,7 +709,7 @@ const TeamDetail = () => {
                 <select
                   value={ticketStatusFilter}
                   onChange={(e) => setTicketStatusFilter(e.target.value)}
-                  className='px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none'
+                  className='px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
                 >
                   <option value='all'>Todo estado</option>
                   <option value='open'>Abierto</option>
@@ -721,7 +727,7 @@ const TeamDetail = () => {
                   setSelectedTicket(null);
                   setIsTicketModalOpen(true);
                 }}
-                className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+                className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
               >
                 <Plus className='w-5 h-5' />
                 Nuevo Ticket
@@ -750,11 +756,11 @@ const TeamDetail = () => {
                       layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`bg-white rounded-lg shadow-sm border p-3 sm:p-4 cursor-pointer hover:shadow-md transition group ${
-                        isInInbox
-                          ? "border-l-4 border-l-yellow-400"
-                          : "border-gray-200"
-                      }`}
+                      style={{
+                        borderLeftColor: teamHex,
+                        borderLeftWidth: isInInbox ? "4px" : "3px",
+                      }}
+                      className='bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 cursor-pointer hover:shadow-md transition group'
                       onClick={() => {
                         setSelectedTicket(ticket);
                         setIsTicketDetailModalOpen(true);
@@ -852,7 +858,7 @@ const TeamDetail = () => {
                             </span>
                             {ticket.assigned_user && (
                               <span className='flex items-center gap-1 text-gray-600'>
-                                <div className='w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-600'>
+                                <div className='w-5 h-5 rounded-full bg-brand-100 flex items-center justify-center text-xs font-medium text-brand-600'>
                                   {ticket.assigned_user.name.charAt(0)}
                                 </div>
                                 {ticket.assigned_user.name}
@@ -898,7 +904,7 @@ const TeamDetail = () => {
                   placeholder='Buscar proyectos...'
                   value={projectSearchTerm}
                   onChange={(e) => setProjectSearchTerm(e.target.value)}
-                  className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                  className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 />
               </div>
 
@@ -910,7 +916,7 @@ const TeamDetail = () => {
                     setSelectedProject(null);
                     setIsProjectModalOpen(true);
                   }}
-                  className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+                  className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
                 >
                   <Plus className='w-5 h-5' />
                   Nuevo Proyecto
@@ -1039,7 +1045,7 @@ const TeamDetail = () => {
             {team.is_owner && (
               <div className='bg-white rounded-xl border border-gray-200 p-6 mb-6'>
                 <h3 className='font-semibold text-gray-900 mb-4 flex items-center gap-2'>
-                  <UserPlus className='w-5 h-5 text-indigo-600' />
+                  <UserPlus className='w-5 h-5 text-brand-600' />
                   Invitar nuevo miembro
                 </h3>
 
@@ -1115,14 +1121,14 @@ const TeamDetail = () => {
                             control: (base, state) => ({
                               ...base,
                               borderColor: state.isFocused
-                                ? "#6366f1"
+                                ? "#7c3aed"
                                 : "#d1d5db",
                               boxShadow: state.isFocused
-                                ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
+                                ? "0 0 0 2px rgba(124, 58, 237, 0.2)"
                                 : "none",
                               "&:hover": {
                                 borderColor: state.isFocused
-                                  ? "#6366f1"
+                                  ? "#7c3aed"
                                   : "#9ca3af",
                               },
                               borderRadius: "0.5rem",
@@ -1148,7 +1154,7 @@ const TeamDetail = () => {
                         whileTap={{ scale: 0.98 }}
                         type='submit'
                         disabled={sendingInvite || !selectedOrgMember}
-                        className='w-full px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center justify-center gap-2'
+                        className='w-full px-6 py-2.5 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:shadow-md hover:shadow-brand-600/20 transition disabled:opacity-50 flex items-center justify-center gap-2'
                       >
                         {sendingInvite ? (
                           <Loader2 className='w-4 h-4 animate-spin' />
@@ -1168,7 +1174,7 @@ const TeamDetail = () => {
                           placeholder='Email del nuevo miembro...'
                           value={inviteEmail}
                           onChange={(e) => setInviteEmail(e.target.value)}
-                          className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                          className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                           required
                         />
                       </div>
@@ -1177,7 +1183,7 @@ const TeamDetail = () => {
                         whileTap={{ scale: 0.98 }}
                         type='submit'
                         disabled={sendingInvite || !inviteEmail.trim()}
-                        className='px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 flex items-center gap-2'
+                        className='px-6 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:shadow-md hover:shadow-brand-600/20 transition disabled:opacity-50 flex items-center gap-2'
                       >
                         {sendingInvite ? (
                           <Loader2 className='w-4 h-4 animate-spin' />
@@ -1227,7 +1233,7 @@ const TeamDetail = () => {
                     <div className='flex items-center gap-3'>
                       <button
                         onClick={() => handleOpenMemberStats(member)}
-                        className='p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors'
+                        className='p-2 text-brand-500 hover:bg-brand-50 rounded-lg transition-colors'
                         title='Ver estadísticas'
                       >
                         <BarChart3 className='w-4 h-4' />
@@ -1256,8 +1262,8 @@ const TeamDetail = () => {
                 {/* Miembros */}
                 <div className='bg-white rounded-xl border border-gray-200 p-6'>
                   <div className='flex items-center gap-4'>
-                    <div className='p-3 bg-indigo-100 rounded-xl'>
-                      <Users className='w-6 h-6 text-indigo-600' />
+                    <div className='p-3 bg-brand-100 rounded-xl'>
+                      <Users className='w-6 h-6 text-brand-600' />
                     </div>
                     <div>
                       <p className='text-2xl font-bold text-gray-900'>
@@ -1378,7 +1384,7 @@ const TeamDetail = () => {
               </div>
             ) : (
               <div className='flex justify-center py-12'>
-                <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+                <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
               </div>
             )}
           </motion.div>
@@ -1500,13 +1506,13 @@ const TeamDetail = () => {
               <div className='p-6'>
                 {loadingMemberStats ? (
                   <div className='flex flex-col items-center justify-center py-12'>
-                    <Loader2 className='w-8 h-8 animate-spin text-indigo-600 mb-3' />
+                    <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
                     <p className='text-gray-500'>Cargando estadísticas...</p>
                   </div>
                 ) : memberStats ? (
                   <div className='space-y-6'>
                     {/* Productividad */}
-                    <div className='bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl p-5 text-white'>
+                    <div className='bg-linear-to-br from-brand-600 to-accent-600 rounded-xl p-5 text-white'>
                       <div className='flex items-center gap-2 mb-4'>
                         <Sparkles className='w-5 h-5' />
                         <h4 className='font-semibold'>
@@ -1517,7 +1523,7 @@ const TeamDetail = () => {
                       {/* Barra de progreso principal */}
                       <div className='mb-4'>
                         <div className='flex justify-between items-center mb-2'>
-                          <span className='text-sm text-indigo-100'>
+                          <span className='text-sm text-white/70'>
                             Tareas completadas
                           </span>
                           <span className='font-bold'>
@@ -1544,7 +1550,7 @@ const TeamDetail = () => {
                           <p className='text-2xl font-bold'>
                             {memberStats.productivity?.percentage || 0}%
                           </p>
-                          <p className='text-xs text-indigo-100'>Completado</p>
+                          <p className='text-xs text-white/70'>Completado</p>
                         </div>
                         <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
                           <div className='flex items-center justify-center gap-1'>
@@ -1554,7 +1560,7 @@ const TeamDetail = () => {
                                 0}
                             </p>
                           </div>
-                          <p className='text-xs text-indigo-100'>Esta semana</p>
+                          <p className='text-xs text-white/70'>Esta semana</p>
                         </div>
                         <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
                           <p className='text-2xl font-bold'>
@@ -1562,7 +1568,7 @@ const TeamDetail = () => {
                               0}
                             %
                           </p>
-                          <p className='text-xs text-indigo-100'>
+                          <p className='text-xs text-white/70'>
                             Avg. Progreso
                           </p>
                         </div>

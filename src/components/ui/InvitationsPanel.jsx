@@ -143,7 +143,7 @@ const InvitationsPanel = () => {
       case "team":
         return <Users className='w-5 h-5 text-purple-500' />;
       case "organization":
-        return <Building2 className='w-5 h-5 text-indigo-500' />;
+        return <Building2 className='w-5 h-5 text-brand-500' />;
       default:
         return <Mail className='w-5 h-5 text-gray-500' />;
     }
@@ -180,7 +180,7 @@ const InvitationsPanel = () => {
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className='absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 text-white text-xs font-bold rounded-full flex items-center justify-center'
+            className='absolute -top-1 -right-1 w-5 h-5 bg-brand-500 text-white text-xs font-bold rounded-full flex items-center justify-center'
           >
             {count > 9 ? "9+" : count}
           </motion.span>
@@ -198,10 +198,10 @@ const InvitationsPanel = () => {
             className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
           >
             {/* Header */}
-            <div className='px-4 py-3 bg-linear-to-r from-indigo-50 to-white border-b border-gray-100'>
+            <div className='px-4 py-3 bg-linear-to-r from-brand-50 to-white border-b border-gray-100'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
-                  <MailOpen className='w-5 h-5 text-indigo-500' />
+                  <MailOpen className='w-5 h-5 text-brand-500' />
                   <h3 className='font-semibold text-gray-900'>
                     Invitaciones Pendientes
                   </h3>
@@ -219,7 +219,7 @@ const InvitationsPanel = () => {
             <div className='max-h-96 overflow-y-auto'>
               {loading ? (
                 <div className='py-12 flex justify-center'>
-                  <Loader2 className='w-6 h-6 animate-spin text-indigo-500' />
+                  <Loader2 className='w-6 h-6 animate-spin text-brand-500' />
                 </div>
               ) : invitations.length === 0 ? (
                 <div className='py-12 text-center'>
@@ -263,7 +263,7 @@ const InvitationsPanel = () => {
                                 {getTypeLabel(invitation.type)}
                               </span>
                               {invitation.role && (
-                                <span className='text-xs px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded'>
+                                <span className='text-xs px-1.5 py-0.5 bg-brand-100 text-brand-700 rounded'>
                                   {invitation.role}
                                 </span>
                               )}
@@ -287,7 +287,7 @@ const InvitationsPanel = () => {
                               <button
                                 onClick={() => handleAccept(invitation)}
                                 disabled={processingId === invitation.id}
-                                className='flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                className='flex items-center gap-1 px-3 py-1.5 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
                               >
                                 {processingId === invitation.id ? (
                                   <Loader2 className='w-4 h-4 animate-spin' />
@@ -350,7 +350,7 @@ const InvitationsPanel = () => {
             >
               <div className='bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden'>
                 {/* Header */}
-                <div className='p-6 text-center bg-linear-to-br from-indigo-50 to-purple-50'>
+                <div className='p-6 text-center bg-linear-to-br from-brand-50 to-accent-50'>
                   <div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                     <Check className='w-8 h-8 text-green-600' />
                   </div>
@@ -368,11 +368,11 @@ const InvitationsPanel = () => {
                   {/* Opción: Modo Organización */}
                   <button
                     onClick={() => handleOrgContextSelection("organization")}
-                    className='w-full p-4 border-2 border-indigo-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition-all group text-left'
+                    className='w-full p-4 border-2 border-brand-200 rounded-xl hover:border-brand-400 hover:bg-brand-50 transition-all group text-left'
                   >
                     <div className='flex items-center gap-3'>
-                      <div className='p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors'>
-                        <Building2 className='w-6 h-6 text-indigo-600' />
+                      <div className='p-2 bg-brand-100 rounded-lg group-hover:bg-brand-200 transition-colors'>
+                        <Building2 className='w-6 h-6 text-brand-600' />
                       </div>
                       <div>
                         <p className='font-semibold text-gray-900'>

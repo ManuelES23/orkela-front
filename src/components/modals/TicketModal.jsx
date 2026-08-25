@@ -125,7 +125,7 @@ const TicketModal = ({
       value: "question",
       label: "Pregunta",
       icon: HelpCircle,
-      color: "text-purple-500",
+      color: "text-accent-500",
     },
     {
       value: "feature",
@@ -215,7 +215,7 @@ const TicketModal = ({
     >
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
           <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
@@ -233,7 +233,7 @@ const TicketModal = ({
                 name='title'
                 value={formData.title}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
                 placeholder='Ej: Solicitud de acceso al sistema'
                 required
               />
@@ -250,7 +250,7 @@ const TicketModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='4'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
               placeholder='Describe detalladamente tu solicitud o problema...'
               required
             ></textarea>
@@ -266,7 +266,7 @@ const TicketModal = ({
                 name='type'
                 value={formData.type}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
               >
                 {typeOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -284,7 +284,7 @@ const TicketModal = ({
                 name='priority'
                 value={formData.priority}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
               >
                 {priorityOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -338,9 +338,9 @@ const TicketModal = ({
             />
 
             {/* Info sobre el buzón */}
-            <div className='mt-2 p-3 bg-purple-50 rounded-lg flex items-start gap-2'>
-              <Inbox className='w-4 h-4 text-purple-600 mt-0.5 shrink-0' />
-              <p className='text-xs text-purple-700'>
+            <div className='mt-2 p-3 bg-accent-50 rounded-lg flex items-start gap-2'>
+              <Inbox className='w-4 h-4 text-accent-600 mt-0.5 shrink-0' />
+              <p className='text-xs text-accent-700'>
                 El ticket llegará al <strong>buzón del equipo</strong>. Los
                 miembros del equipo podrán tomarlo o el líder podrá asignarlo a
                 alguien específico.
@@ -386,7 +386,7 @@ const TicketModal = ({
             <button
               type='submit'
               disabled={loading}
-              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+              className='flex-1 bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
             >
               {loading ? (
                 <>

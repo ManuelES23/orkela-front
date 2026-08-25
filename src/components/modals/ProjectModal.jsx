@@ -151,7 +151,7 @@ const ProjectModal = ({
     >
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
           <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
@@ -169,7 +169,7 @@ const ProjectModal = ({
                 name='name'
                 value={formData.name}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
                 placeholder='Ej: Rediseño de Website'
                 required
               />
@@ -186,7 +186,7 @@ const ProjectModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
               placeholder='Describe brevemente el proyecto...'
             ></textarea>
           </div>
@@ -204,7 +204,7 @@ const ProjectModal = ({
                   name='due_date'
                   value={formData.due_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
                 />
               </div>
             </div>
@@ -219,7 +219,7 @@ const ProjectModal = ({
                   name='priority'
                   value={formData.priority}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
                 >
                   <option value='low'>Baja</option>
                   <option value='medium'>Media</option>
@@ -244,7 +244,7 @@ const ProjectModal = ({
                   }
                   className={`w-8 h-8 rounded-lg ${color.value} ${
                     formData.color === color.value
-                      ? "ring-2 ring-offset-2 ring-indigo-600 scale-110"
+                      ? "ring-2 ring-offset-2 ring-brand-600 scale-110"
                       : "hover:scale-110 opacity-80 hover:opacity-100"
                   } transition-all duration-200`}
                   title={color.label}
@@ -255,7 +255,7 @@ const ProjectModal = ({
 
           {/* Equipo asignado */}
           {teams.length > 0 && (
-            <div className='border-2 border-indigo-200 rounded-lg p-4 bg-indigo-50/50'>
+            <div className='border-2 border-brand-200 rounded-lg p-4 bg-brand-50/50'>
               <label className='block text-sm font-medium text-gray-900 mb-2'>
                 <UsersIcon className='inline w-4 h-4 mr-1' />
                 Opción 1: Asignar Equipo Completo
@@ -264,7 +264,7 @@ const ProjectModal = ({
                 name='team_id'
                 value={formData.team_id}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white'
               >
                 <option value=''>Sin equipo asignado</option>
                 {teams.map((team) => (
@@ -277,7 +277,7 @@ const ProjectModal = ({
                 ✓ Todos los miembros del equipo tendrán acceso automáticamente
               </p>
               {formData.team_id && (
-                <p className='text-xs text-indigo-600 mt-1 font-medium'>
+                <p className='text-xs text-brand-600 mt-1 font-medium'>
                   📌 Equipo seleccionado - Los usuarios individuales se
                   ignorarán
                 </p>
@@ -363,14 +363,14 @@ const ProjectModal = ({
                             }
                           }}
                           placeholder='email@ejemplo.com'
-                          className='w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                          className='w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         />
                       </div>
                       <button
                         type='button'
                         onClick={handleSendInvite}
                         disabled={sendingInvite || !inviteEmail}
-                        className='px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed'
+                        className='px-3 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed'
                       >
                         <Send className='w-4 h-4' />
                       </button>
@@ -401,7 +401,7 @@ const ProjectModal = ({
             <button
               type='submit'
               disabled={loading}
-              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex-1 bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {loading
                 ? "Guardando..."

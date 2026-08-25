@@ -31,7 +31,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className='absolute inset-0 bg-linear-to-br from-gray-900/60 via-gray-900/50 to-indigo-900/40 backdrop-blur-sm'
+            className='absolute inset-0 bg-linear-to-br from-gray-900/60 via-gray-900/50 to-brand-900/40 backdrop-blur-sm'
             onClick={onClose}
           />
 

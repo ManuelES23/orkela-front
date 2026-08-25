@@ -6,10 +6,9 @@ import {
   Search,
   Edit,
   Trash2,
-  Shield,
+  Users,
   Mail,
   Calendar,
-  MoreVertical,
   CheckCircle,
   XCircle,
   Building2,
@@ -122,6 +121,9 @@ const UsersManagement = ({ onStatsUpdate }) => {
     inactive: users.filter((u) => u.status === "inactive").length,
   };
 
+  const activeUsers = filteredUsers.filter((u) => u.status === "active");
+  const inactiveUsers = filteredUsers.filter((u) => u.status !== "active");
+
   const formatDate = (dateString) => {
     if (!dateString) return "Nunca";
     const date = parseLocalDate(dateString);
@@ -135,10 +137,88 @@ const UsersManagement = ({ onStatsUpdate }) => {
   if (loading) {
     return (
       <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600'></div>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
       </div>
     );
   }
+
+  const renderUserRow = (user) => (
+    <motion.div
+      key={user.id}
+      layout
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      className={`flex items-center gap-3 bg-white border border-gray-200 border-l-4 rounded-xl px-4 py-3 ${
+        user.status === "active" ? "border-l-green-500" : "border-l-gray-300"
+      }`}
+    >
+      <UserAvatar user={user} size='md' />
+      <div className='min-w-0 flex-1'>
+        <p className='font-medium text-gray-900 truncate'>{user.name}</p>
+        <p className='text-sm text-gray-500 flex items-center gap-1 truncate'>
+          <Mail className='w-3 h-3 shrink-0' />
+          {user.email}
+        </p>
+      </div>
+
+      <div className='hidden sm:flex items-center gap-1.5 text-sm text-gray-600 shrink-0 w-40'>
+        {user.organization ? (
+          <>
+            <Building2 className='w-4 h-4 text-brand-500 shrink-0' />
+            <span className='truncate'>{user.organization.name}</span>
+          </>
+        ) : (
+          <span className='italic text-gray-400'>Sin organización</span>
+        )}
+      </div>
+
+      <button
+        onClick={() => handleToggleStatus(user.id, user.status)}
+        className={`hidden xs:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 ${
+          user.status === "active"
+            ? "bg-green-100 text-green-700 hover:bg-green-200"
+            : "bg-red-100 text-red-700 hover:bg-red-200"
+        }`}
+      >
+        {user.status === "active" ? (
+          <>
+            <CheckCircle className='w-3.5 h-3.5' />
+            Activo
+          </>
+        ) : (
+          <>
+            <XCircle className='w-3.5 h-3.5' />
+            Inactivo
+          </>
+        )}
+      </button>
+
+      <span className='hidden lg:flex items-center gap-1 text-xs text-gray-400 shrink-0 w-24'>
+        <Calendar className='w-3 h-3' />
+        {formatDate(user.created_at)}
+      </span>
+
+      <div className='flex items-center gap-1 shrink-0'>
+        <button
+          onClick={() => {
+            setSelectedUser(user);
+            setIsModalOpen(true);
+          }}
+          className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
+          title='Editar usuario'
+        >
+          <Edit className='w-4 h-4 text-blue-600' />
+        </button>
+        <button
+          onClick={() => openDeleteConfirm(user.id)}
+          className='p-2 hover:bg-red-50 rounded-lg transition-colors'
+          title='Eliminar usuario'
+        >
+          <Trash2 className='w-4 h-4 text-red-600' />
+        </button>
+      </div>
+    </motion.div>
+  );
 
   return (
     <div>
@@ -152,6 +232,28 @@ const UsersManagement = ({ onStatsUpdate }) => {
         </p>
       </div>
 
+      {/* Stats compactas */}
+      <div className='grid grid-cols-3 gap-3 mb-6'>
+        <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
+          <p className='text-xl font-bold text-gray-900 font-mono'>
+            {stats.total}
+          </p>
+          <p className='text-xs text-gray-500'>Total</p>
+        </div>
+        <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
+          <p className='text-xl font-bold text-green-600 font-mono'>
+            {stats.active}
+          </p>
+          <p className='text-xs text-gray-500'>Activos</p>
+        </div>
+        <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
+          <p className='text-xl font-bold text-red-600 font-mono'>
+            {stats.inactive}
+          </p>
+          <p className='text-xs text-gray-500'>Inactivos</p>
+        </div>
+      </div>
+
       {/* Header con búsqueda y filtros */}
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
         <div className='flex-1 flex flex-wrap items-center gap-4'>
@@ -162,7 +264,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
               placeholder='Buscar usuarios...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
           </div>
 
@@ -170,7 +272,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+            className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
           >
             <option value='all'>Todos los estados</option>
             <option value='active'>Activos</option>
@@ -181,7 +283,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
           <select
             value={orgFilter}
             onChange={(e) => setOrgFilter(e.target.value)}
-            className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+            className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
           >
             <option value='all'>Todas las organizaciones</option>
             <option value='none'>Sin organización</option>
@@ -197,139 +299,42 @@ const UsersManagement = ({ onStatsUpdate }) => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md'
+          className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
         >
           <Plus className='w-5 h-5' />
           <span>Nuevo Usuario</span>
         </motion.button>
       </div>
 
-      {/* Tabla de usuarios */}
-      <div className='overflow-x-auto'>
-        <table className='w-full'>
-          <thead>
-            <tr className='border-b border-gray-200'>
-              <th className='text-left py-3 px-4 font-semibold text-gray-700'>
-                Usuario
-              </th>
-              <th className='text-left py-3 px-4 font-semibold text-gray-700'>
-                Organización
-              </th>
-              <th className='text-left py-3 px-4 font-semibold text-gray-700'>
-                Estado
-              </th>
-              <th className='text-left py-3 px-4 font-semibold text-gray-700'>
-                Creado
-              </th>
-              <th className='text-left py-3 px-4 font-semibold text-gray-700'>
-                Último acceso
-              </th>
-              <th className='text-right py-3 px-4 font-semibold text-gray-700'>
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user, index) => {
-              return (
-                <motion.tr
-                  key={user.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className='border-b border-gray-100 hover:bg-gray-50 transition-colors'
-                >
-                  <td className='py-4 px-4'>
-                    <div className='flex items-center gap-3'>
-                      <UserAvatar user={user} size='md' />
-                      <div>
-                        <p className='font-medium text-gray-900'>{user.name}</p>
-                        <p className='text-sm text-gray-500 flex items-center gap-1'>
-                          <Mail className='w-3 h-3' />
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className='py-4 px-4'>
-                    {user.organization ? (
-                      <div className='flex items-center gap-2'>
-                        <Building2 className='w-4 h-4 text-indigo-500' />
-                        <span className='text-sm font-medium text-gray-700'>
-                          {user.organization.name}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className='text-sm text-gray-400 italic'>
-                        Sin organización
-                      </span>
-                    )}
-                  </td>
-                  <td className='py-4 px-4'>
-                    <button
-                      onClick={() => handleToggleStatus(user.id, user.status)}
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                        user.status === "active"
-                          ? "bg-green-100 text-green-700 hover:bg-green-200"
-                          : "bg-red-100 text-red-700 hover:bg-red-200"
-                      }`}
-                    >
-                      {user.status === "active" ? (
-                        <>
-                          <CheckCircle className='w-4 h-4' />
-                          Activo
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className='w-4 h-4' />
-                          Inactivo
-                        </>
-                      )}
-                    </button>
-                  </td>
-                  <td className='py-4 px-4 text-sm text-gray-600'>
-                    <div className='flex items-center gap-1'>
-                      <Calendar className='w-4 h-4' />
-                      {formatDate(user.created_at)}
-                    </div>
-                  </td>
-                  <td className='py-4 px-4 text-sm text-gray-600'>
-                    {formatDate(user.last_login)}
-                  </td>
-                  <td className='py-4 px-4'>
-                    <div className='flex items-center justify-end gap-2'>
-                      <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsModalOpen(true);
-                        }}
-                        className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
-                        title='Editar usuario'
-                      >
-                        <Edit className='w-4 h-4 text-blue-600' />
-                      </button>
-                      <button
-                        onClick={() => openDeleteConfirm(user.id)}
-                        className='p-2 hover:bg-red-50 rounded-lg transition-colors'
-                        title='Eliminar usuario'
-                      >
-                        <Trash2 className='w-4 h-4 text-red-600' />
-                      </button>
-                    </div>
-                  </td>
-                </motion.tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Usuarios agrupados por estado */}
+      {filteredUsers.length === 0 ? (
+        <div className='text-center py-12 bg-white rounded-xl border border-gray-200'>
+          <Users className='w-12 h-12 text-gray-300 mx-auto mb-3' />
+          <p className='text-gray-500'>No se encontraron usuarios</p>
+        </div>
+      ) : (
+        <>
+          {activeUsers.length > 0 && (
+            <>
+              <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2'>
+                Activos
+              </p>
+              <div className='space-y-2 mb-6'>
+                {activeUsers.map(renderUserRow)}
+              </div>
+            </>
+          )}
 
-        {filteredUsers.length === 0 && (
-          <div className='text-center py-12'>
-            <UserCircle className='w-12 h-12 text-gray-400 mx-auto mb-3' />
-            <p className='text-gray-500'>No se encontraron usuarios</p>
-          </div>
-        )}
-      </div>
+          {inactiveUsers.length > 0 && (
+            <>
+              <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2'>
+                Inactivos
+              </p>
+              <div className='space-y-2'>{inactiveUsers.map(renderUserRow)}</div>
+            </>
+          )}
+        </>
+      )}
 
       {/* Modal de crear/editar usuario */}
       {isModalOpen && (
@@ -431,7 +436,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
           </div>
 
@@ -446,7 +451,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
           </div>
 
@@ -463,7 +468,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                 />
               </div>
 
@@ -481,7 +486,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                       password_confirmation: e.target.value,
                     })
                   }
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                 />
               </div>
             </>
@@ -499,7 +504,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                 onChange={(e) =>
                   setFormData({ ...formData, organization_id: e.target.value })
                 }
-                className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none'
+                className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none'
               >
                 <option value=''>Sin organización (Usuario libre)</option>
                 {organizations.map((org) => (
@@ -524,7 +529,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+              className='px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:shadow-md hover:shadow-brand-600/20 transition'
             >
               {user ? "Guardar cambios" : "Crear usuario"}
             </button>

@@ -82,8 +82,8 @@ const ContextSwitcher = ({ isCompact = false }) => {
         : "hover:bg-purple-50 text-purple-600";
     }
     return isActive
-      ? "bg-indigo-100 text-indigo-700 border-indigo-200"
-      : "hover:bg-indigo-50 text-indigo-600";
+      ? "bg-brand-100 text-brand-700 border-brand-200"
+      : "hover:bg-brand-50 text-brand-600";
   };
 
   const ActiveIcon = getContextIcon(activeContext?.type);
@@ -243,7 +243,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
                       className={`p-2 rounded-lg ${
                         ctx.type === "organization"
                           ? "bg-purple-100"
-                          : "bg-indigo-100"
+                          : "bg-brand-100"
                       }`}
                     >
                       {renderContextIcon(ctx, "w-4 h-4")}

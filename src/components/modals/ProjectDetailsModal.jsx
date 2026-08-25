@@ -203,19 +203,19 @@ const ProjectDetailsModal = ({
                   {/* Stats Grid */}
                   <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                     {/* Progress */}
-                    <div className='bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200'>
+                    <div className='bg-gradient-to-br from-brand-50 to-brand-100 rounded-xl p-4 border border-brand-200'>
                       <div className='flex items-center gap-2 mb-2'>
-                        <TrendingUp className='w-5 h-5 text-indigo-600' />
-                        <span className='text-sm font-medium text-indigo-900'>
+                        <TrendingUp className='w-5 h-5 text-brand-600' />
+                        <span className='text-sm font-medium text-brand-900'>
                           Progreso
                         </span>
                       </div>
-                      <div className='text-3xl font-bold text-indigo-600'>
+                      <div className='text-3xl font-bold text-brand-600'>
                         {project.progress}%
                       </div>
-                      <div className='w-full bg-indigo-200 rounded-full h-2 mt-2'>
+                      <div className='w-full bg-brand-200 rounded-full h-2 mt-2'>
                         <div
-                          className='bg-indigo-600 h-2 rounded-full transition-all'
+                          className='bg-brand-600 h-2 rounded-full transition-all'
                           style={{ width: `${project.progress}%` }}
                         ></div>
                       </div>
@@ -254,7 +254,7 @@ const ProjectDetailsModal = ({
                       className={`bg-gradient-to-br ${
                         daysRemaining && daysRemaining.color.includes("red")
                           ? "from-red-50 to-red-100 border-red-200"
-                          : "from-purple-50 to-purple-100 border-purple-200"
+                          : "from-accent-50 to-accent-100 border-accent-200"
                       } rounded-xl p-4 border`}
                     >
                       <div className='flex items-center gap-2 mb-2'>
@@ -262,14 +262,14 @@ const ProjectDetailsModal = ({
                           className={`w-5 h-5 ${
                             daysRemaining && daysRemaining.color.includes("red")
                               ? "text-red-600"
-                              : "text-purple-600"
+                              : "text-accent-600"
                           }`}
                         />
                         <span
                           className={`text-sm font-medium ${
                             daysRemaining && daysRemaining.color.includes("red")
                               ? "text-red-900"
-                              : "text-purple-900"
+                              : "text-accent-900"
                           }`}
                         >
                           Vencimiento
@@ -279,7 +279,7 @@ const ProjectDetailsModal = ({
                         className={`text-sm font-semibold ${
                           daysRemaining
                             ? daysRemaining.color
-                            : "text-purple-600"
+                            : "text-accent-600"
                         }`}
                       >
                         {formatDate(project.due_date)}
@@ -363,7 +363,7 @@ const ProjectDetailsModal = ({
                         {project.tasks.slice(0, 5).map((task) => (
                           <div
                             key={task.id}
-                            className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-indigo-300 transition-colors'
+                            className='flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-brand-300 transition-colors'
                           >
                             <div className='flex items-center gap-3'>
                               <div
@@ -420,7 +420,7 @@ const ProjectDetailsModal = ({
                     onEdit(project);
                     onClose();
                   }}
-                  className='px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2'
+                  className='px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors flex items-center gap-2'
                 >
                   <Edit className='w-4 h-4' />
                   Editar Proyecto

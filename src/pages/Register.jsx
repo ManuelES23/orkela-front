@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { UserPlus, Mail, Lock, User, Loader2, Info } from "lucide-react";
-import { motion } from "framer-motion";
-import {
-  FadeIn,
-  ScaleIn,
-  SlideInLeft,
-  SlideInRight,
-} from "../components/animations/MotionComponents";
+import { UserPlus, Mail, Lock, User, Info, AlertCircle } from "lucide-react";
+import AuthShell from "../components/auth/AuthShell";
+import AuthInput from "../components/auth/AuthInput";
+import Button from "../components/ui/Button";
+import { motionTokens, shakeVariants } from "../components/animations/variants";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -26,8 +24,11 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [shakeKey, setShakeKey] = useState(0);
 
   // Si el email cambia en el state (ej. navegación desde invitación)
   useEffect(() => {
@@ -37,23 +38,33 @@ const Register = () => {
   }, [prefilledEmail]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpiar el error del campo en cuanto el usuario lo corrige
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const validate = () => {
+    const errors = {};
+    if (formData.password.length < 6) {
+      errors.password = "Debe tener al menos 6 caracteres";
+    }
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Las contraseñas no coinciden";
+    }
+    return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setShakeKey((k) => k + 1);
       return;
     }
 
@@ -77,217 +88,161 @@ const Register = () => {
         navigate("/dashboard");
       }
     } catch (err) {
+      console.error("Error al crear la cuenta:", err);
       setError("Error al crear la cuenta. Intenta de nuevo.");
+      setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden'>
-      {/* Elementos decorativos animados */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          rotate: [0, 90, 0],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className='absolute top-20 left-20 w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70'
-      />
-      <motion.div
-        animate={{
-          scale: [1, 1.3, 1],
-          rotate: [0, -90, 0],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className='absolute bottom-20 right-20 w-64 h-64 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70'
-      />
+    <AuthShell
+      badge='Empieza en minutos'
+      heading='Crea el espacio de tu equipo'
+      description='Invita a tu equipo, organiza proyectos y da seguimiento a cada tarea desde un solo lugar.'
+      formHeader={
+        <div className='mb-9'>
+          <h2 className='text-3xl font-extrabold text-gray-900 mb-2 tracking-tight'>Crear cuenta</h2>
+          <p className='text-gray-500 text-base'>Únete a Orkela Projects hoy.</p>
+        </div>
+      }
+    >
+      <AnimatePresence>
+        {invitationMessage && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            transition={{ duration: motionTokens.duration.base }}
+            className='overflow-hidden'
+          >
+            <div className='mb-4 p-3 bg-brand-50 border border-brand-200 rounded-lg flex items-start gap-2'>
+              <Info className='w-5 h-5 text-brand-600 shrink-0 mt-0.5' />
+              <p className='text-brand-700 text-sm'>{invitationMessage}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className='max-w-md w-full relative z-10'>
-        {/* Logo y título */}
-        <FadeIn delay={0.2}>
-          <div className='text-center mb-8'>
-            <ScaleIn delay={0.3}>
-              <div className='inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-2xl mb-4 shadow-lg'>
-                <UserPlus className='w-8 h-8 text-white' />
-              </div>
-            </ScaleIn>
-            <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-              Crear Cuenta
-            </h1>
-            <p className='text-gray-600'>Únete a Orkela Projects hoy</p>
-          </div>
-        </FadeIn>
-
-        {/* Formulario */}
-        <ScaleIn delay={0.4}>
-          <div className='bg-white rounded-2xl shadow-xl p-8'>
-            <h2 className='text-2xl font-semibold text-gray-900 mb-6'>
-              Registro
-            </h2>
-
-            {/* Mensaje de invitación */}
-            {invitationMessage && (
-              <div className='mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-start gap-2'>
-                <Info className='w-5 h-5 text-indigo-600 shrink-0 mt-0.5' />
-                <p className='text-indigo-700 text-sm'>{invitationMessage}</p>
-              </div>
-            )}
-
-            {error && (
-              <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm'>
+      <motion.form
+        key={shakeKey}
+        variants={shakeVariants}
+        initial='initial'
+        animate={shakeKey > 0 ? "shake" : "initial"}
+        onSubmit={handleSubmit}
+        className='space-y-6'
+        noValidate
+      >
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: motionTokens.duration.fast }}
+              className='overflow-hidden'
+            >
+              <div
+                role='alert'
+                className='mb-1 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-2'
+              >
+                <AlertCircle className='w-4 h-4 shrink-0 mt-0.5' />
                 {error}
               </div>
-            )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            <form onSubmit={handleSubmit} className='space-y-5'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Nombre Completo
-                </label>
-                <div className='relative'>
-                  <User className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                  <input
-                    type='text'
-                    name='name'
-                    value={formData.name}
-                    onChange={handleChange}
-                    className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition'
-                    placeholder='Juan Pérez'
-                    required
-                  />
-                </div>
-              </div>
+        <AuthInput
+          label='Nombre completo'
+          icon={User}
+          type='text'
+          name='name'
+          value={formData.name}
+          onChange={handleChange}
+          placeholder='Juan Pérez'
+          autoComplete='name'
+          required
+        />
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Correo Electrónico
-                </label>
-                <div className='relative'>
-                  <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                  <input
-                    type='email'
-                    name='email'
-                    value={formData.email}
-                    onChange={handleChange}
-                    className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition'
-                    placeholder='tu@email.com'
-                    required
-                  />
-                </div>
-              </div>
+        <AuthInput
+          label='Correo electrónico'
+          icon={Mail}
+          type='email'
+          name='email'
+          value={formData.email}
+          onChange={handleChange}
+          placeholder='tu@empresa.com'
+          autoComplete='email'
+          required
+        />
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Contraseña
-                </label>
-                <div className='relative'>
-                  <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                  <input
-                    type='password'
-                    name='password'
-                    value={formData.password}
-                    onChange={handleChange}
-                    className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition'
-                    placeholder='••••••••'
-                    required
-                  />
-                </div>
-              </div>
+        <AuthInput
+          label='Contraseña'
+          icon={Lock}
+          type='password'
+          name='password'
+          value={formData.password}
+          onChange={handleChange}
+          placeholder='••••••••'
+          autoComplete='new-password'
+          error={fieldErrors.password}
+          required
+        />
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Confirmar Contraseña
-                </label>
-                <div className='relative'>
-                  <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
-                  <input
-                    type='password'
-                    name='confirmPassword'
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition'
-                    placeholder='••••••••'
-                    required
-                  />
-                </div>
-              </div>
+        <AuthInput
+          label='Confirmar contraseña'
+          icon={Lock}
+          type='password'
+          name='confirmPassword'
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          placeholder='••••••••'
+          autoComplete='new-password'
+          error={fieldErrors.confirmPassword}
+          required
+        />
 
-              <div className='flex items-start'>
-                <input
-                  type='checkbox'
-                  className='w-4 h-4 mt-1 text-purple-600 border-gray-300 rounded focus:ring-purple-500'
-                  required
-                />
-                <span className='ml-2 text-sm text-gray-600'>
-                  Acepto los{" "}
-                  <a
-                    href='#'
-                    className='text-purple-600 hover:text-purple-700 font-medium'
-                  >
-                    términos y condiciones
-                  </a>{" "}
-                  y la{" "}
-                  <a
-                    href='#'
-                    className='text-purple-600 hover:text-purple-700 font-medium'
-                  >
-                    política de privacidad
-                  </a>
-                </span>
-              </div>
+        <label className='flex items-start gap-2.5 text-base text-gray-600'>
+          <input
+            type='checkbox'
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className='w-[18px] h-[18px] mt-0.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+            required
+          />
+          <span>
+            Acepto los{" "}
+            <a href='#' className='font-semibold text-brand-600 hover:text-brand-700'>
+              términos y condiciones
+            </a>{" "}
+            y la{" "}
+            <a href='#' className='font-semibold text-brand-600 hover:text-brand-700'>
+              política de privacidad
+            </a>
+          </span>
+        </label>
 
-              <motion.button
-                type='submit'
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className='w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg'
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className='w-5 h-5 animate-spin' />
-                    Creando cuenta...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className='w-5 h-5' />
-                    Crear Cuenta
-                  </>
-                )}
-              </motion.button>
-            </form>
+        <Button
+          type='submit'
+          variant='brand'
+          size='xl'
+          loading={loading}
+          loadingText='Creando cuenta...'
+          className='w-full'
+        >
+          <UserPlus className='w-5 h-5' />
+          Crear cuenta
+        </Button>
 
-            <div className='mt-6 text-center'>
-              <p className='text-gray-600'>
-                ¿Ya tienes una cuenta?{" "}
-                <Link
-                  to='/login'
-                  className='text-purple-600 hover:text-purple-700 font-semibold'
-                >
-                  Inicia sesión
-                </Link>
-              </p>
-            </div>
-          </div>
-        </ScaleIn>
-
-        {/* Footer */}
-        <FadeIn delay={0.6}>
-          <p className='text-center text-gray-500 text-sm mt-8'>
-            © 2025 Orkela Projects. Todos los derechos reservados.
-          </p>
-        </FadeIn>
-      </div>
-    </div>
+        <p className='text-center text-base text-gray-500 pt-1'>
+          ¿Ya tienes una cuenta?{" "}
+          <Link to='/login' className='font-semibold text-brand-600 hover:text-brand-700'>
+            Inicia sesión
+          </Link>
+        </p>
+      </motion.form>
+    </AuthShell>
   );
 };
 

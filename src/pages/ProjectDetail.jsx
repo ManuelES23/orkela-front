@@ -7,6 +7,8 @@ import TaskModal from "../components/modals/TaskModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import Modal from "../components/ui/Modal";
 import UserAvatar from "../components/ui/UserAvatar";
+import ProgressRing from "../components/ui/ProgressRing";
+import AnimatedNumber from "../components/ui/AnimatedNumber";
 import ProjectGantt from "../components/tasks/ProjectGantt";
 import ProjectCalendar from "../components/tasks/ProjectCalendar";
 import TagManager from "../components/tasks/TagManager";
@@ -14,6 +16,7 @@ import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
+import { motionTokens } from "../components/animations/variants";
 import {
   ArrowLeft,
   Calendar,
@@ -692,12 +695,16 @@ const ProjectDetail = () => {
     (t) => t.status === "in-progress",
   ).length;
   const pendingTasks = tasks.filter((t) => t.status === "todo").length;
+  const overdueTasks = tasks.filter((t) => {
+    if (!t.due_date || t.status === "done") return false;
+    return parseLocalDate(t.due_date) < new Date();
+  }).length;
 
   if (loading) {
     return (
       <Layout title='Cargando...'>
         <div className='flex items-center justify-center py-20'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600'></div>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
         </div>
       </Layout>
     );
@@ -712,7 +719,7 @@ const ProjectDetail = () => {
           </p>
           <button
             onClick={() => navigate("/projects")}
-            className='px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700'
+            className='px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 cursor-pointer'
           >
             Volver a Proyectos
           </button>
@@ -793,7 +800,7 @@ const ProjectDetail = () => {
                       onClick={() => handleExport("gantt")}
                       className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
                     >
-                      <GanttChartIcon className='w-4 h-4 text-purple-500' />
+                      <GanttChartIcon className='w-4 h-4 text-accent-500' />
                       Exportar Gantt a PDF
                     </button>
                   </motion.div>
@@ -827,19 +834,25 @@ const ProjectDetail = () => {
           </div>
         </div>
 
-        {/* Project Info Card */}
+        {/* Hero: anillo de progreso + info del proyecto */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className='bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm'
         >
           <div className='flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6'>
-            <div
-              className={`${project.color} w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center shadow-lg shrink-0`}
-            >
-              <span className='text-white font-bold text-2xl sm:text-3xl'>
-                {project.name.charAt(0)}
-              </span>
+            <div className='relative flex items-center justify-center shrink-0'>
+              <ProgressRing
+                percentage={project.progress || 0}
+                color='#7c3aed'
+                size={92}
+                strokeWidth={7}
+              />
+              <div className='absolute flex flex-col items-center'>
+                <span className='text-xl font-bold text-gray-900 tabular-nums'>
+                  <AnimatedNumber value={project.progress || 0} suffix='%' />
+                </span>
+              </div>
             </div>
 
             <div className='flex-1 text-center sm:text-left w-full'>
@@ -878,50 +891,22 @@ const ProjectDetail = () => {
 
       {/* Stats Grid */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
-        {/* Progress */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
-        >
-          <div className='flex items-center justify-between mb-4'>
-            <div className='flex items-center gap-2'>
-              <div className='p-2 bg-indigo-100 rounded-lg'>
-                <TrendingUp className='w-5 h-5 text-indigo-600' />
-              </div>
-              <span className='text-sm font-medium text-gray-700'>
-                Progreso
-              </span>
-            </div>
-            <span className='text-2xl font-bold text-indigo-600'>
-              {project.progress}%
-            </span>
-          </div>
-          <div className='w-full bg-gray-200 rounded-full h-3'>
-            <div
-              className='bg-indigo-600 h-3 rounded-full transition-all duration-500'
-              style={{ width: `${project.progress}%` }}
-            ></div>
-          </div>
-        </motion.div>
-
         {/* Team Size - Clickeable para abrir modal */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.1 }}
           onClick={() => setIsMembersModalOpen(true)}
-          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group'
+          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:border-brand-300 hover:shadow-md transition-all group'
         >
           <div className='flex items-center gap-3 mb-2'>
-            <div className='p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors'>
-              <Users className='w-5 h-5 text-blue-600' />
+            <div className='p-2 bg-brand-100 rounded-lg group-hover:bg-brand-200 transition-colors'>
+              <Users className='w-5 h-5 text-brand-600' />
             </div>
             <span className='text-sm font-medium text-gray-700'>Miembros</span>
           </div>
-          <div className='text-3xl font-bold text-blue-600'>
-            {getAllProjectMembers().length}
+          <div className='text-3xl font-bold text-brand-600 tabular-nums'>
+            <AnimatedNumber value={getAllProjectMembers().length} />
           </div>
           <div className='text-xs text-gray-500 mt-1'>
             {project.team ? `Equipo: ${project.team.name}` : "Ver y gestionar"}
@@ -932,7 +917,7 @@ const ProjectDetail = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
           className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
         >
           <div className='flex items-center gap-3 mb-2'>
@@ -941,8 +926,8 @@ const ProjectDetail = () => {
             </div>
             <span className='text-sm font-medium text-gray-700'>Tareas</span>
           </div>
-          <div className='text-3xl font-bold text-green-600'>
-            {tasks.length}
+          <div className='text-3xl font-bold text-green-600 tabular-nums'>
+            <AnimatedNumber value={tasks.length} />
           </div>
           <div className='text-xs text-gray-500 mt-1'>
             {completedTasks} completadas
@@ -953,18 +938,18 @@ const ProjectDetail = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
         >
           <div className='flex items-center gap-3 mb-2'>
-            <div className='p-2 bg-purple-100 rounded-lg'>
-              <Calendar className='w-5 h-5 text-purple-600' />
+            <div className='p-2 bg-accent-100 rounded-lg'>
+              <Calendar className='w-5 h-5 text-accent-600' />
             </div>
             <span className='text-sm font-medium text-gray-700'>
               Vencimiento
             </span>
           </div>
-          <div className='text-lg font-semibold text-purple-600'>
+          <div className='text-lg font-semibold text-accent-600'>
             {formatDate(project.due_date)}
           </div>
           {daysRemaining && (
@@ -973,6 +958,33 @@ const ProjectDetail = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Overdue */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
+        >
+          <div className='flex items-center gap-3 mb-2'>
+            <div
+              className={`p-2 rounded-lg ${overdueTasks > 0 ? "bg-red-100" : "bg-green-100"}`}
+            >
+              <AlertCircle
+                className={`w-5 h-5 ${overdueTasks > 0 ? "text-red-600" : "text-green-600"}`}
+              />
+            </div>
+            <span className='text-sm font-medium text-gray-700'>Vencidas</span>
+          </div>
+          <div
+            className={`text-3xl font-bold tabular-nums ${overdueTasks > 0 ? "text-red-600" : "text-green-600"}`}
+          >
+            <AnimatedNumber value={overdueTasks} />
+          </div>
+          <div className='text-xs text-gray-500 mt-1'>
+            {overdueTasks > 0 ? "Requieren atención" : "¡Todo al día!"}
+          </div>
+        </motion.div>
       </div>
 
       {/* Tasks Section */}
@@ -980,7 +992,7 @@ const ProjectDetail = () => {
         <div className='flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6'>
           <div>
             <h2 className='text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2'>
-              <ListChecks className='w-5 sm:w-6 h-5 sm:h-6 text-indigo-600' />
+              <ListChecks className='w-5 sm:w-6 h-5 sm:h-6 text-brand-600' />
               Tareas del Proyecto
             </h2>
             <p className='text-sm text-gray-600 mt-1'>
@@ -991,39 +1003,31 @@ const ProjectDetail = () => {
           <div className='flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto'>
             {/* Vista Tabs */}
             <div className='flex items-center bg-gray-100 rounded-lg p-1'>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  viewMode === "list"
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <LayoutList className='w-4 h-4' />
-                <span className='hidden sm:inline'>Lista</span>
-              </button>
-              <button
-                onClick={() => setViewMode("gantt")}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  viewMode === "gantt"
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <GanttChart className='w-4 h-4' />
-                <span className='hidden sm:inline'>Gantt</span>
-              </button>
-              <button
-                onClick={() => setViewMode("calendar")}
-                className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  viewMode === "calendar"
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <CalendarDays className='w-4 h-4' />
-                <span className='hidden sm:inline'>Calendario</span>
-              </button>
+              {[
+                { key: "list", label: "Lista", Icon: LayoutList },
+                { key: "gantt", label: "Gantt", Icon: GanttChart },
+                { key: "calendar", label: "Calendario", Icon: CalendarDays },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setViewMode(tab.key)}
+                  className={`relative flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                    viewMode === tab.key
+                      ? "text-brand-600"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  {viewMode === tab.key && (
+                    <motion.span
+                      layoutId='project-detail-view-tab'
+                      transition={motionTokens.springSnappy}
+                      className='absolute inset-0 bg-white rounded-md shadow-sm'
+                    />
+                  )}
+                  <tab.Icon className='relative w-4 h-4' />
+                  <span className='relative hidden sm:inline'>{tab.label}</span>
+                </button>
+              ))}
             </div>
 
             {/* Botón de Etiquetas - Visible para owner y colaboradores */}
@@ -1041,7 +1045,7 @@ const ProjectDetail = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleNewTask}
-              className='flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-md text-sm'
+              className='flex items-center gap-2 px-3 sm:px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:brightness-105 transition-all shadow-md shadow-brand-600/25 text-sm'
             >
               <Plus className='w-4 sm:w-5 h-4 sm:h-5' />
               <span className='hidden xs:inline'>Nueva Tarea</span>
@@ -1057,11 +1061,11 @@ const ProjectDetail = () => {
             </div>
             <div className='text-sm text-gray-600'>Pendientes</div>
           </div>
-          <div className='bg-blue-50 rounded-lg p-4 border border-blue-200'>
-            <div className='text-2xl font-bold text-blue-600'>
+          <div className='bg-brand-50 rounded-lg p-4 border border-brand-200'>
+            <div className='text-2xl font-bold text-brand-600 tabular-nums'>
               {inProgressTasks}
             </div>
-            <div className='text-sm text-blue-600'>En Progreso</div>
+            <div className='text-sm text-brand-600'>En Progreso</div>
           </div>
           <div className='bg-green-50 rounded-lg p-4 border border-green-200'>
             <div className='text-2xl font-bold text-green-600'>
@@ -1098,7 +1102,7 @@ const ProjectDetail = () => {
                 </p>
                 <button
                   onClick={handleNewTask}
-                  className='px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+                  className='px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition cursor-pointer'
                 >
                   Crear primera tarea
                 </button>
@@ -1182,7 +1186,7 @@ const ProjectDetail = () => {
                           task.status === "done"
                             ? "bg-green-100 text-green-700"
                             : task.status === "in-progress"
-                              ? "bg-blue-100 text-blue-700"
+                              ? "bg-brand-100 text-brand-700"
                               : "bg-gray-100 text-gray-700"
                         }`}
                       >
@@ -1376,7 +1380,7 @@ const ProjectDetail = () => {
                 <div className='flex items-center justify-between p-5 border-b border-gray-200'>
                   <div>
                     <h2 className='text-lg font-bold text-gray-900 flex items-center gap-2'>
-                      <Users className='w-5 h-5 text-indigo-600' />
+                      <Users className='w-5 h-5 text-brand-600' />
                       Miembros del Proyecto
                     </h2>
                     <p className='text-sm text-gray-500 mt-0.5'>
@@ -1419,7 +1423,7 @@ const ProjectDetail = () => {
                       {!showInviteForm ? (
                         <button
                           onClick={() => setShowInviteForm(true)}
-                          className='w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors'
+                          className='w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors cursor-pointer'
                         >
                           <UserPlus className='w-4 h-4' />
                           Invitar colaborador
@@ -1501,14 +1505,14 @@ const ProjectDetail = () => {
                                     control: (base, state) => ({
                                       ...base,
                                       borderColor: state.isFocused
-                                        ? "#6366f1"
+                                        ? "#7c3aed"
                                         : "#d1d5db",
                                       boxShadow: state.isFocused
-                                        ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
+                                        ? "0 0 0 2px rgba(124, 58, 237, 0.2)"
                                         : "none",
                                       "&:hover": {
                                         borderColor: state.isFocused
-                                          ? "#6366f1"
+                                          ? "#7c3aed"
                                           : "#9ca3af",
                                       },
                                       borderRadius: "0.5rem",
@@ -1529,7 +1533,7 @@ const ProjectDetail = () => {
                                 <button
                                   type='submit'
                                   disabled={sendingInvite || !selectedOrgMember}
-                                  className='flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                  className='flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer'
                                 >
                                   {sendingInvite ? (
                                     <Loader2 className='w-4 h-4 animate-spin' />
@@ -1564,7 +1568,7 @@ const ProjectDetail = () => {
                                       setInviteEmail(e.target.value)
                                     }
                                     placeholder='Correo electrónico'
-                                    className='w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                                    className='w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                                     required
                                     autoFocus
                                   />
@@ -1574,7 +1578,7 @@ const ProjectDetail = () => {
                                   disabled={
                                     sendingInvite || !inviteEmail.trim()
                                   }
-                                  className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                  className='flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer'
                                 >
                                   {sendingInvite ? (
                                     <Loader2 className='w-4 h-4 animate-spin' />
@@ -1662,7 +1666,7 @@ const ProjectDetail = () => {
                           {/* Botón de estadísticas - visible para todos */}
                           <button
                             onClick={() => handleOpenCollaboratorStats(member)}
-                            className='p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
+                            className='p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors cursor-pointer'
                             title='Ver estadísticas'
                           >
                             <TrendingUp className='w-4 h-4' />
@@ -1777,7 +1781,7 @@ const ProjectDetail = () => {
               <div className='p-6'>
                 {loadingCollaboratorStats ? (
                   <div className='flex flex-col items-center justify-center py-12'>
-                    <Loader2 className='w-8 h-8 animate-spin text-indigo-600 mb-3' />
+                    <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
                     <p className='text-gray-500'>Cargando estadísticas...</p>
                   </div>
                 ) : collaboratorStats ? (
@@ -1791,7 +1795,7 @@ const ProjectDetail = () => {
                     </div>
 
                     {/* Productividad */}
-                    <div className='bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl p-5 text-white'>
+                    <div className='bg-linear-to-br from-brand-600 to-accent-600 rounded-xl p-5 text-white'>
                       <div className='flex items-center gap-2 mb-4'>
                         <Zap className='w-5 h-5' />
                         <h4 className='font-semibold'>Productividad</h4>
@@ -1800,7 +1804,7 @@ const ProjectDetail = () => {
                       {/* Barra de progreso principal */}
                       <div className='mb-4'>
                         <div className='flex justify-between items-center mb-2'>
-                          <span className='text-sm text-indigo-100'>
+                          <span className='text-sm text-white/80'>
                             Tareas completadas
                           </span>
                           <span className='font-bold'>
@@ -1826,7 +1830,7 @@ const ProjectDetail = () => {
                           <p className='text-2xl font-bold'>
                             {collaboratorStats.productivity?.percentage || 0}%
                           </p>
-                          <p className='text-xs text-indigo-100'>Completado</p>
+                          <p className='text-xs text-white/70'>Completado</p>
                         </div>
                         <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
                           <div className='flex items-center justify-center gap-1'>
@@ -1836,7 +1840,7 @@ const ProjectDetail = () => {
                                 ?.completed_this_week || 0}
                             </p>
                           </div>
-                          <p className='text-xs text-indigo-100'>Esta semana</p>
+                          <p className='text-xs text-white/70'>Esta semana</p>
                         </div>
                         <div className='bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm'>
                           <p className='text-2xl font-bold'>
@@ -1844,7 +1848,7 @@ const ProjectDetail = () => {
                               0}
                             %
                           </p>
-                          <p className='text-xs text-indigo-100'>Progreso</p>
+                          <p className='text-xs text-white/70'>Progreso</p>
                         </div>
                       </div>
                     </div>

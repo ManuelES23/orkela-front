@@ -72,7 +72,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
     >
       {loading ? (
         <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
         </div>
       ) : teamDetails ? (
         <div className='space-y-6'>
@@ -124,7 +124,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
             </h3>
             <div className='space-y-2'>
               {/* Owner */}
-              <div className='flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100'>
+              <div className='flex items-center gap-3 p-3 bg-gradient-to-r from-brand-50 to-accent-50 rounded-lg border border-brand-100'>
                 <UserAvatar user={teamDetails.user} size='md' />
                 <div className='flex-1'>
                   <p className='font-semibold text-gray-900'>
@@ -134,7 +134,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                     {teamDetails.user?.email}
                   </p>
                 </div>
-                <div className='flex items-center gap-1 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium'>
+                <div className='flex items-center gap-1 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-medium'>
                   <Crown className='w-3 h-3' />
                   Dueño
                 </div>
@@ -182,13 +182,13 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder='email@ejemplo.com'
                     disabled={sendingInvite}
-                    className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:bg-gray-100'
+                    className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100'
                   />
                 </div>
                 <button
                   type='submit'
                   disabled={!inviteEmail.trim() || sendingInvite}
-                  className='px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2'
+                  className='px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2'
                 >
                   {sendingInvite ? (
                     <Loader2 className='w-5 h-5 animate-spin' />

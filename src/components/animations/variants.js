@@ -1,4 +1,11 @@
-import { motion } from "framer-motion";
+// Tokens de motion compartidos: una sola fuente de verdad para duraciones/easing
+// en vez de repetir "type: spring, stiffness: 300..." en cada archivo.
+export const motionTokens = {
+  ease: [0.16, 1, 0.3, 1], // --ease-brand
+  duration: { fast: 0.15, base: 0.3, slow: 0.5 },
+  springSoft: { type: "spring", stiffness: 260, damping: 22 },
+  springSnappy: { type: "spring", stiffness: 400, damping: 20 },
+};
 
 // Variantes de página para transiciones
 export const pageVariants = {
@@ -171,4 +178,23 @@ export const progressVariants = {
       ease: "easeOut",
     },
   }),
+};
+
+// "Shake" horizontal para feedback de error de validación (ej. formularios de auth)
+export const shakeVariants = {
+  initial: { x: 0 },
+  shake: {
+    x: [0, -8, 8, -6, 6, -3, 3, 0],
+    transition: { duration: 0.45, ease: motionTokens.ease },
+  },
+};
+
+// Badge/ícono circular de estado (loading, éxito, error) para pantallas tipo AuthStatusScreen
+export const statusIconVariants = {
+  hidden: { scale: 0.6, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: motionTokens.springSoft,
+  },
 };

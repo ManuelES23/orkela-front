@@ -55,7 +55,7 @@ const UserAvatar = ({
           e.target.onerror = null;
           e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
             displayName
-          )}&background=6366f1&color=fff`;
+          )}&background=7c3aed&color=fff`;
         }}
       />
     );
@@ -64,7 +64,7 @@ const UserAvatar = ({
   // Fallback: mostrar iniciales con gradiente
   return (
     <div
-      className={`${sizeClass} rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white ${borderClass} ${className}`}
+      className={`${sizeClass} rounded-full bg-linear-to-br from-brand-600 to-accent-600 flex items-center justify-center text-white ${borderClass} ${className}`}
       title={displayName}
     >
       {initials}

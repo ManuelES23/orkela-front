@@ -203,7 +203,7 @@ const TicketDetailModal = ({
       label: "Abierto",
     },
     in_progress: {
-      color: "text-indigo-600 bg-indigo-50 border-indigo-200",
+      color: "text-brand-600 bg-brand-50 border-brand-200",
       icon: PlayCircle,
       label: "En progreso",
     },
@@ -247,7 +247,7 @@ const TicketDetailModal = ({
       color: "text-blue-500",
     },
     bug: { icon: Bug, label: "Bug", color: "text-red-500" },
-    question: { icon: HelpCircle, label: "Pregunta", color: "text-purple-500" },
+    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500" },
     feature: {
       icon: Lightbulb,
       label: "Funcionalidad",
@@ -269,7 +269,7 @@ const TicketDetailModal = ({
     >
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando ticket...</p>
           <p className='text-gray-400 text-sm mt-1'>
             Preparando detalles del ticket
@@ -346,14 +346,14 @@ const TicketDetailModal = ({
               <div>
                 <p className='text-xs text-gray-500'>Responsable</p>
                 {ticket.assigned_user ? (
-                  <p className='font-medium text-indigo-600'>
+                  <p className='font-medium text-brand-600'>
                     {ticket.assigned_user?.name}
                     {ticket.assigned_user?.id === user?.id && (
                       <span className='ml-1 text-xs text-gray-400'>(Tú)</span>
                     )}
                   </p>
                 ) : (
-                  <p className='text-purple-600 flex items-center gap-1'>
+                  <p className='text-accent-600 flex items-center gap-1'>
                     <Inbox className='w-4 h-4' />
                     En buzón del equipo
                   </p>
@@ -386,8 +386,8 @@ const TicketDetailModal = ({
 
           {/* Acciones de Tomar/Asignar/Devolver */}
           {ticket.team && !["closed", "resolved"].includes(ticket.status) && (
-            <div className='p-4 bg-purple-50 border border-purple-200 rounded-lg'>
-              <h3 className='font-semibold text-purple-900 mb-3 flex items-center gap-2'>
+            <div className='p-4 bg-accent-50 border border-accent-200 rounded-lg'>
+              <h3 className='font-semibold text-accent-900 mb-3 flex items-center gap-2'>
                 <Inbox className='w-5 h-5' />
                 Gestión del ticket
               </h3>
@@ -395,7 +395,7 @@ const TicketDetailModal = ({
               {/* Si está en el buzón */}
               {ticket.is_in_inbox ? (
                 <div className='space-y-3'>
-                  <p className='text-sm text-purple-700'>
+                  <p className='text-sm text-accent-700'>
                     Este ticket está en el buzón del equipo esperando ser
                     tomado.
                   </p>
@@ -408,7 +408,7 @@ const TicketDetailModal = ({
                         whileTap={{ scale: 0.98 }}
                         onClick={handleTakeTicket}
                         disabled={processingAction}
-                        className='px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50'
+                        className='px-4 py-2 bg-accent-600 text-white rounded-lg font-medium hover:bg-accent-700 transition flex items-center gap-2 disabled:opacity-50'
                       >
                         {processingAction ? (
                           <Loader2 className='w-4 h-4 animate-spin' />
@@ -427,7 +427,7 @@ const TicketDetailModal = ({
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setShowAssignSelect(true)}
-                            className='px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center gap-2'
+                            className='px-4 py-2 bg-accent-600 text-white rounded-lg font-medium hover:bg-accent-700 transition flex items-center gap-2'
                           >
                             <UserPlus className='w-4 h-4' />
                             Asignar a un miembro
@@ -468,7 +468,7 @@ const TicketDetailModal = ({
                             <button
                               onClick={handleAssignTicket}
                               disabled={!selectedMember || processingAction}
-                              className='px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50'
+                              className='px-3 py-2 bg-accent-600 text-white rounded-lg hover:bg-accent-700 disabled:opacity-50'
                             >
                               {processingAction ? (
                                 <Loader2 className='w-4 h-4 animate-spin' />
@@ -494,11 +494,11 @@ const TicketDetailModal = ({
               ) : (
                 /* Si ya está asignado */
                 <div className='space-y-3'>
-                  <p className='text-sm text-purple-700'>
+                  <p className='text-sm text-accent-700'>
                     <strong>{ticket.assigned_user?.name}</strong> está
                     trabajando en este ticket.
                     {ticket.taken_at && (
-                      <span className='block text-xs text-purple-600 mt-1'>
+                      <span className='block text-xs text-accent-600 mt-1'>
                         Tomado el{" "}
                         {new Date(ticket.taken_at).toLocaleString("es-ES")}
                       </span>
@@ -531,7 +531,7 @@ const TicketDetailModal = ({
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => setShowAssignSelect(true)}
-                          className='px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center gap-2'
+                          className='px-4 py-2 bg-accent-600 text-white rounded-lg font-medium hover:bg-accent-700 transition flex items-center gap-2'
                         >
                           <UserPlus className='w-4 h-4' />
                           Reasignar a otro miembro
@@ -550,7 +550,7 @@ const TicketDetailModal = ({
                           <button
                             onClick={handleAssignTicket}
                             disabled={!selectedMember || processingAction}
-                            className='px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50'
+                            className='px-3 py-2 bg-accent-600 text-white rounded-lg hover:bg-accent-700 disabled:opacity-50'
                           >
                             {processingAction ? (
                               <Loader2 className='w-4 h-4 animate-spin' />
@@ -636,7 +636,7 @@ const TicketDetailModal = ({
                         comment.is_internal
                           ? "bg-amber-50 border border-amber-200"
                           : comment.user_id === user?.id
-                          ? "bg-indigo-50 border border-indigo-200"
+                          ? "bg-brand-50 border border-brand-200"
                           : "bg-gray-50 border border-gray-200"
                       }`}
                     >
@@ -677,12 +677,12 @@ const TicketDetailModal = ({
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder='Escribe un comentario...'
                     rows='2'
-                    className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none'
+                    className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
                   />
                   <button
                     type='submit'
                     disabled={!newComment.trim() || sendingComment}
-                    className='absolute right-2 bottom-2 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                    className='absolute right-2 bottom-2 p-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
                   >
                     {sendingComment ? (
                       <Loader2 className='w-5 h-5 animate-spin' />

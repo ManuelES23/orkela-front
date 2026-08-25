@@ -73,7 +73,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
               name='name'
               value={formData.name}
               onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
               placeholder='Ej: Juan Pérez'
               required
             />
@@ -92,7 +92,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
               name='email'
               value={formData.email}
               onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               placeholder='juan.perez@orkela.com'
               required
             />
@@ -112,7 +112,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
                 name='role'
                 value={formData.role}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 placeholder='Ej: Frontend Developer'
                 required
               />
@@ -130,7 +130,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
                 name='department'
                 value={formData.department}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 placeholder='Ej: Desarrollo'
               />
             </div>
@@ -149,7 +149,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
           <button
             type='submit'
             disabled={loading}
-            className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+            className='flex-1 bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {loading
               ? "Guardando..."

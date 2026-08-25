@@ -197,7 +197,7 @@ const TaskModal = ({
     <div
       {...innerProps}
       className={`flex items-center justify-between px-3 py-2 cursor-pointer ${
-        isSelected ? "bg-indigo-50" : "hover:bg-gray-50"
+        isSelected ? "bg-brand-50" : "hover:bg-gray-50"
       }`}
     >
       <div className='flex items-center gap-2'>
@@ -209,26 +209,26 @@ const TaskModal = ({
           <div className='text-sm font-medium text-gray-900'>
             {data.label}
             {data.isOwner && (
-              <span className='ml-1 text-xs text-indigo-500'>(Dueño)</span>
+              <span className='ml-1 text-xs text-brand-500'>(Dueño)</span>
             )}
           </div>
           <div className='text-xs text-gray-500'>{data.email}</div>
         </div>
       </div>
-      {isSelected && <Check className='w-4 h-4 text-indigo-600' />}
+      {isSelected && <Check className='w-4 h-4 text-brand-600' />}
     </div>
   );
 
   // Componente personalizado para los tags seleccionados
   const CustomMultiValue = ({ data, removeProps }) => (
-    <div className='flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm m-0.5'>
+    <div className='flex items-center gap-1 px-2 py-1 bg-brand-100 text-brand-700 rounded-full text-sm m-0.5'>
       <UserAvatar user={{ name: data.label, avatar: data.avatar }} size='xs' />
       <span>{data.label}</span>
-      {data.isOwner && <span className='text-xs text-indigo-500'>(Dueño)</span>}
+      {data.isOwner && <span className='text-xs text-brand-500'>(Dueño)</span>}
       <button
         {...removeProps}
         type='button'
-        className='ml-1 hover:bg-indigo-200 rounded-full p-0.5'
+        className='ml-1 hover:bg-brand-200 rounded-full p-0.5'
       >
         <X className='w-3 h-3' />
       </button>
@@ -343,7 +343,7 @@ const TaskModal = ({
       {/* Loading State - Mostrar mientras se cargan los datos */}
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-indigo-600 animate-spin mb-4' />
+          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
           <p className='text-gray-600 font-medium'>Cargando datos...</p>
           <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
         </div>
@@ -361,7 +361,7 @@ const TaskModal = ({
                 name='title'
                 value={formData.title}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
                 placeholder='Ej: Diseñar mockups para landing'
                 required
               />
@@ -378,7 +378,7 @@ const TaskModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
               placeholder='Describe la tarea en detalle...'
             ></textarea>
           </div>
@@ -405,7 +405,7 @@ const TaskModal = ({
                   value={formData.project_id}
                   onChange={handleChange}
                   disabled={!!projectId}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed'
                   required
                 >
                   <option value=''>Seleccionar proyecto</option>
@@ -426,7 +426,7 @@ const TaskModal = ({
                 name='status'
                 value={formData.status}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
               >
                 <option value='pending'>Pendiente</option>
                 <option value='in_progress'>En progreso</option>
@@ -495,7 +495,7 @@ const TaskModal = ({
                   name='priority'
                   value={formData.priority}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none appearance-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
                 >
                   <option value='low'>Baja</option>
                   <option value='medium'>Media</option>
@@ -511,7 +511,7 @@ const TaskModal = ({
                 name='is_urgent'
                 checked={formData.is_urgent}
                 onChange={handleChange}
-                className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
+                className='w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500'
               />
               <label className='ml-2 text-sm font-medium text-gray-700'>
                 Marcar como urgente
@@ -532,7 +532,7 @@ const TaskModal = ({
                   name='start_date'
                   value={formData.start_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 />
               </div>
             </div>
@@ -548,7 +548,7 @@ const TaskModal = ({
                   name='due_date'
                   value={formData.due_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 />
               </div>
             </div>
@@ -566,7 +566,7 @@ const TaskModal = ({
             <button
               type='submit'
               disabled={loading}
-              className='flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
+              className='flex-1 bg-brand-600 text-white py-3 rounded-lg font-semibold hover:bg-brand-700 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {loading
                 ? "Guardando..."

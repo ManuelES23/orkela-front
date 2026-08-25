@@ -79,20 +79,20 @@ const SystemLogs = () => {
 
   const getLevelBadge = (level) => {
     const levels = {
-      info: { label: "Info", color: "bg-blue-100 text-blue-700", icon: Info },
+      info: { label: "Info", console: "text-blue-400", icon: Info },
       success: {
         label: "Success",
-        color: "bg-green-100 text-green-700",
+        console: "text-green-400",
         icon: CheckCircle,
       },
       warning: {
         label: "Warning",
-        color: "bg-yellow-100 text-yellow-700",
+        console: "text-yellow-400",
         icon: AlertCircle,
       },
       error: {
         label: "Error",
-        color: "bg-red-100 text-red-700",
+        console: "text-red-400",
         icon: XCircle,
       },
     };
@@ -110,7 +110,7 @@ const SystemLogs = () => {
   if (loading) {
     return (
       <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600'></div>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
       </div>
     );
   }
@@ -141,7 +141,7 @@ const SystemLogs = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition'
+            className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
           >
             <Download className='w-4 h-4' />
             <span>Exportar</span>
@@ -158,14 +158,14 @@ const SystemLogs = () => {
             placeholder='Buscar en logs...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+            className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
           />
         </div>
 
         <select
           value={levelFilter}
           onChange={(e) => setLevelFilter(e.target.value)}
-          className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+          className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
         >
           <option value='all'>Todos los niveles</option>
           <option value='info'>Info</option>
@@ -175,62 +175,46 @@ const SystemLogs = () => {
         </select>
       </div>
 
-      {/* Lista de logs */}
-      <div className='space-y-2'>
-        {filteredLogs.map((log, index) => {
-          const levelBadge = getLevelBadge(log.level);
-          const LevelIcon = levelBadge.icon;
+      {/* Consola de logs */}
+      {filteredLogs.length === 0 ? (
+        <div className='text-center py-12 bg-white border border-gray-200 rounded-lg'>
+          <FileText className='w-12 h-12 text-gray-400 mx-auto mb-3' />
+          <p className='text-gray-500'>No se encontraron logs</p>
+        </div>
+      ) : (
+        <div className='bg-[#171223] rounded-xl p-4 sm:p-5 overflow-x-auto'>
+          <div className='min-w-[640px] font-mono text-[13px]'>
+            {filteredLogs.map((log, index) => {
+              const levelBadge = getLevelBadge(log.level);
+              const LevelIcon = levelBadge.icon;
 
-          return (
-            <motion.div
-              key={log.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className='bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all'
-            >
-              <div className='flex items-start gap-4'>
-                <div
-                  className={`p-2 rounded-lg ${levelBadge.color
-                    .replace("text", "bg")
-                    .replace("700", "50")}`}
+              return (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className='flex items-baseline gap-4 py-2 border-b border-white/5 last:border-b-0'
                 >
-                  <LevelIcon
-                    className={`w-5 h-5 ${levelBadge.color.split(" ")[1]}`}
-                  />
-                </div>
-
-                <div className='flex-1'>
-                  <div className='flex items-start justify-between mb-2'>
-                    <p className='text-gray-900 font-medium'>{log.message}</p>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${levelBadge.color}`}
-                    >
-                      {levelBadge.label}
-                    </span>
-                  </div>
-
-                  <div className='flex flex-wrap items-center gap-4 text-sm text-gray-600'>
-                    <span className='flex items-center gap-1'>
-                      <FileText className='w-4 h-4' />
-                      {log.timestamp}
-                    </span>
-                    <span>Usuario: {log.user}</span>
-                    <span>IP: {log.ip}</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-
-        {filteredLogs.length === 0 && (
-          <div className='text-center py-12 bg-white border border-gray-200 rounded-lg'>
-            <FileText className='w-12 h-12 text-gray-400 mx-auto mb-3' />
-            <p className='text-gray-500'>No se encontraron logs</p>
+                  <span className='text-[#8b7fa8] shrink-0'>
+                    {log.timestamp}
+                  </span>
+                  <span
+                    className={`flex items-center gap-1 font-bold shrink-0 w-24 ${levelBadge.console}`}
+                  >
+                    <LevelIcon className='w-3.5 h-3.5 shrink-0' />
+                    {levelBadge.label.toUpperCase()}
+                  </span>
+                  <span className='flex-1 text-gray-100'>{log.message}</span>
+                  <span className='text-gray-500 text-xs shrink-0'>
+                    {log.user} · {log.ip}
+                  </span>
+                </motion.div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

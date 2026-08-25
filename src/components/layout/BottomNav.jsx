@@ -69,18 +69,18 @@ const BottomNav = ({ onMenuClick }) => {
               >
                 <div
                   className={`p-2 rounded-xl transition-all duration-200 ${
-                    active ? "bg-indigo-50" : "hover:bg-gray-50 active:scale-95"
+                    active ? "bg-brand-50" : "hover:bg-gray-50 active:scale-95"
                   }`}
                 >
                   <Icon
                     className={`w-5 h-5 ${
-                      active ? "text-indigo-600" : "text-gray-600"
+                      active ? "text-brand-600" : "text-gray-600"
                     }`}
                   />
                 </div>
                 <span
                   className={`text-[10px] font-medium mt-0.5 ${
-                    active ? "text-indigo-600" : "text-gray-600"
+                    active ? "text-brand-600" : "text-gray-600"
                   }`}
                 >
                   {item.label}
@@ -100,7 +100,7 @@ const BottomNav = ({ onMenuClick }) => {
               {active && (
                 <motion.div
                   layoutId='bottomNavIndicator'
-                  className='absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-indigo-600 rounded-full'
+                  className='absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-brand-600 rounded-full'
                   transition={{
                     type: "spring",
                     stiffness: 500,
@@ -111,18 +111,18 @@ const BottomNav = ({ onMenuClick }) => {
 
               <div
                 className={`p-2 rounded-xl transition-all duration-200 ${
-                  active ? "bg-indigo-50" : "hover:bg-gray-50 active:scale-95"
+                  active ? "bg-brand-50" : "hover:bg-gray-50 active:scale-95"
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 ${
-                    active ? "text-indigo-600" : "text-gray-600"
+                    active ? "text-brand-600" : "text-gray-600"
                   }`}
                 />
               </div>
               <span
                 className={`text-[10px] font-medium mt-0.5 ${
-                  active ? "text-indigo-600" : "text-gray-600"
+                  active ? "text-brand-600" : "text-gray-600"
                 }`}
               >
                 {item.label}

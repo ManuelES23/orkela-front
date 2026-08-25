@@ -137,7 +137,7 @@ const Settings = () => {
     }
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(
       profile.name || "U"
-    )}&background=6366f1&color=fff&size=80`;
+    )}&background=7c3aed&color=fff&size=80`;
   };
 
   if (loading) {
@@ -147,7 +147,7 @@ const Settings = () => {
         subtitle='Administra las preferencias de tu cuenta'
       >
         <div className='flex items-center justify-center py-20'>
-          <Loader2 className='w-8 h-8 animate-spin text-indigo-600' />
+          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
         </div>
       </Layout>
     );
@@ -158,236 +158,233 @@ const Settings = () => {
       title='Configuración'
       subtitle='Administra las preferencias de tu cuenta'
     >
-      <div className='max-w-4xl'>
-        {/* Contenido de configuración */}
+      <div className='max-w-3xl'>
         <StaggerContainer className='space-y-6'>
-          {/* Información del perfil */}
+          {/* Tarjeta de identidad */}
           <StaggerItem>
-            <motion.div
-              whileHover={{ y: -4 }}
-              className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'
-            >
-              <h2 className='text-lg font-semibold text-gray-900 mb-4'>
-                Información Personal
-              </h2>
+            <div className='relative overflow-hidden rounded-2xl p-6 sm:p-7 text-white shadow-lg bg-linear-to-br from-brand-600 to-accent-600'>
+              <div className='absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 pointer-events-none' />
 
-              <div className='space-y-5'>
-                {/* Avatar */}
-                <div className='flex items-center gap-4'>
-                  <div className='relative'>
-                    <img
-                      src={getAvatarUrl()}
-                      alt='Avatar'
-                      className='w-20 h-20 rounded-full object-cover border-2 border-gray-100'
-                    />
-                    {uploadingAvatar && (
-                      <div className='absolute inset-0 flex items-center justify-center bg-black/50 rounded-full'>
-                        <Loader2 className='w-6 h-6 text-white animate-spin' />
-                      </div>
-                    )}
-                  </div>
-                  <div className='space-y-2'>
-                    <input
-                      type='file'
-                      ref={fileInputRef}
-                      onChange={handleAvatarSelect}
-                      accept='image/jpeg,image/png,image/gif,image/webp'
-                      className='hidden'
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingAvatar}
-                      className='flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition disabled:opacity-50'
-                    >
-                      <Camera className='w-4 h-4' />
-                      Cambiar Foto
-                    </button>
-                    {profile.avatar && (
-                      <button
-                        onClick={handleDeleteAvatar}
-                        disabled={uploadingAvatar}
-                        className='flex items-center gap-2 px-4 py-2 text-red-600 text-sm hover:bg-red-50 rounded-lg transition disabled:opacity-50'
-                      >
-                        <Trash2 className='w-4 h-4' />
-                        Eliminar
-                      </button>
-                    )}
-                    <p className='text-xs text-gray-500'>
-                      JPG, PNG, GIF o WebP. Máx. 2MB
-                    </p>
-                  </div>
-                </div>
-
-                {/* Formulario */}
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Nombre completo
-                    </label>
-                    <input
-                      type='text'
-                      name='name'
-                      value={profile.name}
-                      onChange={handleChange}
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-                    />
-                  </div>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Correo Electrónico
-                    </label>
-                    <input
-                      type='email'
-                      value={profile.email}
-                      disabled
-                      className='w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
-                    />
-                    <p className='text-xs text-gray-400 mt-1'>
-                      El correo no se puede cambiar
-                    </p>
-                  </div>
-                </div>
-
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Teléfono
-                    </label>
-                    <input
-                      type='tel'
-                      name='phone'
-                      value={profile.phone || ""}
-                      onChange={handleChange}
-                      placeholder='+51 999 999 999'
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-                    />
-                  </div>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      Cargo / Puesto
-                    </label>
-                    <input
-                      type='text'
-                      name='job_title'
-                      value={profile.job_title || ""}
-                      onChange={handleChange}
-                      placeholder='Ej: Project Manager'
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Biografía
-                  </label>
-                  <textarea
-                    name='bio'
-                    value={profile.bio || ""}
-                    onChange={handleChange}
-                    rows='3'
-                    maxLength={500}
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none'
-                    placeholder='Cuéntanos sobre ti...'
+              <div className='relative flex flex-col sm:flex-row sm:items-center gap-5'>
+                <div className='relative shrink-0'>
+                  <img
+                    src={getAvatarUrl()}
+                    alt='Avatar'
+                    className='w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-white/30'
                   />
-                  <p className='text-xs text-gray-400 mt-1 text-right'>
-                    {(profile.bio || "").length}/500
+                  {uploadingAvatar && (
+                    <div className='absolute inset-0 flex items-center justify-center bg-black/50 rounded-full'>
+                      <Loader2 className='w-6 h-6 text-white animate-spin' />
+                    </div>
+                  )}
+                </div>
+
+                <div className='flex-1 min-w-0'>
+                  <h1 className='text-xl sm:text-2xl font-bold truncate'>
+                    {profile.name || "Tu perfil"}
+                  </h1>
+                  <p className='text-white/80 text-sm truncate'>
+                    {profile.email}
                   </p>
                 </div>
-              </div>
 
-              <div className='flex gap-3 mt-6 pt-4 border-t border-gray-100'>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSaveProfile}
-                  disabled={saving}
-                  className='flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50'
-                >
-                  {saving ? (
-                    <Loader2 className='w-4 h-4 animate-spin' />
-                  ) : (
-                    <Save className='w-4 h-4' />
+                <div className='flex items-center gap-2 shrink-0'>
+                  <input
+                    type='file'
+                    ref={fileInputRef}
+                    onChange={handleAvatarSelect}
+                    accept='image/jpeg,image/png,image/gif,image/webp'
+                    className='hidden'
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    className='flex items-center gap-2 px-3 py-1.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white text-xs font-medium rounded-lg transition disabled:opacity-50'
+                  >
+                    <Camera className='w-3.5 h-3.5' />
+                    Cambiar foto
+                  </button>
+                  {profile.avatar && (
+                    <button
+                      onClick={handleDeleteAvatar}
+                      disabled={uploadingAvatar}
+                      className='p-1.5 text-white/70 hover:text-white hover:bg-white/15 rounded-lg transition disabled:opacity-50'
+                      title='Eliminar avatar'
+                    >
+                      <Trash2 className='w-3.5 h-3.5' />
+                    </button>
                   )}
-                  Guardar Cambios
-                </motion.button>
+                </div>
               </div>
-            </motion.div>
+              <p className='relative text-xs text-white/60 mt-3'>
+                JPG, PNG, GIF o WebP. Máx. 2MB
+              </p>
+            </div>
           </StaggerItem>
 
-          {/* Preferencias */}
+          {/* Formulario editorial: secciones divididas por línea, sin doble card */}
           <StaggerItem>
-            <motion.div
-              whileHover={{ y: -4 }}
-              className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'
-            >
-              <h2 className='text-lg font-semibold text-gray-900 mb-4'>
-                Preferencias
-              </h2>
+            <div className='bg-white rounded-2xl border border-gray-100 shadow-sm px-6'>
+              {/* Información personal */}
+              <div className='py-6 border-b border-gray-100'>
+                <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-4'>
+                  Información personal
+                </h3>
+                <div className='space-y-4'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                        Nombre completo
+                      </label>
+                      <input
+                        type='text'
+                        name='name'
+                        value={profile.name}
+                        onChange={handleChange}
+                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                        Correo Electrónico
+                      </label>
+                      <input
+                        type='email'
+                        value={profile.email}
+                        disabled
+                        className='w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
+                      />
+                      <p className='text-xs text-gray-400 mt-1'>
+                        El correo no se puede cambiar
+                      </p>
+                    </div>
+                  </div>
 
-              <div className='space-y-4'>
-                <div className='flex items-center justify-between'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                        Teléfono
+                      </label>
+                      <input
+                        type='tel'
+                        name='phone'
+                        value={profile.phone || ""}
+                        onChange={handleChange}
+                        placeholder='+51 999 999 999'
+                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                        Cargo / Puesto
+                      </label>
+                      <input
+                        type='text'
+                        name='job_title'
+                        value={profile.job_title || ""}
+                        onChange={handleChange}
+                        placeholder='Ej: Project Manager'
+                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <p className='font-medium text-gray-900'>Idioma</p>
-                    <p className='text-sm text-gray-500'>
-                      Selecciona tu idioma preferido
+                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      Biografía
+                    </label>
+                    <textarea
+                      name='bio'
+                      value={profile.bio || ""}
+                      onChange={handleChange}
+                      rows='3'
+                      maxLength={500}
+                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none'
+                      placeholder='Cuéntanos sobre ti...'
+                    />
+                    <p className='text-xs text-gray-400 mt-1 text-right'>
+                      {(profile.bio || "").length}/500
                     </p>
                   </div>
-                  <select
-                    name='language'
-                    value={profile.language}
-                    onChange={handleChange}
-                    className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-                  >
-                    <option value='es'>Español</option>
-                    <option value='en'>English</option>
-                    <option value='fr'>Français</option>
-                    <option value='pt'>Português</option>
-                  </select>
-                </div>
-
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <p className='font-medium text-gray-900'>Zona Horaria</p>
-                    <p className='text-sm text-gray-500'>
-                      Configura tu zona horaria
-                    </p>
-                  </div>
-                  <select
-                    name='timezone'
-                    value={profile.timezone}
-                    onChange={handleChange}
-                    className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none'
-                  >
-                    <option value='America/Lima'>GMT-5 (Lima)</option>
-                    <option value='America/Mexico_City'>GMT-6 (México)</option>
-                    <option value='America/Bogota'>GMT-5 (Bogotá)</option>
-                    <option value='America/Buenos_Aires'>
-                      GMT-3 (Buenos Aires)
-                    </option>
-                    <option value='Europe/Madrid'>GMT+1 (Madrid)</option>
-                    <option value='America/New_York'>GMT-5 (New York)</option>
-                  </select>
                 </div>
               </div>
 
-              <div className='flex gap-3 mt-6 pt-4 border-t border-gray-100'>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSaveProfile}
-                  disabled={saving}
-                  className='flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50'
-                >
-                  {saving ? (
-                    <Loader2 className='w-4 h-4 animate-spin' />
-                  ) : (
-                    <Save className='w-4 h-4' />
-                  )}
-                  Guardar Preferencias
-                </motion.button>
+              {/* Preferencias */}
+              <div className='py-6'>
+                <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-4'>
+                  Preferencias
+                </h3>
+                <div className='space-y-4'>
+                  <div className='flex items-center justify-between gap-4'>
+                    <div>
+                      <p className='font-medium text-gray-900'>Idioma</p>
+                      <p className='text-sm text-gray-500'>
+                        Selecciona tu idioma preferido
+                      </p>
+                    </div>
+                    <select
+                      name='language'
+                      value={profile.language}
+                      onChange={handleChange}
+                      className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                    >
+                      <option value='es'>Español</option>
+                      <option value='en'>English</option>
+                      <option value='fr'>Français</option>
+                      <option value='pt'>Português</option>
+                    </select>
+                  </div>
+
+                  <div className='flex items-center justify-between gap-4'>
+                    <div>
+                      <p className='font-medium text-gray-900'>Zona Horaria</p>
+                      <p className='text-sm text-gray-500'>
+                        Configura tu zona horaria
+                      </p>
+                    </div>
+                    <select
+                      name='timezone'
+                      value={profile.timezone}
+                      onChange={handleChange}
+                      className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                    >
+                      <option value='America/Lima'>GMT-5 (Lima)</option>
+                      <option value='America/Mexico_City'>
+                        GMT-6 (México)
+                      </option>
+                      <option value='America/Bogota'>GMT-5 (Bogotá)</option>
+                      <option value='America/Buenos_Aires'>
+                        GMT-3 (Buenos Aires)
+                      </option>
+                      <option value='Europe/Madrid'>GMT+1 (Madrid)</option>
+                      <option value='America/New_York'>
+                        GMT-5 (New York)
+                      </option>
+                    </select>
+                  </div>
+                </div>
               </div>
-            </motion.div>
+            </div>
+          </StaggerItem>
+
+          {/* Acción de guardado unificada */}
+          <StaggerItem>
+            <div className='flex justify-end'>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className='flex items-center gap-2 px-5 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition disabled:opacity-50'
+              >
+                {saving ? (
+                  <Loader2 className='w-4 h-4 animate-spin' />
+                ) : (
+                  <Save className='w-4 h-4' />
+                )}
+                Guardar Cambios
+              </motion.button>
+            </div>
           </StaggerItem>
         </StaggerContainer>
       </div>

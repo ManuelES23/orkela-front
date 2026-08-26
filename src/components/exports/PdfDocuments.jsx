@@ -5,7 +5,7 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 // ========================================
 
 const colors = {
-  primary: "#4F46E5", // indigo-600
+  primary: "#7c3aed", // brand-600
   secondary: "#6B7280", // gray-500
   success: "#10B981", // green-500
   warning: "#F59E0B", // amber-500

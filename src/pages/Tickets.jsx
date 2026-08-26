@@ -267,7 +267,7 @@ const Tickets = () => {
       label: "Abierto",
     },
     in_progress: {
-      color: "text-indigo-600 bg-indigo-50",
+      color: "text-brand-600 bg-brand-50",
       icon: PlayCircle,
       label: "En progreso",
     },
@@ -295,7 +295,7 @@ const Tickets = () => {
       color: "text-blue-500",
     },
     bug: { icon: Bug, label: "Bug", color: "text-red-500" },
-    question: { icon: HelpCircle, label: "Pregunta", color: "text-purple-500" },
+    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500" },
     feature: {
       icon: Lightbulb,
       label: "Funcionalidad",

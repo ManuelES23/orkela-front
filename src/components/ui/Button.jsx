@@ -15,11 +15,11 @@ const Button = ({
     "font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary: "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg",
+    primary: "bg-brand-600 text-white hover:bg-brand-700 hover:shadow-lg",
     secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300 hover:shadow-md",
     danger: "bg-red-600 text-white hover:bg-red-700 hover:shadow-lg",
     outline:
-      "border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 hover:shadow-md",
+      "border-2 border-brand-600 text-brand-600 hover:bg-brand-50 hover:shadow-md",
     // Variante de marca (gradiente violeta -> fucsia) para los flujos de auth
     brand:
       "text-white bg-linear-to-r from-brand-600 to-accent-600 shadow-lg shadow-brand-600/25 hover:brightness-105 hover:shadow-xl hover:shadow-brand-600/30",

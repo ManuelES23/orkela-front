@@ -234,14 +234,14 @@ const TagSelector = ({
                           setIsOpen(false);
                           onManageTags();
                         }}
-                        className='text-sm text-indigo-600 hover:text-indigo-700 font-medium'
+                        className='text-sm text-brand-600 hover:text-brand-700 font-medium'
                       >
                         Crear etiquetas →
                       </button>
                     ) : showManageHint ? (
                       <p className='text-xs text-gray-400'>
                         Ve al detalle del proyecto y usa el botón{" "}
-                        <span className='inline-flex items-center gap-1 text-indigo-600 font-medium'>
+                        <span className='inline-flex items-center gap-1 text-brand-600 font-medium'>
                           <Tag className='w-3 h-3' />
                           Etiquetas
                         </span>{" "}
@@ -289,7 +289,7 @@ const TagSelector = ({
                             setIsOpen(false);
                             onManageTags();
                           }}
-                          className='w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors'
+                          className='w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors'
                         >
                           <Settings className='w-4 h-4' />
                           Gestionar etiquetas

@@ -78,8 +78,8 @@ const ContextSwitcher = ({ isCompact = false }) => {
   const getContextColor = (type, isActive) => {
     if (type === "organization") {
       return isActive
-        ? "bg-purple-100 text-purple-700 border-purple-200"
-        : "hover:bg-purple-50 text-purple-600";
+        ? "bg-accent-100 text-accent-700 border-accent-200"
+        : "hover:bg-accent-50 text-accent-600";
     }
     return isActive
       ? "bg-brand-100 text-brand-700 border-brand-200"
@@ -104,7 +104,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
     if (ctx?.type === "organization") {
       return (
         <div
-          className={`${size} rounded-full bg-purple-600 flex items-center justify-center text-white font-semibold text-xs`}
+          className={`${size} rounded-full bg-accent-600 flex items-center justify-center text-white font-semibold text-xs`}
         >
           {ctx?.name?.charAt(0).toUpperCase() || "O"}
         </div>
@@ -242,7 +242,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
                     <div
                       className={`p-2 rounded-lg ${
                         ctx.type === "organization"
-                          ? "bg-purple-100"
+                          ? "bg-accent-100"
                           : "bg-brand-100"
                       }`}
                     >

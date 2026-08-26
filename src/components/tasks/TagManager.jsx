@@ -239,7 +239,7 @@ const TagManager = ({ projectId, onClose }) => {
   if (loading) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <Loader2 className='w-6 h-6 animate-spin text-indigo-600' />
+        <Loader2 className='w-6 h-6 animate-spin text-brand-600' />
       </div>
     );
   }
@@ -249,7 +249,7 @@ const TagManager = ({ projectId, onClose }) => {
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
-          <Tag className='w-5 h-5 text-indigo-600' />
+          <Tag className='w-5 h-5 text-brand-600' />
           <h3 className='font-semibold text-gray-900'>
             Etiquetas del proyecto
           </h3>
@@ -302,7 +302,7 @@ const TagManager = ({ projectId, onClose }) => {
                         if (e.key === "Enter") saveTagName(tag.id);
                         if (e.key === "Escape") cancelEditing();
                       }}
-                      className='flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none'
+                      className='flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                       autoFocus
                       disabled={saving}
                     />
@@ -412,7 +412,7 @@ const TagManager = ({ projectId, onClose }) => {
             type='button'
             onClick={handleInitializeDefaults}
             disabled={initializing}
-            className='inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50'
+            className='inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50'
           >
             {initializing ? (
               <Loader2 className='w-4 h-4 animate-spin' />

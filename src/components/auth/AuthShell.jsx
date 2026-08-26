@@ -27,19 +27,19 @@ const AuthShell = ({ formHeader, heading, description, badge, children }) => {
         <div className='absolute inset-0 pointer-events-none' aria-hidden='true'>
           <motion.span
             {...squareFloat(-10, 7)}
-            className='absolute top-[8%] right-[12%] w-16 h-16 rounded-2xl rotate-12 bg-linear-to-br from-purple-300 to-brand-400 opacity-55'
+            className='absolute top-[8%] right-[12%] w-16 h-16 rounded-2xl rotate-12 bg-linear-to-br from-accent-300 to-brand-400 opacity-55'
           />
           <motion.span
             {...squareFloat(8, 9)}
-            className='absolute top-[19%] right-[6%] w-9 h-9 rounded-lg bg-linear-to-br from-purple-300 to-brand-400 opacity-40'
+            className='absolute top-[19%] right-[6%] w-9 h-9 rounded-lg bg-linear-to-br from-accent-300 to-brand-400 opacity-40'
           />
           <motion.span
             {...squareFloat(-6, 8)}
-            className='absolute top-[4%] right-[27%] w-6 h-6 rounded-md bg-purple-300 opacity-35'
+            className='absolute top-[4%] right-[27%] w-6 h-6 rounded-md bg-accent-300 opacity-35'
           />
           <motion.span
             {...squareFloat(7, 10)}
-            className='absolute top-[15%] right-[22%] w-11 h-11 rounded-xl -rotate-6 bg-purple-300 opacity-30'
+            className='absolute top-[15%] right-[22%] w-11 h-11 rounded-xl -rotate-6 bg-accent-300 opacity-30'
           />
         </div>
 

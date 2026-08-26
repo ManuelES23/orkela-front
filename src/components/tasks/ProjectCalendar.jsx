@@ -307,7 +307,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
       {/* Header con navegación */}
       <div className='flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200'>
         <div className='flex items-center gap-2'>
-          <Calendar className='w-5 h-5 text-indigo-600' />
+          <Calendar className='w-5 h-5 text-brand-600' />
           <h3 className='font-semibold text-gray-900'>Vista de Calendario</h3>
         </div>
 
@@ -318,7 +318,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
               onClick={() => setViewMode("timeline")}
               className={`px-2 py-1 text-xs font-medium rounded-md transition flex items-center gap-1 ${
                 viewMode === "timeline"
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -329,7 +329,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
               onClick={() => setViewMode("classic")}
               className={`px-2 py-1 text-xs font-medium rounded-md transition flex items-center gap-1 ${
                 viewMode === "classic"
-                  ? "bg-white text-indigo-600 shadow-sm"
+                  ? "bg-white text-brand-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -341,7 +341,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
           <div className='flex items-center gap-2'>
             <button
               onClick={goToToday}
-              className='px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition'
+              className='px-3 py-1 text-sm bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition'
             >
               Hoy
             </button>
@@ -455,12 +455,12 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                               }
                               ${
                                 isToday(day.date)
-                                  ? "bg-indigo-50"
+                                  ? "bg-brand-50"
                                   : "hover:bg-gray-50"
                               }
                               ${
                                 isSelected
-                                  ? "ring-2 ring-indigo-500 ring-inset z-10 relative"
+                                  ? "ring-2 ring-brand-500 ring-inset z-10 relative"
                                   : ""
                               }
                             `}
@@ -469,7 +469,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                             <span
                               className={`text-xs font-medium ${
                                 isToday(day.date)
-                                  ? "text-white bg-indigo-600 rounded-full w-5 h-5 flex items-center justify-center"
+                                  ? "text-white bg-brand-600 rounded-full w-5 h-5 flex items-center justify-center"
                                   : ""
                               }`}
                             >
@@ -554,16 +554,16 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                           }
                           ${
                             isToday(day.date)
-                              ? "border-indigo-500 bg-indigo-50"
+                              ? "border-brand-500 bg-brand-50"
                               : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                           }
-                          ${isSelected ? "ring-2 ring-indigo-500" : ""}
+                          ${isSelected ? "ring-2 ring-brand-500" : ""}
                         `}
                       >
                         <span
                           className={`text-xs font-medium self-end ${
                             isToday(day.date)
-                              ? "text-white bg-indigo-600 rounded-full w-5 h-5 flex items-center justify-center"
+                              ? "text-white bg-brand-600 rounded-full w-5 h-5 flex items-center justify-center"
                               : ""
                           }`}
                         >
@@ -675,7 +675,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                             )}
                             {/* Mostrar rango de fechas */}
                             {task.start_date && task.due_date && (
-                              <p className='text-[10px] text-indigo-600 mt-1 flex items-center gap-1'>
+                              <p className='text-[10px] text-brand-600 mt-1 flex items-center gap-1'>
                                 <Calendar className='w-3 h-3' />
                                 {parseDateString(
                                   task.start_date

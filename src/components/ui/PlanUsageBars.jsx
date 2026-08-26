@@ -40,7 +40,7 @@ const PlanUsageBars = ({ limits, usage }) => {
             ? "bg-red-500"
             : percent >= 70
               ? "bg-yellow-500"
-              : "bg-brand-600";
+              : "bg-indigo-600";
 
         return (
           <motion.div

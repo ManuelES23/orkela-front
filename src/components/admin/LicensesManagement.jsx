@@ -108,7 +108,7 @@ const LicensesManagement = () => {
   if (loading) {
     return (
       <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600'></div>
       </div>
     );
   }
@@ -124,7 +124,7 @@ const LicensesManagement = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder='Buscar organización'
-              className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+              className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
             />
           </div>
         </div>
@@ -143,7 +143,7 @@ const LicensesManagement = () => {
                 type='button'
                 onClick={() => setSelectedId(org.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                  isSelected ? "bg-brand-50" : "hover:bg-gray-50"
+                  isSelected ? "bg-indigo-50" : "hover:bg-gray-50"
                 }`}
               >
                 <span
@@ -171,7 +171,7 @@ const LicensesManagement = () => {
           </p>
         ) : loadingDetail || !detail ? (
           <div className='flex items-center justify-center py-12'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600'></div>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600'></div>
           </div>
         ) : (
           <motion.div
@@ -180,8 +180,8 @@ const LicensesManagement = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className='flex items-center gap-3 mb-6'>
-              <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
-                <Building2 className='w-5 h-5 text-brand-600' />
+              <div className='w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center'>
+                <Building2 className='w-5 h-5 text-indigo-600' />
               </div>
               <div>
                 <h3 className='font-semibold text-gray-900'>
@@ -216,7 +216,7 @@ const LicensesManagement = () => {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, plan: e.target.value }))
                   }
-                  className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                  className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
                 >
                   <option value='free'>Free</option>
                   <option value='starter'>Starter</option>
@@ -232,14 +232,14 @@ const LicensesManagement = () => {
                       plan_expires_at: e.target.value,
                     }))
                   }
-                  className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                  className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
                 />
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSave}
                   disabled={saving}
-                  className='flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm disabled:opacity-50'
+                  className='flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-sm disabled:opacity-50'
                 >
                   <Save className='w-4 h-4' />
                   {saving ? "Guardando..." : "Guardar"}

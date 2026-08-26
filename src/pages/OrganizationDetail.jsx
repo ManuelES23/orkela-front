@@ -5,6 +5,7 @@ import { getAssetUrl } from "../utils/assetUrl";
 import OrganizationModal from "../components/modals/OrganizationModal";
 import OrganizationMailConfig from "../components/organizations/OrganizationMailConfig";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import PlanUsageBars from "../components/ui/PlanUsageBars";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,7 +43,7 @@ import { organizationsAPI } from "../utils/api";
 const OrganizationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { success, error: showError } = useNotification();
+  const { success, error: showError, info } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
 
   const [organization, setOrganization] = useState(null);
@@ -1003,13 +1004,61 @@ const OrganizationDetail = () => {
               {organization.is_owner ? (
                 <div className='space-y-6'>
                   <div className='p-4 bg-gray-50 rounded-lg'>
-                    <h4 className='font-medium text-gray-900 mb-2'>
-                      Plan actual
-                    </h4>
-                    <p className='text-gray-600 capitalize'>
+                    <div className='flex items-center justify-between mb-1'>
+                      <h4 className='font-medium text-gray-900'>
+                        Plan actual
+                      </h4>
+                      {organization.plan_expires_at && (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                            new Date(organization.plan_expires_at) < new Date()
+                              ? "bg-red-100 text-red-700"
+                              : Math.ceil(
+                                    (new Date(organization.plan_expires_at) -
+                                      new Date()) /
+                                      (1000 * 60 * 60 * 24),
+                                  ) <= 30
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-700"
+                          }`}
+                        >
+                          <Calendar className='w-3 h-3' />
+                          Vence{" "}
+                          {new Date(
+                            organization.plan_expires_at,
+                          ).toLocaleDateString("es-ES", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    <p className='text-gray-600 capitalize mb-4'>
                       {organization.plan}
                     </p>
-                    <button className='mt-3 text-indigo-600 font-medium text-sm hover:underline'>
+
+                    {stats?.plan_limits && (
+                      <PlanUsageBars
+                        limits={stats.plan_limits}
+                        usage={{
+                          members: stats.members_count,
+                          projects: stats.projects_count,
+                          teams: stats.teams_count,
+                          storage_bytes: stats.storage_used_bytes,
+                        }}
+                      />
+                    )}
+
+                    <button
+                      type='button'
+                      onClick={() =>
+                        info(
+                          "Contacta a tu administrador de cuenta para actualizar el plan de tu organización.",
+                        )
+                      }
+                      className='mt-4 text-indigo-600 font-medium text-sm hover:underline'
+                    >
                       Mejorar plan →
                     </button>
                   </div>

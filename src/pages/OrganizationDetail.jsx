@@ -40,6 +40,36 @@ import {
 } from "lucide-react";
 import { organizationsAPI } from "../utils/api";
 
+// `plan_expires_at` is stored as a UTC-midnight ISO string (e.g.
+// "2027-01-01T00:00:00.000000Z"). Building a plain `new Date(isoString)` and
+// letting the browser render it in local time shifts the displayed date back
+// a day for negative UTC offsets (common in LatAm). Compare and format using
+// the UTC calendar date instead, so this agrees with the date-only string
+// the admin plan form reads via `.slice(0, 10)`.
+const getExpiryBadge = (planExpiresAt) => {
+  const dateOnly = planExpiresAt.slice(0, 10);
+  const expiresAtUTC = new Date(`${dateOnly}T00:00:00Z`);
+  const todayUTC = new Date(
+    `${new Date().toISOString().slice(0, 10)}T00:00:00Z`,
+  );
+  const daysLeft = Math.ceil(
+    (expiresAtUTC - todayUTC) / (1000 * 60 * 60 * 24),
+  );
+  const className =
+    daysLeft < 0
+      ? "bg-red-100 text-red-700"
+      : daysLeft <= 30
+        ? "bg-yellow-100 text-yellow-700"
+        : "bg-green-100 text-green-700";
+  const displayDate = expiresAtUTC.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  return { className, displayDate };
+};
+
 const OrganizationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -1008,31 +1038,20 @@ const OrganizationDetail = () => {
                       <h4 className='font-medium text-gray-900'>
                         Plan actual
                       </h4>
-                      {organization.plan_expires_at && (
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                            new Date(organization.plan_expires_at) < new Date()
-                              ? "bg-red-100 text-red-700"
-                              : Math.ceil(
-                                    (new Date(organization.plan_expires_at) -
-                                      new Date()) /
-                                      (1000 * 60 * 60 * 24),
-                                  ) <= 30
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-green-100 text-green-700"
-                          }`}
-                        >
-                          <Calendar className='w-3 h-3' />
-                          Vence{" "}
-                          {new Date(
+                      {organization.plan_expires_at &&
+                        (() => {
+                          const expiryBadge = getExpiryBadge(
                             organization.plan_expires_at,
-                          ).toLocaleDateString("es-ES", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </span>
-                      )}
+                          );
+                          return (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${expiryBadge.className}`}
+                            >
+                              <Calendar className='w-3 h-3' />
+                              Vence {expiryBadge.displayDate}
+                            </span>
+                          );
+                        })()}
                     </div>
                     <p className='text-gray-600 capitalize mb-4'>
                       {organization.plan}

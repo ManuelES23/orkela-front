@@ -29,9 +29,11 @@ const LicensesManagement = () => {
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [planFilter, setPlanFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState(null);
   const [form, setForm] = useState({ plan: "free", plan_expires_at: "" });
   const [saving, setSaving] = useState(false);
 
@@ -65,6 +67,7 @@ const LicensesManagement = () => {
   const loadDetail = async (id) => {
     try {
       setLoadingDetail(true);
+      setDetailError(null);
       const data = await adminOrganizationsAPI.getStats(id);
       setDetail(data);
       setForm({
@@ -74,6 +77,9 @@ const LicensesManagement = () => {
           : "",
       });
     } catch (err) {
+      setDetail(null);
+      setForm({ plan: "free", plan_expires_at: "" });
+      setDetailError("Error al cargar el detalle de la organización");
       error("Error al cargar el detalle de la organización");
       console.error(err);
     } finally {
@@ -82,10 +88,14 @@ const LicensesManagement = () => {
   };
 
   const filtered = useMemo(() => {
-    return organizations.filter((org) =>
-      org.name.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [organizations, search]);
+    return organizations.filter((org) => {
+      const matchesSearch = org.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesPlan = planFilter === "all" || org.plan === planFilter;
+      return matchesSearch && matchesPlan;
+    });
+  }, [organizations, search, planFilter]);
 
   const handleSave = async () => {
     if (!selectedId) return;
@@ -116,7 +126,7 @@ const LicensesManagement = () => {
   return (
     <div className='grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6'>
       <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
-        <div className='p-4 border-b border-gray-100'>
+        <div className='p-4 border-b border-gray-100 space-y-2'>
           <div className='relative'>
             <Search className='w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2' />
             <input
@@ -127,6 +137,17 @@ const LicensesManagement = () => {
               className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
             />
           </div>
+          <select
+            value={planFilter}
+            onChange={(e) => setPlanFilter(e.target.value)}
+            className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500'
+          >
+            <option value='all'>Todos los planes</option>
+            <option value='free'>{PLAN_LABELS.free}</option>
+            <option value='starter'>{PLAN_LABELS.starter}</option>
+            <option value='professional'>{PLAN_LABELS.professional}</option>
+            <option value='enterprise'>{PLAN_LABELS.enterprise}</option>
+          </select>
         </div>
         <div className='divide-y divide-gray-100 max-h-[560px] overflow-y-auto'>
           {filtered.length === 0 && (
@@ -156,6 +177,7 @@ const LicensesManagement = () => {
                   </p>
                   <p className='text-xs text-gray-500'>
                     {PLAN_LABELS[org.plan] || org.plan}
+                    <span className='text-gray-400'> · {status.label}</span>
                   </p>
                 </div>
               </button>
@@ -169,6 +191,19 @@ const LicensesManagement = () => {
           <p className='text-sm text-gray-500 text-center py-12'>
             No hay organizaciones para mostrar.
           </p>
+        ) : detailError ? (
+          <div className='text-sm text-gray-500 text-center py-12'>
+            <p className='mb-4'>{detailError}</p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type='button'
+              onClick={() => loadDetail(selectedId)}
+              className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-sm'
+            >
+              Reintentar
+            </motion.button>
+          </div>
         ) : loadingDetail || !detail ? (
           <div className='flex items-center justify-center py-12'>
             <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600'></div>

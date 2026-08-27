@@ -1,130 +1,118 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { parseLocalDate } from "../../utils/dateUtils";
-import {
-  Plus,
-  Key,
-  Calendar,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Edit,
-  Trash2,
-} from "lucide-react";
+import { Search, Building2, Save } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
+import { adminOrganizationsAPI } from "../../utils/adminAPI";
+import PlanUsageBars from "../ui/PlanUsageBars";
 
-const LicensesManagement = ({ onStatsUpdate }) => {
+const PLAN_LABELS = {
+  free: "Free",
+  starter: "Starter",
+  professional: "Professional",
+  enterprise: "Enterprise",
+};
+
+const getExpiryStatus = (org) => {
+  if (org.plan === "free" || !org.plan_expires_at) {
+    return { label: "Sin vencimiento", dot: "bg-gray-300" };
+  }
+  const daysLeft = Math.ceil(
+    (new Date(org.plan_expires_at) - new Date()) / (1000 * 60 * 60 * 24),
+  );
+  if (daysLeft < 0) return { label: "Vencida", dot: "bg-red-500" };
+  if (daysLeft <= 30) return { label: "Por vencer", dot: "bg-yellow-500" };
+  return { label: "Activa", dot: "bg-green-500" };
+};
+
+const LicensesManagement = () => {
   const { success, error } = useNotification();
-  const [licenses, setLicenses] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [planFilter, setPlanFilter] = useState("all");
+  const [selectedId, setSelectedId] = useState(null);
+  const [detail, setDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState(null);
+  const [form, setForm] = useState({ plan: "free", plan_expires_at: "" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadLicenses();
+    loadOrganizations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadLicenses = async () => {
+  const loadOrganizations = async () => {
     try {
       setLoading(true);
-      // Simulación de datos
-      const mockLicenses = [
-        {
-          id: 1,
-          key: "ORKL-2025-ENTP-0001",
-          type: "Enterprise",
-          status: "active",
-          max_users: 50,
-          current_users: 12,
-          max_projects: 100,
-          issued_date: "2025-01-01",
-          expiry_date: "2026-01-01",
-        },
-        {
-          id: 2,
-          key: "ORKL-2025-PROF-0002",
-          type: "Professional",
-          status: "active",
-          max_users: 20,
-          current_users: 8,
-          max_projects: 50,
-          issued_date: "2025-02-15",
-          expiry_date: "2025-08-15",
-        },
-        {
-          id: 3,
-          key: "ORKL-2024-ENTP-0003",
-          type: "Enterprise",
-          status: "expired",
-          max_users: 30,
-          current_users: 0,
-          max_projects: 75,
-          issued_date: "2024-01-01",
-          expiry_date: "2025-01-01",
-        },
-      ];
-
-      setLicenses(mockLicenses);
-
-      const activeCount = mockLicenses.filter(
-        (l) => l.status === "active",
-      ).length;
-      onStatsUpdate?.((prev) => ({ ...prev, activeLicenses: activeCount }));
+      const data = await adminOrganizationsAPI.getAll();
+      setOrganizations(data);
+      if (data.length > 0) {
+        setSelectedId((current) => current ?? data[0].id);
+      }
     } catch (err) {
-      error("Error al cargar licencias");
+      error("Error al cargar organizaciones");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (license) => {
-    const daysUntilExpiry = Math.ceil(
-      (parseLocalDate(license.expiry_date) - new Date()) /
-        (1000 * 60 * 60 * 24),
-    );
+  useEffect(() => {
+    if (!selectedId) return;
+    loadDetail(selectedId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
-    if (license.status === "expired" || daysUntilExpiry < 0) {
-      return {
-        label: "Expirada",
-        color: "bg-red-100 text-red-700",
-        icon: XCircle,
-      };
+  const loadDetail = async (id) => {
+    try {
+      setLoadingDetail(true);
+      setDetailError(null);
+      const data = await adminOrganizationsAPI.getStats(id);
+      setDetail(data);
+      setForm({
+        plan: data.organization.plan,
+        plan_expires_at: data.organization.plan_expires_at
+          ? data.organization.plan_expires_at.slice(0, 10)
+          : "",
+      });
+    } catch (err) {
+      setDetail(null);
+      setForm({ plan: "free", plan_expires_at: "" });
+      setDetailError("Error al cargar el detalle de la organización");
+      error("Error al cargar el detalle de la organización");
+      console.error(err);
+    } finally {
+      setLoadingDetail(false);
     }
-    if (daysUntilExpiry <= 30) {
-      return {
-        label: "Por vencer",
-        color: "bg-yellow-100 text-yellow-700",
-        icon: AlertCircle,
-      };
-    }
-    return {
-      label: "Activa",
-      color: "bg-green-100 text-green-700",
-      icon: CheckCircle,
-    };
   };
 
-  const getTypeBadge = (type) => {
-    const types = {
-      Enterprise: {
-        color: "bg-accent-100 text-accent-700",
-        label: "Enterprise",
-      },
-      Professional: {
-        color: "bg-blue-100 text-blue-700",
-        label: "Professional",
-      },
-      Basic: { color: "bg-gray-100 text-gray-700", label: "Basic" },
-    };
-    return types[type] || types.Basic;
-  };
-
-  const formatDate = (dateString) => {
-    const date = parseLocalDate(dateString);
-    return date.toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
+  const filtered = useMemo(() => {
+    return organizations.filter((org) => {
+      const matchesSearch = org.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesPlan = planFilter === "all" || org.plan === planFilter;
+      return matchesSearch && matchesPlan;
     });
+  }, [organizations, search, planFilter]);
+
+  const handleSave = async () => {
+    if (!selectedId) return;
+    try {
+      setSaving(true);
+      await adminOrganizationsAPI.update(selectedId, {
+        plan: form.plan,
+        plan_expires_at: form.plan_expires_at || null,
+      });
+      success("Plan actualizado exitosamente");
+      await loadOrganizations();
+      await loadDetail(selectedId);
+    } catch (err) {
+      error(err.message || "Error al actualizar el plan");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -136,107 +124,168 @@ const LicensesManagement = ({ onStatsUpdate }) => {
   }
 
   return (
-    <div>
-      <div className='flex justify-between items-center mb-6'>
-        <div>
-          <h3 className='text-lg font-semibold text-gray-900'>
-            Gestión de Licencias
-          </h3>
-          <p className='text-sm text-gray-600 mt-1'>
-            Administra las licencias del sistema
-          </p>
+    <div className='grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6'>
+      <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
+        <div className='p-4 border-b border-gray-100 space-y-2'>
+          <div className='relative'>
+            <Search className='w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2' />
+            <input
+              type='text'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder='Buscar organización'
+              className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+            />
+          </div>
+          <select
+            value={planFilter}
+            onChange={(e) => setPlanFilter(e.target.value)}
+            className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+          >
+            <option value='all'>Todos los planes</option>
+            <option value='free'>{PLAN_LABELS.free}</option>
+            <option value='starter'>{PLAN_LABELS.starter}</option>
+            <option value='professional'>{PLAN_LABELS.professional}</option>
+            <option value='enterprise'>{PLAN_LABELS.enterprise}</option>
+          </select>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm hover:shadow-md hover:shadow-brand-600/20 transition'
-        >
-          <Plus className='w-5 h-5' />
-          <span>Nueva Licencia</span>
-        </motion.button>
+        <div className='divide-y divide-gray-100 max-h-[560px] overflow-y-auto'>
+          {filtered.length === 0 && (
+            <p className='p-4 text-sm text-gray-500'>
+              No se encontraron organizaciones.
+            </p>
+          )}
+          {filtered.map((org) => {
+            const status = getExpiryStatus(org);
+            const isSelected = org.id === selectedId;
+            return (
+              <button
+                key={org.id}
+                type='button'
+                onClick={() => setSelectedId(org.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                  isSelected ? "bg-brand-50" : "hover:bg-gray-50"
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${status.dot}`}
+                  aria-hidden='true'
+                ></span>
+                <div className='min-w-0 flex-1'>
+                  <p className='text-sm font-medium text-gray-900 truncate'>
+                    {org.name}
+                  </p>
+                  <p className='text-xs text-gray-500'>
+                    {PLAN_LABELS[org.plan] || org.plan}
+                    <span className='text-gray-400'> · {status.label}</span>
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className='bg-white border border-gray-200 rounded-xl divide-y divide-gray-100'>
-        {licenses.map((license, index) => {
-          const statusBadge = getStatusBadge(license);
-          const typeBadge = getTypeBadge(license.type);
-          const StatusIcon = statusBadge.icon;
-          const usagePercent = Math.min(
-            100,
-            (license.current_users / license.max_users) * 100,
-          );
-          const barColor =
-            usagePercent > 80
-              ? "bg-red-500"
-              : usagePercent > 50
-                ? "bg-yellow-500"
-                : "bg-green-500";
-
-          return (
-            <motion.div
-              key={license.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className='flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 hover:bg-gray-50 transition-colors'
+      <div className='bg-white border border-gray-200 rounded-xl p-6'>
+        {organizations.length === 0 ? (
+          <p className='text-sm text-gray-500 text-center py-12'>
+            No hay organizaciones para mostrar.
+          </p>
+        ) : detailError ? (
+          <div className='text-sm text-gray-500 text-center py-12'>
+            <p className='mb-4'>{detailError}</p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type='button'
+              onClick={() => loadDetail(selectedId)}
+              className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm'
             >
-              {/* Identidad */}
-              <div className='flex items-center gap-3 sm:w-64 shrink-0'>
-                <div className='w-9 h-9 bg-brand-100 rounded-lg flex items-center justify-center shrink-0'>
-                  <Key className='w-4 h-4 text-brand-600' />
-                </div>
-                <p className='font-mono text-sm font-semibold text-gray-900 truncate'>
-                  {license.key}
+              Reintentar
+            </motion.button>
+          </div>
+        ) : loadingDetail || !detail ? (
+          <div className='flex items-center justify-center py-12'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600'></div>
+          </div>
+        ) : (
+          <motion.div
+            key={selectedId}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className='flex items-center gap-3 mb-6'>
+              <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                <Building2 className='w-5 h-5 text-brand-600' />
+              </div>
+              <div>
+                <h3 className='font-semibold text-gray-900'>
+                  {detail.organization.name}
+                </h3>
+                <p className='text-sm text-gray-500'>
+                  {PLAN_LABELS[detail.organization.plan] ||
+                    detail.organization.plan}
                 </p>
               </div>
+            </div>
 
-              {/* Uso */}
-              <div className='flex items-center gap-2 sm:w-40 shrink-0'>
-                <div className='flex-1 bg-gray-200 rounded-full h-1.5'>
-                  <div
-                    className={`h-1.5 rounded-full transition-all ${barColor}`}
-                    style={{ width: `${usagePercent}%` }}
-                  ></div>
-                </div>
-                <span className='text-xs text-gray-500 shrink-0'>
-                  {license.current_users}/{license.max_users}
-                </span>
-              </div>
+            <div className='mb-6'>
+              <PlanUsageBars
+                limits={detail.plan_limits}
+                usage={{
+                  members: detail.stats.members,
+                  projects: detail.stats.projects,
+                  teams: detail.stats.teams,
+                  storage_bytes: detail.storage_used_bytes,
+                }}
+              />
+            </div>
 
-              {/* Metadatos */}
-              <div className='flex items-center flex-wrap gap-2 flex-1 text-sm'>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeBadge.color}`}
+            <div className='border-t border-gray-100 pt-6'>
+              <h4 className='text-sm font-medium text-gray-900 mb-3'>
+                Cambiar plan
+              </h4>
+              <div className='flex flex-col sm:flex-row gap-3'>
+                <select
+                  value={form.plan}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, plan: e.target.value }))
+                  }
+                  className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 >
-                  {typeBadge.label}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.color}`}
+                  <option value='free'>Free</option>
+                  <option value='starter'>Starter</option>
+                  <option value='professional'>Professional</option>
+                  <option value='enterprise'>Enterprise</option>
+                </select>
+                <input
+                  type='date'
+                  value={form.plan_expires_at}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      plan_expires_at: e.target.value,
+                    }))
+                  }
+                  className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                />
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSave}
+                  disabled={saving}
+                  className='flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm disabled:opacity-50'
                 >
-                  <StatusIcon className='w-3 h-3' />
-                  {statusBadge.label}
-                </span>
-                <span className='text-xs text-gray-500'>
-                  {license.max_projects} proyectos máx.
-                </span>
-                <span className='flex items-center gap-1 text-xs text-gray-400'>
-                  <Calendar className='w-3 h-3' />
-                  Vence {formatDate(license.expiry_date)}
-                </span>
+                  <Save className='w-4 h-4' />
+                  {saving ? "Guardando..." : "Guardar"}
+                </motion.button>
               </div>
-
-              {/* Acciones */}
-              <div className='flex items-center gap-1 shrink-0'>
-                <button className='p-2 hover:bg-blue-50 rounded-lg transition'>
-                  <Edit className='w-4 h-4 text-blue-600' />
-                </button>
-                <button className='p-2 hover:bg-red-50 rounded-lg transition'>
-                  <Trash2 className='w-4 h-4 text-red-600' />
-                </button>
-              </div>
-            </motion.div>
-          );
-        })}
+              <p className='text-xs text-gray-400 mt-2'>
+                Deja la fecha vacía para un plan sin vencimiento.
+              </p>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import OrganizationModal from "../components/modals/OrganizationModal";
 import OrganizationMailConfig from "../components/organizations/OrganizationMailConfig";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import UserAvatar from "../components/ui/UserAvatar";
+import PlanUsageBars from "../components/ui/PlanUsageBars";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,10 +44,40 @@ import {
 import { organizationsAPI } from "../utils/api";
 import { parseLocalDate } from "../utils/dateUtils";
 
+// `plan_expires_at` is stored as a UTC-midnight ISO string (e.g.
+// "2027-01-01T00:00:00.000000Z"). Building a plain `new Date(isoString)` and
+// letting the browser render it in local time shifts the displayed date back
+// a day for negative UTC offsets (common in LatAm). Compare and format using
+// the UTC calendar date instead, so this agrees with the date-only string
+// the admin plan form reads via `.slice(0, 10)`.
+const getExpiryBadge = (planExpiresAt) => {
+  const dateOnly = planExpiresAt.slice(0, 10);
+  const expiresAtUTC = new Date(`${dateOnly}T00:00:00Z`);
+  const todayUTC = new Date(
+    `${new Date().toISOString().slice(0, 10)}T00:00:00Z`,
+  );
+  const daysLeft = Math.ceil(
+    (expiresAtUTC - todayUTC) / (1000 * 60 * 60 * 24),
+  );
+  const className =
+    daysLeft < 0
+      ? "bg-red-100 text-red-700"
+      : daysLeft <= 30
+        ? "bg-yellow-100 text-yellow-700"
+        : "bg-green-100 text-green-700";
+  const displayDate = expiresAtUTC.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  return { className, displayDate };
+};
+
 const OrganizationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { success, error: showError } = useNotification();
+  const { success, error: showError, info } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
 
   const [organization, setOrganization] = useState(null);
@@ -1083,13 +1114,50 @@ const OrganizationDetail = () => {
               {organization.is_owner ? (
                 <div className='space-y-6'>
                   <div className='p-4 bg-gray-50 rounded-lg'>
-                    <h4 className='font-medium text-gray-900 mb-2'>
-                      Plan actual
-                    </h4>
-                    <p className='text-gray-600 capitalize'>
+                    <div className='flex items-center justify-between mb-1'>
+                      <h4 className='font-medium text-gray-900'>
+                        Plan actual
+                      </h4>
+                      {organization.plan_expires_at &&
+                        (() => {
+                          const expiryBadge = getExpiryBadge(
+                            organization.plan_expires_at,
+                          );
+                          return (
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${expiryBadge.className}`}
+                            >
+                              <Calendar className='w-3 h-3' />
+                              Vence {expiryBadge.displayDate}
+                            </span>
+                          );
+                        })()}
+                    </div>
+                    <p className='text-gray-600 capitalize mb-4'>
                       {organization.plan}
                     </p>
-                    <button className='mt-3 text-brand-600 font-medium text-sm hover:underline'>
+
+                    {stats?.plan_limits && (
+                      <PlanUsageBars
+                        limits={stats.plan_limits}
+                        usage={{
+                          members: stats.members_count,
+                          projects: stats.projects_count,
+                          teams: stats.teams_count,
+                          storage_bytes: stats.storage_used_bytes,
+                        }}
+                      />
+                    )}
+
+                    <button
+                      type='button'
+                      onClick={() =>
+                        info(
+                          "Contacta a tu administrador de cuenta para actualizar el plan de tu organización.",
+                        )
+                      }
+                      className='mt-4 text-brand-600 font-medium text-sm hover:underline'
+                    >
                       Mejorar plan →
                     </button>
                   </div>

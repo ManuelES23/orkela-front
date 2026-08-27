@@ -16,8 +16,13 @@ const getExpiryStatus = (org) => {
   if (org.plan === "free" || !org.plan_expires_at) {
     return { label: "Sin vencimiento", dot: "bg-gray-300" };
   }
+  const dateOnly = org.plan_expires_at.slice(0, 10);
+  const expiresAtUTC = new Date(`${dateOnly}T00:00:00Z`);
+  const todayUTC = new Date(
+    `${new Date().toISOString().slice(0, 10)}T00:00:00Z`,
+  );
   const daysLeft = Math.ceil(
-    (new Date(org.plan_expires_at) - new Date()) / (1000 * 60 * 60 * 24),
+    (expiresAtUTC - todayUTC) / (1000 * 60 * 60 * 24),
   );
   if (daysLeft < 0) return { label: "Vencida", dot: "bg-red-500" };
   if (daysLeft <= 30) return { label: "Por vencer", dot: "bg-yellow-500" };

@@ -19,6 +19,7 @@ import {
   Upload,
 } from "lucide-react";
 import { organizationsAPI } from "../../utils/api";
+import { adminPlansAPI } from "../../utils/adminAPI";
 
 const OrganizationModal = ({
   isOpen,
@@ -33,6 +34,7 @@ const OrganizationModal = ({
   const [initializing, setInitializing] = useState(true);
   const fileInputRef = useRef(null);
   const [logoPreview, setLogoPreview] = useState(null);
+  const [plansCatalog, setPlansCatalog] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -73,7 +75,7 @@ const OrganizationModal = ({
             country: organization.country || "",
             industry: organization.industry || "",
             size: organization.size || "",
-            plan: organization.plan || "free",
+            plan_id: organization.plan?.id || "",
           });
           setLogoPreview(organization.logo || null);
         } else {
@@ -88,7 +90,7 @@ const OrganizationModal = ({
             country: "",
             industry: "",
             size: "",
-            plan: "free",
+            plan_id: "",
           });
           setLogoPreview(null);
         }
@@ -103,6 +105,12 @@ const OrganizationModal = ({
 
     initializeModal();
   }, [isOpen, organization]);
+
+  useEffect(() => {
+    if (isSystemAdmin) {
+      adminPlansAPI.getAll().then(setPlansCatalog).catch((err) => console.error(err));
+    }
+  }, [isSystemAdmin]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -234,13 +242,6 @@ const OrganizationModal = ({
     { value: "500+", label: "Más de 500 empleados" },
   ];
 
-  const plans = [
-    { value: "free", label: "Gratis (5 miembros)" },
-    { value: "starter", label: "Starter (15 miembros)" },
-    { value: "professional", label: "Professional (50 miembros)" },
-    { value: "enterprise", label: "Enterprise (Ilimitado)" },
-  ];
-
   return (
     <Modal
       isOpen={isOpen}
@@ -282,14 +283,15 @@ const OrganizationModal = ({
                 Plan
               </label>
               <select
-                name='plan'
-                value={formData.plan}
+                name='plan_id'
+                value={formData.plan_id}
                 onChange={handleChange}
                 className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white'
               >
-                {plans.map((plan) => (
-                  <option key={plan.value} value={plan.value}>
-                    {plan.label}
+                <option value=''>Seleccionar plan...</option>
+                {plansCatalog.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.members_limit === -1 ? "ilimitado" : p.members_limit} miembros)
                   </option>
                 ))}
               </select>

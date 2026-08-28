@@ -123,6 +123,20 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
           />
         </div>
 
+        <div>
+          <label className='block text-sm font-medium text-gray-700 mb-2'>
+            Orden de visualización
+          </label>
+          <input
+            type='number'
+            name='display_order'
+            value={formData.display_order}
+            onChange={handleChange}
+            min={0}
+            className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+          />
+        </div>
+
         <div className='grid grid-cols-2 gap-4'>
           {limitField("members_limit", "Miembros")}
           {limitField("projects_limit", "Proyectos")}

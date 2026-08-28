@@ -346,20 +346,33 @@ const LicensesManagement = () => {
                       }
                       className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
                     />
-                    {["members", "projects", "teams", "storage_mb"].map((key) => (
-                      <input
-                        key={key}
-                        type='number'
-                        placeholder={key}
-                        value={form.custom_limits[key]}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            custom_limits: { ...prev.custom_limits, [key]: e.target.value },
-                          }))
-                        }
-                        className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
-                      />
+                    {[
+                      { key: "members", label: "Miembros" },
+                      { key: "projects", label: "Proyectos" },
+                      { key: "teams", label: "Equipos" },
+                      { key: "storage_mb", label: "Almacenamiento (MB)" },
+                    ].map(({ key, label }) => (
+                      <div key={key}>
+                        <label
+                          htmlFor={`custom-limit-${key}`}
+                          className='block text-xs text-gray-500 mb-1'
+                        >
+                          {label}
+                        </label>
+                        <input
+                          id={`custom-limit-${key}`}
+                          type='number'
+                          placeholder='-1 = ilimitado'
+                          value={form.custom_limits[key]}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              custom_limits: { ...prev.custom_limits, [key]: e.target.value },
+                            }))
+                          }
+                          className='w-full px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>

@@ -652,7 +652,7 @@ const AdminOrganizations = () => {
                   {assignOwnerModal.org?.name}
                 </p>
                 <p className='text-sm text-gray-500'>
-                  Plan: {assignOwnerModal.org?.plan}
+                  Plan: {assignOwnerModal.org?.plan?.name || "Sin plan"}
                 </p>
               </div>
             </div>

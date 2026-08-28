@@ -22,6 +22,7 @@ import {
   BarChart3,
   Ticket,
   Building2,
+  CreditCard,
 } from "lucide-react";
 
 // Rail colapsado vs. panel expandido (overlay al hacer hover/foco, no empuja el contenido)
@@ -69,6 +70,7 @@ const Sidebar = () => {
           path: "/admin/organizations",
         },
         { icon: Key, label: "Licencias", path: "/admin/licenses" },
+        { icon: CreditCard, label: "Planes", path: "/admin/plans" },
         { icon: FileText, label: "Logs", path: "/admin/logs" },
         { icon: BarChart3, label: "Estadísticas", path: "/admin/stats" },
         { icon: Settings, label: "Configuración", path: "/admin/settings" },

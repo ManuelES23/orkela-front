@@ -47,6 +47,7 @@ const AcceptOrganizationInvitation = lazy(() =>
 const Users = lazy(() => import("./pages/admin/Users"));
 const AdminOrganizations = lazy(() => import("./pages/admin/Organizations"));
 const Licenses = lazy(() => import("./pages/admin/Licenses"));
+const Plans = lazy(() => import("./pages/admin/Plans"));
 const Logs = lazy(() => import("./pages/admin/Logs"));
 const Stats = lazy(() => import("./pages/admin/Stats"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
@@ -192,6 +193,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <Licenses />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path='/admin/plans'
+                  element={
+                    <AdminRoute>
+                      <Plans />
                     </AdminRoute>
                   }
                 />

@@ -2,18 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search, Building2, Save } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
-import { adminOrganizationsAPI } from "../../utils/adminAPI";
+import { adminOrganizationsAPI, adminPlansAPI } from "../../utils/adminAPI";
 import PlanUsageBars from "../ui/PlanUsageBars";
 
-const PLAN_LABELS = {
-  free: "Free",
-  starter: "Starter",
-  professional: "Professional",
-  enterprise: "Enterprise",
-};
-
 const getExpiryStatus = (org) => {
-  if (org.plan === "free" || !org.plan_expires_at) {
+  if (org.plan?.is_default || !org.plan_expires_at) {
     return { label: "Sin vencimiento", dot: "bg-gray-300" };
   }
   const dateOnly = org.plan_expires_at.slice(0, 10);
@@ -39,12 +32,24 @@ const LicensesManagement = () => {
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState(null);
-  const [form, setForm] = useState({ plan: "free", plan_expires_at: "" });
+  const [plansCatalog, setPlansCatalog] = useState([]);
+  const [form, setForm] = useState({
+    plan_id: "",
+    plan_expires_at: "",
+    billing_cycle: "monthly",
+    custom_monthly_price: "",
+    custom_annual_price: "",
+    custom_limits: { members: "", projects: "", teams: "", storage_mb: "" },
+  });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadOrganizations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    adminPlansAPI.getAll().then(setPlansCatalog).catch((err) => console.error(err));
   }, []);
 
   const loadOrganizations = async () => {
@@ -76,14 +81,30 @@ const LicensesManagement = () => {
       const data = await adminOrganizationsAPI.getStats(id);
       setDetail(data);
       setForm({
-        plan: data.organization.plan,
+        plan_id: data.organization.plan?.id ?? "",
         plan_expires_at: data.organization.plan_expires_at
           ? data.organization.plan_expires_at.slice(0, 10)
           : "",
+        billing_cycle: data.organization.billing_cycle || "monthly",
+        custom_monthly_price: data.organization.custom_monthly_price ?? "",
+        custom_annual_price: data.organization.custom_annual_price ?? "",
+        custom_limits: {
+          members: data.organization.custom_limits?.members ?? "",
+          projects: data.organization.custom_limits?.projects ?? "",
+          teams: data.organization.custom_limits?.teams ?? "",
+          storage_mb: data.organization.custom_limits?.storage_mb ?? "",
+        },
       });
     } catch (err) {
       setDetail(null);
-      setForm({ plan: "free", plan_expires_at: "" });
+      setForm({
+        plan_id: "",
+        plan_expires_at: "",
+        billing_cycle: "monthly",
+        custom_monthly_price: "",
+        custom_annual_price: "",
+        custom_limits: { members: "", projects: "", teams: "", storage_mb: "" },
+      });
       setDetailError("Error al cargar el detalle de la organización");
       error("Error al cargar el detalle de la organización");
       console.error(err);
@@ -97,7 +118,7 @@ const LicensesManagement = () => {
       const matchesSearch = org.name
         .toLowerCase()
         .includes(search.toLowerCase());
-      const matchesPlan = planFilter === "all" || org.plan === planFilter;
+      const matchesPlan = planFilter === "all" || org.plan?.id === Number(planFilter);
       return matchesSearch && matchesPlan;
     });
   }, [organizations, search, planFilter]);
@@ -106,10 +127,24 @@ const LicensesManagement = () => {
     if (!selectedId) return;
     try {
       setSaving(true);
-      await adminOrganizationsAPI.update(selectedId, {
-        plan: form.plan,
+      const selectedPlan = plansCatalog.find((p) => p.id === Number(form.plan_id));
+      const payload = {
+        plan_id: form.plan_id,
         plan_expires_at: form.plan_expires_at || null,
-      });
+        billing_cycle: form.billing_cycle,
+      };
+      if (selectedPlan?.is_custom) {
+        payload.custom_monthly_price = form.custom_monthly_price || null;
+        payload.custom_annual_price = form.custom_annual_price || null;
+        const limits = {};
+        for (const key of ["members", "projects", "teams", "storage_mb"]) {
+          if (form.custom_limits[key] !== "") {
+            limits[key] = Number(form.custom_limits[key]);
+          }
+        }
+        payload.custom_limits = Object.keys(limits).length ? limits : null;
+      }
+      await adminOrganizationsAPI.update(selectedId, payload);
       success("Plan actualizado exitosamente");
       await loadOrganizations();
       await loadDetail(selectedId);
@@ -148,10 +183,9 @@ const LicensesManagement = () => {
             className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
           >
             <option value='all'>Todos los planes</option>
-            <option value='free'>{PLAN_LABELS.free}</option>
-            <option value='starter'>{PLAN_LABELS.starter}</option>
-            <option value='professional'>{PLAN_LABELS.professional}</option>
-            <option value='enterprise'>{PLAN_LABELS.enterprise}</option>
+            {plansCatalog.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
           </select>
         </div>
         <div className='divide-y divide-gray-100 max-h-[560px] overflow-y-auto'>
@@ -181,7 +215,7 @@ const LicensesManagement = () => {
                     {org.name}
                   </p>
                   <p className='text-xs text-gray-500'>
-                    {PLAN_LABELS[org.plan] || org.plan}
+                    {org.plan?.name || "Sin plan"}
                     <span className='text-gray-400'> · {status.label}</span>
                   </p>
                 </div>
@@ -228,8 +262,7 @@ const LicensesManagement = () => {
                   {detail.organization.name}
                 </h3>
                 <p className='text-sm text-gray-500'>
-                  {PLAN_LABELS[detail.organization.plan] ||
-                    detail.organization.plan}
+                  {detail.organization.plan?.name || "Sin plan"}
                 </p>
               </div>
             </div>
@@ -250,18 +283,29 @@ const LicensesManagement = () => {
               <h4 className='text-sm font-medium text-gray-900 mb-3'>
                 Cambiar plan
               </h4>
-              <div className='flex flex-col sm:flex-row gap-3'>
+              <div className='flex flex-col sm:flex-row gap-3 mb-3'>
                 <select
-                  value={form.plan}
+                  value={form.plan_id}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, plan: e.target.value }))
+                    setForm((prev) => ({ ...prev, plan_id: e.target.value }))
                   }
                   className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 >
-                  <option value='free'>Free</option>
-                  <option value='starter'>Starter</option>
-                  <option value='professional'>Professional</option>
-                  <option value='enterprise'>Enterprise</option>
+                  {plansCatalog.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}{!p.is_active ? " (inactivo)" : ""}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={form.billing_cycle}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, billing_cycle: e.target.value }))
+                  }
+                  className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                >
+                  <option value='monthly'>Mensual</option>
+                  <option value='annual'>Anual</option>
                 </select>
                 <input
                   type='date'
@@ -274,17 +318,61 @@ const LicensesManagement = () => {
                   }
                   className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 />
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSave}
-                  disabled={saving}
-                  className='flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm disabled:opacity-50'
-                >
-                  <Save className='w-4 h-4' />
-                  {saving ? "Guardando..." : "Guardar"}
-                </motion.button>
               </div>
+
+              {plansCatalog.find((p) => p.id === Number(form.plan_id))?.is_custom && (
+                <div className='mb-3 p-3 bg-gray-50 rounded-lg space-y-2'>
+                  <p className='text-xs font-medium text-gray-700'>
+                    Personalizar para esta organización
+                  </p>
+                  <div className='grid grid-cols-2 gap-2'>
+                    <input
+                      type='number'
+                      placeholder='Precio mensual (MXN)'
+                      value={form.custom_monthly_price}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, custom_monthly_price: e.target.value }))
+                      }
+                      className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                    />
+                    <input
+                      type='number'
+                      placeholder='Precio anual (MXN)'
+                      value={form.custom_annual_price}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, custom_annual_price: e.target.value }))
+                      }
+                      className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                    />
+                    {["members", "projects", "teams", "storage_mb"].map((key) => (
+                      <input
+                        key={key}
+                        type='number'
+                        placeholder={key}
+                        value={form.custom_limits[key]}
+                        onChange={(e) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            custom_limits: { ...prev.custom_limits, [key]: e.target.value },
+                          }))
+                        }
+                        className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSave}
+                disabled={saving}
+                className='flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg shadow-sm disabled:opacity-50'
+              >
+                <Save className='w-4 h-4' />
+                {saving ? "Guardando..." : "Guardar"}
+              </motion.button>
               <p className='text-xs text-gray-400 mt-2'>
                 Deja la fecha vacía para un plan sin vencimiento.
               </p>

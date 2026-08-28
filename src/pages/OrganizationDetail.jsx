@@ -694,8 +694,8 @@ const OrganizationDetail = () => {
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 <div>
                   <p className='text-sm text-gray-500 mb-1'>Plan</p>
-                  <p className='font-medium text-gray-900 capitalize'>
-                    {organization.plan}
+                  <p className='font-medium text-gray-900'>
+                    {organization.plan?.name}
                   </p>
                 </div>
                 {organization.industry && (
@@ -1133,8 +1133,8 @@ const OrganizationDetail = () => {
                           );
                         })()}
                     </div>
-                    <p className='text-gray-600 capitalize mb-4'>
-                      {organization.plan}
+                    <p className='text-gray-600 mb-4'>
+                      {organization.plan?.name}
                     </p>
 
                     {stats?.plan_limits && (

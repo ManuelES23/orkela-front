@@ -291,11 +291,13 @@ const LicensesManagement = () => {
                   }
                   className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 >
-                  {plansCatalog.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}{!p.is_active ? " (inactivo)" : ""}
-                    </option>
-                  ))}
+                  {plansCatalog
+                    .filter((p) => p.is_active || p.id === Number(form.plan_id))
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}{!p.is_active ? " (inactivo)" : ""}
+                      </option>
+                    ))}
                 </select>
                 <select
                   value={form.billing_cycle}

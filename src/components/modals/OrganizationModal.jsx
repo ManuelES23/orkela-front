@@ -289,11 +289,13 @@ const OrganizationModal = ({
                 className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white'
               >
                 <option value=''>Seleccionar plan...</option>
-                {plansCatalog.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.members_limit === -1 ? "ilimitado" : p.members_limit} miembros)
-                  </option>
-                ))}
+                {plansCatalog
+                  .filter((p) => p.is_active || p.id === Number(formData.plan_id))
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.members_limit === -1 ? "ilimitado" : p.members_limit} miembros){!p.is_active ? " (inactivo)" : ""}
+                    </option>
+                  ))}
               </select>
             </div>
           )}

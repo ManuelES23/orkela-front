@@ -90,7 +90,15 @@ export const AuthProvider = ({ children }) => {
    * @param {string} contextId - 'organization' o 'personal'
    */
   const switchContext = async (contextId) => {
-    if (!user || !user.organization_id) {
+    // `user.organization_id` solo refleja la organización ACTIVA (el
+    // backend lo deja en null salvo que active_context === 'organization',
+    // ver AuthController::formatUserResponse) — no sirve para decidir si
+    // el usuario TIENE una organización a la que cambiar. La señal
+    // correcta es available_contexts, que el backend llena siempre
+    // (independiente del modo activo) y es lo mismo que ya usa
+    // hasMultipleContexts() para decidir si mostrar el selector.
+    const hasOrganizationAccess = (user?.available_contexts?.length ?? 0) > 1;
+    if (!user || !hasOrganizationAccess) {
       console.warn("Solo usuarios con organización pueden cambiar contexto");
       return;
     }

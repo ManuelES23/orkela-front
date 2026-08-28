@@ -100,13 +100,6 @@ const Organizations = () => {
     ? filteredOrganizations.filter((o) => o.id !== featuredOrg.id)
     : filteredOrganizations;
 
-  const planLabels = {
-    free: "Gratis",
-    starter: "Starter",
-    professional: "Professional",
-    enterprise: "Enterprise",
-  };
-
   // Badges translúcidos para usar sobre el fondo degradado del hero
   // (la organización destacada es la única que muestra rol/plan en esta vista;
   // las tiles compactas de "otras organizaciones" solo usan texto plano).
@@ -136,7 +129,7 @@ const Organizations = () => {
 
   const getPlanBadgeHero = (plan) => (
     <span className='px-2.5 py-1 bg-white/20 rounded-full text-xs font-semibold'>
-      {planLabels[plan] || planLabels.free}
+      {plan?.name || "Sin plan"}
     </span>
   );
 
@@ -295,7 +288,7 @@ const Organizations = () => {
                     <p className='text-xs text-gray-500 flex items-center gap-1'>
                       <Users className='w-3 h-3' />
                       {org.active_members_count || 0} miembros ·{" "}
-                      {planLabels[org.plan] || planLabels.free}
+                      {org.plan?.name || "Sin plan"}
                     </p>
                   </div>
                   <ArrowRight className='w-4 h-4 text-gray-300 group-hover:text-brand-500 shrink-0 transition-colors' />

@@ -509,7 +509,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                 <option value=''>Sin organización (Usuario libre)</option>
                 {organizations.map((org) => (
                   <option key={org.id} value={org.id}>
-                    {org.name} ({org.plan})
+                    {org.name} ({org.plan?.name || "Sin plan"})
                   </option>
                 ))}
               </select>

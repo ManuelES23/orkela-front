@@ -106,9 +106,9 @@ const Login = () => {
 
   return (
     <AuthShell
-      badge='Tiempo real, sin fricción'
+      badge='Todo en un solo lugar'
       heading='Organiza tus proyectos con claridad'
-      description='Equipos, tareas y tickets en un solo lugar — con notificaciones al instante.'
+      description='Gestiona equipos, tareas y tickets de forma simple, ordenada y sin complicaciones.'
       formHeader={
         <div className='mb-9'>
           <h2 className='text-3xl font-extrabold text-gray-900 mb-2 tracking-tight'>

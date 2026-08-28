@@ -116,3 +116,32 @@ export const adminOrganizationsAPI = {
     });
   },
 };
+
+// Admin Plans API — catálogo de planes
+export const adminPlansAPI = {
+  getAll: async () => {
+    return await request("/admin/plans", {
+      method: "GET",
+    });
+  },
+
+  create: async (planData) => {
+    return await request("/admin/plans", {
+      method: "POST",
+      body: JSON.stringify(planData),
+    });
+  },
+
+  update: async (id, planData) => {
+    return await request(`/admin/plans/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(planData),
+    });
+  },
+
+  delete: async (id) => {
+    return await request(`/admin/plans/${id}`, {
+      method: "DELETE",
+    });
+  },
+};

@@ -31,7 +31,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { organizationsAPI } from "../../utils/api";
-import { adminUsersAPI, adminOrganizationsAPI } from "../../utils/adminAPI";
+import { adminUsersAPI, adminOrganizationsAPI, adminPlansAPI } from "../../utils/adminAPI";
 
 const AdminOrganizations = () => {
   const navigate = useNavigate();
@@ -59,6 +59,12 @@ const AdminOrganizations = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedOwnerId, setSelectedOwnerId] = useState("");
   const [assigningOwner, setAssigningOwner] = useState(false);
+
+  const [plansCatalog, setPlansCatalog] = useState([]);
+
+  useEffect(() => {
+    adminPlansAPI.getAll().then(setPlansCatalog).catch((err) => console.error(err));
+  }, []);
 
   const loadOrganizations = useCallback(async () => {
     try {
@@ -191,33 +197,30 @@ const AdminOrganizations = () => {
       org.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       org.owner?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesPlan = filterPlan === "all" || org.plan === filterPlan;
+    const matchesPlan = filterPlan === "all" || org.plan?.id === Number(filterPlan);
     const matchesStatus = filterStatus === "all" || org.status === filterStatus;
 
     return matchesSearch && matchesPlan && matchesStatus;
   });
 
   const getPlanBadge = (plan) => {
-    const plans = {
-      free: { bg: "bg-gray-100", text: "text-gray-700", label: "Gratis" },
-      starter: { bg: "bg-blue-100", text: "text-blue-700", label: "Starter" },
-      professional: {
-        bg: "bg-brand-100",
-        text: "text-brand-700",
-        label: "Professional",
-      },
-      enterprise: {
-        bg: "bg-accent-100",
-        text: "text-accent-700",
-        label: "Enterprise",
-      },
-    };
-    const planStyle = plans[plan] || plans.free;
+    if (!plan) {
+      return (
+        <span className='px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium'>
+          Sin plan
+        </span>
+      );
+    }
+    const style = plan.is_custom
+      ? { bg: "bg-accent-100", text: "text-accent-700" }
+      : plan.is_default
+        ? { bg: "bg-gray-100", text: "text-gray-700" }
+        : { bg: "bg-brand-100", text: "text-brand-700" };
     return (
       <span
-        className={`px-2 py-1 ${planStyle.bg} ${planStyle.text} rounded-full text-xs font-medium`}
+        className={`px-2 py-1 ${style.bg} ${style.text} rounded-full text-xs font-medium`}
       >
-        {planStyle.label}
+        {plan.name}
       </span>
     );
   };
@@ -373,10 +376,9 @@ const AdminOrganizations = () => {
               className='px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none bg-white'
             >
               <option value='all'>Todos los planes</option>
-              <option value='free'>Gratis</option>
-              <option value='starter'>Starter</option>
-              <option value='professional'>Professional</option>
-              <option value='enterprise'>Enterprise</option>
+              {plansCatalog.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
             </select>
 
             <select

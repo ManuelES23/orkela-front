@@ -46,7 +46,7 @@ const OrganizationModal = ({
     country: "",
     industry: "",
     size: "",
-    plan: "free",
+    plan_id: "",
   });
 
   const isSystemAdmin = user?.isSystemAdmin;

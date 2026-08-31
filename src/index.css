@@ -52,6 +52,30 @@
   --ease-brand: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+:root {
+  /* Tokens de formulario que sí cambian con el tema (a diferencia de la
+     escala night-*, que son valores fijos) — para <select> nativo y para
+     react-select, que ignora las clases de Tailwind por ser CSS-in-JS. */
+  --select-bg: #ffffff;
+  --select-border: #d1d5db;
+  --select-border-focus: var(--color-brand-500);
+  --select-text: #111827;
+  --select-text-muted: #9ca3af;
+  --select-menu-bg: #ffffff;
+  --select-option-hover-bg: var(--color-brand-50);
+  --select-option-selected-bg: var(--color-brand-100);
+}
+[data-theme="dark"] {
+  --select-bg: var(--color-night-800);
+  --select-border: var(--color-night-600);
+  --select-border-focus: var(--color-brand-400);
+  --select-text: var(--color-night-50);
+  --select-text-muted: var(--color-night-500);
+  --select-menu-bg: var(--color-night-800);
+  --select-option-hover-bg: var(--color-night-700);
+  --select-option-selected-bg: var(--color-brand-900);
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 dark:bg-night-950 dark:text-night-50;
@@ -63,6 +87,24 @@
 }
 
 @layer components {
+  /* select nativo: sin esto, un select sin clases bg y text explícitas en
+     su className hereda el widget blanco del navegador, sin importar el
+     tema. Preflight de Tailwind define su propio "background-color:
+     transparent" para select dentro de la layer "base"; un select puesto
+     también en "base" no le gana de forma confiable (el orden de layers
+     manda por encima de la especificidad). Poniendo el override aquí, en
+     la layer "components" (declarada después de "base" pero antes de
+     "utilities"), gana siempre a Preflight, y una clase bg o dark:bg
+     explícita en un componente (layer "utilities") lo sigue ganando. */
+  select {
+    background-color: var(--select-bg);
+    color: var(--select-text);
+  }
+  select option {
+    background-color: var(--select-menu-bg);
+    color: var(--select-text);
+  }
+
   /* Bloque de skeleton ("Andamio") con barrido de brillo. La animación
      continua se hace en CSS (más barato que JS); las entradas/salidas de
      los bloques y el cruce hacia el contenido real usan framer-motion. */

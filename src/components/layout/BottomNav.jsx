@@ -71,7 +71,7 @@ const BottomNav = ({ onMenuClick }) => {
                 <div
                   className={`p-2 rounded-xl transition-all duration-200 ${
                     active
-                      ? "bg-brand-50 dark:bg-brand-900/20 dark:bg-brand-900/30"
+                      ? "bg-brand-50 dark:bg-brand-900/20"
                       : "hover:bg-gray-50 dark:hover:bg-night-800 active:scale-95"
                   }`}
                 >
@@ -119,7 +119,7 @@ const BottomNav = ({ onMenuClick }) => {
               <div
                 className={`p-2 rounded-xl transition-all duration-200 ${
                   active
-                    ? "bg-brand-50 dark:bg-brand-900/20 dark:bg-brand-900/30"
+                    ? "bg-brand-50 dark:bg-brand-900/20"
                     : "hover:bg-gray-50 dark:hover:bg-night-800 active:scale-95"
                 }`}
               >

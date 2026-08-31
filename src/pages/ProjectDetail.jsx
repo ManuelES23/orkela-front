@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Select from "react-select";
+import { selectStyles } from "../utils/reactSelectStyles";
 import Layout from "../components/layout/Layout";
 import ProjectModal from "../components/modals/ProjectModal";
 import TaskModal from "../components/modals/TaskModal";
@@ -1530,29 +1531,7 @@ const ProjectDetail = () => {
                                       </div>
                                     </div>
                                   )}
-                                  styles={{
-                                    control: (base, state) => ({
-                                      ...base,
-                                      borderColor: state.isFocused
-                                        ? "#7c3aed"
-                                        : "#d1d5db",
-                                      boxShadow: state.isFocused
-                                        ? "0 0 0 2px rgba(124, 58, 237, 0.2)"
-                                        : "none",
-                                      "&:hover": {
-                                        borderColor: state.isFocused
-                                          ? "#7c3aed"
-                                          : "#9ca3af",
-                                      },
-                                      borderRadius: "0.5rem",
-                                      minHeight: "38px",
-                                    }),
-                                    menu: (base) => ({
-                                      ...base,
-                                      borderRadius: "0.5rem",
-                                      zIndex: 20,
-                                    }),
-                                  }}
+                                  styles={selectStyles}
                                 />
                               </div>
                               <p className='text-xs text-gray-500 dark:text-night-400 text-center'>

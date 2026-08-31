@@ -263,7 +263,7 @@ const InvitationsPanel = () => {
                                 {getTypeLabel(invitation.type)}
                               </span>
                               {invitation.role && (
-                                <span className='text-xs px-1.5 py-0.5 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 dark:bg-brand-900/30 dark:text-brand-300 rounded'>
+                                <span className='text-xs px-1.5 py-0.5 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded'>
                                   {invitation.role}
                                 </span>
                               )}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import Select from "react-select";
+import { selectStyles } from "../../utils/reactSelectStyles";
 import { useNotification } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
 import { useRealtime } from "../../context/RealtimeContext";
@@ -445,13 +446,7 @@ const TicketDetailModal = ({
                               onChange={setSelectedMember}
                               placeholder='Seleccionar miembro...'
                               className='flex-1 min-w-[200px]'
-                              styles={{
-                                control: (base) => ({
-                                  ...base,
-                                  borderColor: "#c4b5fd",
-                                  "&:hover": { borderColor: "#a78bfa" },
-                                }),
-                              }}
+                              styles={selectStyles}
                               formatOptionLabel={(option) => (
                                 <div className='flex items-center gap-2'>
                                   <UserAvatar
@@ -546,6 +541,7 @@ const TicketDetailModal = ({
                             onChange={setSelectedMember}
                             placeholder='Seleccionar miembro...'
                             className='flex-1 min-w-[200px]'
+                            styles={selectStyles}
                           />
                           <button
                             onClick={handleAssignTicket}

@@ -42,6 +42,9 @@ const AcceptTeamInvitation = lazy(() => import("./pages/AcceptTeamInvitation"));
 const AcceptOrganizationInvitation = lazy(() =>
   import("./pages/AcceptOrganizationInvitation")
 );
+const PortalAccessRequest = lazy(() =>
+  import("./pages/portal/PortalAccessRequest")
+);
 
 // Admin Pages - Lazy loaded
 const Users = lazy(() => import("./pages/admin/Users"));
@@ -90,6 +93,7 @@ function App() {
                   path='/accept-organization-invitation/:token'
                   element={<AcceptOrganizationInvitation />}
                 />
+                <Route path='/portal/:orgSlug' element={<PortalAccessRequest />} />
 
                 {/* Rutas protegidas */}
                 <Route

@@ -40,3 +40,36 @@
     @apply antialiased;
   }
 }
+
+@layer components {
+  /* Bloque de skeleton ("Andamio") con barrido de brillo. La animación
+     continua se hace en CSS (más barato que JS); las entradas/salidas de
+     los bloques y el cruce hacia el contenido real usan framer-motion. */
+  .skeleton {
+    @apply rounded-lg bg-brand-100;
+    background-image: linear-gradient(
+      100deg,
+      var(--color-brand-100) 30%,
+      #f3effa 45%,
+      var(--color-brand-100) 60%
+    );
+    background-size: 220% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background-image: none;
+  }
+}

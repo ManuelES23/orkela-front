@@ -4,6 +4,7 @@ import { Search, Building2, Save } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
 import { adminOrganizationsAPI, adminPlansAPI } from "../../utils/adminAPI";
 import PlanUsageBars from "../ui/PlanUsageBars";
+import { SkeletonTableRows } from "../ui/Skeleton";
 
 const getExpiryStatus = (org) => {
   if (org.plan?.is_default || !org.plan_expires_at) {
@@ -156,11 +157,7 @@ const LicensesManagement = () => {
   };
 
   if (loading) {
-    return (
-      <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
-      </div>
-    );
+    return <SkeletonTableRows rows={6} columns={3} />;
   }
 
   return (

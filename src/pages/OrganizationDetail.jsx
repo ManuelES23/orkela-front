@@ -5,6 +5,7 @@ import { getAssetUrl } from "../utils/assetUrl";
 import OrganizationModal from "../components/modals/OrganizationModal";
 import OrganizationMailConfig from "../components/organizations/OrganizationMailConfig";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import { SkeletonDetail } from "../components/ui/Skeleton";
 import UserAvatar from "../components/ui/UserAvatar";
 import PlanUsageBars from "../components/ui/PlanUsageBars";
 import { useNotification } from "../context/NotificationContext";
@@ -449,15 +450,12 @@ const OrganizationDetail = () => {
     { id: "settings", label: "Configuración", icon: Settings },
   ];
 
-  // Mostrar loader de pantalla completa mientras carga
+  // Silueta del layout mientras carga (misma cabecera/sidebar que la vista real)
   if (loading) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='flex flex-col items-center gap-4'>
-          <Loader2 className='w-10 h-10 animate-spin text-brand-600' />
-          <p className='text-gray-600 font-medium'>Cargando organización...</p>
-        </div>
-      </div>
+      <Layout title='Cargando...'>
+        <SkeletonDetail />
+      </Layout>
     );
   }
 

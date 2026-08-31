@@ -11,6 +11,7 @@ import {
 import Layout from "../../components/layout/Layout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
+import { SkeletonSettings } from "../../components/ui/Skeleton";
 import settingsAPI from "../../utils/settingsAPI";
 import { useNotification } from "../../context/NotificationContext";
 
@@ -140,9 +141,7 @@ export default function Settings() {
         title='Configuración'
         subtitle='Gestiona las configuraciones del sistema'
       >
-        <div className='flex items-center justify-center h-64'>
-          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
-        </div>
+        <SkeletonSettings sections={3} />
       </Layout>
     );
   }

@@ -5,6 +5,7 @@ import { getAssetUrl } from "../../utils/assetUrl";
 import OrganizationModal from "../../components/modals/OrganizationModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import Modal from "../../components/ui/Modal";
+import { SkeletonRows } from "../../components/ui/Skeleton";
 import { useNotification } from "../../context/NotificationContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../../components/animations/MotionComponents";
@@ -407,11 +408,7 @@ const AdminOrganizations = () => {
       </FadeIn>
 
       {/* Loading State */}
-      {loading && (
-        <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
-        </div>
-      )}
+      {loading && <SkeletonRows count={6} />}
 
       {/* Lista de Organizaciones */}
       {!loading && (

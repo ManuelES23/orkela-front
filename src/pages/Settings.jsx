@@ -11,6 +11,7 @@ import { getAssetUrl } from "../utils/assetUrl";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 import MyPlanSection from "../components/settings/MyPlanSection";
+import { SkeletonSettings } from "../components/ui/Skeleton";
 
 const Settings = () => {
   const { user, refreshUser } = useAuth();
@@ -147,9 +148,7 @@ const Settings = () => {
         title='Configuración'
         subtitle='Administra las preferencias de tu cuenta'
       >
-        <div className='flex items-center justify-center py-20'>
-          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
-        </div>
+        <SkeletonSettings sections={2} />
       </Layout>
     );
   }

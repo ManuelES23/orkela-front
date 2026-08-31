@@ -8,12 +8,12 @@ import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import AnimatedNumber from "../components/ui/AnimatedNumber";
+import { SkeletonCardGrid } from "../components/ui/Skeleton";
 import {
   Search,
   Building2,
   Users,
   FolderKanban,
-  Loader2,
   Crown,
   Shield,
   ArrowRight,
@@ -155,11 +155,7 @@ const Organizations = () => {
       </FadeIn>
 
       {/* Loading State */}
-      {loading && (
-        <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
-        </div>
-      )}
+      {loading && <SkeletonCardGrid count={6} className='grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3' />}
 
       {/* Empty State */}
       {!loading && organizations.length === 0 && (

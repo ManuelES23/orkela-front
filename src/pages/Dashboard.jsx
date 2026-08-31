@@ -12,6 +12,7 @@ import {
 } from "../components/animations/MotionComponents";
 import ProgressRing from "../components/ui/ProgressRing";
 import AnimatedNumber from "../components/ui/AnimatedNumber";
+import DashboardSkeleton from "../components/dashboard/DashboardSkeleton";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -28,7 +29,6 @@ import {
   CheckCircle,
   Users,
   Clock,
-  Loader2,
   Calendar,
   CalendarClock,
   AlertTriangle,
@@ -297,9 +297,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <Layout title='Dashboard' subtitle='Cargando...'>
-        <div className='flex justify-center items-center py-24'>
-          <Loader2 className='w-10 h-10 animate-spin text-brand-600' />
-        </div>
+        <DashboardSkeleton />
       </Layout>
     );
   }

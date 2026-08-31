@@ -11,6 +11,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { SkeletonTableRows } from "../ui/Skeleton";
 
 const SystemLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -108,11 +109,7 @@ const SystemLogs = () => {
   });
 
   if (loading) {
-    return (
-      <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
-      </div>
-    );
+    return <SkeletonTableRows rows={6} columns={4} />;
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import Button from "../ui/Button";
@@ -27,9 +27,26 @@ const PortalNewTicketModal = ({ isOpen, onClose, onCreate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setTitle("");
+      setDescription("");
+      setType("bug");
+      setPriority("medium");
+      setError(null);
+    }
+  }, [isOpen]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    // Validation
+    if (!title.trim() || !description.trim()) {
+      setError("Completa el título y la descripción.");
+      return;
+    }
+
     setLoading(true);
     try {
       await onCreate({ title, description, type, priority });

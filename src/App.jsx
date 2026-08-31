@@ -45,6 +45,9 @@ const AcceptOrganizationInvitation = lazy(() =>
 const PortalAccessRequest = lazy(() =>
   import("./pages/portal/PortalAccessRequest")
 );
+const PortalAccessConsume = lazy(() =>
+  import("./pages/portal/PortalAccessConsume")
+);
 
 // Admin Pages - Lazy loaded
 const Users = lazy(() => import("./pages/admin/Users"));
@@ -94,6 +97,7 @@ function App() {
                   element={<AcceptOrganizationInvitation />}
                 />
                 <Route path='/portal/:orgSlug' element={<PortalAccessRequest />} />
+                <Route path='/portal/access/:token' element={<PortalAccessConsume />} />
 
                 {/* Rutas protegidas */}
                 <Route

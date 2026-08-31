@@ -345,7 +345,7 @@ const Projects = () => {
               </div>
               <div className='min-w-0'>
                 {featured && (
-                  <span className='inline-flex items-center gap-1 text-[10px] font-bold text-brand-700 bg-brand-100 px-2 py-0.5 rounded-full mb-1'>
+                  <span className='inline-flex items-center gap-1 text-[10px] font-bold text-brand-700 dark:text-brand-300 bg-brand-100 dark:bg-brand-900/30 px-2 py-0.5 rounded-full mb-1'>
                     <Flag className='w-2.5 h-2.5' />
                     Más urgente
                   </span>
@@ -455,10 +455,10 @@ const Projects = () => {
                 </div>
                 <div className='text-[10px] text-green-600 dark:text-green-400'>Listas</div>
               </div>
-              <div className='text-center p-2 bg-brand-50 rounded-lg'>
+              <div className='text-center p-2 bg-brand-50 dark:bg-brand-900/20 rounded-lg'>
                 <div className='flex items-center justify-center gap-1'>
                   <Clock className='w-3.5 h-3.5 text-brand-500' />
-                  <span className='text-sm font-bold text-brand-700 tabular-nums'>
+                  <span className='text-sm font-bold text-brand-700 dark:text-brand-300 tabular-nums'>
                     {taskStats.inProgress}
                   </span>
                 </div>
@@ -615,7 +615,7 @@ const Projects = () => {
                       : daysRemaining <= 3
                         ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
                         : isDueSoon
-                          ? "bg-brand-100 text-brand-700"
+                          ? "bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300"
                           : "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300"
                 }`}
               >

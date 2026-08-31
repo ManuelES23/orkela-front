@@ -38,7 +38,7 @@ const LoadingScreen = ({ message = "Cargando...", fullScreen = true, className =
           />
         </div>
 
-        <div className='w-28 h-[3px] rounded-full bg-brand-100 dark:bg-night-800 overflow-hidden'>
+        <div className='w-28 h-[3px] rounded-full bg-brand-100 dark:bg-brand-900/30 dark:bg-night-800 overflow-hidden'>
           <motion.div
             className='h-full w-[46%] rounded-full bg-brand-600'
             animate={prefersReducedMotion ? {} : { x: ["-120%", "260%"] }}

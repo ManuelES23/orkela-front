@@ -128,9 +128,9 @@ const Login = () => {
             transition={{ duration: motionTokens.duration.base }}
             className='overflow-hidden'
           >
-            <div className='mb-4 p-3 bg-brand-50 border border-brand-200 dark:bg-brand-900/20 dark:border-brand-800 rounded-lg flex items-start gap-2'>
+            <div className='mb-4 p-3 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 dark:bg-brand-900/20 dark:border-brand-800 rounded-lg flex items-start gap-2'>
               <Info className='w-5 h-5 text-brand-600 dark:text-brand-300 shrink-0 mt-0.5' />
-              <p className='text-brand-700 dark:text-brand-300 text-sm'>{invitationMessage}</p>
+              <p className='text-brand-700 dark:text-brand-300 dark:text-brand-300 text-sm'>{invitationMessage}</p>
             </div>
           </motion.div>
         )}
@@ -188,7 +188,7 @@ const Login = () => {
             required
           />
           <div className='flex justify-end mt-2.5'>
-            <a href='#' className='text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
+            <a href='#' className='text-sm font-semibold text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 dark:text-brand-400 dark:hover:text-brand-300'>
               ¿Olvidaste tu contraseña?
             </a>
           </div>
@@ -216,7 +216,7 @@ const Login = () => {
 
         <p className='text-center text-base text-gray-500 dark:text-night-400 pt-1'>
           ¿No tienes cuenta?{" "}
-          <Link to='/register' className='font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
+          <Link to='/register' className='font-semibold text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 dark:text-brand-400 dark:hover:text-brand-300'>
             Regístrate gratis
           </Link>
         </p>

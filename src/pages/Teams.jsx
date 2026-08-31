@@ -264,7 +264,7 @@ const Teams = () => {
               {!searchTerm && (
                 <button
                   onClick={handleNewTeam}
-                  className='mt-4 text-brand-600 hover:text-brand-700 font-medium'
+                  className='mt-4 text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium'
                 >
                   Crear tu primer equipo
                 </button>
@@ -431,13 +431,13 @@ const Teams = () => {
                                   e.stopPropagation();
                                   setInvitingTeamId(team.id);
                                 }}
-                                className='flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-night-300 hover:text-brand-700 transition-colors'
+                                className='flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-night-300 hover:text-brand-700 dark:hover:text-brand-300 transition-colors'
                               >
                                 <Mail className='w-4 h-4' />
                                 Invitar
                               </button>
                             )}
-                            <span className='ml-auto flex items-center gap-1 text-sm text-gray-500 dark:text-night-400 group-hover:text-brand-700 transition-colors'>
+                            <span className='ml-auto flex items-center gap-1 text-sm text-gray-500 dark:text-night-400 group-hover:text-brand-700 dark:hover:text-brand-300 transition-colors'>
                               Ver equipo
                               <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
                             </span>

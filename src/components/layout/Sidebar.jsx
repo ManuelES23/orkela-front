@@ -170,7 +170,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                 title={isPinned ? "Desanclar sidebar" : "Fijar sidebar abierto"}
                 className={`shrink-0 p-1.5 rounded-lg transition-colors duration-200 ${
                   isPinned
-                    ? "bg-brand-100 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300"
+                    ? "bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300"
                     : "text-gray-300 hover:bg-gray-50 hover:text-gray-500 dark:text-night-600 dark:hover:bg-night-800 dark:hover:text-night-400"
                 }`}
               >
@@ -235,7 +235,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                   !isOpen && "justify-center"
                 } ${
                   active
-                    ? "text-brand-700 dark:text-brand-300"
+                    ? "text-brand-700 dark:text-brand-300 dark:text-brand-300"
                     : "text-gray-700 hover:bg-gray-50 dark:text-night-300 dark:hover:bg-night-800"
                 }`}
               >

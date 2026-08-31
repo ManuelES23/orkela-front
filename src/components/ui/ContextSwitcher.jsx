@@ -67,12 +67,12 @@ const ContextSwitcher = ({ isCompact = false }) => {
   const getContextColor = (type, isActive) => {
     if (type === "organization") {
       return isActive
-        ? "bg-accent-100 text-accent-700 border-accent-200 dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-800"
-        : "hover:bg-accent-50 text-accent-600 dark:hover:bg-accent-900/20 dark:text-accent-400";
+        ? "bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 border-accent-200 dark:border-accent-800 dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-800"
+        : "hover:bg-accent-50 dark:hover:bg-accent-900/20 text-accent-600 dark:hover:bg-accent-900/20 dark:text-accent-400";
     }
     return isActive
-      ? "bg-brand-100 text-brand-700 border-brand-200 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-800"
-      : "hover:bg-brand-50 text-brand-600 dark:hover:bg-brand-900/20 dark:text-brand-400";
+      ? "bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-800 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-800"
+      : "hover:bg-brand-50 dark:hover:bg-brand-900/20 text-brand-600 dark:hover:bg-brand-900/20 dark:text-brand-400";
   };
 
   const ActiveIcon = getContextIcon(activeContext?.type);
@@ -226,8 +226,8 @@ const ContextSwitcher = ({ isCompact = false }) => {
                     <div
                       className={`p-2 rounded-lg ${
                         ctx.type === "organization"
-                          ? "bg-accent-100 dark:bg-accent-900/30"
-                          : "bg-brand-100 dark:bg-brand-900/30"
+                          ? "bg-accent-100 dark:bg-accent-900/30 dark:bg-accent-900/30"
+                          : "bg-brand-100 dark:bg-brand-900/30 dark:bg-brand-900/30"
                       }`}
                     >
                       {renderContextIcon(ctx, "w-4 h-4")}

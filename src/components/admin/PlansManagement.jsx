@@ -78,12 +78,12 @@ const PlansManagement = () => {
   return (
     <div>
       <div className='flex items-center justify-between mb-6'>
-        <div className='inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50'>
+        <div className='inline-flex rounded-lg border border-gray-200 dark:border-night-700 p-1 bg-gray-50 dark:bg-night-800'>
           <button
             type='button'
             onClick={() => setScope("organization")}
             className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              scope === "organization" ? "bg-white shadow-sm text-brand-700" : "text-gray-500 hover:text-gray-700"
+              scope === "organization" ? "bg-white dark:bg-night-900 shadow-sm text-brand-700 dark:text-brand-300" : "text-gray-500 dark:text-night-400 hover:text-gray-700 dark:hover:text-night-300"
             }`}
           >
             Empresariales
@@ -92,7 +92,7 @@ const PlansManagement = () => {
             type='button'
             onClick={() => setScope("personal")}
             className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              scope === "personal" ? "bg-white shadow-sm text-brand-700" : "text-gray-500 hover:text-gray-700"
+              scope === "personal" ? "bg-white dark:bg-night-900 shadow-sm text-brand-700 dark:text-brand-300" : "text-gray-500 dark:text-night-400 hover:text-gray-700 dark:hover:text-night-300"
             }`}
           >
             Personales
@@ -116,41 +116,41 @@ const PlansManagement = () => {
             key={plan.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`bg-white border rounded-xl p-4 ${plan.is_default ? "border-brand-300" : "border-gray-200"}`}
+            className={`bg-white dark:bg-night-900 border rounded-xl p-4 ${plan.is_default ? "border-brand-300 dark:border-brand-700" : "border-gray-200 dark:border-night-700"}`}
           >
             <div className='flex items-start justify-between mb-2'>
-              <p className='font-semibold text-gray-900'>{plan.name}</p>
+              <p className='font-semibold text-gray-900 dark:text-night-50'>{plan.name}</p>
               {!plan.is_active && (
-                <span className='text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full'>
+                <span className='text-xs px-2 py-0.5 bg-gray-100 dark:bg-night-800 text-gray-500 dark:text-night-400 rounded-full'>
                   Inactivo
                 </span>
               )}
             </div>
             <div className='flex gap-1.5 mb-3'>
               {plan.is_default && (
-                <span className='text-xs px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full'>
+                <span className='text-xs px-2 py-0.5 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full'>
                   Default
                 </span>
               )}
               {plan.is_custom && (
-                <span className='text-xs px-2 py-0.5 bg-accent-100 text-accent-700 rounded-full'>
+                <span className='text-xs px-2 py-0.5 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 rounded-full'>
                   Custom
                 </span>
               )}
             </div>
-            <p className='text-2xl font-semibold text-gray-900'>
+            <p className='text-2xl font-semibold text-gray-900 dark:text-night-50'>
               {formatPrice(plan.monthly_price)}
             </p>
-            <p className='text-xs text-gray-500 mb-3'>
+            <p className='text-xs text-gray-500 dark:text-night-400 mb-3'>
               por mes · o {formatPrice(plan.annual_price)}/año
             </p>
             {plan.scope === "personal" ? (
-              <div className='flex items-center gap-1.5 text-xs text-gray-500 mb-4'>
+              <div className='flex items-center gap-1.5 text-xs text-gray-500 dark:text-night-400 mb-4'>
                 <Users className='w-3.5 h-3.5' />
                 {plan.projects_limit === -1 ? "Ilimitados" : plan.projects_limit} proyectos
               </div>
             ) : (
-              <div className='flex items-center gap-1.5 text-xs text-gray-500 mb-4'>
+              <div className='flex items-center gap-1.5 text-xs text-gray-500 dark:text-night-400 mb-4'>
                 <Users className='w-3.5 h-3.5' />
                 {plan.members_limit === -1 ? "Ilimitado" : plan.members_limit} miembros
               </div>
@@ -159,7 +159,7 @@ const PlansManagement = () => {
               <button
                 type='button'
                 onClick={() => handleEdit(plan)}
-                className='flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors'
+                className='flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
               >
                 <Edit className='w-3.5 h-3.5' />
                 Editar
@@ -167,7 +167,7 @@ const PlansManagement = () => {
               <button
                 type='button'
                 onClick={() => handleDeleteClick(plan)}
-                className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors'
+                className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors'
                 title='Eliminar plan'
               >
                 <Trash2 className='w-3.5 h-3.5' />

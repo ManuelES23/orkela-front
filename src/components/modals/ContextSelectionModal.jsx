@@ -43,18 +43,18 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
 
     if (type === "organization") {
       return isSelected
-        ? `${baseStyles} border-accent-500 bg-accent-50 ring-2 ring-accent-200 dark:bg-accent-900/20 dark:ring-accent-800`
-        : `${baseStyles} border-gray-200 dark:border-night-700 hover:border-accent-300 hover:bg-accent-50/50 dark:hover:bg-accent-900/10`;
+        ? `${baseStyles} border-accent-500 bg-accent-50 dark:bg-accent-900/20 ring-2 ring-accent-200 dark:bg-accent-900/20 dark:ring-accent-800`
+        : `${baseStyles} border-gray-200 dark:border-night-700 hover:border-accent-300 dark:hover:border-accent-700 hover:bg-accent-50/50 dark:hover:bg-accent-900/10`;
     }
     return isSelected
-      ? `${baseStyles} border-brand-500 bg-brand-50 ring-2 ring-brand-200 dark:bg-brand-900/20 dark:ring-brand-800`
-      : `${baseStyles} border-gray-200 dark:border-night-700 hover:border-brand-300 hover:bg-brand-50/50 dark:hover:bg-brand-900/10`;
+      ? `${baseStyles} border-brand-500 bg-brand-50 dark:bg-brand-900/20 ring-2 ring-brand-200 dark:bg-brand-900/20 dark:ring-brand-800`
+      : `${baseStyles} border-gray-200 dark:border-night-700 hover:border-brand-300 dark:hover:border-brand-700 hover:bg-brand-50/50 dark:hover:bg-brand-900/10`;
   };
 
   const getIconBgColor = (type) => {
     return type === "organization"
-      ? "bg-accent-100 dark:bg-accent-900/30"
-      : "bg-brand-100 dark:bg-brand-900/30";
+      ? "bg-accent-100 dark:bg-accent-900/30 dark:bg-accent-900/30"
+      : "bg-brand-100 dark:bg-brand-900/30 dark:bg-brand-900/30";
   };
 
   const getIconColor = (type) => {

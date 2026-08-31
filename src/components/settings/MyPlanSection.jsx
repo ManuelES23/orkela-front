@@ -88,7 +88,7 @@ const MyPlanSection = () => {
               <div className='flex items-start justify-between mb-2'>
                 <p className='font-semibold text-gray-900 dark:text-night-50'>{plan.name}</p>
                 {isCurrent && (
-                  <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full'>
+                  <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-full'>
                     <Check className='w-3 h-3' /> Actual
                   </span>
                 )}

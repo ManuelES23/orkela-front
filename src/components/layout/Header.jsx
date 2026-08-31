@@ -22,7 +22,7 @@ const Header = ({ title, subtitle }) => {
               </h1>
               {/* Indicador de organización - solo en modo organización */}
               {isInOrganizationMode && (
-                <span className='hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 rounded-full text-xs font-medium'>
+                <span className='hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 dark:bg-brand-900/30 dark:text-brand-300 rounded-full text-xs font-medium'>
                   <Building2 className='w-3.5 h-3.5' />
                   <span className='hidden md:inline'>
                     {user.organization.name}

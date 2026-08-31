@@ -268,7 +268,7 @@ const Tickets = () => {
       label: "Abierto",
     },
     in_progress: {
-      color: "text-brand-600 bg-brand-50",
+      color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20",
       icon: PlayCircle,
       label: "En progreso",
     },
@@ -413,7 +413,7 @@ const Tickets = () => {
                     onClick={() => setActiveFilter(f.key)}
                     className={`relative flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                       active
-                        ? "text-brand-700"
+                        ? "text-brand-700 dark:text-brand-300"
                         : "text-gray-600 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800"
                     }`}
                   >
@@ -421,7 +421,7 @@ const Tickets = () => {
                       <motion.span
                         layoutId='tickets-rail-active'
                         transition={motionTokens.springSnappy}
-                        className='absolute inset-0 rounded-lg bg-brand-50'
+                        className='absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/20'
                       />
                     )}
                     <span className='relative flex items-center gap-2 font-medium'>
@@ -448,7 +448,7 @@ const Tickets = () => {
                     onClick={() => setSelectedTeamId("")}
                     className={`relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                       !selectedTeamId
-                        ? "text-brand-700"
+                        ? "text-brand-700 dark:text-brand-300"
                         : "text-gray-600 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800"
                     }`}
                   >
@@ -456,7 +456,7 @@ const Tickets = () => {
                       <motion.span
                         layoutId='tickets-team-active'
                         transition={motionTokens.springSnappy}
-                        className='absolute inset-0 rounded-lg bg-brand-50'
+                        className='absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/20'
                       />
                     )}
                     <span className='relative flex items-center gap-2 font-medium'>
@@ -473,7 +473,7 @@ const Tickets = () => {
                         onClick={() => setSelectedTeamId(team.id.toString())}
                         className={`relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                           active
-                            ? "text-brand-700"
+                            ? "text-brand-700 dark:text-brand-300"
                             : "text-gray-600 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800"
                         }`}
                       >
@@ -481,7 +481,7 @@ const Tickets = () => {
                           <motion.span
                             layoutId='tickets-team-active'
                             transition={motionTokens.springSnappy}
-                            className='absolute inset-0 rounded-lg bg-brand-50'
+                            className='absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/20'
                           />
                         )}
                         <span className='relative flex items-center gap-2 font-medium truncate'>
@@ -603,7 +603,7 @@ const Tickets = () => {
                                       }
                                     />
                                     {ticket.is_in_inbox && (
-                                      <span className='px-1.5 py-0.5 bg-accent-50 text-accent-700 rounded text-[10px] font-semibold'>
+                                      <span className='px-1.5 py-0.5 bg-accent-50 dark:bg-accent-900/20 text-accent-700 dark:text-accent-300 rounded text-[10px] font-semibold'>
                                         Buzón
                                       </span>
                                     )}
@@ -624,7 +624,7 @@ const Tickets = () => {
                                     </span>
 
                                     {ticket.assigned_user && (
-                                      <span className='flex items-center gap-1 text-brand-700 font-medium'>
+                                      <span className='flex items-center gap-1 text-brand-700 dark:text-brand-300 font-medium'>
                                         <User className='w-3.5 h-3.5' />
                                         {ticket.assigned_user.name}
                                         {ticket.can_resolve &&
@@ -682,7 +682,7 @@ const Tickets = () => {
                                     </span>
 
                                     {ticket.is_creator && (
-                                      <span className='px-2 py-0.5 bg-brand-50 text-brand-700 rounded text-[11px] font-medium'>
+                                      <span className='px-2 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 rounded text-[11px] font-medium'>
                                         Creado por mí
                                       </span>
                                     )}

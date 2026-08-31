@@ -132,10 +132,10 @@ const SystemStats = () => {
   return (
     <div className='space-y-6'>
       <div>
-        <h3 className='text-lg font-semibold text-gray-900'>
+        <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
           Estadísticas del Sistema
         </h3>
-        <p className='text-sm text-gray-600 mt-1'>
+        <p className='text-sm text-gray-600 dark:text-night-300 mt-1'>
           Vista general del rendimiento
         </p>
       </div>
@@ -144,15 +144,15 @@ const SystemStats = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='bg-white border border-gray-200 rounded-xl p-6'
+        className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl p-6'
       >
         <div className='flex items-center gap-3 mb-4'>
-          <div className='p-2 bg-brand-100 rounded-lg'>
+          <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg'>
             <Users className='w-5 h-5 text-brand-600' />
           </div>
           <div>
-            <h4 className='font-semibold text-gray-900'>Usuarios Activos</h4>
-            <p className='text-sm text-gray-600'>Última semana</p>
+            <h4 className='font-semibold text-gray-900 dark:text-night-50'>Usuarios Activos</h4>
+            <p className='text-sm text-gray-600 dark:text-night-300'>Última semana</p>
           </div>
         </div>
         <div style={{ height: "300px" }}>
@@ -167,15 +167,15 @@ const SystemStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className='bg-white border border-gray-200 rounded-xl p-6'
+          className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl p-6'
         >
           <div className='flex items-center gap-3 mb-4'>
-            <div className='p-2 bg-accent-100 rounded-lg'>
+            <div className='p-2 bg-accent-100 dark:bg-accent-900/30 rounded-lg'>
               <FolderKanban className='w-5 h-5 text-accent-600' />
             </div>
             <div>
-              <h4 className='font-semibold text-gray-900'>Proyectos</h4>
-              <p className='text-sm text-gray-600'>Última semana</p>
+              <h4 className='font-semibold text-gray-900 dark:text-night-50'>Proyectos</h4>
+              <p className='text-sm text-gray-600 dark:text-night-300'>Última semana</p>
             </div>
           </div>
           <div style={{ height: "200px" }}>
@@ -188,15 +188,15 @@ const SystemStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className='bg-white border border-gray-200 rounded-xl p-6'
+          className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl p-6'
         >
           <div className='flex items-center gap-3 mb-4'>
-            <div className='p-2 bg-blue-100 rounded-lg'>
-              <CheckCircle className='w-5 h-5 text-blue-600' />
+            <div className='p-2 bg-blue-100 dark:bg-blue-950/40 rounded-lg'>
+              <CheckCircle className='w-5 h-5 text-blue-600 dark:text-blue-400' />
             </div>
             <div>
-              <h4 className='font-semibold text-gray-900'>Tareas</h4>
-              <p className='text-sm text-gray-600'>Última semana</p>
+              <h4 className='font-semibold text-gray-900 dark:text-night-50'>Tareas</h4>
+              <p className='text-sm text-gray-600 dark:text-night-300'>Última semana</p>
             </div>
           </div>
           <div style={{ height: "200px" }}>
@@ -209,15 +209,15 @@ const SystemStats = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className='bg-white border border-gray-200 rounded-xl p-6'
+          className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl p-6'
         >
           <div className='flex items-center gap-3 mb-4'>
-            <div className='p-2 bg-gray-100 rounded-lg'>
-              <Activity className='w-5 h-5 text-gray-600' />
+            <div className='p-2 bg-gray-100 dark:bg-night-800 rounded-lg'>
+              <Activity className='w-5 h-5 text-gray-600 dark:text-night-300' />
             </div>
             <div>
-              <h4 className='font-semibold text-gray-900'>Roles</h4>
-              <p className='text-sm text-gray-600'>Usuarios por rol</p>
+              <h4 className='font-semibold text-gray-900 dark:text-night-50'>Roles</h4>
+              <p className='text-sm text-gray-600 dark:text-night-300'>Usuarios por rol</p>
             </div>
           </div>
           <div style={{ height: "200px" }}>
@@ -228,28 +228,28 @@ const SystemStats = () => {
 
       {/* Métricas adicionales */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='bg-white border border-gray-200 border-l-4 border-l-brand-500 rounded-xl p-6'>
+        <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 border-l-brand-500 rounded-xl p-6'>
           <div className='flex items-center justify-between mb-2'>
             <Activity className='w-8 h-8 text-brand-600' />
           </div>
-          <h3 className='text-3xl font-bold text-gray-900 mb-1'>98.5%</h3>
-          <p className='text-gray-500 text-sm'>Tiempo de actividad</p>
+          <h3 className='text-3xl font-bold text-gray-900 dark:text-night-50 mb-1'>98.5%</h3>
+          <p className='text-gray-500 dark:text-night-400 text-sm'>Tiempo de actividad</p>
         </div>
 
-        <div className='bg-white border border-gray-200 border-l-4 border-l-green-500 rounded-xl p-6'>
+        <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 border-l-green-500 rounded-xl p-6'>
           <div className='flex items-center justify-between mb-2'>
-            <TrendingUp className='w-8 h-8 text-green-600' />
+            <TrendingUp className='w-8 h-8 text-green-600 dark:text-green-400' />
           </div>
-          <h3 className='text-3xl font-bold text-gray-900 mb-1'>+24%</h3>
-          <p className='text-gray-500 text-sm'>Crecimiento mensual</p>
+          <h3 className='text-3xl font-bold text-gray-900 dark:text-night-50 mb-1'>+24%</h3>
+          <p className='text-gray-500 dark:text-night-400 text-sm'>Crecimiento mensual</p>
         </div>
 
-        <div className='bg-white border border-gray-200 border-l-4 border-l-accent-500 rounded-xl p-6'>
+        <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 border-l-accent-500 rounded-xl p-6'>
           <div className='flex items-center justify-between mb-2'>
             <Clock className='w-8 h-8 text-accent-600' />
           </div>
-          <h3 className='text-3xl font-bold text-gray-900 mb-1'>2.4h</h3>
-          <p className='text-gray-500 text-sm'>Promedio de uso diario</p>
+          <h3 className='text-3xl font-bold text-gray-900 dark:text-night-50 mb-1'>2.4h</h3>
+          <p className='text-gray-500 dark:text-night-400 text-sm'>Promedio de uso diario</p>
         </div>
       </div>
     </div>

@@ -85,7 +85,7 @@ const AuthShell = ({ formHeader, heading, description, badge, children }) => {
         >
           <div className='lg:hidden flex items-center gap-2.5 mb-9 justify-center'>
             <img src='/img/isotipo_orkela.png' alt='Orkela' className='w-10 h-10 object-contain' />
-            <span className='font-extrabold text-2xl text-brand-700 dark:text-brand-300'>Orkela</span>
+            <span className='font-extrabold text-2xl text-brand-700 dark:text-brand-300 dark:text-brand-300'>Orkela</span>
           </div>
 
           {formHeader}

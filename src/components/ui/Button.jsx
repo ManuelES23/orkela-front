@@ -20,7 +20,7 @@ const Button = ({
       "bg-gray-200 text-gray-900 hover:bg-gray-300 hover:shadow-md dark:bg-night-700 dark:text-night-50 dark:hover:bg-night-600",
     danger: "bg-red-600 text-white hover:bg-red-700 hover:shadow-lg",
     outline:
-      "border-2 border-brand-600 text-brand-600 hover:bg-brand-50 hover:shadow-md dark:text-brand-300 dark:hover:bg-brand-900/20",
+      "border-2 border-brand-600 text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 hover:shadow-md dark:text-brand-300 dark:hover:bg-brand-900/20",
     // Variante de marca (gradiente violeta -> fucsia) para los flujos de auth
     brand:
       "text-white bg-linear-to-r from-brand-600 to-accent-600 shadow-lg shadow-brand-600/25 hover:brightness-105 hover:shadow-xl hover:shadow-brand-600/30",

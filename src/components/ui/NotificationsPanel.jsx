@@ -169,7 +169,7 @@ const NotificationsPanel = () => {
       case "task_updated":
       case "task_status_changed":
       case "checklist_item_updated":
-        return "bg-brand-50";
+        return "bg-brand-50 dark:bg-brand-900/20";
 
       case "task_due_soon":
         return "bg-yellow-50";
@@ -184,7 +184,7 @@ const NotificationsPanel = () => {
       case "organization_member_left":
         return "bg-orange-50";
       case "organization_role_updated":
-        return "bg-brand-50";
+        return "bg-brand-50 dark:bg-brand-900/20";
 
       // Tickets
       case "ticket_created":
@@ -193,7 +193,7 @@ const NotificationsPanel = () => {
       case "ticket_assigned":
         return "bg-blue-50";
       case "ticket_status_changed":
-        return "bg-brand-50";
+        return "bg-brand-50 dark:bg-brand-900/20";
       case "ticket_resolved":
         return "bg-green-50";
       case "ticket_returned_to_inbox":
@@ -262,7 +262,7 @@ const NotificationsPanel = () => {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className='p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 dark:text-night-400 dark:hover:text-brand-300 dark:hover:bg-brand-900/30 rounded-lg transition-colors'
+                      className='p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 dark:text-night-400 dark:hover:text-brand-300 dark:hover:bg-brand-900/30 rounded-lg transition-colors'
                       title='Marcar todas como leídas'
                     >
                       <CheckCheck className='w-4 h-4' />

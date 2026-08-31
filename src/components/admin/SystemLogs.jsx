@@ -117,10 +117,10 @@ const SystemLogs = () => {
       {/* Header */}
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
         <div>
-          <h3 className='text-lg font-semibold text-gray-900'>
+          <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
             Logs del Sistema
           </h3>
-          <p className='text-sm text-gray-600 mt-1'>
+          <p className='text-sm text-gray-600 dark:text-night-300 mt-1'>
             Registro de actividad del sistema
           </p>
         </div>
@@ -130,7 +130,7 @@ const SystemLogs = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={loadLogs}
-            className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+            className='flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition'
           >
             <RefreshCw className='w-4 h-4' />
             <span>Actualizar</span>
@@ -149,20 +149,20 @@ const SystemLogs = () => {
       {/* Filtros */}
       <div className='flex flex-col md:flex-row gap-4 mb-6'>
         <div className='relative flex-1'>
-          <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
           <input
             type='text'
             placeholder='Buscar en logs...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+            className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
           />
         </div>
 
         <select
           value={levelFilter}
           onChange={(e) => setLevelFilter(e.target.value)}
-          className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+          className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
         >
           <option value='all'>Todos los niveles</option>
           <option value='info'>Info</option>
@@ -174,9 +174,9 @@ const SystemLogs = () => {
 
       {/* Consola de logs */}
       {filteredLogs.length === 0 ? (
-        <div className='text-center py-12 bg-white border border-gray-200 rounded-lg'>
-          <FileText className='w-12 h-12 text-gray-400 mx-auto mb-3' />
-          <p className='text-gray-500'>No se encontraron logs</p>
+        <div className='text-center py-12 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-lg'>
+          <FileText className='w-12 h-12 text-gray-400 dark:text-night-500 mx-auto mb-3' />
+          <p className='text-gray-500 dark:text-night-400'>No se encontraron logs</p>
         </div>
       ) : (
         <div className='bg-[#171223] rounded-xl p-4 sm:p-5 overflow-x-auto'>
@@ -203,7 +203,7 @@ const SystemLogs = () => {
                     {levelBadge.label.toUpperCase()}
                   </span>
                   <span className='flex-1 text-gray-100'>{log.message}</span>
-                  <span className='text-gray-500 text-xs shrink-0'>
+                  <span className='text-gray-500 dark:text-night-400 text-xs shrink-0'>
                     {log.user} · {log.ip}
                   </span>
                 </motion.div>

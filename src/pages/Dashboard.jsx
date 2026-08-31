@@ -499,7 +499,7 @@ const Dashboard = () => {
           <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700'>
             <div className='p-5 border-b border-gray-100 dark:border-night-700 flex items-center justify-between'>
               <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center'>
                   <FolderKanban className='w-5 h-5 text-brand-600' />
                 </div>
                 <div>
@@ -513,7 +513,7 @@ const Dashboard = () => {
               </div>
               <button
                 onClick={() => navigate("/projects")}
-                className='text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1'
+                className='text-sm text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium flex items-center gap-1'
               >
                 Ver todos <ChevronRight className='w-4 h-4' />
               </button>
@@ -528,7 +528,7 @@ const Dashboard = () => {
                   <p className='text-gray-500 dark:text-night-400'>No tienes proyectos aún</p>
                   <button
                     onClick={() => navigate("/projects")}
-                    className='mt-3 text-brand-600 hover:text-brand-700 font-medium'
+                    className='mt-3 text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium'
                   >
                     Crear tu primer proyecto
                   </button>
@@ -652,7 +652,7 @@ const Dashboard = () => {
           <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700 p-5'>
             <div className='flex items-center justify-between mb-4'>
               <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center'>
                   <BarChart3 className='w-5 h-5 text-brand-600' />
                 </div>
                 <div>
@@ -682,7 +682,7 @@ const Dashboard = () => {
               </div>
               <button
                 onClick={() => navigate("/tasks")}
-                className='text-xs text-brand-600 hover:text-brand-700 font-medium'
+                className='text-xs text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium'
               >
                 Ver todas
               </button>
@@ -840,7 +840,7 @@ const Dashboard = () => {
                 </div>
                 <button
                   onClick={() => navigate("/teams")}
-                  className='text-xs text-accent-600 hover:text-accent-700 font-medium'
+                  className='text-xs text-accent-600 hover:text-accent-700 dark:hover:text-accent-300 font-medium'
                 >
                   Ver todos
                 </button>

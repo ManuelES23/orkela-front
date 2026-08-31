@@ -514,7 +514,7 @@ const Tasks = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   active
-                    ? "text-brand-700"
+                    ? "text-brand-700 dark:text-brand-300"
                     : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
                 }`}
               >

@@ -34,6 +34,7 @@ const Teams = lazy(() => import("./pages/Teams"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const Tickets = lazy(() => import("./pages/Tickets"));
 const ClientsManagement = lazy(() => import("./pages/ClientsManagement"));
+const ClientTicketsInbox = lazy(() => import("./pages/ClientTicketsInbox"));
 const Organizations = lazy(() => import("./pages/Organizations"));
 const OrganizationDetail = lazy(() => import("./pages/OrganizationDetail"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -173,6 +174,14 @@ function App() {
                   element={
                     <OrganizationRoute>
                       <ClientsManagement />
+                    </OrganizationRoute>
+                  }
+                />
+                <Route
+                  path='/client-tickets'
+                  element={
+                    <OrganizationRoute>
+                      <ClientTicketsInbox />
                     </OrganizationRoute>
                   }
                 />

@@ -24,6 +24,7 @@ import {
   Building2,
   CreditCard,
   Contact,
+  Inbox,
 } from "lucide-react";
 
 // Rail colapsado vs. panel expandido (overlay al hacer hover/foco, no empuja el contenido)
@@ -92,6 +93,9 @@ const Sidebar = () => {
           : []),
         ...(isInOrganizationMode
           ? [{ icon: Contact, label: "Clientes", path: "/clients" }]
+          : []),
+        ...(isInOrganizationMode
+          ? [{ icon: Inbox, label: "Bandeja de Clientes", path: "/client-tickets" }]
           : []),
         // Mostrar "Mi Organización" si es owner o admin de la organización
         ...(isInOrganizationMode &&

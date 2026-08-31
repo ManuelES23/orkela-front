@@ -9,6 +9,7 @@ import Modal from "../components/ui/Modal";
 import UserAvatar from "../components/ui/UserAvatar";
 import ProgressRing from "../components/ui/ProgressRing";
 import AnimatedNumber from "../components/ui/AnimatedNumber";
+import { SkeletonDetail } from "../components/ui/Skeleton";
 import ProjectGantt from "../components/tasks/ProjectGantt";
 import ProjectCalendar from "../components/tasks/ProjectCalendar";
 import TagManager from "../components/tasks/TagManager";
@@ -725,9 +726,7 @@ const ProjectDetail = () => {
   if (loading) {
     return (
       <Layout title='Cargando...'>
-        <div className='flex items-center justify-center py-20'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
-        </div>
+        <SkeletonDetail />
       </Layout>
     );
   }

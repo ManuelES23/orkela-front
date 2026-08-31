@@ -91,6 +91,13 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             </div>
 
+            {/* Context Switcher - arriba del todo, antes de la info de usuario */}
+            {user?.available_contexts?.length > 1 && (
+              <div className='px-6 pt-4'>
+                <ContextSwitcher />
+              </div>
+            )}
+
             {/* User Info */}
             <div className='px-6 py-4 border-b border-gray-100'>
               <div className='flex items-center gap-3'>
@@ -100,13 +107,6 @@ const MobileMenu = ({ isOpen, onClose }) => {
                   <p className='text-sm text-gray-500'>{user?.email}</p>
                 </div>
               </div>
-
-              {/* Context Switcher */}
-              {user?.available_contexts?.length > 1 && (
-                <div className='mt-4'>
-                  <ContextSwitcher />
-                </div>
-              )}
             </div>
 
             {/* Menu Items */}

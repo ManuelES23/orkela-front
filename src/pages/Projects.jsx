@@ -7,6 +7,7 @@ import GanttChart from "../components/GanttChart";
 import UserAvatar from "../components/ui/UserAvatar";
 import ProgressRing from "../components/ui/ProgressRing";
 import AnimatedNumber from "../components/ui/AnimatedNumber";
+import { SkeletonCardGrid } from "../components/ui/Skeleton";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -789,11 +790,7 @@ const Projects = () => {
       )}
 
       {/* Loading state */}
-      {loading && (
-        <div className='flex items-center justify-center py-20'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
-        </div>
-      )}
+      {loading && <SkeletonCardGrid count={6} />}
 
       {/* Vista de tabs */}
       {view === "grid" && !loading && (

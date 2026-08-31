@@ -3,6 +3,7 @@ import Layout from "../components/layout/Layout";
 import TicketModal from "../components/modals/TicketModal";
 import TicketDetailModal from "../components/modals/TicketDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import { SkeletonRows } from "../components/ui/Skeleton";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -529,11 +530,7 @@ const Tickets = () => {
             </div>
 
             {/* Loading y Error States */}
-            {loading && (
-              <div className='flex justify-center items-center py-12'>
-                <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
-              </div>
-            )}
+            {loading && <SkeletonRows count={6} />}
 
             {error && (
               <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>

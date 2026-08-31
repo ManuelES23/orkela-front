@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit, Trash2, Users, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
 import { adminPlansAPI } from "../../utils/adminAPI";
 import PlanModal from "../modals/PlanModal";
 import ConfirmModal from "../ui/ConfirmModal";
+import { SkeletonTableRows } from "../ui/Skeleton";
 
 const formatPrice = (value) =>
   new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value);
@@ -71,11 +72,7 @@ const PlansManagement = () => {
   };
 
   if (loading) {
-    return (
-      <div className='flex items-center justify-center py-12'>
-        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600'></div>
-      </div>
-    );
+    return <SkeletonTableRows rows={6} columns={3} />;
   }
 
   return (

@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import ProgressRing from "../components/ui/ProgressRing";
 import AnimatedNumber from "../components/ui/AnimatedNumber";
+import { SkeletonRows } from "../components/ui/Skeleton";
 import { motionTokens } from "../components/animations/variants";
 import {
   Plus,
@@ -22,7 +23,6 @@ import {
   Circle,
   Edit,
   Trash2,
-  Loader2,
   CheckSquare,
   Square,
   ChevronDown,
@@ -535,11 +535,7 @@ const Tasks = () => {
       </FadeIn>
 
       {/* Loading y Error States */}
-      {loading && (
-        <div className='flex justify-center items-center py-12'>
-          <Loader2 className='w-8 h-8 animate-spin text-brand-600' />
-        </div>
-      )}
+      {loading && <SkeletonRows count={6} />}
 
       {error && (
         <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>

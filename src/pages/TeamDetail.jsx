@@ -7,6 +7,7 @@ import TicketDetailModal from "../components/modals/TicketDetailModal";
 import ProjectModal from "../components/modals/ProjectModal";
 import TeamModal from "../components/modals/TeamModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import { SkeletonDetail } from "../components/ui/Skeleton";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
@@ -536,15 +537,12 @@ const TeamDetail = () => {
   // Contar tickets en el buzón
   const inboxCount = tickets.filter((t) => !t.assigned_to).length;
 
-  // Mostrar loader de pantalla completa mientras carga
+  // Silueta del layout mientras carga (misma cabecera/sidebar que la vista real)
   if (loading) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='flex flex-col items-center gap-4'>
-          <Loader2 className='w-10 h-10 animate-spin text-brand-600' />
-          <p className='text-gray-600 font-medium'>Cargando equipo...</p>
-        </div>
-      </div>
+      <Layout title='Cargando...'>
+        <SkeletonDetail />
+      </Layout>
     );
   }
 

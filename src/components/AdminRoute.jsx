@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useNotification } from "../context/NotificationContext";
 import { useEffect } from "react";
+import LoadingScreen from "./ui/LoadingScreen";
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -17,14 +18,7 @@ const AdminRoute = ({ children }) => {
   }, [loading, user, error]);
 
   if (loading) {
-    return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
-        <div className='flex flex-col items-center gap-3'>
-          <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-brand-600'></div>
-          <span className='text-gray-500 text-sm'>Verificando permisos...</span>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message='Verificando permisos...' />;
   }
 
   // No autenticado - redirigir a login

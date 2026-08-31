@@ -577,6 +577,23 @@ export const ticketsAPI = {
       method: "POST",
     });
   },
+
+  getClientInbox: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.status) params.append("status", filters.status);
+    if (filters.unassigned) params.append("unassigned", "1");
+    if (filters.client_id) params.append("client_id", filters.client_id);
+
+    const query = params.toString();
+    return await request(`/client-tickets${query ? `?${query}` : ""}`);
+  },
+
+  assignToTeam: async (id, teamId) => {
+    return await request(`/tickets/${id}/assign-team`, {
+      method: "POST",
+      body: JSON.stringify({ team_id: teamId }),
+    });
+  },
 };
 
 // Organizations API
@@ -774,6 +791,47 @@ export const plansAPI = {
     return await request("/me/plan", {
       method: "PATCH",
       body: JSON.stringify({ plan_id: planId }),
+    });
+  },
+};
+
+// Clients API
+export const clientsAPI = {
+  getAll: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.status) params.append("status", filters.status);
+
+    const query = params.toString();
+    return await request(`/clients${query ? `?${query}` : ""}`);
+  },
+
+  getById: async (id) => {
+    return await request(`/clients/${id}`);
+  },
+
+  create: async (clientData) => {
+    return await request("/clients", {
+      method: "POST",
+      body: JSON.stringify(clientData),
+    });
+  },
+
+  update: async (id, clientData) => {
+    return await request(`/clients/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(clientData),
+    });
+  },
+
+  archive: async (id) => {
+    return await request(`/clients/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  resendAccess: async (id) => {
+    return await request(`/clients/${id}/resend-access`, {
+      method: "POST",
     });
   },
 };

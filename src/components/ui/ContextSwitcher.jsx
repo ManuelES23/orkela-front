@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -14,7 +14,6 @@ import { getAssetUrl } from "../../utils/assetUrl";
 
 const ContextSwitcher = ({ isCompact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const {
@@ -25,16 +24,6 @@ const ContextSwitcher = ({ isCompact = false }) => {
     getActiveContext,
   } = useAuth();
   const { success, error: showError } = useNotification();
-
-  // Detectar si es móvil
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Solo mostrar si el usuario tiene múltiples contextos
   if (!user || !hasMultipleContexts()) {
@@ -122,10 +111,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={switchingContext}
-          className={`p-2 rounded-lg transition-all duration-200 ${getContextColor(
-            activeContext?.type,
-            true
-          )}`}
+          className='flex items-center justify-center w-full py-3 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors duration-200'
           title={`Modo: ${activeContext?.name}`}
         >
           {switchingContext ? (
@@ -141,7 +127,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              className='absolute left-full ml-2 bottom-0 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[180px] z-50'
+              className='absolute left-full ml-2 top-0 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[180px] z-50'
             >
               <div className='px-3 py-2 border-b border-gray-100'>
                 <p className='text-xs text-gray-500 font-medium'>
@@ -213,12 +199,10 @@ const ContextSwitcher = ({ isCompact = false }) => {
             />
             <motion.div
               ref={dropdownRef}
-              initial={{ opacity: 0, y: isMobile ? 10 : -10 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: isMobile ? 10 : -10 }}
-              className={`absolute z-[200] bg-white rounded-lg shadow-xl border border-gray-200 py-1 w-full ${
-                isMobile ? "top-full mt-2" : "bottom-full mb-2"
-              }`}
+              exit={{ opacity: 0, y: 10 }}
+              className='absolute z-[200] bg-white rounded-lg shadow-xl border border-gray-200 py-1 w-full top-full mt-2'
             >
               <div className='px-3 py-2 border-b border-gray-100'>
                 <p className='text-xs text-gray-500 font-medium'>

@@ -23,22 +23,25 @@ import {
   Ticket,
   Building2,
   CreditCard,
+  Pin,
+  PinOff,
 } from "lucide-react";
 
 // Rail colapsado vs. panel expandido (overlay al hacer hover/foco, no empuja el contenido)
 const RAIL_WIDTH = 80;
 const PANEL_WIDTH = 256;
 
-const Sidebar = () => {
+const Sidebar = ({ isPinned = false, onTogglePin }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const sidebarRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, hasMultipleContexts } = useAuth();
 
-  const isOpen = isExpanded;
+  // Fijado (pin) o expandido por hover/foco - ambos abren el panel
+  const isOpen = isExpanded || isPinned;
 
   const collapse = () => {
     setIsExpanded(false);
@@ -134,13 +137,31 @@ const Sidebar = () => {
         {/* Header del Sidebar */}
         <div className='flex items-center justify-between px-4 py-5 border-b border-gray-200'>
           {isOpen ? (
-            <div className='flex items-center justify-center w-full'>
-              <img
-                src='/img/orkela_logo_h.png'
-                alt='Orkela'
-                className='h-12 w-auto max-w-150 object-contain'
-              />
-            </div>
+            <>
+              <div className='flex items-center justify-center flex-1'>
+                <img
+                  src='/img/orkela_logo_h.png'
+                  alt='Orkela'
+                  className='h-12 w-auto max-w-150 object-contain'
+                />
+              </div>
+              <button
+                onClick={onTogglePin}
+                aria-label={isPinned ? "Desanclar sidebar" : "Fijar sidebar abierto"}
+                title={isPinned ? "Desanclar sidebar" : "Fijar sidebar abierto"}
+                className={`shrink-0 p-1.5 rounded-lg transition-colors duration-200 ${
+                  isPinned
+                    ? "bg-brand-100 text-brand-600"
+                    : "text-gray-300 hover:bg-gray-50 hover:text-gray-500"
+                }`}
+              >
+                {isPinned ? (
+                  <PinOff className='w-4 h-4' />
+                ) : (
+                  <Pin className='w-4 h-4' />
+                )}
+              </button>
+            </>
           ) : (
             <img
               src='/img/isotipo_orkela.png'
@@ -149,6 +170,14 @@ const Sidebar = () => {
             />
           )}
         </div>
+
+        {/* Context Switcher - arriba del todo, antes de la navegación (solo
+            si el usuario tiene más de un contexto entre el que elegir) */}
+        {hasMultipleContexts() && (
+          <div className='px-3 pt-3'>
+            <ContextSwitcher isCompact={!isOpen} />
+          </div>
+        )}
 
         {/* Buscador de secciones */}
         <div className='px-3 pt-3'>
@@ -207,11 +236,6 @@ const Sidebar = () => {
 
         {/* Usuario */}
         <div className='absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200'>
-          {/* Context Switcher - solo si tiene múltiples contextos */}
-          <div className='mb-3'>
-            <ContextSwitcher isCompact={!isOpen} />
-          </div>
-
           <div className='relative'>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}

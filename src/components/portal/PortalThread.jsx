@@ -27,37 +27,61 @@ const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 // tickets vía efectos, evitando una carrera entre "restaurar borrador
 // del ticket nuevo" y "persistir borrador" que podía escribir texto del
 // ticket anterior en la sessionStorage del ticket nuevo por un instante.
-const PortalThread = ({ ticket, onBack, onSendComment, sending }) => {
+const PortalThread = ({ ticketId, ticket, onBack, onSendComment, sending }) => {
   // Restaura el borrador de este ticket si había uno guardado — cubre el
   // caso de que el token haya expirado a medio escribir: PortalLayout
   // redirige (desmontando este componente) antes de que el envío pueda
   // completarse, así que el borrador debe sobrevivir en sessionStorage,
   // no solo en el estado local de React. Inicializador perezoso: solo se
   // ejecuta al montar (ver nota de `key` arriba), no en cada cambio de prop.
+  // Se indexa por `ticketId` (conocido de forma síncrona desde la URL), no
+  // por `ticket?.id` — `ticket` llega `null` mientras el fetch está en
+  // vuelo, y usar su id encadenaría el borrador al ticket anterior por un
+  // ciclo de render.
   const [draft, setDraft] = useState(() => {
-    if (!ticket) return "";
-    return sessionStorage.getItem(`${DRAFT_KEY_PREFIX}${ticket.id}`) || "";
+    if (!ticketId) return "";
+    return sessionStorage.getItem(`${DRAFT_KEY_PREFIX}${ticketId}`) || "";
   });
   const [sendError, setSendError] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
+    if (!ticketId) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [ticket?.id, ticket?.comments?.length]);
+  }, [ticketId, ticket?.comments?.length]);
 
   useEffect(() => {
-    if (!ticket) return;
+    if (!ticketId) return;
     if (draft) {
-      sessionStorage.setItem(`${DRAFT_KEY_PREFIX}${ticket.id}`, draft);
+      sessionStorage.setItem(`${DRAFT_KEY_PREFIX}${ticketId}`, draft);
     } else {
-      sessionStorage.removeItem(`${DRAFT_KEY_PREFIX}${ticket.id}`);
+      sessionStorage.removeItem(`${DRAFT_KEY_PREFIX}${ticketId}`);
     }
-  }, [draft, ticket?.id]);
+  }, [draft, ticketId]);
 
-  if (!ticket) {
+  if (!ticketId) {
     return (
       <div className='hidden md:flex flex-1 items-center justify-center text-gray-400 text-sm'>
         Selecciona un ticket para ver la conversación
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className='flex flex-1 flex-col min-w-0 h-full'>
+        <div className='p-4 border-b border-gray-200 flex items-center gap-3 shrink-0'>
+          <button
+            onClick={onBack}
+            aria-label='Volver a mis tickets'
+            className='md:hidden text-gray-500'
+          >
+            <ArrowLeft className='w-5 h-5' />
+          </button>
+        </div>
+        <div className='flex-1 flex items-center justify-center'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600'></div>
+        </div>
       </div>
     );
   }

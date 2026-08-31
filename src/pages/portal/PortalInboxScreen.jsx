@@ -11,6 +11,7 @@ const PortalInboxScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
+  const [organization, setOrganization] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -43,6 +44,7 @@ const PortalInboxScreen = () => {
       .then((data) => {
         setClientId(data.client.id);
         setTickets(data.tickets);
+        setOrganization(data.organization);
         setLoading(false);
         if (!selectedIdRef.current && data.tickets.length > 0) {
           navigate(`/portal/tickets/${data.tickets[0].id}`, { replace: true });
@@ -154,7 +156,7 @@ const PortalInboxScreen = () => {
 
   if (loading) {
     return (
-      <PortalLayout>
+      <PortalLayout organization={organization}>
         <div className='flex-1 flex items-center justify-center'>
           <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600'></div>
         </div>
@@ -164,7 +166,7 @@ const PortalInboxScreen = () => {
 
   if (loadError) {
     return (
-      <PortalLayout>
+      <PortalLayout organization={organization}>
         <div className='flex-1 flex items-center justify-center p-6'>
           <div className='text-center'>
             <p className='text-gray-900 font-semibold mb-2'>
@@ -187,7 +189,7 @@ const PortalInboxScreen = () => {
   }
 
   return (
-    <PortalLayout>
+    <PortalLayout organization={organization}>
       <div className='flex-1 flex min-h-0'>
         <div
           className={`w-full md:w-80 border-r border-gray-200 shrink-0 ${
@@ -204,7 +206,8 @@ const PortalInboxScreen = () => {
         <div className={`flex-1 min-w-0 ${selectedId ? "flex" : "hidden md:flex"}`}>
           <PortalThread
             key={selectedId}
-            ticket={selectedTicket}
+            ticketId={selectedId}
+            ticket={selectedTicket?.id === selectedId ? selectedTicket : null}
             onBack={() => navigate("/portal/dashboard")}
             onSendComment={handleSendComment}
             sending={sending}

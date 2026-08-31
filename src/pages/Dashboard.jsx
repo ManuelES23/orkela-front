@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { parseLocalDate } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
+import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -54,6 +55,7 @@ ChartJS.register(
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isOrganizationContext: isInOrganizationMode } = useUserContext();
   const { registerRefresh, unregisterRefresh } = useRealtime();
 
   const [projects, setProjects] = useState([]);
@@ -463,25 +465,27 @@ const Dashboard = () => {
           </motion.div>
         </StaggerItem>
 
-        <StaggerItem>
-          <motion.div
-            whileHover={{ y: -4 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
-            onClick={() => navigate("/teams")}
-          >
-            <ProgressRing
-              percentage={stats.totalTeams > 0 ? 100 : 0}
-              color='#c026d3'
-              size={52}
-            />
-            <div>
-              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
-                <AnimatedNumber value={stats.totalTeams} />
-              </h3>
-              <p className='text-sm text-gray-500'>Equipos</p>
-            </div>
-          </motion.div>
-        </StaggerItem>
+        {isInOrganizationMode && (
+          <StaggerItem>
+            <motion.div
+              whileHover={{ y: -4 }}
+              className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
+              onClick={() => navigate("/teams")}
+            >
+              <ProgressRing
+                percentage={stats.totalTeams > 0 ? 100 : 0}
+                color='#c026d3'
+                size={52}
+              />
+              <div>
+                <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+                  <AnimatedNumber value={stats.totalTeams} />
+                </h3>
+                <p className='text-sm text-gray-500'>Equipos</p>
+              </div>
+            </motion.div>
+          </StaggerItem>
+        )}
       </StaggerContainer>
 
       {/* Sección principal */}
@@ -823,7 +827,7 @@ const Dashboard = () => {
           </div>
 
           {/* Equipos */}
-          {teams.length > 0 && (
+          {isInOrganizationMode && teams.length > 0 && (
             <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
               <div className='p-4 border-b border-gray-100 flex items-center justify-between'>
                 <div className='flex items-center gap-2'>

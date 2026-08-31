@@ -127,17 +127,17 @@ function App() {
                 <Route
                   path='/teams'
                   element={
-                    <PrivateRoute>
+                    <OrganizationRoute>
                       <Teams />
-                    </PrivateRoute>
+                    </OrganizationRoute>
                   }
                 />
                 <Route
                   path='/teams/:id'
                   element={
-                    <PrivateRoute>
+                    <OrganizationRoute>
                       <TeamDetail />
-                    </PrivateRoute>
+                    </OrganizationRoute>
                   }
                 />
                 <Route

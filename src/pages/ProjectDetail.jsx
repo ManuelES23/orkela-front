@@ -14,6 +14,7 @@ import ProjectCalendar from "../components/tasks/ProjectCalendar";
 import TagManager from "../components/tasks/TagManager";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import { useAuth } from "../context/AuthContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
 import { motionTokens } from "../components/animations/variants";
@@ -71,9 +72,21 @@ const ProjectDetail = () => {
   const navigate = useNavigate();
   const { success, error: showError } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
+  const { user } = useAuth();
 
   // Contexto de organización
   const { isOrganizationContext, organizationId } = useUserContext();
+
+  // Feature gate Gantt/exportaciones: solo aplica en modo personal, según
+  // el plan personal del usuario (los planes de organización siempre han
+  // tenido acceso completo — ver docs/superpowers/specs/2026-08-30-planes-personales-design.md).
+  // No se bloquea por datos aún no cargados (undefined): solo por `false`
+  // explícito, para no ocultar la función a un usuario de organización ni
+  // parpadear mientras el plan personal todavía está cargando.
+  const canUseGantt =
+    isOrganizationContext || user?.plan?.features?.gantt !== false;
+  const canUseExports =
+    isOrganizationContext || user?.plan?.features?.exports !== false;
 
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -89,6 +102,15 @@ const ProjectDetail = () => {
   });
   const [deleting, setDeleting] = useState(false);
   const [viewMode, setViewMode] = useState("list"); // 'list', 'gantt', 'calendar'
+
+  // Si el plan (personal) termina de cargar sin acceso a Gantt y el usuario
+  // ya estaba en esa pestaña, volver a la vista de lista.
+  useEffect(() => {
+    if (viewMode === "gantt" && !canUseGantt) {
+      setViewMode("list");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canUseGantt]);
 
   // Estados para gestión de miembros
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
@@ -743,6 +765,7 @@ const ProjectDetail = () => {
 
           <div className='flex items-center gap-2 w-full sm:w-auto'>
             {/* Botón de Exportar con menú dropdown */}
+            {canUseExports && (
             <div className='relative' ref={exportMenuRef}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -791,22 +814,27 @@ const ProjectDetail = () => {
                       Excel con tareas
                     </button>
 
-                    <div className='border-t border-gray-100 my-2' />
+                    {canUseGantt && (
+                      <>
+                        <div className='border-t border-gray-100 my-2' />
 
-                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
-                      Diagrama Gantt
-                    </div>
-                    <button
-                      onClick={() => handleExport("gantt")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
-                    >
-                      <GanttChartIcon className='w-4 h-4 text-accent-500' />
-                      Exportar Gantt a PDF
-                    </button>
+                        <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                          Diagrama Gantt
+                        </div>
+                        <button
+                          onClick={() => handleExport("gantt")}
+                          className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                        >
+                          <GanttChartIcon className='w-4 h-4 text-accent-500' />
+                          Exportar Gantt a PDF
+                        </button>
+                      </>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
+            )}
 
             {project.can_edit && (
               <motion.button
@@ -1005,7 +1033,9 @@ const ProjectDetail = () => {
             <div className='flex items-center bg-gray-100 rounded-lg p-1'>
               {[
                 { key: "list", label: "Lista", Icon: LayoutList },
-                { key: "gantt", label: "Gantt", Icon: GanttChart },
+                ...(canUseGantt
+                  ? [{ key: "gantt", label: "Gantt", Icon: GanttChart }]
+                  : []),
                 { key: "calendar", label: "Calendario", Icon: CalendarDays },
               ].map((tab) => (
                 <button

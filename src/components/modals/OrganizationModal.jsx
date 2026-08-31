@@ -108,7 +108,7 @@ const OrganizationModal = ({
 
   useEffect(() => {
     if (isSystemAdmin) {
-      adminPlansAPI.getAll().then(setPlansCatalog).catch((err) => console.error(err));
+      adminPlansAPI.getAll("organization").then(setPlansCatalog).catch((err) => console.error(err));
     }
   }, [isSystemAdmin]);
 

@@ -31,7 +31,9 @@ const MobileMenu = ({ isOpen, onClose }) => {
         { icon: Settings, label: "Configuración", path: "/admin/settings" },
       ]
     : [
-        { icon: Users, label: "Equipos", path: "/teams" },
+        ...(isInOrganizationMode
+          ? [{ icon: Users, label: "Equipos", path: "/teams" }]
+          : []),
         ...(isInOrganizationMode && user.is_organization_owner
           ? [
               {

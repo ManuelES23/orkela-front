@@ -49,7 +49,7 @@ const LicensesManagement = () => {
   }, []);
 
   useEffect(() => {
-    adminPlansAPI.getAll().then(setPlansCatalog).catch((err) => console.error(err));
+    adminPlansAPI.getAll("organization").then(setPlansCatalog).catch((err) => console.error(err));
   }, []);
 
   const loadOrganizations = async () => {

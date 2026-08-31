@@ -33,8 +33,11 @@ const BottomNav = ({ onMenuClick }) => {
         { icon: FolderKanban, label: "Proyectos", path: "/projects" },
         { icon: CheckSquare, label: "Tareas", path: "/tasks" },
         ...(isInOrganizationMode
-          ? [{ icon: Ticket, label: "Tickets", path: "/tickets" }]
-          : [{ icon: Users, label: "Equipos", path: "/teams" }]),
+          ? [
+              { icon: Ticket, label: "Tickets", path: "/tickets" },
+              { icon: Users, label: "Equipos", path: "/teams" },
+            ]
+          : []),
         { icon: Menu, label: "Más", path: null, isMenu: true },
       ];
 

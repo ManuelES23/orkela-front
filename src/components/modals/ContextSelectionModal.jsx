@@ -43,20 +43,24 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
 
     if (type === "organization") {
       return isSelected
-        ? `${baseStyles} border-accent-500 bg-accent-50 ring-2 ring-accent-200`
-        : `${baseStyles} border-gray-200 hover:border-accent-300 hover:bg-accent-50/50`;
+        ? `${baseStyles} border-accent-500 bg-accent-50 ring-2 ring-accent-200 dark:bg-accent-900/20 dark:ring-accent-800`
+        : `${baseStyles} border-gray-200 dark:border-night-700 hover:border-accent-300 hover:bg-accent-50/50 dark:hover:bg-accent-900/10`;
     }
     return isSelected
-      ? `${baseStyles} border-brand-500 bg-brand-50 ring-2 ring-brand-200`
-      : `${baseStyles} border-gray-200 hover:border-brand-300 hover:bg-brand-50/50`;
+      ? `${baseStyles} border-brand-500 bg-brand-50 ring-2 ring-brand-200 dark:bg-brand-900/20 dark:ring-brand-800`
+      : `${baseStyles} border-gray-200 dark:border-night-700 hover:border-brand-300 hover:bg-brand-50/50 dark:hover:bg-brand-900/10`;
   };
 
   const getIconBgColor = (type) => {
-    return type === "organization" ? "bg-accent-100" : "bg-brand-100";
+    return type === "organization"
+      ? "bg-accent-100 dark:bg-accent-900/30"
+      : "bg-brand-100 dark:bg-brand-900/30";
   };
 
   const getIconColor = (type) => {
-    return type === "organization" ? "text-accent-600" : "text-brand-600";
+    return type === "organization"
+      ? "text-accent-600 dark:text-accent-300"
+      : "text-brand-600 dark:text-brand-300";
   };
 
   return (
@@ -79,16 +83,16 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'
           >
-            <div className='bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden'>
+            <div className='bg-white dark:bg-night-800 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden'>
               {/* Header */}
-              <div className='p-6 pb-4 text-center border-b border-gray-100'>
+              <div className='p-6 pb-4 text-center border-b border-gray-100 dark:border-night-700'>
                 <div className='w-16 h-16 bg-gradient-to-br from-brand-500 to-accent-600 rounded-2xl flex items-center justify-center mx-auto mb-4'>
                   <User className='w-8 h-8 text-white' />
                 </div>
-                <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+                <h2 className='text-2xl font-bold text-gray-900 dark:text-night-50 mb-2'>
                   ¡Bienvenido, {userName}!
                 </h2>
-                <p className='text-gray-600'>
+                <p className='text-gray-600 dark:text-night-300'>
                   Selecciona el modo de trabajo con el que deseas comenzar
                 </p>
               </div>
@@ -96,7 +100,7 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
               {/* Content */}
               <div className='p-6 space-y-3'>
                 {availableContexts.length === 0 ? (
-                  <div className='text-center py-4 text-gray-500'>
+                  <div className='text-center py-4 text-gray-500 dark:text-night-400'>
                     <p>No hay contextos disponibles.</p>
                   </div>
                 ) : (
@@ -126,11 +130,11 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
                             />
                           </div>
                           <div className='flex-1'>
-                            <h3 className='font-semibold text-gray-900'>
+                            <h3 className='font-semibold text-gray-900 dark:text-night-50'>
                               {ctx.name}
                             </h3>
                             {ctx.description && (
-                              <p className='text-sm text-gray-500'>
+                              <p className='text-sm text-gray-500 dark:text-night-400'>
                                 {ctx.description}
                               </p>
                             )}
@@ -164,7 +168,7 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
               </div>
 
               {/* Footer */}
-              <div className='px-6 py-4 bg-gray-50 border-t border-gray-100'>
+              <div className='px-6 py-4 bg-gray-50 dark:bg-night-900 border-t border-gray-100 dark:border-night-700'>
                 <button
                   onClick={handleContinue}
                   disabled={!selectedContext || loading}
@@ -182,7 +186,7 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
                     </>
                   )}
                 </button>
-                <p className='text-xs text-gray-500 text-center mt-3'>
+                <p className='text-xs text-gray-500 dark:text-night-400 text-center mt-3'>
                   Puedes cambiar de modo en cualquier momento desde el menú
                   lateral
                 </p>

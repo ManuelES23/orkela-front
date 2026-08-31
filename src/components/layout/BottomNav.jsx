@@ -55,7 +55,7 @@ const BottomNav = ({ onMenuClick }) => {
   };
 
   return (
-    <nav className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50 md:hidden'>
+    <nav className='fixed bottom-0 left-0 right-0 bg-white dark:bg-night-900 border-t border-gray-200 dark:border-night-700 shadow-2xl z-50 md:hidden'>
       <div className='flex items-center justify-around h-16 px-2'>
         {mainMenuItems.map((item) => {
           const Icon = item.icon;
@@ -70,18 +70,24 @@ const BottomNav = ({ onMenuClick }) => {
               >
                 <div
                   className={`p-2 rounded-xl transition-all duration-200 ${
-                    active ? "bg-brand-50" : "hover:bg-gray-50 active:scale-95"
+                    active
+                      ? "bg-brand-50 dark:bg-brand-900/30"
+                      : "hover:bg-gray-50 dark:hover:bg-night-800 active:scale-95"
                   }`}
                 >
                   <Icon
                     className={`w-5 h-5 ${
-                      active ? "text-brand-600" : "text-gray-600"
+                      active
+                        ? "text-brand-600"
+                        : "text-gray-600 dark:text-night-300"
                     }`}
                   />
                 </div>
                 <span
                   className={`text-[10px] font-medium mt-0.5 ${
-                    active ? "text-brand-600" : "text-gray-600"
+                    active
+                      ? "text-brand-600"
+                      : "text-gray-600 dark:text-night-300"
                   }`}
                 >
                   {item.label}
@@ -112,18 +118,24 @@ const BottomNav = ({ onMenuClick }) => {
 
               <div
                 className={`p-2 rounded-xl transition-all duration-200 ${
-                  active ? "bg-brand-50" : "hover:bg-gray-50 active:scale-95"
+                  active
+                    ? "bg-brand-50 dark:bg-brand-900/30"
+                    : "hover:bg-gray-50 dark:hover:bg-night-800 active:scale-95"
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 ${
-                    active ? "text-brand-600" : "text-gray-600"
+                    active
+                      ? "text-brand-600"
+                      : "text-gray-600 dark:text-night-300"
                   }`}
                 />
               </div>
               <span
                 className={`text-[10px] font-medium mt-0.5 ${
-                  active ? "text-brand-600" : "text-gray-600"
+                  active
+                    ? "text-brand-600"
+                    : "text-gray-600 dark:text-night-300"
                 }`}
               >
                 {item.label}

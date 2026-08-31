@@ -1,6 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* Modo oscuro manual (no solo prefers-color-scheme): activado por
+   data-theme="dark" en <html>, controlado por ThemeContext. Ver
+   index.html para el script anti-flash que lo aplica antes del primer paint. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
@@ -27,13 +32,29 @@
   --color-accent-800: #86198f;
   --color-accent-900: #701a75;
 
+  /* Escala neutra del modo oscuro ("violeta profundo" - el mismo sesgo de
+     tono que el violeta de marca, en vez de un gris genérico). 950 = fondo
+     de página, 900 = superficie/tarjeta, 800 = superficie elevada/hover,
+     700/600 = bordes, 400/300 = texto secundario, 50 = texto primario. */
+  --color-night-50: #f1edfa;
+  --color-night-100: #ded7ec;
+  --color-night-200: #c9c0e0;
+  --color-night-300: #b7abd1;
+  --color-night-400: #8577a3;
+  --color-night-500: #6b5f8f;
+  --color-night-600: #453768;
+  --color-night-700: #332752;
+  --color-night-800: #241c3d;
+  --color-night-900: #1c1530;
+  --color-night-950: #140f20;
+
   /* Curva de easing compartida para motion (framer-motion la toma como array) */
   --ease-brand: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 dark:bg-night-950 dark:text-night-50;
   }
 
   * {
@@ -46,7 +67,7 @@
      continua se hace en CSS (más barato que JS); las entradas/salidas de
      los bloques y el cruce hacia el contenido real usan framer-motion. */
   .skeleton {
-    @apply rounded-lg bg-brand-100;
+    @apply rounded-lg bg-brand-100 dark:bg-night-800;
     background-image: linear-gradient(
       100deg,
       var(--color-brand-100) 30%,
@@ -55,6 +76,15 @@
     );
     background-size: 220% 100%;
     animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+
+  [data-theme="dark"] .skeleton {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-night-800) 30%,
+      var(--color-night-700) 45%,
+      var(--color-night-800) 60%
+    );
   }
 }
 

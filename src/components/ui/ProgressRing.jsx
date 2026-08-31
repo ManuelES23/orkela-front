@@ -11,7 +11,10 @@ const ProgressRing = ({
   size = 44,
   strokeWidth = 4,
   color = "var(--color-brand-600)",
-  trackColor = "#f0ebf9",
+  // Traslúcido en vez de un hex plano: se lee bien tanto sobre tarjetas
+  // blancas (claro) como sobre tarjetas night-900 (oscuro) sin necesitar
+  // dos valores distintos.
+  trackColor = "color-mix(in srgb, var(--color-brand-500) 15%, transparent)",
   className = "",
 }) => {
   const prefersReducedMotion = useReducedMotion();

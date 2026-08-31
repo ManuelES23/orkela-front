@@ -25,7 +25,7 @@ const DashboardSkeleton = () => (
         <motion.div
           key={i}
           variants={itemVariants}
-          className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center gap-4'
+          className='bg-white dark:bg-night-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-night-700 flex items-center gap-4'
         >
           <Skeleton className='w-13 h-13 rounded-full shrink-0' />
           <div className='space-y-2 flex-1'>
@@ -40,12 +40,12 @@ const DashboardSkeleton = () => (
     <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
       <motion.div
         variants={itemVariants}
-        className='lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-gray-100'
+        className='lg:col-span-2 bg-white dark:bg-night-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-night-700'
       >
         <Skeleton className='h-5 w-40 mb-5' />
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className='p-4 rounded-lg border border-gray-100 space-y-3'>
+            <div key={i} className='p-4 rounded-lg border border-gray-100 dark:border-night-700 space-y-3'>
               <Skeleton className='h-4 w-3/4' />
               <Skeleton className='h-3 w-1/2' />
               <Skeleton className='h-2 w-full' />
@@ -56,7 +56,7 @@ const DashboardSkeleton = () => (
 
       <motion.div
         variants={itemVariants}
-        className='bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4'
+        className='bg-white dark:bg-night-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-night-700 space-y-4'
       >
         <Skeleton className='h-5 w-32' />
         {[0, 1, 2, 3].map((i) => (

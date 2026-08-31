@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { RealtimeProvider, useRealtime } from "./context/RealtimeContext";
 import PrivateRoute from "./components/PrivateRoute";
@@ -71,15 +72,16 @@ const GlobalModals = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <NotificationProvider>
-        <RealtimeProvider>
-          <Router>
-            <GlobalModals />
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* Rutas públicas */}
-                <Route path='/login' element={<Login />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <RealtimeProvider>
+            <Router>
+              <GlobalModals />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  {/* Rutas públicas */}
+                  <Route path='/login' element={<Login />} />
                 <Route path='/register' element={<Register />} />
                 <Route
                   path='/accept-invitation/:token'
@@ -276,6 +278,7 @@ function App() {
         </RealtimeProvider>
       </NotificationProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

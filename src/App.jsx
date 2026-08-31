@@ -33,6 +33,7 @@ const Tasks = lazy(() => import("./pages/Tasks"));
 const Teams = lazy(() => import("./pages/Teams"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const Tickets = lazy(() => import("./pages/Tickets"));
+const ClientsManagement = lazy(() => import("./pages/ClientsManagement"));
 const Organizations = lazy(() => import("./pages/Organizations"));
 const OrganizationDetail = lazy(() => import("./pages/OrganizationDetail"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -156,6 +157,22 @@ function App() {
                   element={
                     <OrganizationRoute>
                       <Tickets />
+                    </OrganizationRoute>
+                  }
+                />
+                <Route
+                  path='/clients'
+                  element={
+                    <OrganizationRoute>
+                      <ClientsManagement />
+                    </OrganizationRoute>
+                  }
+                />
+                <Route
+                  path='/clients/:id'
+                  element={
+                    <OrganizationRoute>
+                      <ClientsManagement />
                     </OrganizationRoute>
                   }
                 />

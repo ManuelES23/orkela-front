@@ -27,6 +27,8 @@ const Tasks = lazy(() => import("./pages/Tasks"));
 const Teams = lazy(() => import("./pages/Teams"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const Tickets = lazy(() => import("./pages/Tickets"));
+const ClientsManagement = lazy(() => import("./pages/ClientsManagement"));
+const ClientTicketsInbox = lazy(() => import("./pages/ClientTicketsInbox"));
 const Organizations = lazy(() => import("./pages/Organizations"));
 const OrganizationDetail = lazy(() => import("./pages/OrganizationDetail"));
 const Settings = lazy(() => import("./pages/Settings"));
@@ -36,6 +38,13 @@ const AcceptTeamInvitation = lazy(() => import("./pages/AcceptTeamInvitation"));
 const AcceptOrganizationInvitation = lazy(() =>
   import("./pages/AcceptOrganizationInvitation")
 );
+const PortalAccessRequest = lazy(() =>
+  import("./pages/portal/PortalAccessRequest")
+);
+const PortalAccessConsume = lazy(() =>
+  import("./pages/portal/PortalAccessConsume")
+);
+const PortalInboxScreen = lazy(() => import("./pages/portal/PortalInboxScreen"));
 
 // Admin Pages - Lazy loaded
 const Users = lazy(() => import("./pages/admin/Users"));
@@ -84,6 +93,10 @@ function App() {
                   path='/accept-organization-invitation/:token'
                   element={<AcceptOrganizationInvitation />}
                 />
+                <Route path='/portal/:orgSlug' element={<PortalAccessRequest />} />
+                <Route path='/portal/access/:token' element={<PortalAccessConsume />} />
+                <Route path='/portal/dashboard' element={<PortalInboxScreen />} />
+                <Route path='/portal/tickets/:id' element={<PortalInboxScreen />} />
 
                 {/* Rutas protegidas */}
                 <Route
@@ -139,6 +152,30 @@ function App() {
                   element={
                     <OrganizationRoute>
                       <Tickets />
+                    </OrganizationRoute>
+                  }
+                />
+                <Route
+                  path='/clients'
+                  element={
+                    <OrganizationRoute>
+                      <ClientsManagement />
+                    </OrganizationRoute>
+                  }
+                />
+                <Route
+                  path='/clients/:id'
+                  element={
+                    <OrganizationRoute>
+                      <ClientsManagement />
+                    </OrganizationRoute>
+                  }
+                />
+                <Route
+                  path='/client-tickets'
+                  element={
+                    <OrganizationRoute>
+                      <ClientTicketsInbox />
                     </OrganizationRoute>
                   }
                 />

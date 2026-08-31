@@ -11,6 +11,7 @@ const formatPrice = (value) =>
 
 const PlansManagement = () => {
   const { success, error: showError } = useNotification();
+  const [scope, setScope] = useState("organization");
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,7 +22,7 @@ const PlansManagement = () => {
   const loadPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await adminPlansAPI.getAll();
+      const data = await adminPlansAPI.getAll(scope);
       setPlans(data);
     } catch (err) {
       showError("No se pudieron cargar los planes");
@@ -29,7 +30,7 @@ const PlansManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, [showError, scope]);
 
   useEffect(() => {
     loadPlans();
@@ -79,7 +80,28 @@ const PlansManagement = () => {
 
   return (
     <div>
-      <div className='flex justify-end mb-6'>
+      <div className='flex items-center justify-between mb-6'>
+        <div className='inline-flex rounded-lg border border-gray-200 p-1 bg-gray-50'>
+          <button
+            type='button'
+            onClick={() => setScope("organization")}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              scope === "organization" ? "bg-white shadow-sm text-brand-700" : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Empresariales
+          </button>
+          <button
+            type='button'
+            onClick={() => setScope("personal")}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              scope === "personal" ? "bg-white shadow-sm text-brand-700" : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Personales
+          </button>
+        </div>
+
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -125,10 +147,17 @@ const PlansManagement = () => {
             <p className='text-xs text-gray-500 mb-3'>
               por mes · o {formatPrice(plan.annual_price)}/año
             </p>
-            <div className='flex items-center gap-1.5 text-xs text-gray-500 mb-4'>
-              <Users className='w-3.5 h-3.5' />
-              {plan.members_limit === -1 ? "Ilimitado" : plan.members_limit} miembros
-            </div>
+            {plan.scope === "personal" ? (
+              <div className='flex items-center gap-1.5 text-xs text-gray-500 mb-4'>
+                <Users className='w-3.5 h-3.5' />
+                {plan.projects_limit === -1 ? "Ilimitados" : plan.projects_limit} proyectos
+              </div>
+            ) : (
+              <div className='flex items-center gap-1.5 text-xs text-gray-500 mb-4'>
+                <Users className='w-3.5 h-3.5' />
+                {plan.members_limit === -1 ? "Ilimitado" : plan.members_limit} miembros
+              </div>
+            )}
             <div className='flex gap-2'>
               <button
                 type='button'
@@ -155,6 +184,7 @@ const PlansManagement = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         plan={selectedPlan}
+        defaultScope={scope}
         onSuccess={handleModalSuccess}
       />
 

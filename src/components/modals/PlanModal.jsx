@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import { useNotification } from "../../context/NotificationContext";
-import { Loader2, Star, Layers, Eye } from "lucide-react";
+import { Loader2, Star, Layers, Eye, GanttChartSquare, FileDown } from "lucide-react";
 import { adminPlansAPI } from "../../utils/adminAPI";
 
-const emptyForm = {
+const emptyForm = (scope) => ({
   name: "",
+  scope,
   is_default: false,
   is_custom: false,
   is_active: true,
@@ -13,15 +14,17 @@ const emptyForm = {
   projects_limit: 0,
   teams_limit: 0,
   storage_mb_limit: 0,
+  collaborators_per_project_limit: 0,
   monthly_price: 0,
   annual_price: 0,
   display_order: 0,
-};
+  features: { gantt: false, exports: false },
+});
 
-const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
+const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization", onSuccess }) => {
   const { success, error: showError } = useNotification();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(emptyForm);
+  const [formData, setFormData] = useState(emptyForm(defaultScope));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -29,6 +32,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
       plan
         ? {
             name: plan.name,
+            scope: plan.scope,
             is_default: plan.is_default,
             is_custom: plan.is_custom,
             is_active: plan.is_active,
@@ -36,19 +40,30 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
             projects_limit: plan.projects_limit,
             teams_limit: plan.teams_limit,
             storage_mb_limit: plan.storage_mb_limit,
+            collaborators_per_project_limit: plan.collaborators_per_project_limit ?? 0,
             monthly_price: plan.monthly_price,
             annual_price: plan.annual_price,
             display_order: plan.display_order,
+            features: plan.features ?? { gantt: false, exports: false },
           }
-        : emptyForm,
+        : emptyForm(defaultScope),
     );
-  }, [isOpen, plan]);
+  }, [isOpen, plan, defaultScope]);
+
+  const isPersonal = formData.scope === "personal";
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleFeatureChange = (key) => (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      features: { ...prev.features, [key]: e.target.checked },
     }));
   };
 
@@ -62,6 +77,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
       projects_limit: Number(formData.projects_limit),
       teams_limit: Number(formData.teams_limit),
       storage_mb_limit: Number(formData.storage_mb_limit),
+      collaborators_per_project_limit: Number(formData.collaborators_per_project_limit),
       monthly_price: Number(formData.monthly_price),
       annual_price: Number(formData.annual_price),
       display_order: Number(formData.display_order),
@@ -69,7 +85,9 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
 
     try {
       if (plan) {
-        await adminPlansAPI.update(plan.id, payload);
+        // scope es inmutable después de creado — no se envía en update.
+        const { scope: _scope, ...updatePayload } = payload;
+        await adminPlansAPI.update(plan.id, updatePayload);
         success("Plan actualizado exitosamente");
       } else {
         await adminPlansAPI.create(payload);
@@ -104,7 +122,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={plan ? "Editar plan" : "Nuevo plan"}
+      title={plan ? "Editar plan" : `Nuevo plan ${isPersonal ? "personal" : "empresarial"}`}
       size='md'
     >
       <form onSubmit={handleSubmit} className='space-y-5'>
@@ -137,12 +155,45 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
           />
         </div>
 
-        <div className='grid grid-cols-2 gap-4'>
-          {limitField("members_limit", "Miembros")}
-          {limitField("projects_limit", "Proyectos")}
-          {limitField("teams_limit", "Equipos")}
-          {limitField("storage_mb_limit", "Almacenamiento (MB)")}
-        </div>
+        {isPersonal ? (
+          <div className='grid grid-cols-2 gap-4'>
+            {limitField("projects_limit", "Proyectos")}
+            {limitField("collaborators_per_project_limit", "Colaboradores por proyecto")}
+            {limitField("storage_mb_limit", "Almacenamiento (MB)")}
+          </div>
+        ) : (
+          <div className='grid grid-cols-2 gap-4'>
+            {limitField("members_limit", "Miembros")}
+            {limitField("projects_limit", "Proyectos")}
+            {limitField("teams_limit", "Equipos")}
+            {limitField("storage_mb_limit", "Almacenamiento (MB)")}
+          </div>
+        )}
+
+        {isPersonal && (
+          <div className='space-y-3 border-t border-gray-100 pt-4'>
+            <label className='flex items-center gap-2 text-sm text-gray-700'>
+              <input
+                type='checkbox'
+                checked={formData.features.gantt}
+                onChange={handleFeatureChange("gantt")}
+                className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+              />
+              <GanttChartSquare className='w-4 h-4 text-gray-400' />
+              Incluye Gantt
+            </label>
+            <label className='flex items-center gap-2 text-sm text-gray-700'>
+              <input
+                type='checkbox'
+                checked={formData.features.exports}
+                onChange={handleFeatureChange("exports")}
+                className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+              />
+              <FileDown className='w-4 h-4 text-gray-400' />
+              Incluye exportar reportes
+            </label>
+          </div>
+        )}
 
         <div className='grid grid-cols-2 gap-4'>
           <div>
@@ -187,17 +238,19 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
             <Eye className='w-4 h-4 text-gray-400' />
             Activo (visible para asignar)
           </label>
-          <label className='flex items-center gap-2 text-sm text-gray-700'>
-            <input
-              type='checkbox'
-              name='is_custom'
-              checked={formData.is_custom}
-              onChange={handleChange}
-              className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
-            />
-            <Layers className='w-4 h-4 text-gray-400' />
-            Personalizable por organización (tipo Enterprise)
-          </label>
+          {!isPersonal && (
+            <label className='flex items-center gap-2 text-sm text-gray-700'>
+              <input
+                type='checkbox'
+                name='is_custom'
+                checked={formData.is_custom}
+                onChange={handleChange}
+                className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+              />
+              <Layers className='w-4 h-4 text-gray-400' />
+              Personalizable por organización (tipo Enterprise)
+            </label>
+          )}
           <label className='flex items-center gap-2 text-sm text-gray-700'>
             <input
               type='checkbox'
@@ -207,7 +260,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, onSuccess }) => {
               className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
             />
             <Star className='w-4 h-4 text-gray-400' />
-            Plan default (nuevas organizaciones y downgrades caen acá)
+            Plan default {isPersonal ? "(usuarios nuevos y downgrades caen acá)" : "(nuevas organizaciones y downgrades caen acá)"}
           </label>
         </div>
 

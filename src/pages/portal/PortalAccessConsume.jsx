@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { setPortalToken, setPortalOrgSlug, portalAPI } from "../../utils/portalApi";
+import {
+  setPortalToken,
+  setPortalOrgSlug,
+  portalAPI,
+  getPortalToken,
+  clearPortalToken,
+} from "../../utils/portalApi";
 
 const PortalAccessConsume = () => {
   const { token } = useParams();
@@ -9,6 +15,12 @@ const PortalAccessConsume = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Si el cliente ya tenía una sesión válida guardada y hace clic en un
+    // enlace de correo viejo (token ya rotado o expirado — el backend emite
+    // uno nuevo en cada notificación, así que los enlaces viejos se
+    // acumulan), no queremos pisar esa sesión buena antes de validar la
+    // nueva. Se restaura si la validación falla.
+    const previousToken = getPortalToken();
     setPortalToken(token);
 
     portalAPI
@@ -19,6 +31,11 @@ const PortalAccessConsume = () => {
         navigate(redirect || "/portal/dashboard", { replace: true });
       })
       .catch(() => {
+        if (previousToken) {
+          setPortalToken(previousToken);
+        } else {
+          clearPortalToken();
+        }
         setError(
           "Este enlace ya no es válido. Pide uno nuevo desde tu correo o contacta a soporte."
         );

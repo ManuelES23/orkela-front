@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import ClientModal from "../components/modals/ClientModal";
@@ -35,6 +35,18 @@ const ClientsManagement = () => {
   const [editingClient, setEditingClient] = useState(null);
   const [resending, setResending] = useState(false);
   const [archiving, setArchiving] = useState(false);
+
+  // Ref con el `id` de la URL "actual" — necesario porque las promesas en
+  // vuelo (getById tras archivar/guardar) capturan el `id` del render en el
+  // que arrancaron, y para cuando resuelven el usuario puede haber navegado
+  // a otro cliente. Leer `currentIdRef.current` en el callback de
+  // resolución, en vez del `id` cerrado en la promesa, es lo que permite
+  // detectar ese cambio (mismo patrón que `selectedIdRef` en
+  // PortalInboxScreen.jsx).
+  const currentIdRef = useRef(id);
+  useEffect(() => {
+    currentIdRef.current = id;
+  }, [id]);
 
   const loadClients = useCallback(async () => {
     setLoading(true);
@@ -112,7 +124,7 @@ const ClientsManagement = () => {
         success("Cliente reactivado");
       }
       const updated = await clientsAPI.getById(targetId);
-      if (String(targetId) === id) {
+      if (String(targetId) === currentIdRef.current) {
         setSelected(updated);
       }
       loadClients();
@@ -133,7 +145,7 @@ const ClientsManagement = () => {
       // pisar el `selected` actual.
       const targetId = selected.id;
       clientsAPI.getById(targetId).then((updated) => {
-        if (String(targetId) === id) {
+        if (String(targetId) === currentIdRef.current) {
           setSelected(updated);
         }
       });

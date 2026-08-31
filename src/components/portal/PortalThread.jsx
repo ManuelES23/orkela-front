@@ -21,25 +21,29 @@ const statusBadgeColor = {
 
 const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 
+// Asume que el padre (PortalInboxScreen) monta este componente con
+// `key={selectedTicketId}` — así React lo remonta por completo en cada
+// cambio de ticket en vez de tener que sincronizar el borrador entre
+// tickets vía efectos, evitando una carrera entre "restaurar borrador
+// del ticket nuevo" y "persistir borrador" que podía escribir texto del
+// ticket anterior en la sessionStorage del ticket nuevo por un instante.
 const PortalThread = ({ ticket, onBack, onSendComment, sending }) => {
-  const [draft, setDraft] = useState("");
+  // Restaura el borrador de este ticket si había uno guardado — cubre el
+  // caso de que el token haya expirado a medio escribir: PortalLayout
+  // redirige (desmontando este componente) antes de que el envío pueda
+  // completarse, así que el borrador debe sobrevivir en sessionStorage,
+  // no solo en el estado local de React. Inicializador perezoso: solo se
+  // ejecuta al montar (ver nota de `key` arriba), no en cada cambio de prop.
+  const [draft, setDraft] = useState(() => {
+    if (!ticket) return "";
+    return sessionStorage.getItem(`${DRAFT_KEY_PREFIX}${ticket.id}`) || "";
+  });
   const [sendError, setSendError] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [ticket?.comments?.length]);
-
-  // Restaura el borrador de este ticket si había uno guardado — cubre el
-  // caso de que el token haya expirado a medio escribir: PortalLayout
-  // redirige (desmontando este componente) antes de que el envío pueda
-  // completarse, así que el borrador debe sobrevivir en sessionStorage,
-  // no solo en el estado local de React.
-  useEffect(() => {
-    if (!ticket) return;
-    const saved = sessionStorage.getItem(`${DRAFT_KEY_PREFIX}${ticket.id}`);
-    setDraft(saved || "");
-  }, [ticket?.id]);
+  }, [ticket?.id, ticket?.comments?.length]);
 
   useEffect(() => {
     if (!ticket) return;

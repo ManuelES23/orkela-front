@@ -252,21 +252,21 @@ const OrganizationModal = ({
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
-          <p className='text-gray-600 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
+          <p className='text-gray-600 dark:text-night-300 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>Preparando el formulario</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>
           {/* Aviso para SystemAdmins al crear */}
           {isSystemAdmin && isCreating && (
-            <div className='p-4 bg-blue-50 border border-blue-200 rounded-lg'>
+            <div className='p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg'>
               <div className='flex items-start gap-3'>
-                <AlertCircle className='w-5 h-5 text-blue-600 mt-0.5' />
+                <AlertCircle className='w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5' />
                 <div>
-                  <p className='text-sm font-medium text-blue-800'>
+                  <p className='text-sm font-medium text-blue-800 dark:text-blue-300'>
                     La organización se creará sin propietario
                   </p>
-                  <p className='mt-1 text-xs text-blue-600'>
+                  <p className='mt-1 text-xs text-blue-600 dark:text-blue-400'>
                     Después de crear la organización, podrás asignar un usuario
                     como administrador desde el listado.
                   </p>
@@ -278,7 +278,7 @@ const OrganizationModal = ({
           {/* Plan - Solo para SystemAdmins */}
           {isSystemAdmin && (
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 <CreditCard className='inline w-4 h-4 mr-1' />
                 Plan
               </label>
@@ -286,7 +286,7 @@ const OrganizationModal = ({
                 name='plan_id'
                 value={formData.plan_id}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white dark:bg-night-900'
               >
                 <option value=''>Seleccionar plan...</option>
                 {plansCatalog
@@ -302,15 +302,15 @@ const OrganizationModal = ({
 
           {/* Logo */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Logo de la organización
             </label>
             <div className='flex items-center gap-4'>
               {/* Preview del logo */}
               <div className='relative'>
-                <div className='w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50'>
+                <div className='w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 dark:border-night-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-night-800'>
                   {uploadingLogo ? (
-                    <Loader2 className='w-8 h-8 text-gray-400 animate-spin' />
+                    <Loader2 className='w-8 h-8 text-gray-400 dark:text-night-500 animate-spin' />
                   ) : logoPreview ? (
                     <img
                       src={getAssetUrl(logoPreview)}
@@ -318,7 +318,7 @@ const OrganizationModal = ({
                       className='w-full h-full object-cover'
                     />
                   ) : (
-                    <Building2 className='w-8 h-8 text-gray-400' />
+                    <Building2 className='w-8 h-8 text-gray-400 dark:text-night-500' />
                   )}
                 </div>
                 {logoPreview && !uploadingLogo && (
@@ -346,7 +346,7 @@ const OrganizationModal = ({
                   type='button'
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingLogo}
-                  className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {uploadingLogo ? (
                     <>
@@ -365,11 +365,11 @@ const OrganizationModal = ({
                     </>
                   )}
                 </button>
-                <p className='mt-1 text-xs text-gray-500'>
+                <p className='mt-1 text-xs text-gray-500 dark:text-night-400'>
                   JPG, PNG, GIF, SVG o WebP. Máximo 2MB.
                 </p>
                 {!organization && logoPreview && (
-                  <p className='mt-1 text-xs text-amber-600'>
+                  <p className='mt-1 text-xs text-amber-600 dark:text-amber-400'>
                     El logo se guardará después de crear la organización.
                   </p>
                 )}
@@ -379,18 +379,18 @@ const OrganizationModal = ({
 
           {/* Nombre */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Nombre de la organización *
             </label>
             <div className='relative'>
-              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 name='name'
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all'
                 placeholder='Ej: Mi Empresa S.A.'
               />
             </div>
@@ -398,7 +398,7 @@ const OrganizationModal = ({
 
           {/* Descripción */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Descripción
             </label>
             <textarea
@@ -406,7 +406,7 @@ const OrganizationModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
               placeholder='Describe brevemente tu organización...'
             />
           </div>
@@ -414,34 +414,34 @@ const OrganizationModal = ({
           {/* Website y Email */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Sitio web
               </label>
               <div className='relative'>
-                <Globe className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <Globe className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                 <input
                   type='url'
                   name='website'
                   value={formData.website}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='https://...'
                 />
               </div>
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Email de contacto
               </label>
               <div className='relative'>
-                <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                 <input
                   type='email'
                   name='email'
                   value={formData.email}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='contacto@empresa.com'
                 />
               </div>
@@ -451,34 +451,34 @@ const OrganizationModal = ({
           {/* Teléfono y Dirección */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Teléfono
               </label>
               <div className='relative'>
-                <Phone className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <Phone className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                 <input
                   type='tel'
                   name='phone'
                   value={formData.phone}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='+34 612 345 678'
                 />
               </div>
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Dirección
               </label>
               <div className='relative'>
-                <MapPin className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <MapPin className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                 <input
                   type='text'
                   name='address'
                   value={formData.address}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='Calle Principal 123'
                 />
               </div>
@@ -488,7 +488,7 @@ const OrganizationModal = ({
           {/* Ciudad y País */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Ciudad
               </label>
               <input
@@ -496,13 +496,13 @@ const OrganizationModal = ({
                 name='city'
                 value={formData.city}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 placeholder='Madrid'
               />
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 País
               </label>
               <input
@@ -510,7 +510,7 @@ const OrganizationModal = ({
                 name='country'
                 value={formData.country}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 placeholder='España'
               />
             </div>
@@ -519,16 +519,16 @@ const OrganizationModal = ({
           {/* Industria y Tamaño */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Industria
               </label>
               <div className='relative'>
-                <Briefcase className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <Briefcase className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                 <select
                   name='industry'
                   value={formData.industry}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none bg-white'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none bg-white dark:bg-night-900'
                 >
                   <option value=''>Seleccionar...</option>
                   {industries.map((industry) => (
@@ -541,16 +541,16 @@ const OrganizationModal = ({
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Tamaño
               </label>
               <div className='relative'>
-                <Users className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                <Users className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                 <select
                   name='size'
                   value={formData.size}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none bg-white'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none bg-white dark:bg-night-900'
                 >
                   <option value=''>Seleccionar...</option>
                   {sizes.map((size) => (
@@ -585,7 +585,7 @@ const OrganizationModal = ({
               type='button'
               onClick={onClose}
               disabled={loading}
-              className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50'
+              className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all disabled:opacity-50'
             >
               Cancelar
             </button>

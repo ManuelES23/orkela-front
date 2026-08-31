@@ -163,12 +163,12 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
       {/* Header con progreso */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
-          <CheckSquare className='w-4 h-4 text-gray-500' />
-          <span className='text-sm font-medium text-gray-700'>
+          <CheckSquare className='w-4 h-4 text-gray-500 dark:text-night-400' />
+          <span className='text-sm font-medium text-gray-700 dark:text-night-300'>
             Lista de tareas
           </span>
           {totalCount > 0 && (
-            <span className='text-xs text-gray-500'>
+            <span className='text-xs text-gray-500 dark:text-night-400'>
               ({completedCount}/{totalCount})
             </span>
           )}
@@ -177,7 +177,7 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
 
       {/* Barra de progreso */}
       {totalCount > 0 && (
-        <div className='w-full bg-gray-200 rounded-full h-1.5'>
+        <div className='w-full bg-gray-200 dark:bg-night-700 rounded-full h-1.5'>
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
@@ -197,7 +197,7 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
               layout
-              className='flex items-center gap-2 group py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors'
+              className='flex items-center gap-2 group py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
             >
               {/* Checkbox */}
               <button
@@ -206,9 +206,9 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
                 className='shrink-0 focus:outline-none'
               >
                 {item.is_completed ? (
-                  <CheckSquare className='w-5 h-5 text-green-500' />
+                  <CheckSquare className='w-5 h-5 text-green-500 dark:text-green-400' />
                 ) : (
-                  <Square className='w-5 h-5 text-gray-400 hover:text-gray-600' />
+                  <Square className='w-5 h-5 text-gray-400 dark:text-night-500 hover:text-gray-600 dark:hover:text-night-300' />
                 )}
               </button>
 
@@ -216,8 +216,8 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
               <span
                 className={`flex-1 text-sm ${
                   item.is_completed
-                    ? "text-gray-400 line-through"
-                    : "text-gray-700"
+                    ? "text-gray-400 dark:text-night-500 line-through"
+                    : "text-gray-700 dark:text-night-300"
                 }`}
               >
                 {item.text}
@@ -227,9 +227,9 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
               <button
                 type='button'
                 onClick={() => handleDeleteItem(item.id)}
-                className='shrink-0 p-1 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all'
+                className='shrink-0 p-1 opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-all'
               >
-                <Trash2 className='w-4 h-4 text-red-500' />
+                <Trash2 className='w-4 h-4 text-red-500 dark:text-red-400' />
               </button>
             </motion.div>
           ))}
@@ -239,7 +239,7 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
       {/* Agregar nuevo item */}
       <div className='flex items-center gap-2'>
         <div className='relative flex-1'>
-          <Plus className='absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+          <Plus className='absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' />
           <input
             type='text'
             value={newItemText}
@@ -253,7 +253,7 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
             }}
             placeholder='Agregar elemento...'
             disabled={addingItem}
-            className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed'
+            className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:bg-night-800 disabled:cursor-not-allowed'
           />
         </div>
         <button
@@ -279,7 +279,7 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
 
       {/* Mensaje si no hay items */}
       {checklistItems.length === 0 && (
-        <p className='text-xs text-gray-400 text-center py-2'>
+        <p className='text-xs text-gray-400 dark:text-night-500 text-center py-2'>
           Agrega elementos a tu lista de tareas
         </p>
       )}

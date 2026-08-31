@@ -152,24 +152,24 @@ const ProjectModal = ({
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
-          <p className='text-gray-600 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 text-sm mt-1'>Preparando el formulario</p>
+          <p className='text-gray-600 dark:text-night-300 font-medium'>Cargando datos...</p>
+          <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>Preparando el formulario</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className='space-y-5'>
           {/* Nombre del proyecto */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Nombre del Proyecto *
             </label>
             <div className='relative'>
-              <FolderKanban className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+              <FolderKanban className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500 transition-colors' />
               <input
                 type='text'
                 name='name'
                 value={formData.name}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
                 placeholder='Ej: Rediseño de Website'
                 required
               />
@@ -178,7 +178,7 @@ const ProjectModal = ({
 
           {/* Descripción */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Descripción
             </label>
             <textarea
@@ -186,7 +186,7 @@ const ProjectModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
               placeholder='Describe brevemente el proyecto...'
             ></textarea>
           </div>
@@ -194,32 +194,32 @@ const ProjectModal = ({
           {/* Fecha de vencimiento y Prioridad */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Fecha de Vencimiento
               </label>
               <div className='relative'>
-                <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+                <Calendar className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500 transition-colors' />
                 <input
                   type='date'
                   name='due_date'
                   value={formData.due_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
                 />
               </div>
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                 Prioridad
               </label>
               <div className='relative'>
-                <Flag className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+                <Flag className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500 transition-colors' />
                 <select
                   name='priority'
                   value={formData.priority}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
                 >
                   <option value='low'>Baja</option>
                   <option value='medium'>Media</option>
@@ -231,7 +231,7 @@ const ProjectModal = ({
 
           {/* Color del proyecto */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Color del Proyecto
             </label>
             <div className='grid grid-cols-8 gap-2'>
@@ -255,8 +255,8 @@ const ProjectModal = ({
 
           {/* Equipo asignado */}
           {teams.length > 0 && (
-            <div className='border-2 border-brand-200 rounded-lg p-4 bg-brand-50/50'>
-              <label className='block text-sm font-medium text-gray-900 mb-2'>
+            <div className='border-2 border-brand-200 dark:border-brand-800 rounded-lg p-4 bg-brand-50/50'>
+              <label className='block text-sm font-medium text-gray-900 dark:text-night-50 mb-2'>
                 <UsersIcon className='inline w-4 h-4 mr-1' />
                 Opción 1: Asignar Equipo Completo
               </label>
@@ -264,7 +264,7 @@ const ProjectModal = ({
                 name='team_id'
                 value={formData.team_id}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white dark:bg-night-900'
               >
                 <option value=''>Sin equipo asignado</option>
                 {teams.map((team) => (
@@ -273,7 +273,7 @@ const ProjectModal = ({
                   </option>
                 ))}
               </select>
-              <p className='text-xs text-gray-600 mt-2'>
+              <p className='text-xs text-gray-600 dark:text-night-300 mt-2'>
                 ✓ Todos los miembros del equipo tendrán acceso automáticamente
               </p>
               {formData.team_id && (
@@ -288,9 +288,9 @@ const ProjectModal = ({
           {/* Separador visual */}
           {teams.length > 0 && (
             <div className='flex items-center gap-3 my-4'>
-              <div className='flex-1 border-t border-gray-300'></div>
-              <span className='text-sm text-gray-500 font-medium'>O</span>
-              <div className='flex-1 border-t border-gray-300'></div>
+              <div className='flex-1 border-t border-gray-300 dark:border-night-600'></div>
+              <span className='text-sm text-gray-500 dark:text-night-400 font-medium'>O</span>
+              <div className='flex-1 border-t border-gray-300 dark:border-night-600'></div>
             </div>
           )}
 
@@ -299,10 +299,10 @@ const ProjectModal = ({
             className={`${
               formData.team_id
                 ? "opacity-50 pointer-events-none"
-                : "border-2 border-green-200 rounded-lg p-4 bg-green-50/50"
+                : "border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50/50"
             }`}
           >
-            <label className='block text-sm font-medium text-gray-900 mb-2'>
+            <label className='block text-sm font-medium text-gray-900 dark:text-night-50 mb-2'>
               <UserCheck className='inline w-4 h-4 mr-1' />
               {teams.length > 0
                 ? "Opción 2: Invitar Colaboradores"
@@ -310,7 +310,7 @@ const ProjectModal = ({
             </label>
 
             {formData.team_id ? (
-              <p className='text-sm text-gray-500 py-4 text-center border border-gray-300 rounded-lg bg-gray-50'>
+              <p className='text-sm text-gray-500 dark:text-night-400 py-4 text-center border border-gray-300 dark:border-night-600 rounded-lg bg-gray-50 dark:bg-night-800'>
                 Has seleccionado un equipo. Todos los miembros tendrán acceso
                 automáticamente.
               </p>
@@ -319,21 +319,21 @@ const ProjectModal = ({
                 {/* Mostrar colaboradores actuales del proyecto */}
                 {project && project.users && project.users.length > 0 && (
                   <div className='mb-3'>
-                    <p className='text-xs text-gray-700 mb-2 font-medium'>
+                    <p className='text-xs text-gray-700 dark:text-night-300 mb-2 font-medium'>
                       Colaboradores actuales:
                     </p>
-                    <div className='max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-1 bg-white'>
+                    <div className='max-h-32 overflow-y-auto border border-gray-300 dark:border-night-600 rounded-lg p-2 space-y-1 bg-white dark:bg-night-900'>
                       {project.users.map((user) => (
                         <div
                           key={user.id}
-                          className='flex items-center gap-2 p-2 bg-gray-50 rounded'
+                          className='flex items-center gap-2 p-2 bg-gray-50 dark:bg-night-800 rounded'
                         >
                           <UserAvatar user={user} size='sm' />
                           <div className='flex-1'>
-                            <p className='text-sm font-medium text-gray-900'>
+                            <p className='text-sm font-medium text-gray-900 dark:text-night-50'>
                               {user.name}
                             </p>
-                            <p className='text-xs text-gray-500'>
+                            <p className='text-xs text-gray-500 dark:text-night-400'>
                               {user.email}
                             </p>
                           </div>
@@ -345,13 +345,13 @@ const ProjectModal = ({
 
                 {/* Invitar por email */}
                 {project ? (
-                  <div className='border border-gray-300 rounded-lg p-3 bg-white'>
-                    <p className='text-xs text-gray-700 mb-2 font-medium'>
+                  <div className='border border-gray-300 dark:border-night-600 rounded-lg p-3 bg-white dark:bg-night-900'>
+                    <p className='text-xs text-gray-700 dark:text-night-300 mb-2 font-medium'>
                       Invitar nuevo colaborador por email:
                     </p>
                     <div className='flex gap-2'>
                       <div className='flex-1 relative'>
-                        <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+                        <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' />
                         <input
                           type='email'
                           value={inviteEmail}
@@ -363,7 +363,7 @@ const ProjectModal = ({
                             }
                           }}
                           placeholder='email@ejemplo.com'
-                          className='w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                          className='w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         />
                       </div>
                       <button
@@ -375,12 +375,12 @@ const ProjectModal = ({
                         <Send className='w-4 h-4' />
                       </button>
                     </div>
-                    <p className='text-xs text-gray-500 mt-1'>
+                    <p className='text-xs text-gray-500 dark:text-night-400 mt-1'>
                       El usuario recibirá una invitación que debe aceptar
                     </p>
                   </div>
                 ) : (
-                  <p className='text-sm text-gray-500 text-center py-4 border border-gray-200 rounded-lg bg-white'>
+                  <p className='text-sm text-gray-500 dark:text-night-400 text-center py-4 border border-gray-200 dark:border-night-700 rounded-lg bg-white dark:bg-night-900'>
                     Una vez creado el proyecto, podrás invitar colaboradores por
                     email. Ellos deberán aceptar la invitación para unirse.
                   </p>
@@ -391,7 +391,7 @@ const ProjectModal = ({
 
           {/* Error message */}
           {error && (
-            <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
+            <div className='p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm'>
               {error}
             </div>
           )}
@@ -413,7 +413,7 @@ const ProjectModal = ({
               type='button'
               onClick={onClose}
               disabled={loading}
-              className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+              className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               Cancelar
             </button>

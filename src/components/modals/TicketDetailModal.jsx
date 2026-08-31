@@ -198,27 +198,27 @@ const TicketDetailModal = ({
 
   const statusConfig = {
     open: {
-      color: "text-blue-600 bg-blue-50 border-blue-200",
+      color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",
       icon: AlertCircle,
       label: "Abierto",
     },
     in_progress: {
-      color: "text-brand-600 bg-brand-50 border-brand-200",
+      color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800",
       icon: PlayCircle,
       label: "En progreso",
     },
     pending: {
-      color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
       icon: PauseCircle,
       label: "Pendiente",
     },
     resolved: {
-      color: "text-green-600 bg-green-50 border-green-200",
+      color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800",
       icon: CheckCircle2,
       label: "Resuelto",
     },
     closed: {
-      color: "text-gray-600 bg-gray-50 border-gray-200",
+      color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700",
       icon: XCircle,
       label: "Cerrado",
     },
@@ -226,35 +226,35 @@ const TicketDetailModal = ({
 
   const priorityConfig = {
     urgent: {
-      color: "text-red-600 bg-red-50 border-red-200",
+      color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
       label: "Urgente",
     },
     high: {
-      color: "text-orange-600 bg-orange-50 border-orange-200",
+      color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800",
       label: "Alta",
     },
     medium: {
-      color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
       label: "Media",
     },
-    low: { color: "text-gray-600 bg-gray-50 border-gray-200", label: "Baja" },
+    low: { color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700", label: "Baja" },
   };
 
   const typeConfig = {
     request: {
       icon: MessageSquare,
       label: "Solicitud",
-      color: "text-blue-500",
+      color: "text-blue-500 dark:text-blue-400",
     },
-    bug: { icon: Bug, label: "Bug", color: "text-red-500" },
+    bug: { icon: Bug, label: "Bug", color: "text-red-500 dark:text-red-400" },
     question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500" },
     feature: {
       icon: Lightbulb,
       label: "Funcionalidad",
-      color: "text-yellow-500",
+      color: "text-yellow-500 dark:text-yellow-400",
     },
-    support: { icon: Headphones, label: "Soporte", color: "text-green-500" },
-    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500" },
+    support: { icon: Headphones, label: "Soporte", color: "text-green-500 dark:text-green-400" },
+    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500 dark:text-night-400" },
   };
 
   const StatusIcon = ticket ? statusConfig[ticket.status]?.icon : AlertCircle;
@@ -270,8 +270,8 @@ const TicketDetailModal = ({
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
-          <p className='text-gray-600 font-medium'>Cargando ticket...</p>
-          <p className='text-gray-400 text-sm mt-1'>
+          <p className='text-gray-600 dark:text-night-300 font-medium'>Cargando ticket...</p>
+          <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>
             Preparando detalles del ticket
           </p>
         </div>
@@ -280,14 +280,14 @@ const TicketDetailModal = ({
           {/* Header del ticket */}
           <div className='flex flex-col md:flex-row md:items-start gap-4'>
             <div
-              className={`p-3 rounded-lg bg-gray-50 ${
+              className={`p-3 rounded-lg bg-gray-50 dark:bg-night-800 ${
                 typeConfig[ticket.type]?.color
               }`}
             >
               <TypeIcon className='w-6 h-6' />
             </div>
             <div className='flex-1'>
-              <h2 className='text-xl font-bold text-gray-900 mb-2'>
+              <h2 className='text-xl font-bold text-gray-900 dark:text-night-50 mb-2'>
                 {ticket.title}
               </h2>
               <div className='flex flex-wrap gap-2 items-center'>
@@ -310,7 +310,7 @@ const TicketDetailModal = ({
                   {priorityConfig[ticket.priority]?.label}
                 </span>
                 {/* Tipo */}
-                <span className='px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600'>
+                <span className='px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300'>
                   {typeConfig[ticket.type]?.label}
                 </span>
               </div>
@@ -318,23 +318,23 @@ const TicketDetailModal = ({
           </div>
 
           {/* Información */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-night-800 rounded-lg'>
             <div className='flex items-center gap-3'>
-              <User className='w-5 h-5 text-gray-400' />
+              <User className='w-5 h-5 text-gray-400 dark:text-night-500' />
               <div>
-                <p className='text-xs text-gray-500'>Creado por</p>
-                <p className='font-medium text-gray-900'>{ticket.user?.name}</p>
+                <p className='text-xs text-gray-500 dark:text-night-400'>Creado por</p>
+                <p className='font-medium text-gray-900 dark:text-night-50'>{ticket.user?.name}</p>
               </div>
             </div>
             <div className='flex items-center gap-3'>
-              <Users className='w-5 h-5 text-gray-400' />
+              <Users className='w-5 h-5 text-gray-400 dark:text-night-500' />
               <div>
-                <p className='text-xs text-gray-500'>Equipo asignado</p>
-                <p className='font-medium text-gray-900 flex items-center gap-1'>
+                <p className='text-xs text-gray-500 dark:text-night-400'>Equipo asignado</p>
+                <p className='font-medium text-gray-900 dark:text-night-50 flex items-center gap-1'>
                   {ticket.team?.name || "Sin equipo"}
                   {ticket.is_team_leader && (
                     <Crown
-                      className='w-4 h-4 text-yellow-500'
+                      className='w-4 h-4 text-yellow-500 dark:text-yellow-400'
                       title='Eres líder de este equipo'
                     />
                   )}
@@ -342,14 +342,14 @@ const TicketDetailModal = ({
               </div>
             </div>
             <div className='flex items-center gap-3'>
-              <User className='w-5 h-5 text-gray-400' />
+              <User className='w-5 h-5 text-gray-400 dark:text-night-500' />
               <div>
-                <p className='text-xs text-gray-500'>Responsable</p>
+                <p className='text-xs text-gray-500 dark:text-night-400'>Responsable</p>
                 {ticket.assigned_user ? (
                   <p className='font-medium text-brand-600'>
                     {ticket.assigned_user?.name}
                     {ticket.assigned_user?.id === user?.id && (
-                      <span className='ml-1 text-xs text-gray-400'>(Tú)</span>
+                      <span className='ml-1 text-xs text-gray-400 dark:text-night-500'>(Tú)</span>
                     )}
                   </p>
                 ) : (
@@ -361,19 +361,19 @@ const TicketDetailModal = ({
               </div>
             </div>
             <div className='flex items-center gap-3'>
-              <Clock className='w-5 h-5 text-gray-400' />
+              <Clock className='w-5 h-5 text-gray-400 dark:text-night-500' />
               <div>
-                <p className='text-xs text-gray-500'>Fecha de creación</p>
-                <p className='font-medium text-gray-900'>
+                <p className='text-xs text-gray-500 dark:text-night-400'>Fecha de creación</p>
+                <p className='font-medium text-gray-900 dark:text-night-50'>
                   {new Date(ticket.created_at).toLocaleString("es-ES")}
                 </p>
               </div>
             </div>
             {ticket.project && (
               <div className='flex items-center gap-3'>
-                <Ticket className='w-5 h-5 text-gray-400' />
+                <Ticket className='w-5 h-5 text-gray-400 dark:text-night-500' />
                 <div>
-                  <p className='text-xs text-gray-500'>Proyecto</p>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>Proyecto</p>
                   <span
                     className={`px-2 py-0.5 rounded text-sm font-medium ${ticket.project.color} text-white`}
                   >
@@ -386,7 +386,7 @@ const TicketDetailModal = ({
 
           {/* Acciones de Tomar/Asignar/Devolver */}
           {ticket.team && !["closed", "resolved"].includes(ticket.status) && (
-            <div className='p-4 bg-accent-50 border border-accent-200 rounded-lg'>
+            <div className='p-4 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg'>
               <h3 className='font-semibold text-accent-900 mb-3 flex items-center gap-2'>
                 <Inbox className='w-5 h-5' />
                 Gestión del ticket
@@ -395,7 +395,7 @@ const TicketDetailModal = ({
               {/* Si está en el buzón */}
               {ticket.is_in_inbox ? (
                 <div className='space-y-3'>
-                  <p className='text-sm text-accent-700'>
+                  <p className='text-sm text-accent-700 dark:text-accent-300'>
                     Este ticket está en el buzón del equipo esperando ser
                     tomado.
                   </p>
@@ -481,7 +481,7 @@ const TicketDetailModal = ({
                                 setShowAssignSelect(false);
                                 setSelectedMember(null);
                               }}
-                              className='px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300'
+                              className='px-3 py-2 bg-gray-200 dark:bg-night-700 text-gray-700 dark:text-night-300 rounded-lg hover:bg-gray-300 dark:hover:bg-night-600'
                             >
                               <XCircle className='w-4 h-4' />
                             </button>
@@ -494,7 +494,7 @@ const TicketDetailModal = ({
               ) : (
                 /* Si ya está asignado */
                 <div className='space-y-3'>
-                  <p className='text-sm text-accent-700'>
+                  <p className='text-sm text-accent-700 dark:text-accent-300'>
                     <strong>{ticket.assigned_user?.name}</strong> está
                     trabajando en este ticket.
                     {ticket.taken_at && (
@@ -563,7 +563,7 @@ const TicketDetailModal = ({
                               setShowAssignSelect(false);
                               setSelectedMember(null);
                             }}
-                            className='px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300'
+                            className='px-3 py-2 bg-gray-200 dark:bg-night-700 text-gray-700 dark:text-night-300 rounded-lg hover:bg-gray-300 dark:hover:bg-night-600'
                           >
                             <XCircle className='w-4 h-4' />
                           </button>
@@ -578,9 +578,9 @@ const TicketDetailModal = ({
 
           {/* Descripción */}
           <div>
-            <h3 className='font-semibold text-gray-900 mb-2'>Descripción</h3>
-            <div className='p-4 bg-white border border-gray-200 rounded-lg'>
-              <p className='text-gray-700 whitespace-pre-wrap'>
+            <h3 className='font-semibold text-gray-900 dark:text-night-50 mb-2'>Descripción</h3>
+            <div className='p-4 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-lg'>
+              <p className='text-gray-700 dark:text-night-300 whitespace-pre-wrap'>
                 {ticket.description || "Sin descripción"}
               </p>
             </div>
@@ -589,7 +589,7 @@ const TicketDetailModal = ({
           {/* Cambiar estado (solo si puede resolver) */}
           {ticket.can_resolve && !["closed"].includes(ticket.status) && (
             <div>
-              <h3 className='font-semibold text-gray-900 mb-2'>
+              <h3 className='font-semibold text-gray-900 dark:text-night-50 mb-2'>
                 Cambiar Estado
               </h3>
               <div className='flex flex-wrap gap-2'>
@@ -614,7 +614,7 @@ const TicketDetailModal = ({
 
           {/* Comentarios */}
           <div>
-            <h3 className='font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+            <h3 className='font-semibold text-gray-900 dark:text-night-50 mb-3 flex items-center gap-2'>
               <MessageSquare className='w-5 h-5' />
               Comentarios ({comments.length})
             </h3>
@@ -622,7 +622,7 @@ const TicketDetailModal = ({
             {/* Lista de comentarios */}
             <div className='space-y-3 max-h-64 overflow-y-auto mb-4'>
               {comments.length === 0 ? (
-                <p className='text-center text-gray-400 py-4'>
+                <p className='text-center text-gray-400 dark:text-night-500 py-4'>
                   No hay comentarios aún
                 </p>
               ) : (
@@ -634,32 +634,32 @@ const TicketDetailModal = ({
                       animate={{ opacity: 1, y: 0 }}
                       className={`p-3 rounded-lg ${
                         comment.is_internal
-                          ? "bg-amber-50 border border-amber-200"
+                          ? "bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800"
                           : comment.user_id === user?.id
-                          ? "bg-brand-50 border border-brand-200"
-                          : "bg-gray-50 border border-gray-200"
+                          ? "bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800"
+                          : "bg-gray-50 dark:bg-night-800 border border-gray-200 dark:border-night-700"
                       }`}
                     >
                       <div className='flex items-start justify-between mb-1'>
                         <div className='flex items-center gap-2'>
                           <UserAvatar user={comment.user} size='sm' />
                           <div>
-                            <span className='font-medium text-gray-900 text-sm'>
+                            <span className='font-medium text-gray-900 dark:text-night-50 text-sm'>
                               {comment.user?.name}
                             </span>
                             {comment.is_internal && (
-                              <span className='ml-2 px-2 py-0.5 bg-amber-200 text-amber-700 rounded text-xs inline-flex items-center gap-1'>
+                              <span className='ml-2 px-2 py-0.5 bg-amber-200 text-amber-700 dark:text-amber-300 rounded text-xs inline-flex items-center gap-1'>
                                 <Lock className='w-3 h-3' />
                                 Interno
                               </span>
                             )}
                           </div>
                         </div>
-                        <span className='text-xs text-gray-400'>
+                        <span className='text-xs text-gray-400 dark:text-night-500'>
                           {new Date(comment.created_at).toLocaleString("es-ES")}
                         </span>
                       </div>
-                      <p className='text-gray-700 text-sm ml-10 whitespace-pre-wrap'>
+                      <p className='text-gray-700 dark:text-night-300 text-sm ml-10 whitespace-pre-wrap'>
                         {comment.content}
                       </p>
                     </motion.div>
@@ -677,7 +677,7 @@ const TicketDetailModal = ({
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder='Escribe un comentario...'
                     rows='2'
-                    className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
+                    className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
                   />
                   <button
                     type='submit'
@@ -694,14 +694,14 @@ const TicketDetailModal = ({
 
                 {/* Opción de comentario interno (solo para asignados) */}
                 {ticket.can_resolve && (
-                  <label className='flex items-center gap-2 text-sm text-gray-600 cursor-pointer'>
+                  <label className='flex items-center gap-2 text-sm text-gray-600 dark:text-night-300 cursor-pointer'>
                     <input
                       type='checkbox'
                       checked={isInternal}
                       onChange={(e) => setIsInternal(e.target.checked)}
-                      className='w-4 h-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500'
+                      className='w-4 h-4 text-amber-600 dark:text-amber-400 border-gray-300 dark:border-night-600 rounded focus:ring-amber-500'
                     />
-                    <Lock className='w-4 h-4 text-amber-500' />
+                    <Lock className='w-4 h-4 text-amber-500 dark:text-amber-400' />
                     Comentario interno (solo visible para el equipo)
                   </label>
                 )}
@@ -710,7 +710,7 @@ const TicketDetailModal = ({
           </div>
         </div>
       ) : (
-        <div className='text-center py-12 text-gray-500'>
+        <div className='text-center py-12 text-gray-500 dark:text-night-400'>
           No se pudo cargar el ticket
         </div>
       )}

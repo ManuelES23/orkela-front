@@ -130,7 +130,7 @@ const Login = () => {
           >
             <div className='mb-4 p-3 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 dark:bg-brand-900/20 dark:border-brand-800 rounded-lg flex items-start gap-2'>
               <Info className='w-5 h-5 text-brand-600 dark:text-brand-300 shrink-0 mt-0.5' />
-              <p className='text-brand-700 dark:text-brand-300 dark:text-brand-300 text-sm'>{invitationMessage}</p>
+              <p className='text-brand-700 dark:text-brand-300 text-sm'>{invitationMessage}</p>
             </div>
           </motion.div>
         )}

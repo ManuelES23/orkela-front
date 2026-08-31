@@ -226,8 +226,8 @@ const ContextSwitcher = ({ isCompact = false }) => {
                     <div
                       className={`p-2 rounded-lg ${
                         ctx.type === "organization"
-                          ? "bg-accent-100 dark:bg-accent-900/30 dark:bg-accent-900/30"
-                          : "bg-brand-100 dark:bg-brand-900/30 dark:bg-brand-900/30"
+                          ? "bg-accent-100 dark:bg-accent-900/30"
+                          : "bg-brand-100 dark:bg-brand-900/30"
                       }`}
                     >
                       {renderContextIcon(ctx, "w-4 h-4")}

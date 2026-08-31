@@ -235,7 +235,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                   !isOpen && "justify-center"
                 } ${
                   active
-                    ? "text-brand-700 dark:text-brand-300 dark:text-brand-300"
+                    ? "text-brand-700 dark:text-brand-300"
                     : "text-gray-700 hover:bg-gray-50 dark:text-night-300 dark:hover:bg-night-800"
                 }`}
               >

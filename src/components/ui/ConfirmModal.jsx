@@ -17,19 +17,19 @@ const ConfirmModal = ({
   const typeStyles = {
     danger: {
       icon: Trash2,
-      iconBg: "bg-red-100",
-      iconColor: "text-red-600",
+      iconBg: "bg-red-100 dark:bg-red-950/40",
+      iconColor: "text-red-600 dark:text-red-400",
       buttonBg: "bg-red-600 hover:bg-red-700",
     },
     warning: {
       icon: AlertTriangle,
-      iconBg: "bg-yellow-100",
-      iconColor: "text-yellow-600",
+      iconBg: "bg-yellow-100 dark:bg-yellow-950/40",
+      iconColor: "text-yellow-600 dark:text-yellow-400",
       buttonBg: "bg-yellow-600 hover:bg-yellow-700",
     },
     info: {
       icon: AlertTriangle,
-      iconBg: "bg-brand-100",
+      iconBg: "bg-brand-100 dark:bg-brand-900/30",
       iconColor: "text-brand-600",
       buttonBg: "bg-brand-600 hover:bg-brand-700",
     },
@@ -65,7 +65,7 @@ const ConfirmModal = ({
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'
           >
-            <div className='bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden'>
+            <div className='bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-md w-full overflow-hidden'>
               {/* Header */}
               <div className='p-6 pb-4'>
                 <div className='flex items-start gap-4'>
@@ -76,28 +76,28 @@ const ConfirmModal = ({
 
                   {/* Content */}
                   <div className='flex-1'>
-                    <h3 className='text-lg font-semibold text-gray-900 mb-1'>
+                    <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-1'>
                       {title}
                     </h3>
-                    <p className='text-gray-600 text-sm'>{message}</p>
+                    <p className='text-gray-600 dark:text-night-300 text-sm'>{message}</p>
                   </div>
 
                   {/* Close button */}
                   <button
                     onClick={onClose}
-                    className='p-1 hover:bg-gray-100 rounded-full transition-colors'
+                    className='p-1 hover:bg-gray-100 dark:hover:bg-night-800 rounded-full transition-colors'
                   >
-                    <X className='w-5 h-5 text-gray-400' />
+                    <X className='w-5 h-5 text-gray-400 dark:text-night-500' />
                   </button>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className='px-6 py-4 bg-gray-50 flex gap-3 justify-end'>
+              <div className='px-6 py-4 bg-gray-50 dark:bg-night-800 flex gap-3 justify-end'>
                 <button
                   onClick={onClose}
                   disabled={loading}
-                  className='px-4 py-2 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors disabled:opacity-50'
+                  className='px-4 py-2 text-gray-700 dark:text-night-300 font-medium rounded-lg border border-gray-300 dark:border-night-600 hover:bg-gray-100 dark:hover:bg-night-800 transition-colors disabled:opacity-50'
                 >
                   {cancelText}
                 </button>

@@ -368,10 +368,10 @@ const InvitationsPanel = () => {
                   {/* Opción: Modo Organización */}
                   <button
                     onClick={() => handleOrgContextSelection("organization")}
-                    className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 dark:border-brand-800 rounded-xl hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 dark:hover:bg-brand-900/20 transition-all group text-left'
+                    className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 rounded-xl hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all group text-left'
                   >
                     <div className='flex items-center gap-3'>
-                      <div className='p-2 bg-brand-100 dark:bg-brand-900/30 dark:bg-brand-900/30 rounded-lg group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
+                      <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
                         <Building2 className='w-6 h-6 text-brand-600 dark:text-brand-300' />
                       </div>
                       <div>

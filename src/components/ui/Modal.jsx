@@ -46,15 +46,15 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
               stiffness: 300,
               duration: 0.3,
             }}
-            className={`relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl ${sizes[size]} w-full max-h-[calc(100vh-5rem)] sm:max-h-[90vh] overflow-hidden flex flex-col`}
+            className={`relative bg-white dark:bg-night-900 rounded-t-2xl sm:rounded-2xl shadow-2xl ${sizes[size]} w-full max-h-[calc(100vh-5rem)] sm:max-h-[90vh] overflow-hidden flex flex-col`}
           >
             {/* Header con gradiente */}
-            <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-linear-to-r from-gray-50 to-white'>
+            <div className='flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-night-700 bg-linear-to-r from-gray-50 to-white dark:from-night-800 dark:to-night-900'>
               <motion.h2
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className='text-lg sm:text-xl font-semibold text-gray-900'
+                className='text-lg sm:text-xl font-semibold text-gray-900 dark:text-night-50'
               >
                 {title}
               </motion.h2>
@@ -62,9 +62,9 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className='p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors duration-200'
+                className='p-2 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors duration-200'
               >
-                <X className='w-5 h-5 text-gray-500' />
+                <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
               </motion.button>
             </div>
 

@@ -53,8 +53,8 @@ const ContextSelectionModal = ({ isOpen, onSelect, user, loading = false }) => {
 
   const getIconBgColor = (type) => {
     return type === "organization"
-      ? "bg-accent-100 dark:bg-accent-900/30 dark:bg-accent-900/30"
-      : "bg-brand-100 dark:bg-brand-900/30 dark:bg-brand-900/30";
+      ? "bg-accent-100 dark:bg-accent-900/30"
+      : "bg-brand-100 dark:bg-brand-900/30";
   };
 
   const getIconColor = (type) => {

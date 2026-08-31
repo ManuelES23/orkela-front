@@ -61,7 +61,7 @@ const PortalAccessRequest = () => {
       >
         <div className='flex items-center gap-2.5 mb-6'>
           <img
-            src='/img/isotipo_orkela.png'
+            src={org?.logo || "/img/isotipo_orkela.png"}
             alt=''
             className='w-9 h-9 object-contain'
             aria-hidden='true'

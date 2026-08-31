@@ -30,6 +30,7 @@ const ClientsManagement = () => {
   const [clients, setClients] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
@@ -50,12 +51,15 @@ const ClientsManagement = () => {
 
   const loadClients = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const data = await clientsAPI.getAll();
       setClients(data);
       if (!id && data.length > 0) {
         navigate(`/clients/${data[0].id}`, { replace: true });
       }
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -182,7 +186,11 @@ const ClientsManagement = () => {
             </div>
           </div>
           <div className='flex-1 overflow-y-auto'>
-            {!loading && filteredClients.length === 0 ? (
+            {!loading && loadError ? (
+              <div className='p-6 text-center text-gray-500 text-sm'>
+                No se pudieron cargar los clientes.
+              </div>
+            ) : !loading && filteredClients.length === 0 ? (
               <div className='p-6 text-center text-gray-500 text-sm'>
                 {clients.length === 0
                   ? "Aún no hay clientes. Da de alta el primero con el botón +."

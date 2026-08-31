@@ -30,6 +30,7 @@ const ClientTicketsInbox = () => {
   const [tickets, setTickets] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [onlyUnassigned, setOnlyUnassigned] = useState(false);
   const [assigningId, setAssigningId] = useState(null);
   // Bump para forzar un recarga tras asignar, sin depender del closure de
@@ -40,11 +41,14 @@ const ClientTicketsInbox = () => {
 
   const loadTickets = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const data = await ticketsAPI.getClientInbox(
         onlyUnassigned ? { unassigned: true } : {}
       );
       setTickets(data);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -55,7 +59,7 @@ const ClientTicketsInbox = () => {
   }, [loadTickets, reloadKey]);
 
   useEffect(() => {
-    teamsAPI.getAll().then(setTeams);
+    teamsAPI.getAll().then(setTeams).catch(() => {});
   }, []);
 
   const visibleTickets = clientFilter
@@ -96,7 +100,12 @@ const ClientTicketsInbox = () => {
           </label>
         </div>
 
-        {!loading && visibleTickets.length === 0 ? (
+        {!loading && loadError ? (
+          <div className='py-12 text-center text-gray-400'>
+            <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
+            <p className='text-sm'>No se pudieron cargar los tickets.</p>
+          </div>
+        ) : !loading && visibleTickets.length === 0 ? (
           <div className='py-12 text-center text-gray-400'>
             <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
             <p className='text-sm'>No hay tickets de clientes {onlyUnassigned ? "sin asignar" : "todavía"}.</p>

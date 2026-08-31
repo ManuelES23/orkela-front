@@ -763,3 +763,17 @@ export const myInvitationsAPI = {
     });
   },
 };
+
+// Plans API (de cara al usuario — catálogo personal + selector self-service)
+export const plansAPI = {
+  getPersonalCatalog: async () => {
+    return await request("/plans/personal-catalog");
+  },
+
+  switchMyPlan: async (planId) => {
+    return await request("/me/plan", {
+      method: "PATCH",
+      body: JSON.stringify({ plan_id: planId }),
+    });
+  },
+};

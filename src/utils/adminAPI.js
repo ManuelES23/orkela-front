@@ -119,8 +119,9 @@ export const adminOrganizationsAPI = {
 
 // Admin Plans API — catálogo de planes
 export const adminPlansAPI = {
-  getAll: async () => {
-    return await request("/admin/plans", {
+  getAll: async (scope) => {
+    const query = scope ? `?scope=${scope}` : "";
+    return await request(`/admin/plans${query}`, {
       method: "GET",
     });
   },

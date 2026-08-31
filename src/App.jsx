@@ -48,6 +48,7 @@ const PortalAccessRequest = lazy(() =>
 const PortalAccessConsume = lazy(() =>
   import("./pages/portal/PortalAccessConsume")
 );
+const PortalInboxScreen = lazy(() => import("./pages/portal/PortalInboxScreen"));
 
 // Admin Pages - Lazy loaded
 const Users = lazy(() => import("./pages/admin/Users"));
@@ -98,6 +99,8 @@ function App() {
                 />
                 <Route path='/portal/:orgSlug' element={<PortalAccessRequest />} />
                 <Route path='/portal/access/:token' element={<PortalAccessConsume />} />
+                <Route path='/portal/dashboard' element={<PortalInboxScreen />} />
+                <Route path='/portal/tickets/:id' element={<PortalInboxScreen />} />
 
                 {/* Rutas protegidas */}
                 <Route

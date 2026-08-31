@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   getPortalToken,
   clearPortalToken,
@@ -7,8 +7,15 @@ import {
 } from "../../utils/portalApi";
 
 /**
- * Shell del portal público de clientes. No usa el layout interno de
- * Orkela (sin sidebar) — header mínimo con la marca de la organización.
+ * Shell de las pantallas AUTENTICADAS del portal público de clientes
+ * (dashboard, detalle de ticket). No usa el layout interno de Orkela
+ * (sin sidebar) — header mínimo con la marca de la organización.
+ *
+ * Las pantallas previas al login (`/portal/:orgSlug` para solicitar
+ * acceso, `/portal/access/:token` para consumir el magic link) tienen
+ * su propio layout standalone y nunca montan este componente — por
+ * eso el guard de acceso de aquí abajo puede redirigir a
+ * `/portal/:orgSlug` sin riesgo de loop.
  *
  * Guard de acceso: si no hay token, o si cualquier request del portal
  * responde 401 (evento global "portal:unauthorized"), redirige a la
@@ -38,8 +45,7 @@ const PortalLayout = ({ children }) => {
   if (!hasToken) {
     const orgSlug = getPortalOrgSlug();
     if (orgSlug) {
-      navigate(`/portal/${orgSlug}`, { replace: true });
-      return null;
+      return <Navigate to={`/portal/${orgSlug}`} replace />;
     }
 
     return (

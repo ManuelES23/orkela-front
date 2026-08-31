@@ -13,8 +13,10 @@ const PortalAccessRequest = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setNotFound(false);
     portalAPI
       .getOrgInfo(orgSlug)
       .then(setOrg)
@@ -23,10 +25,13 @@ const PortalAccessRequest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
     try {
       await portalAPI.requestAccess(orgSlug, email);
       setSent(true);
+    } catch {
+      setError("No se pudo enviar el enlace. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -81,6 +86,7 @@ const PortalAccessRequest = () => {
               {org?.name || "la organización"} y te enviaremos un enlace de
               acceso.
             </p>
+            {error && <p className='text-sm text-red-600'>{error}</p>}
             <div className='relative'>
               <Mail
                 aria-hidden='true'

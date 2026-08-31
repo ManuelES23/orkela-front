@@ -10,6 +10,7 @@ import { profileAPI } from "../utils/api";
 import { getAssetUrl } from "../utils/assetUrl";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
+import MyPlanSection from "../components/settings/MyPlanSection";
 
 const Settings = () => {
   const { user, refreshUser } = useAuth();
@@ -220,6 +221,10 @@ const Settings = () => {
                 JPG, PNG, GIF o WebP. Máx. 2MB
               </p>
             </div>
+          </StaggerItem>
+
+          <StaggerItem>
+            <MyPlanSection />
           </StaggerItem>
 
           {/* Formulario editorial: secciones divididas por línea, sin doble card */}

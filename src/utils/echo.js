@@ -49,6 +49,41 @@ export const disconnectEcho = () => {
   }
 };
 
+// Instancia de Echo separada para el portal de clientes — autentica con
+// el token del portal, no con la sesión de Sanctum del staff interno.
+let portalEchoInstance = null;
+
+export const getPortalEcho = (token) => {
+  if (!portalEchoInstance) {
+    portalEchoInstance = new Echo({
+      broadcaster: "reverb",
+      key: import.meta.env.VITE_REVERB_APP_KEY,
+      wsHost: import.meta.env.VITE_REVERB_HOST || "localhost",
+      wsPort: parseInt(import.meta.env.VITE_REVERB_PORT) || 6001,
+      wssPort: parseInt(import.meta.env.VITE_REVERB_PORT) || 6001,
+      forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? "http") === "https",
+      enabledTransports: ["ws", "wss"],
+      authEndpoint: `${
+        import.meta.env.VITE_API_URL || "http://orkela.localhost/api"
+      }/portal/broadcasting/auth`,
+      auth: {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          Accept: "application/json",
+        },
+      },
+    });
+  }
+  return portalEchoInstance;
+};
+
+export const disconnectPortalEcho = () => {
+  if (portalEchoInstance) {
+    portalEchoInstance.disconnect();
+    portalEchoInstance = null;
+  }
+};
+
 // Para compatibilidad con imports existentes
 export default {
   get instance() {

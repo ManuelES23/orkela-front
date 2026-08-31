@@ -80,8 +80,12 @@ const Sidebar = () => {
         { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
         { icon: FolderKanban, label: "Proyectos", path: "/projects" },
         { icon: CheckSquare, label: "Tareas", path: "/tasks" },
-        { icon: UsersRound, label: "Equipos", path: "/teams" },
-        // Tickets solo disponible en modo organización
+        // Equipos y Tickets solo disponibles en modo organización — los
+        // planes personales no incluyen esta feature (ver spec
+        // docs/superpowers/specs/2026-08-30-planes-personales-design.md)
+        ...(isInOrganizationMode
+          ? [{ icon: UsersRound, label: "Equipos", path: "/teams" }]
+          : []),
         ...(isInOrganizationMode
           ? [{ icon: Ticket, label: "Tickets", path: "/tickets" }]
           : []),

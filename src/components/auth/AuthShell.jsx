@@ -20,7 +20,7 @@ const AuthShell = ({ formHeader, heading, description, badge, children }) => {
         };
 
   return (
-    <div className='min-h-screen w-full flex bg-[#f7f5fb]'>
+    <div className='min-h-screen w-full flex bg-[#f7f5fb] dark:bg-night-950'>
       {/* Panel de marca (oculto en mobile) */}
       <div className='hidden lg:flex lg:w-[48%] relative overflow-hidden flex-col justify-between p-14 xl:p-16 text-white bg-[radial-gradient(130%_120%_at_15%_8%,var(--color-brand-500)_0%,var(--color-brand-700)_45%,#3b1670_100%)]'>
         {/* Confetti de cuadrados: eco del isotipo */}
@@ -85,7 +85,7 @@ const AuthShell = ({ formHeader, heading, description, badge, children }) => {
         >
           <div className='lg:hidden flex items-center gap-2.5 mb-9 justify-center'>
             <img src='/img/isotipo_orkela.png' alt='Orkela' className='w-10 h-10 object-contain' />
-            <span className='font-extrabold text-2xl text-brand-700'>Orkela</span>
+            <span className='font-extrabold text-2xl text-brand-700 dark:text-brand-300'>Orkela</span>
           </div>
 
           {formHeader}

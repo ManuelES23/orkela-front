@@ -203,13 +203,13 @@ const Teams = () => {
       <FadeIn delay={0.1}>
         <div className='flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6'>
           <div className='relative flex-1 w-full md:w-auto'>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
             <input
               type='text'
               placeholder='Buscar equipos...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+              className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
 
@@ -226,7 +226,7 @@ const Teams = () => {
             </motion.button>
           ) : (
             isOrganizationContext && (
-              <div className='flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg w-full md:w-auto justify-center'>
+              <div className='flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300 rounded-lg w-full md:w-auto justify-center'>
                 <Info className='w-4 h-4' />
                 <span className='text-sm'>
                   Solo{" "}
@@ -245,7 +245,7 @@ const Teams = () => {
       {loading && <SkeletonCardGrid count={6} />}
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
+        <div className='bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg'>
           {error}
         </div>
       )}
@@ -255,8 +255,8 @@ const Teams = () => {
         <>
           {filteredTeams.length === 0 ? (
             <div className='text-center py-12'>
-              <Users className='w-16 h-16 text-gray-300 mx-auto mb-4' />
-              <p className='text-gray-500 text-lg'>
+              <Users className='w-16 h-16 text-gray-300 dark:text-night-600 mx-auto mb-4' />
+              <p className='text-gray-500 dark:text-night-400 text-lg'>
                 {searchTerm
                   ? "No se encontraron equipos con ese criterio"
                   : "No hay equipos creados aún"}
@@ -264,7 +264,7 @@ const Teams = () => {
               {!searchTerm && (
                 <button
                   onClick={handleNewTeam}
-                  className='mt-4 text-brand-600 hover:text-brand-700 font-medium'
+                  className='mt-4 text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium'
                 >
                   Crear tu primer equipo
                 </button>
@@ -304,18 +304,18 @@ const Teams = () => {
                         <div className='absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
                           <button
                             onClick={(e) => handleEdit(team, e)}
-                            className='p-1.5 bg-white/80 hover:bg-blue-50 rounded transition'
+                            className='p-1.5 bg-white/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded transition'
                           >
-                            <Edit className='w-4 h-4 text-blue-600' />
+                            <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               openDeleteConfirm(team.id);
                             }}
-                            className='p-1.5 bg-white/80 hover:bg-red-50 rounded transition'
+                            className='p-1.5 bg-white/80 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition'
                           >
-                            <Trash2 className='w-4 h-4 text-red-600' />
+                            <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
                           </button>
                         </div>
                       )}
@@ -328,36 +328,36 @@ const Teams = () => {
                         <Users className='w-6 h-6 text-white' />
                       </div>
 
-                      <h3 className='font-bold text-gray-900 text-lg mb-1'>
+                      <h3 className='font-bold text-gray-900 dark:text-night-50 text-lg mb-1'>
                         {team.name}
                       </h3>
                       {team.description && (
-                        <p className='text-sm text-gray-600 line-clamp-2 mb-4'>
+                        <p className='text-sm text-gray-600 dark:text-night-300 line-clamp-2 mb-4'>
                           {team.description}
                         </p>
                       )}
 
                       {/* Estadísticas como píldoras */}
                       <div className='flex flex-wrap gap-2 mb-4'>
-                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
-                          <Users className='w-3.5 h-3.5 text-gray-400' />
+                        <span className='inline-flex items-center gap-1.5 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 dark:text-night-300'>
+                          <Users className='w-3.5 h-3.5 text-gray-400 dark:text-night-500' />
                           {team.member_count || 0}
                         </span>
-                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
-                          <FolderKanban className='w-3.5 h-3.5 text-gray-400' />
+                        <span className='inline-flex items-center gap-1.5 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 dark:text-night-300'>
+                          <FolderKanban className='w-3.5 h-3.5 text-gray-400 dark:text-night-500' />
                           {team.project_count || 0}
                         </span>
-                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
-                          <Ticket className='w-3.5 h-3.5 text-gray-400' />
+                        <span className='inline-flex items-center gap-1.5 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 dark:text-night-300'>
+                          <Ticket className='w-3.5 h-3.5 text-gray-400 dark:text-night-500' />
                           {team.ticket_count || 0}
                           {team.open_tickets > 0 && (
-                            <span className='px-1.5 py-0.5 -mr-1 text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full'>
+                            <span className='px-1.5 py-0.5 -mr-1 text-[10px] font-bold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-full'>
                               {team.open_tickets}
                             </span>
                           )}
                         </span>
-                        <span className='inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700'>
-                          <CheckSquare className='w-3.5 h-3.5 text-gray-400' />
+                        <span className='inline-flex items-center gap-1.5 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 dark:text-night-300'>
+                          <CheckSquare className='w-3.5 h-3.5 text-gray-400 dark:text-night-500' />
                           {team.task_count || 0}
                         </span>
                       </div>
@@ -368,7 +368,7 @@ const Teams = () => {
                           className='flex items-center justify-between pt-4 border-t mb-3'
                           style={{ borderColor: `${hex}26` }}
                         >
-                          <span className='text-xs text-gray-500'>
+                          <span className='text-xs text-gray-500 dark:text-night-400'>
                             {pct}% completado
                           </span>
                           <ProgressRing
@@ -376,7 +376,6 @@ const Teams = () => {
                             size={32}
                             strokeWidth={3.5}
                             color={hex}
-                            trackColor='#e5e7eb'
                           />
                         </div>
                       )}
@@ -401,7 +400,7 @@ const Teams = () => {
                               placeholder='Email...'
                               value={inviteEmail}
                               onChange={(e) => setInviteEmail(e.target.value)}
-                              className='flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                              className='flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-night-600 rounded-lg bg-white dark:bg-night-900 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                               onClick={(e) => e.stopPropagation()}
                             />
                             <button
@@ -419,7 +418,7 @@ const Teams = () => {
                                 setInvitingTeamId(null);
                                 setInviteEmail("");
                               }}
-                              className='px-2 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg bg-white hover:bg-gray-50 transition shrink-0'
+                              className='px-2 py-1.5 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 text-sm rounded-lg bg-white dark:bg-night-900 hover:bg-gray-50 dark:hover:bg-night-800 transition shrink-0'
                             >
                               ✕
                             </button>
@@ -432,13 +431,13 @@ const Teams = () => {
                                   e.stopPropagation();
                                   setInvitingTeamId(team.id);
                                 }}
-                                className='flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-brand-700 transition-colors'
+                                className='flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-night-300 hover:text-brand-700 dark:hover:text-brand-300 transition-colors'
                               >
                                 <Mail className='w-4 h-4' />
                                 Invitar
                               </button>
                             )}
-                            <span className='ml-auto flex items-center gap-1 text-sm text-gray-500 group-hover:text-brand-700 transition-colors'>
+                            <span className='ml-auto flex items-center gap-1 text-sm text-gray-500 dark:text-night-400 group-hover:text-brand-700 dark:hover:text-brand-300 transition-colors'>
                               Ver equipo
                               <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
                             </span>

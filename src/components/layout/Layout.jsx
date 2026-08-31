@@ -20,7 +20,7 @@ const Layout = ({ children, title, subtitle }) => {
   }, [isPinned]);
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-night-950'>
       {/* Sidebar - Solo visible en pantallas medianas y grandes */}
       <div className='hidden md:block'>
         <Sidebar isPinned={isPinned} onTogglePin={() => setIsPinned((p) => !p)} />

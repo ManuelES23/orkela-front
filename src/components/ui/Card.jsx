@@ -13,7 +13,7 @@ const Card = ({ children, className = "", hover = false }) => {
           : {}
       }
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`bg-white rounded-xl shadow-sm border border-gray-100 ${className}`}
+      className={`bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700 ${className}`}
     >
       {children}
     </motion.div>
@@ -22,7 +22,7 @@ const Card = ({ children, className = "", hover = false }) => {
 
 const CardHeader = ({ children, className = "" }) => {
   return (
-    <div className={`p-6 border-b border-gray-100 ${className}`}>
+    <div className={`p-6 border-b border-gray-100 dark:border-night-700 ${className}`}>
       {children}
     </div>
   );
@@ -35,7 +35,7 @@ const CardBody = ({ children, className = "" }) => {
 const CardFooter = ({ children, className = "" }) => {
   return (
     <div
-      className={`px-6 py-3 bg-gray-50 border-t border-gray-100 rounded-b-xl ${className}`}
+      className={`px-6 py-3 bg-gray-50 dark:bg-night-800 border-t border-gray-100 dark:border-night-700 rounded-b-xl ${className}`}
     >
       {children}
     </div>

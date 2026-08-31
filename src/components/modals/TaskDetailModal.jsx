@@ -91,9 +91,9 @@ const TaskDetailModal = ({
   if (!currentTask) return null;
 
   const priorityColors = {
-    high: "text-red-600 bg-red-50 border-red-200",
-    medium: "text-yellow-600 bg-yellow-50 border-yellow-200",
-    low: "text-gray-600 bg-gray-50 border-gray-200",
+    high: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
+    medium: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
+    low: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700",
   };
 
   const priorityLabels = {
@@ -113,13 +113,13 @@ const TaskDetailModal = ({
   };
 
   const statusColors = {
-    todo: "bg-gray-100 text-gray-700",
-    "in-progress": "bg-blue-100 text-blue-700",
-    done: "bg-green-100 text-green-700",
-    pending: "bg-gray-100 text-gray-700",
-    in_progress: "bg-blue-100 text-blue-700",
-    completed: "bg-green-100 text-green-700",
-    cancelled: "bg-red-100 text-red-700",
+    todo: "bg-gray-100 dark:bg-night-800 text-gray-700 dark:text-night-300",
+    "in-progress": "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
+    done: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
+    pending: "bg-gray-100 dark:bg-night-800 text-gray-700 dark:text-night-300",
+    in_progress: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
+    completed: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
+    cancelled: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300",
   };
 
   // Función para calcular días hasta vencimiento
@@ -247,8 +247,8 @@ const TaskDetailModal = ({
       {initializing ? (
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
-          <p className='text-gray-600 font-medium'>Cargando tarea...</p>
-          <p className='text-gray-400 text-sm mt-1'>
+          <p className='text-gray-600 dark:text-night-300 font-medium'>Cargando tarea...</p>
+          <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>
             Preparando detalles de la tarea
           </p>
         </div>
@@ -258,8 +258,8 @@ const TaskDetailModal = ({
           <div className='flex items-start justify-between gap-4'>
             <div className='flex-1'>
               <h2
-                className={`text-2xl font-bold text-gray-900 mb-2 ${
-                  isCompleted ? "line-through text-gray-500" : ""
+                className={`text-2xl font-bold text-gray-900 dark:text-night-50 mb-2 ${
+                  isCompleted ? "line-through text-gray-500 dark:text-night-400" : ""
                 }`}
               >
                 {currentTask.title}
@@ -269,7 +269,7 @@ const TaskDetailModal = ({
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium ${
                     statusColors[currentTask.status] ||
-                    "bg-gray-100 text-gray-700"
+                    "bg-gray-100 dark:bg-night-800 text-gray-700 dark:text-night-300"
                   }`}
                 >
                   {statusLabels[currentTask.status] || currentTask.status}
@@ -296,20 +296,20 @@ const TaskDetailModal = ({
                     // para evitar que se borre selectedTask antes de abrir el modal de edición
                     onEdit(currentTask);
                   }}
-                  className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
+                  className='p-2 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors'
                   title='Editar tarea'
                 >
-                  <Edit className='w-5 h-5 text-blue-600' />
+                  <Edit className='w-5 h-5 text-blue-600 dark:text-blue-400' />
                 </button>
                 <button
                   onClick={() => {
                     // No llamar onClose() aquí - el callback onDelete ya maneja el cierre
                     onDelete(currentTask.id);
                   }}
-                  className='p-2 hover:bg-red-50 rounded-lg transition-colors'
+                  className='p-2 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors'
                   title='Eliminar tarea'
                 >
-                  <Trash2 className='w-5 h-5 text-red-600' />
+                  <Trash2 className='w-5 h-5 text-red-600 dark:text-red-400' />
                 </button>
               </div>
             )}
@@ -318,10 +318,10 @@ const TaskDetailModal = ({
           {/* Descripción */}
           {currentTask.description && (
             <div>
-              <h3 className='text-sm font-semibold text-gray-700 mb-2'>
+              <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300 mb-2'>
                 Descripción
               </h3>
-              <p className='text-gray-600 whitespace-pre-wrap'>
+              <p className='text-gray-600 dark:text-night-300 whitespace-pre-wrap'>
                 {currentTask.description}
               </p>
             </div>
@@ -331,11 +331,11 @@ const TaskDetailModal = ({
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             {/* Proyecto */}
             {currentTask.project && (
-              <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg'>
-                <FolderKanban className='w-5 h-5 text-gray-500' />
+              <div className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-night-800 rounded-lg'>
+                <FolderKanban className='w-5 h-5 text-gray-500 dark:text-night-400' />
                 <div>
-                  <p className='text-xs text-gray-500'>Proyecto</p>
-                  <p className='font-medium text-gray-900'>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>Proyecto</p>
+                  <p className='font-medium text-gray-900 dark:text-night-50'>
                     {currentTask.project.name}
                   </p>
                 </div>
@@ -347,34 +347,34 @@ const TaskDetailModal = ({
               <div
                 className={`flex items-center gap-3 p-3 rounded-lg ${
                   days !== null && days < 0 && !isCompleted
-                    ? "bg-red-50"
+                    ? "bg-red-50 dark:bg-red-950/40"
                     : days === 0 && !isCompleted
-                      ? "bg-orange-50"
+                      ? "bg-orange-50 dark:bg-orange-950/40"
                       : days !== null && days <= 3 && !isCompleted
-                        ? "bg-yellow-50"
-                        : "bg-gray-50"
+                        ? "bg-yellow-50 dark:bg-yellow-950/40"
+                        : "bg-gray-50 dark:bg-night-800"
                 }`}
               >
                 {days !== null && days < 0 && !isCompleted ? (
-                  <AlertTriangle className='w-5 h-5 text-red-500' />
+                  <AlertTriangle className='w-5 h-5 text-red-500 dark:text-red-400' />
                 ) : days === 0 && !isCompleted ? (
-                  <Clock className='w-5 h-5 text-orange-500' />
+                  <Clock className='w-5 h-5 text-orange-500 dark:text-orange-400' />
                 ) : days !== null && days <= 3 && !isCompleted ? (
-                  <CalendarClock className='w-5 h-5 text-yellow-500' />
+                  <CalendarClock className='w-5 h-5 text-yellow-500 dark:text-yellow-400' />
                 ) : (
-                  <Calendar className='w-5 h-5 text-gray-500' />
+                  <Calendar className='w-5 h-5 text-gray-500 dark:text-night-400' />
                 )}
                 <div>
-                  <p className='text-xs text-gray-500'>Vencimiento</p>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>Vencimiento</p>
                   <p
                     className={`font-medium ${
                       days !== null && days < 0 && !isCompleted
-                        ? "text-red-700"
+                        ? "text-red-700 dark:text-red-300"
                         : days === 0 && !isCompleted
-                          ? "text-orange-700"
+                          ? "text-orange-700 dark:text-orange-300"
                           : days !== null && days <= 3 && !isCompleted
-                            ? "text-yellow-700"
-                            : "text-gray-900"
+                            ? "text-yellow-700 dark:text-yellow-300"
+                            : "text-gray-900 dark:text-night-50"
                     }`}
                   >
                     {parseLocalDate(currentTask.due_date).toLocaleDateString(
@@ -403,8 +403,8 @@ const TaskDetailModal = ({
 
             {/* Etiquetas */}
             {currentTask.tags && currentTask.tags.length > 0 && (
-              <div className='flex items-start gap-3 p-3 bg-gray-50 rounded-lg sm:col-span-2'>
-                <div className='w-5 h-5 flex items-center justify-center text-gray-500'>
+              <div className='flex items-start gap-3 p-3 bg-gray-50 dark:bg-night-800 rounded-lg sm:col-span-2'>
+                <div className='w-5 h-5 flex items-center justify-center text-gray-500 dark:text-night-400'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     width='20'
@@ -421,32 +421,32 @@ const TaskDetailModal = ({
                   </svg>
                 </div>
                 <div className='flex-1'>
-                  <p className='text-xs text-gray-500 mb-2'>Etiquetas</p>
+                  <p className='text-xs text-gray-500 dark:text-night-400 mb-2'>Etiquetas</p>
                   <div className='flex flex-wrap gap-2'>
                     {currentTask.tags.map((tag) => {
                       const colorClasses = {
-                        red: { bg: "bg-red-100", text: "text-red-700" },
+                        red: { bg: "bg-red-100 dark:bg-red-950/40", text: "text-red-700 dark:text-red-300" },
                         orange: {
-                          bg: "bg-orange-100",
-                          text: "text-orange-700",
+                          bg: "bg-orange-100 dark:bg-orange-950/40",
+                          text: "text-orange-700 dark:text-orange-300",
                         },
                         yellow: {
-                          bg: "bg-yellow-100",
-                          text: "text-yellow-700",
+                          bg: "bg-yellow-100 dark:bg-yellow-950/40",
+                          text: "text-yellow-700 dark:text-yellow-300",
                         },
-                        green: { bg: "bg-green-100", text: "text-green-700" },
-                        teal: { bg: "bg-teal-100", text: "text-teal-700" },
-                        blue: { bg: "bg-blue-100", text: "text-blue-700" },
+                        green: { bg: "bg-green-100 dark:bg-green-950/40", text: "text-green-700 dark:text-green-300" },
+                        teal: { bg: "bg-teal-100 dark:bg-teal-950/40", text: "text-teal-700 dark:text-teal-300" },
+                        blue: { bg: "bg-blue-100 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300" },
                         indigo: {
-                          bg: "bg-indigo-100",
-                          text: "text-indigo-700",
+                          bg: "bg-indigo-100 dark:bg-indigo-950/40",
+                          text: "text-indigo-700 dark:text-indigo-300",
                         },
                         purple: {
-                          bg: "bg-purple-100",
-                          text: "text-purple-700",
+                          bg: "bg-purple-100 dark:bg-purple-950/40",
+                          text: "text-purple-700 dark:text-purple-300",
                         },
-                        pink: { bg: "bg-pink-100", text: "text-pink-700" },
-                        gray: { bg: "bg-gray-100", text: "text-gray-700" },
+                        pink: { bg: "bg-pink-100 dark:bg-pink-950/40", text: "text-pink-700 dark:text-pink-300" },
+                        gray: { bg: "bg-gray-100 dark:bg-night-800", text: "text-gray-700 dark:text-night-300" },
                       };
                       const colors =
                         colorClasses[tag.color] || colorClasses.gray;
@@ -468,31 +468,31 @@ const TaskDetailModal = ({
             {((currentTask.assigned_users &&
               currentTask.assigned_users.length > 0) ||
               currentTask.assigned_user) && (
-              <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg sm:col-span-2'>
-                <Users className='w-5 h-5 text-gray-500' />
+              <div className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-night-800 rounded-lg sm:col-span-2'>
+                <Users className='w-5 h-5 text-gray-500 dark:text-night-400' />
                 <div className='flex-1'>
-                  <p className='text-xs text-gray-500 mb-2'>Asignado a</p>
+                  <p className='text-xs text-gray-500 dark:text-night-400 mb-2'>Asignado a</p>
                   <div className='flex flex-wrap gap-2'>
                     {currentTask.assigned_users &&
                     currentTask.assigned_users.length > 0 ? (
                       currentTask.assigned_users.map((user) => (
                         <div
                           key={user.id}
-                          className='flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-200'
+                          className='flex items-center gap-2 px-3 py-1 bg-white dark:bg-night-900 rounded-full border border-gray-200 dark:border-night-700'
                         >
                           <UserAvatar user={user} size='xs' />
-                          <span className='text-sm text-gray-700'>
+                          <span className='text-sm text-gray-700 dark:text-night-300'>
                             {user.name}
                           </span>
                         </div>
                       ))
                     ) : currentTask.assigned_user ? (
-                      <div className='flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-gray-200'>
+                      <div className='flex items-center gap-2 px-3 py-1 bg-white dark:bg-night-900 rounded-full border border-gray-200 dark:border-night-700'>
                         <UserAvatar
                           user={currentTask.assigned_user}
                           size='xs'
                         />
-                        <span className='text-sm text-gray-700'>
+                        <span className='text-sm text-gray-700 dark:text-night-300'>
                           {currentTask.assigned_user.name}
                         </span>
                       </div>
@@ -504,13 +504,13 @@ const TaskDetailModal = ({
           </div>
 
           {/* Checklist de subtareas */}
-          <div className='border border-gray-200 rounded-lg p-4'>
+          <div className='border border-gray-200 dark:border-night-700 rounded-lg p-4'>
             <div className='flex items-center justify-between mb-3'>
-              <h3 className='text-sm font-semibold text-gray-700 flex items-center gap-2'>
+              <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300 flex items-center gap-2'>
                 <CheckSquare className='w-4 h-4' />
                 Lista de subtareas
                 {checklistItems.length > 0 && (
-                  <span className='text-xs text-gray-500'>
+                  <span className='text-xs text-gray-500 dark:text-night-400'>
                     ({completedCount}/{totalCount})
                   </span>
                 )}
@@ -519,7 +519,7 @@ const TaskDetailModal = ({
 
             {/* Barra de progreso */}
             {checklistItems.length > 0 && (
-              <div className='w-full bg-gray-200 rounded-full h-2 mb-4'>
+              <div className='w-full bg-gray-200 dark:bg-night-700 rounded-full h-2 mb-4'>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
@@ -539,7 +539,7 @@ const TaskDetailModal = ({
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
-                      className='flex items-center gap-3 group py-2 px-3 -mx-3 rounded-lg hover:bg-gray-50 transition-colors'
+                      className='flex items-center gap-3 group py-2 px-3 -mx-3 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
                     >
                       <button
                         type='button'
@@ -548,16 +548,16 @@ const TaskDetailModal = ({
                         className='shrink-0 focus:outline-none disabled:opacity-50'
                       >
                         {item.is_completed ? (
-                          <CheckSquare className='w-5 h-5 text-green-500' />
+                          <CheckSquare className='w-5 h-5 text-green-500 dark:text-green-400' />
                         ) : (
-                          <Square className='w-5 h-5 text-gray-400 hover:text-gray-600' />
+                          <Square className='w-5 h-5 text-gray-400 dark:text-night-500 hover:text-gray-600 dark:hover:text-night-300' />
                         )}
                       </button>
                       <span
                         className={`flex-1 text-sm ${
                           item.is_completed
-                            ? "text-gray-400 line-through"
-                            : "text-gray-700"
+                            ? "text-gray-400 dark:text-night-500 line-through"
+                            : "text-gray-700 dark:text-night-300"
                         }`}
                       >
                         {item.text}
@@ -571,7 +571,7 @@ const TaskDetailModal = ({
             {/* Agregar nueva subtarea */}
             <div className='flex items-center gap-2'>
               <div className='relative flex-1'>
-                <Plus className='absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+                <Plus className='absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' />
                 <input
                   type='text'
                   value={newItemText}
@@ -584,7 +584,7 @@ const TaskDetailModal = ({
                   }}
                   placeholder='Agregar subtarea...'
                   disabled={addingItem}
-                  className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 disabled:cursor-not-allowed'
+                  className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:bg-night-800 disabled:cursor-not-allowed'
                 />
               </div>
               <button
@@ -606,14 +606,14 @@ const TaskDetailModal = ({
 
             {/* Mensaje si no hay items */}
             {checklistItems.length === 0 && (
-              <p className='text-xs text-gray-400 text-center py-2 mb-4'>
+              <p className='text-xs text-gray-400 dark:text-night-500 text-center py-2 mb-4'>
                 No hay subtareas. Agrega una nueva arriba.
               </p>
             )}
           </div>
 
           {/* Fechas de creación/actualización */}
-          <div className='flex flex-wrap gap-4 text-xs text-gray-500 pt-4 border-t border-gray-200'>
+          <div className='flex flex-wrap gap-4 text-xs text-gray-500 dark:text-night-400 pt-4 border-t border-gray-200 dark:border-night-700'>
             <div>
               <span className='font-medium'>Creada:</span>{" "}
               {new Date(currentTask.created_at).toLocaleDateString("es-ES", {

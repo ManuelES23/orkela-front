@@ -50,10 +50,10 @@ const PlanUsageBars = ({ limits, usage }) => {
             transition={{ delay: index * 0.05 }}
           >
             <div className='flex justify-between items-center mb-1'>
-              <span className='text-sm font-medium text-gray-700'>
+              <span className='text-sm font-medium text-gray-700 dark:text-night-300'>
                 {RESOURCE_LABELS[row.key]}
               </span>
-              <span className='text-xs text-gray-500'>
+              <span className='text-xs text-gray-500 dark:text-night-400'>
                 {unlimited
                   ? "Sin límite"
                   : row.formatted
@@ -61,9 +61,9 @@ const PlanUsageBars = ({ limits, usage }) => {
                     : `${row.used}/${row.limit}`}
               </span>
             </div>
-            <div className='w-full bg-gray-200 rounded-full h-2'>
+            <div className='w-full bg-gray-200 dark:bg-night-700 rounded-full h-2'>
               <div
-                className={`h-2 rounded-full transition-all ${unlimited ? "bg-gray-300" : barColor}`}
+                className={`h-2 rounded-full transition-all ${unlimited ? "bg-gray-300 dark:bg-night-600" : barColor}`}
                 style={{ width: `${unlimited ? 100 : percent}%` }}
               ></div>
             </div>

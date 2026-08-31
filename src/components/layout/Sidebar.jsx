@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import { useUserContext } from "../../hooks/useOrganizationPermissions";
 import ContextSwitcher from "../ui/ContextSwitcher";
 import UserAvatar from "../ui/UserAvatar";
@@ -27,7 +28,16 @@ import {
   PinOff,
   Contact,
   Inbox,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+
+const THEME_OPTIONS = [
+  { value: "light", icon: Sun, label: "Claro" },
+  { value: "dark", icon: Moon, label: "Oscuro" },
+  { value: "system", icon: Monitor, label: "Sistema" },
+];
 
 // Rail colapsado vs. panel expandido (overlay al hacer hover/foco, no empuja el contenido)
 const RAIL_WIDTH = 80;
@@ -41,6 +51,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, hasMultipleContexts } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   // Fijado (pin) o expandido por hover/foco - ambos abren el panel
   const isOpen = isExpanded || isPinned;
@@ -138,12 +149,12 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
         onBlur={handleBlur}
         animate={{ width: isOpen ? PANEL_WIDTH : RAIL_WIDTH }}
         transition={motionTokens.springSnappy}
-        className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 overflow-hidden ${
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-night-900 border-r border-gray-200 dark:border-night-700 z-40 overflow-hidden ${
           isOpen ? "shadow-xl" : "shadow-lg"
         }`}
       >
         {/* Header del Sidebar */}
-        <div className='flex items-center justify-between px-4 py-5 border-b border-gray-200'>
+        <div className='flex items-center justify-between px-4 py-5 border-b border-gray-200 dark:border-night-700'>
           {isOpen ? (
             <>
               <div className='flex items-center justify-center flex-1'>
@@ -159,8 +170,8 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                 title={isPinned ? "Desanclar sidebar" : "Fijar sidebar abierto"}
                 className={`shrink-0 p-1.5 rounded-lg transition-colors duration-200 ${
                   isPinned
-                    ? "bg-brand-100 text-brand-600"
-                    : "text-gray-300 hover:bg-gray-50 hover:text-gray-500"
+                    ? "bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300"
+                    : "text-gray-300 hover:bg-gray-50 hover:text-gray-500 dark:text-night-600 dark:hover:bg-night-800 dark:hover:text-night-400"
                 }`}
               >
                 {isPinned ? (
@@ -190,11 +201,11 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
         {/* Buscador de secciones */}
         <div className='px-3 pt-3'>
           <div
-            className={`flex items-center gap-2 rounded-lg bg-gray-50 border border-gray-200 ${
+            className={`flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-night-800 border border-gray-200 dark:border-night-700 ${
               isOpen ? "px-3 py-2" : "justify-center py-2"
             }`}
           >
-            <Search className='w-4 h-4 text-gray-400 shrink-0' />
+            <Search className='w-4 h-4 text-gray-400 dark:text-night-400 shrink-0' />
             {isOpen && (
               <input
                 type='text'
@@ -202,7 +213,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder='Buscar...'
                 aria-label='Buscar en el menú'
-                className='w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none'
+                className='w-full bg-transparent text-sm text-gray-700 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 focus:outline-none'
               />
             )}
           </div>
@@ -211,7 +222,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
         {/* Navegación */}
         <nav className='p-3 space-y-1'>
           {filteredItems.length === 0 && isOpen && (
-            <p className='px-3 py-2 text-sm text-gray-400'>Sin resultados</p>
+            <p className='px-3 py-2 text-sm text-gray-400 dark:text-night-400'>Sin resultados</p>
           )}
           {filteredItems.map((item) => {
             const active = isActive(item.path);
@@ -222,13 +233,17 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                 aria-label={item.label}
                 className={`relative flex items-center gap-3 px-3 py-3 rounded-lg transition-colors duration-200 ${
                   !isOpen && "justify-center"
-                } ${active ? "text-brand-700" : "text-gray-700 hover:bg-gray-50"}`}
+                } ${
+                  active
+                    ? "text-brand-700 dark:text-brand-300"
+                    : "text-gray-700 hover:bg-gray-50 dark:text-night-300 dark:hover:bg-night-800"
+                }`}
               >
                 {active && (
                   <motion.span
                     layoutId='sidebar-active-pill'
                     transition={motionTokens.springSnappy}
-                    className='absolute inset-0 rounded-lg bg-linear-to-r from-brand-50 to-accent-50 shadow-sm'
+                    className='absolute inset-0 rounded-lg bg-linear-to-r from-brand-50 to-accent-50 dark:from-brand-900/40 dark:to-accent-900/30 shadow-sm'
                   />
                 )}
                 <item.icon className='relative w-5 h-5 shrink-0' />
@@ -243,11 +258,11 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
         </nav>
 
         {/* Usuario */}
-        <div className='absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200'>
+        <div className='absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200 dark:border-night-700'>
           <div className='relative'>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 ${
+              className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-all duration-200 ${
                 !isOpen && "justify-center"
               }`}
             >
@@ -255,24 +270,49 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
               {isOpen && (
                 <>
                   <div className='flex-1 text-left'>
-                    <p className='text-sm font-medium text-gray-900'>
+                    <p className='text-sm font-medium text-gray-900 dark:text-night-50'>
                       {user?.name}
                     </p>
-                    <p className='text-xs text-gray-500 truncate'>
+                    <p className='text-xs text-gray-500 dark:text-night-400 truncate'>
                       {user?.email}
                     </p>
                   </div>
-                  <ChevronDown className='w-4 h-4 text-gray-400' />
+                  <ChevronDown className='w-4 h-4 text-gray-400 dark:text-night-400' />
                 </>
               )}
             </button>
 
             {/* Menú desplegable del usuario */}
             {isUserMenuOpen && isOpen && (
-              <div className='absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200'>
+              <div className='absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-night-800 border border-gray-200 dark:border-night-700 rounded-lg shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200'>
+                {/* Tema */}
+                <div className='px-3 py-2.5 border-b border-gray-100 dark:border-night-700'>
+                  <p className='text-xs font-medium text-gray-400 dark:text-night-400 mb-1.5'>
+                    Tema
+                  </p>
+                  <div className='flex gap-1 bg-gray-100 dark:bg-night-900 rounded-lg p-1'>
+                    {THEME_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setTheme(opt.value)}
+                        title={opt.label}
+                        aria-label={opt.label}
+                        aria-pressed={theme === opt.value}
+                        className={`flex-1 flex items-center justify-center py-1.5 rounded-md transition-colors duration-150 ${
+                          theme === opt.value
+                            ? "bg-white dark:bg-night-700 shadow-sm text-brand-600 dark:text-brand-300"
+                            : "text-gray-400 dark:text-night-400 hover:text-gray-600 dark:hover:text-night-200"
+                        }`}
+                      >
+                        <opt.icon className='w-3.5 h-3.5' />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button
                   onClick={handleLogout}
-                  className='flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 hover:translate-x-1'
+                  className='flex items-center gap-3 w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all duration-200 hover:translate-x-1'
                 >
                   <LogOut className='w-4 h-4' />
                   <span className='text-sm font-medium'>Cerrar Sesión</span>

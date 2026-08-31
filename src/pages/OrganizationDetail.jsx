@@ -62,10 +62,10 @@ const getExpiryBadge = (planExpiresAt) => {
   );
   const className =
     daysLeft < 0
-      ? "bg-red-100 text-red-700"
+      ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
       : daysLeft <= 30
-        ? "bg-yellow-100 text-yellow-700"
-        : "bg-green-100 text-green-700";
+        ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
+        : "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300";
   const displayDate = expiresAtUTC.toLocaleDateString("es-ES", {
     day: "2-digit",
     month: "short",
@@ -419,16 +419,16 @@ const OrganizationDetail = () => {
   const getRoleBadge = (role, isOwner = false) => {
     if (isOwner) {
       return (
-        <span className='flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium'>
+        <span className='flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium'>
           <Crown className='w-3 h-3' />
           Dueño
         </span>
       );
     }
     const roles = {
-      admin: { bg: "bg-accent-100", text: "text-accent-700", icon: Shield },
-      manager: { bg: "bg-blue-100", text: "text-blue-700", icon: Briefcase },
-      member: { bg: "bg-gray-100", text: "text-gray-700", icon: Users },
+      admin: { bg: "bg-accent-100 dark:bg-accent-900/30", text: "text-accent-700 dark:text-accent-300", icon: Shield },
+      manager: { bg: "bg-blue-100 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", icon: Briefcase },
+      member: { bg: "bg-gray-100 dark:bg-night-800", text: "text-gray-700 dark:text-night-300", icon: Users },
     };
     const roleStyle = roles[role] || roles.member;
     const Icon = roleStyle.icon;
@@ -461,9 +461,9 @@ const OrganizationDetail = () => {
 
   if (!organization) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-50'>
+      <div className='min-h-screen flex items-center justify-center bg-gray-50 dark:bg-night-800'>
         <div className='text-center'>
-          <p className='text-gray-500 mb-4'>
+          <p className='text-gray-500 dark:text-night-400 mb-4'>
             No se pudo cargar la organización
           </p>
           <button
@@ -489,7 +489,7 @@ const OrganizationDetail = () => {
           <div className='flex items-center justify-between mb-4'>
             <button
               onClick={() => navigate("/organizations")}
-              className='flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors'
+              className='flex items-center gap-2 text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50 transition-colors'
             >
               <ArrowLeft className='w-5 h-5' />
               Volver a organizaciones
@@ -500,7 +500,7 @@ const OrganizationDetail = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsEditModalOpen(true)}
-                className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+                className='flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition'
               >
                 <Edit className='w-4 h-4' />
                 Editar
@@ -592,7 +592,7 @@ const OrganizationDetail = () => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm shrink-0 whitespace-nowrap transition-colors ${
                   active
                     ? "bg-linear-to-r from-brand-600 to-accent-600 text-white shadow-sm"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300 hover:bg-gray-200 dark:hover:bg-night-700"
                 }`}
               >
                 <tab.icon className='w-4 h-4' />
@@ -613,70 +613,70 @@ const OrganizationDetail = () => {
             exit={{ opacity: 0, y: -10 }}
           >
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6'>
-              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
-                  <div className='p-3 bg-blue-100 rounded-lg'>
-                    <Users className='w-6 h-6 text-blue-600' />
+                  <div className='p-3 bg-blue-100 dark:bg-blue-950/40 rounded-lg'>
+                    <Users className='w-6 h-6 text-blue-600 dark:text-blue-400' />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-gray-900'>
+                    <p className='text-2xl font-bold text-gray-900 dark:text-night-50'>
                       {stats?.members_count || 0}
                     </p>
-                    <p className='text-sm text-gray-500'>Miembros</p>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>Miembros</p>
                   </div>
                 </div>
               </div>
 
-              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
-                  <div className='p-3 bg-accent-100 rounded-lg'>
+                  <div className='p-3 bg-accent-100 dark:bg-accent-900/30 rounded-lg'>
                     <Shield className='w-6 h-6 text-accent-600' />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-gray-900'>
+                    <p className='text-2xl font-bold text-gray-900 dark:text-night-50'>
                       {stats?.teams_count || 0}
                     </p>
-                    <p className='text-sm text-gray-500'>Equipos</p>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>Equipos</p>
                   </div>
                 </div>
               </div>
 
-              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
-                  <div className='p-3 bg-green-100 rounded-lg'>
-                    <FolderKanban className='w-6 h-6 text-green-600' />
+                  <div className='p-3 bg-green-100 dark:bg-green-950/40 rounded-lg'>
+                    <FolderKanban className='w-6 h-6 text-green-600 dark:text-green-400' />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-gray-900'>
+                    <p className='text-2xl font-bold text-gray-900 dark:text-night-50'>
                       {stats?.projects_count || 0}
                     </p>
-                    <p className='text-sm text-gray-500'>Proyectos</p>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>Proyectos</p>
                   </div>
                 </div>
               </div>
 
-              <div className='bg-white rounded-xl border border-gray-200 border-l-4 border-l-brand-500 p-6'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 border-l-4 border-l-brand-500 p-6'>
                 <div className='flex items-center gap-3 mb-4'>
-                  <div className='p-3 bg-orange-100 rounded-lg'>
-                    <Ticket className='w-6 h-6 text-orange-600' />
+                  <div className='p-3 bg-orange-100 dark:bg-orange-950/40 rounded-lg'>
+                    <Ticket className='w-6 h-6 text-orange-600 dark:text-orange-400' />
                   </div>
                   <div>
-                    <p className='text-2xl font-bold text-gray-900'>
+                    <p className='text-2xl font-bold text-gray-900 dark:text-night-50'>
                       {stats?.tickets?.total || 0}
                     </p>
-                    <p className='text-sm text-gray-500'>Tickets</p>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>Tickets</p>
                   </div>
                 </div>
                 {/* Desglose de tickets */}
                 {stats?.tickets?.total > 0 && (
-                  <div className='flex gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100 mt-2'>
-                    <span className='text-blue-600'>
+                  <div className='flex gap-4 text-xs text-gray-500 dark:text-night-400 pt-2 border-t border-gray-100 dark:border-night-700 mt-2'>
+                    <span className='text-blue-600 dark:text-blue-400'>
                       {stats.tickets.open || 0} abiertos
                     </span>
-                    <span className='text-yellow-600'>
+                    <span className='text-yellow-600 dark:text-yellow-400'>
                       {stats.tickets.in_progress || 0} en progreso
                     </span>
-                    <span className='text-green-600'>
+                    <span className='text-green-600 dark:text-green-400'>
                       {stats.tickets.resolved || 0} resueltos
                     </span>
                   </div>
@@ -685,37 +685,37 @@ const OrganizationDetail = () => {
             </div>
 
             {/* Info adicional */}
-            <div className='bg-white rounded-xl border border-gray-200 p-6'>
-              <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+            <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-6'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-4'>
                 Información de la organización
               </h3>
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 <div>
-                  <p className='text-sm text-gray-500 mb-1'>Plan</p>
-                  <p className='font-medium text-gray-900'>
+                  <p className='text-sm text-gray-500 dark:text-night-400 mb-1'>Plan</p>
+                  <p className='font-medium text-gray-900 dark:text-night-50'>
                     {organization.plan?.name}
                   </p>
                 </div>
                 {organization.industry && (
                   <div>
-                    <p className='text-sm text-gray-500 mb-1'>Industria</p>
-                    <p className='font-medium text-gray-900'>
+                    <p className='text-sm text-gray-500 dark:text-night-400 mb-1'>Industria</p>
+                    <p className='font-medium text-gray-900 dark:text-night-50'>
                       {organization.industry}
                     </p>
                   </div>
                 )}
                 {organization.size && (
                   <div>
-                    <p className='text-sm text-gray-500 mb-1'>Tamaño</p>
-                    <p className='font-medium text-gray-900'>
+                    <p className='text-sm text-gray-500 dark:text-night-400 mb-1'>Tamaño</p>
+                    <p className='font-medium text-gray-900 dark:text-night-50'>
                       {organization.size} empleados
                     </p>
                   </div>
                 )}
                 {organization.phone && (
                   <div>
-                    <p className='text-sm text-gray-500 mb-1'>Teléfono</p>
-                    <p className='font-medium text-gray-900'>
+                    <p className='text-sm text-gray-500 dark:text-night-400 mb-1'>Teléfono</p>
+                    <p className='font-medium text-gray-900 dark:text-night-50'>
                       {organization.phone}
                     </p>
                   </div>
@@ -732,12 +732,12 @@ const OrganizationDetail = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            <div className='bg-white rounded-xl border border-gray-200'>
+            <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700'>
               {/* Header */}
-              <div className='p-4 border-b border-gray-200 flex items-center justify-between'>
+              <div className='p-4 border-b border-gray-200 dark:border-night-700 flex items-center justify-between'>
                 <div>
-                  <h3 className='font-semibold text-gray-900'>Miembros</h3>
-                  <p className='text-sm text-gray-500'>
+                  <h3 className='font-semibold text-gray-900 dark:text-night-50'>Miembros</h3>
+                  <p className='text-sm text-gray-500 dark:text-night-400'>
                     {members.length} miembros activos
                   </p>
                 </div>
@@ -754,32 +754,32 @@ const OrganizationDetail = () => {
 
               {/* Pending Invitations */}
               {pendingInvitations.length > 0 && (
-                <div className='p-4 bg-yellow-50 border-b border-yellow-100'>
-                  <p className='text-sm font-medium text-yellow-800 mb-2'>
+                <div className='p-4 bg-yellow-50 dark:bg-yellow-950/40 border-b border-yellow-100 dark:border-yellow-900'>
+                  <p className='text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2'>
                     Invitaciones pendientes
                   </p>
                   <div className='space-y-2'>
                     {pendingInvitations.map((inv) => (
                       <div
                         key={inv.id}
-                        className='flex items-center justify-between bg-white p-3 rounded-lg border border-yellow-200'
+                        className='flex items-center justify-between bg-white dark:bg-night-900 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800'
                       >
                         <div className='flex items-center gap-3'>
-                          <div className='w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center'>
-                            <Clock className='w-4 h-4 text-yellow-600' />
+                          <div className='w-8 h-8 bg-yellow-100 dark:bg-yellow-950/40 rounded-full flex items-center justify-center'>
+                            <Clock className='w-4 h-4 text-yellow-600 dark:text-yellow-400' />
                           </div>
                           <div>
-                            <p className='text-sm font-medium text-gray-900'>
+                            <p className='text-sm font-medium text-gray-900 dark:text-night-50'>
                               {inv.email}
                             </p>
-                            <p className='text-xs text-gray-500'>
+                            <p className='text-xs text-gray-500 dark:text-night-400'>
                               Rol: {inv.role}
                             </p>
                           </div>
                         </div>
                         <button
                           onClick={() => handleCancelInvitation(inv.id)}
-                          className='p-1 text-red-500 hover:bg-red-50 rounded'
+                          className='p-1 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded'
                         >
                           <X className='w-4 h-4' />
                         </button>
@@ -792,20 +792,20 @@ const OrganizationDetail = () => {
               {/* Members List */}
               {loadingMembers ? (
                 <div className='p-8 text-center'>
-                  <Loader2 className='w-6 h-6 animate-spin text-gray-400 mx-auto' />
+                  <Loader2 className='w-6 h-6 animate-spin text-gray-400 dark:text-night-500 mx-auto' />
                 </div>
               ) : (
-                <div className='divide-y divide-gray-100'>
+                <div className='divide-y divide-gray-100 dark:divide-night-700'>
                   {members.map((member) => (
                     <div
                       key={member.id}
-                      className='p-4 flex items-center justify-between hover:bg-gray-50'
+                      className='p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-night-800'
                     >
                       <div className='flex items-center gap-3'>
                         <UserAvatar user={member} size='md' />
                         <div>
                           <div className='flex items-center gap-2'>
-                            <p className='font-medium text-gray-900'>
+                            <p className='font-medium text-gray-900 dark:text-night-50'>
                               {member.name}
                             </p>
                             {getRoleBadge(
@@ -813,11 +813,11 @@ const OrganizationDetail = () => {
                               member.id === organization.owner_id,
                             )}
                           </div>
-                          <p className='text-sm text-gray-500'>
+                          <p className='text-sm text-gray-500 dark:text-night-400'>
                             {member.email}
                           </p>
                           {member.job_title && (
-                            <p className='text-xs text-gray-400'>
+                            <p className='text-xs text-gray-400 dark:text-night-500'>
                               {member.job_title}
                             </p>
                           )}
@@ -828,7 +828,7 @@ const OrganizationDetail = () => {
                         {/* Botón de estadísticas - visible para todos */}
                         <button
                           onClick={() => handleOpenMemberStats(member)}
-                          className='p-2 text-brand-500 hover:bg-brand-50 rounded-lg transition-colors'
+                          className='p-2 text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors'
                           title='Ver estadísticas'
                         >
                           <BarChart3 className='w-4 h-4' />
@@ -845,7 +845,7 @@ const OrganizationDetail = () => {
                                     e.target.value,
                                   )
                                 }
-                                className='text-sm border border-gray-300 rounded-lg px-2 py-1'
+                                className='text-sm border border-gray-300 dark:border-night-600 rounded-lg px-2 py-1'
                               >
                                 <option value='admin'>Admin</option>
                                 <option value='manager'>Manager</option>
@@ -859,7 +859,7 @@ const OrganizationDetail = () => {
                                     data: member,
                                   })
                                 }
-                                className='p-2 text-red-500 hover:bg-red-50 rounded-lg'
+                                className='p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg'
                               >
                                 <UserMinus className='w-4 h-4' />
                               </button>
@@ -882,17 +882,17 @@ const OrganizationDetail = () => {
             exit={{ opacity: 0, y: -10 }}
           >
             {loadingTeams ? (
-              <div className='bg-white rounded-xl border border-gray-200 p-8 text-center'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-8 text-center'>
                 <Loader2 className='w-8 h-8 animate-spin text-brand-500 mx-auto mb-3' />
-                <p className='text-gray-500'>Cargando equipos...</p>
+                <p className='text-gray-500 dark:text-night-400'>Cargando equipos...</p>
               </div>
             ) : teams.length === 0 ? (
-              <div className='bg-white rounded-xl border border-gray-200 p-8 text-center'>
-                <Shield className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                <h3 className='text-lg font-medium text-gray-900 mb-1'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-8 text-center'>
+                <Shield className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                <h3 className='text-lg font-medium text-gray-900 dark:text-night-50 mb-1'>
                   No hay equipos
                 </h3>
-                <p className='text-gray-500 mb-4'>
+                <p className='text-gray-500 dark:text-night-400 mb-4'>
                   Los equipos de esta organización aparecerán aquí
                 </p>
                 <button
@@ -907,7 +907,7 @@ const OrganizationDetail = () => {
                 {teams.map((team) => (
                   <div
                     key={team.id}
-                    className='bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer'
+                    className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-5 hover:shadow-md transition-shadow cursor-pointer'
                     onClick={() => navigate(`/teams/${team.id}`)}
                   >
                     <div className='flex items-start gap-3 mb-3'>
@@ -919,17 +919,17 @@ const OrganizationDetail = () => {
                         {team.name?.charAt(0).toUpperCase() || "T"}
                       </div>
                       <div className='flex-1 min-w-0'>
-                        <h4 className='font-semibold text-gray-900 truncate'>
+                        <h4 className='font-semibold text-gray-900 dark:text-night-50 truncate'>
                           {team.name}
                         </h4>
-                        <p className='text-sm text-gray-500 line-clamp-1'>
+                        <p className='text-sm text-gray-500 dark:text-night-400 line-clamp-1'>
                           {team.description || "Sin descripción"}
                         </p>
                       </div>
                     </div>
 
                     <div className='flex items-center justify-between text-sm'>
-                      <div className='flex items-center gap-1 text-gray-500'>
+                      <div className='flex items-center gap-1 text-gray-500 dark:text-night-400'>
                         <Users className='w-4 h-4' />
                         <span>
                           {team.members_count || team.members?.length || 0}{" "}
@@ -939,8 +939,8 @@ const OrganizationDetail = () => {
                       <span
                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           team.status === "active"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-600"
+                            ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
+                            : "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300"
                         }`}
                       >
                         {team.status === "active" ? "Activo" : "Inactivo"}
@@ -949,9 +949,9 @@ const OrganizationDetail = () => {
 
                     {/* Owner del equipo */}
                     {team.user && (
-                      <div className='mt-3 pt-3 border-t border-gray-100 flex items-center gap-2'>
+                      <div className='mt-3 pt-3 border-t border-gray-100 dark:border-night-700 flex items-center gap-2'>
                         <UserAvatar user={team.user} size='xs' />
-                        <span className='text-xs text-gray-500'>
+                        <span className='text-xs text-gray-500 dark:text-night-400'>
                           Creado por {team.user.name}
                         </span>
                       </div>
@@ -971,17 +971,17 @@ const OrganizationDetail = () => {
             exit={{ opacity: 0, y: -10 }}
           >
             {loadingProjects ? (
-              <div className='bg-white rounded-xl border border-gray-200 p-8 text-center'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-8 text-center'>
                 <Loader2 className='w-8 h-8 animate-spin text-brand-500 mx-auto mb-3' />
-                <p className='text-gray-500'>Cargando proyectos...</p>
+                <p className='text-gray-500 dark:text-night-400'>Cargando proyectos...</p>
               </div>
             ) : projects.length === 0 ? (
-              <div className='bg-white rounded-xl border border-gray-200 p-8 text-center'>
-                <FolderKanban className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                <h3 className='text-lg font-medium text-gray-900 mb-1'>
+              <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-8 text-center'>
+                <FolderKanban className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                <h3 className='text-lg font-medium text-gray-900 dark:text-night-50 mb-1'>
                   No hay proyectos
                 </h3>
-                <p className='text-gray-500 mb-4'>
+                <p className='text-gray-500 dark:text-night-400 mb-4'>
                   Los proyectos de esta organización aparecerán aquí
                 </p>
                 <button
@@ -996,7 +996,7 @@ const OrganizationDetail = () => {
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className='bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer'
+                    className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-5 hover:shadow-md transition-shadow cursor-pointer'
                     onClick={() => navigate(`/projects/${project.id}`)}
                   >
                     <div className='flex items-start gap-3 mb-3'>
@@ -1008,10 +1008,10 @@ const OrganizationDetail = () => {
                         {project.name?.charAt(0).toUpperCase() || "P"}
                       </div>
                       <div className='flex-1 min-w-0'>
-                        <h4 className='font-semibold text-gray-900 truncate'>
+                        <h4 className='font-semibold text-gray-900 dark:text-night-50 truncate'>
                           {project.name}
                         </h4>
-                        <p className='text-sm text-gray-500 line-clamp-1'>
+                        <p className='text-sm text-gray-500 dark:text-night-400 line-clamp-1'>
                           {project.description || "Sin descripción"}
                         </p>
                       </div>
@@ -1020,12 +1020,12 @@ const OrganizationDetail = () => {
                     {/* Barra de progreso */}
                     <div className='mb-3'>
                       <div className='flex items-center justify-between text-sm mb-1'>
-                        <span className='text-gray-500'>Progreso</span>
-                        <span className='font-medium text-gray-900'>
+                        <span className='text-gray-500 dark:text-night-400'>Progreso</span>
+                        <span className='font-medium text-gray-900 dark:text-night-50'>
                           {project.progress || 0}%
                         </span>
                       </div>
-                      <div className='w-full bg-gray-200 rounded-full h-2'>
+                      <div className='w-full bg-gray-200 dark:bg-night-700 rounded-full h-2'>
                         <div
                           className='bg-linear-to-r from-brand-600 to-accent-600 h-2 rounded-full transition-all'
                           style={{ width: `${project.progress || 0}%` }}
@@ -1034,17 +1034,17 @@ const OrganizationDetail = () => {
                     </div>
 
                     <div className='flex items-center justify-between text-sm'>
-                      <div className='flex items-center gap-1 text-gray-500'>
+                      <div className='flex items-center gap-1 text-gray-500 dark:text-night-400'>
                         <CheckSquare className='w-4 h-4' />
                         <span>{project.tasks_count || 0} tareas</span>
                       </div>
                       <span
                         className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           project.priority === "high"
-                            ? "bg-red-100 text-red-700"
+                            ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                             : project.priority === "medium"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
+                              ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
+                              : "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                         }`}
                       >
                         {project.priority === "high"
@@ -1057,7 +1057,7 @@ const OrganizationDetail = () => {
 
                     {/* Fecha de vencimiento */}
                     {project.due_date && (
-                      <div className='mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-sm text-gray-500'>
+                      <div className='mt-3 pt-3 border-t border-gray-100 dark:border-night-700 flex items-center gap-2 text-sm text-gray-500 dark:text-night-400'>
                         <Calendar className='w-4 h-4' />
                         <span>
                           Vence:{" "}
@@ -1083,7 +1083,7 @@ const OrganizationDetail = () => {
                         >
                           {project.team.name?.charAt(0).toUpperCase()}
                         </div>
-                        <span className='text-xs text-gray-500'>
+                        <span className='text-xs text-gray-500 dark:text-night-400'>
                           {project.team.name}
                         </span>
                       </div>
@@ -1104,16 +1104,16 @@ const OrganizationDetail = () => {
             className='space-y-6'
           >
             {/* Configuración General */}
-            <div className='bg-white rounded-xl border border-gray-200 p-6'>
-              <h3 className='text-lg font-semibold text-gray-900 mb-6'>
+            <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-6'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-6'>
                 Configuración general
               </h3>
 
               {organization.is_owner ? (
                 <div className='space-y-6'>
-                  <div className='p-4 bg-gray-50 rounded-lg'>
+                  <div className='p-4 bg-gray-50 dark:bg-night-800 rounded-lg'>
                     <div className='flex items-center justify-between mb-1'>
-                      <h4 className='font-medium text-gray-900'>
+                      <h4 className='font-medium text-gray-900 dark:text-night-50'>
                         Plan actual
                       </h4>
                       {organization.plan_expires_at &&
@@ -1131,7 +1131,7 @@ const OrganizationDetail = () => {
                           );
                         })()}
                     </div>
-                    <p className='text-gray-600 mb-4'>
+                    <p className='text-gray-600 dark:text-night-300 mb-4'>
                       {organization.plan?.name}
                     </p>
 
@@ -1160,11 +1160,11 @@ const OrganizationDetail = () => {
                     </button>
                   </div>
 
-                  <div className='p-4 border border-red-200 rounded-lg bg-red-50'>
-                    <h4 className='font-medium text-red-800 mb-2'>
+                  <div className='p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-950/40'>
+                    <h4 className='font-medium text-red-800 dark:text-red-300 mb-2'>
                       Zona de peligro
                     </h4>
-                    <p className='text-red-600 text-sm mb-3'>
+                    <p className='text-red-600 dark:text-red-400 text-sm mb-3'>
                       Eliminar la organización borrará todos los datos asociados
                       de forma permanente.
                     </p>
@@ -1175,8 +1175,8 @@ const OrganizationDetail = () => {
                 </div>
               ) : (
                 <div className='text-center py-8'>
-                  <Settings className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                  <p className='text-gray-500'>
+                  <Settings className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                  <p className='text-gray-500 dark:text-night-400'>
                     Solo el dueño de la organización puede acceder a la
                     configuración
                   </p>
@@ -1185,8 +1185,8 @@ const OrganizationDetail = () => {
             </div>
 
             {/* Configuración de Correo */}
-            <div className='bg-white rounded-xl border border-gray-200 p-6'>
-              <h3 className='text-lg font-semibold text-gray-900 mb-6'>
+            <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 p-6'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-6'>
                 Configuración de correo
               </h3>
               <OrganizationMailConfig
@@ -1224,14 +1224,14 @@ const OrganizationDetail = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className='relative bg-white rounded-xl shadow-xl max-w-md w-full p-6'
+              className='relative bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-md w-full p-6'
             >
-              <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-4'>
                 Invitar miembro
               </h3>
               <form onSubmit={handleSendInvitation} className='space-y-4'>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                     Email *
                   </label>
                   <input
@@ -1244,12 +1244,12 @@ const OrganizationDetail = () => {
                         email: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500'
                     placeholder='email@ejemplo.com'
                   />
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                     Rol
                   </label>
                   <select
@@ -1260,7 +1260,7 @@ const OrganizationDetail = () => {
                         role: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg'
                   >
                     <option value='member'>Miembro</option>
                     <option value='manager'>Manager</option>
@@ -1268,7 +1268,7 @@ const OrganizationDetail = () => {
                   </select>
                 </div>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                     Puesto (opcional)
                   </label>
                   <input
@@ -1280,7 +1280,7 @@ const OrganizationDetail = () => {
                         job_title: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg'
                     placeholder='Ej: Desarrollador Senior'
                   />
                 </div>
@@ -1300,7 +1300,7 @@ const OrganizationDetail = () => {
                   <button
                     type='button'
                     onClick={() => setIsInviteModalOpen(false)}
-                    className='px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50'
+                    className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800'
                   >
                     Cancelar
                   </button>
@@ -1341,26 +1341,26 @@ const OrganizationDetail = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className='relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
+              className='relative bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
             >
               {/* Header */}
-              <div className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between'>
+              <div className='sticky top-0 bg-white dark:bg-night-900 border-b border-gray-200 dark:border-night-700 px-6 py-4 flex items-center justify-between'>
                 <div className='flex items-center gap-3'>
                   <UserAvatar user={memberStatsModal.member} size='md' />
                   <div>
-                    <h3 className='text-lg font-semibold text-gray-900'>
+                    <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
                       {memberStatsModal.member?.name}
                     </h3>
-                    <p className='text-sm text-gray-500'>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>
                       {memberStatsModal.member?.email}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleCloseMemberStats}
-                  className='p-2 hover:bg-gray-100 rounded-lg'
+                  className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg'
                 >
-                  <X className='w-5 h-5 text-gray-500' />
+                  <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
                 </button>
               </div>
 
@@ -1369,7 +1369,7 @@ const OrganizationDetail = () => {
                 {memberStatsModal.loading ? (
                   <div className='flex flex-col items-center justify-center py-12'>
                     <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
-                    <p className='text-gray-500'>Cargando estadísticas...</p>
+                    <p className='text-gray-500 dark:text-night-400'>Cargando estadísticas...</p>
                   </div>
                 ) : memberStatsModal.stats ? (
                   <div className='space-y-6'>
@@ -1394,7 +1394,7 @@ const OrganizationDetail = () => {
                         </div>
                         <div className='w-full bg-white/20 rounded-full h-3'>
                           <div
-                            className='bg-white h-3 rounded-full transition-all duration-500'
+                            className='bg-white dark:bg-night-900 h-3 rounded-full transition-all duration-500'
                             style={{
                               width: `${
                                 memberStatsModal.stats.productivity
@@ -1439,121 +1439,121 @@ const OrganizationDetail = () => {
                     </div>
 
                     {/* Proyectos */}
-                    <div className='bg-blue-50 rounded-xl p-4'>
+                    <div className='bg-blue-50 dark:bg-blue-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
-                        <FolderKanban className='w-5 h-5 text-blue-600' />
+                        <FolderKanban className='w-5 h-5 text-blue-600 dark:text-blue-400' />
                         <h4 className='font-semibold text-blue-900'>
                           Proyectos
                         </h4>
                       </div>
                       <div className='grid grid-cols-3 gap-4'>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-blue-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                             {memberStatsModal.stats.projects?.owned || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Propios</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Propios</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-blue-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                             {memberStatsModal.stats.projects?.collaborating ||
                               0}
                           </p>
-                          <p className='text-xs text-gray-500'>Colabora</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Colabora</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-blue-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                             {memberStatsModal.stats.projects?.total || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Total</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Total</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Tareas */}
-                    <div className='bg-green-50 rounded-xl p-4'>
+                    <div className='bg-green-50 dark:bg-green-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
-                        <CheckSquare className='w-5 h-5 text-green-600' />
+                        <CheckSquare className='w-5 h-5 text-green-600 dark:text-green-400' />
                         <h4 className='font-semibold text-green-900'>Tareas</h4>
                         {memberStatsModal.stats.tasks?.completion_rate > 0 && (
-                          <span className='ml-auto text-sm font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full'>
+                          <span className='ml-auto text-sm font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-950/40 px-2 py-0.5 rounded-full'>
                             {memberStatsModal.stats.tasks.completion_rate}%
                             completado
                           </span>
                         )}
                       </div>
                       <div className='grid grid-cols-4 gap-3'>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {memberStatsModal.stats.tasks?.created || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Creadas</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Creadas</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {memberStatsModal.stats.tasks?.assigned || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Asignadas</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Asignadas</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {memberStatsModal.stats.tasks?.completed || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Completadas</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Completadas</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-yellow-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-yellow-600 dark:text-yellow-400'>
                             {memberStatsModal.stats.tasks?.pending || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Pendientes</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Pendientes</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Tickets */}
-                    <div className='bg-orange-50 rounded-xl p-4'>
+                    <div className='bg-orange-50 dark:bg-orange-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
-                        <Ticket className='w-5 h-5 text-orange-600' />
+                        <Ticket className='w-5 h-5 text-orange-600 dark:text-orange-400' />
                         <h4 className='font-semibold text-orange-900'>
                           Tickets
                         </h4>
                         {memberStatsModal.stats.tickets?.resolution_rate >
                           0 && (
-                          <span className='ml-auto text-sm font-medium text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full'>
+                          <span className='ml-auto text-sm font-medium text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-950/40 px-2 py-0.5 rounded-full'>
                             {memberStatsModal.stats.tickets.resolution_rate}%
                             resueltos
                           </span>
                         )}
                       </div>
                       <div className='grid grid-cols-4 gap-3'>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-orange-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-orange-600 dark:text-orange-400'>
                             {memberStatsModal.stats.tickets?.created || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Creados</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Creados</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-orange-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-orange-600 dark:text-orange-400'>
                             {memberStatsModal.stats.tickets?.assigned || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Asignados</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Asignados</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {memberStatsModal.stats.tickets?.resolved || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Resueltos</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Resueltos</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-red-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-red-600 dark:text-red-400'>
                             {memberStatsModal.stats.tickets?.open || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Abiertos</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Abiertos</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Equipos */}
-                    <div className='bg-accent-50 rounded-xl p-4'>
+                    <div className='bg-accent-50 dark:bg-accent-900/20 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <Users className='w-5 h-5 text-accent-600' />
                         <h4 className='font-semibold text-accent-900'>
@@ -1561,31 +1561,31 @@ const OrganizationDetail = () => {
                         </h4>
                       </div>
                       <div className='grid grid-cols-3 gap-4'>
-                        <div className='bg-white rounded-lg p-3 text-center'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
                           <p className='text-2xl font-bold text-accent-600'>
                             {memberStatsModal.stats.teams?.owned || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Lidera</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Lidera</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
                           <p className='text-2xl font-bold text-accent-600'>
                             {memberStatsModal.stats.teams?.member_of || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Miembro</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Miembro</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
                           <p className='text-2xl font-bold text-accent-600'>
                             {memberStatsModal.stats.teams?.total || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Total</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Total</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className='text-center py-12'>
-                    <BarChart3 className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                    <p className='text-gray-500'>
+                    <BarChart3 className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                    <p className='text-gray-500 dark:text-night-400'>
                       No se pudieron cargar las estadísticas
                     </p>
                   </div>

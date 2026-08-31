@@ -67,12 +67,12 @@ const ContextSwitcher = ({ isCompact = false }) => {
   const getContextColor = (type, isActive) => {
     if (type === "organization") {
       return isActive
-        ? "bg-accent-100 text-accent-700 border-accent-200"
-        : "hover:bg-accent-50 text-accent-600";
+        ? "bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 border-accent-200 dark:border-accent-800 dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-800"
+        : "hover:bg-accent-50 dark:hover:bg-accent-900/20 text-accent-600 dark:hover:bg-accent-900/20 dark:text-accent-400";
     }
     return isActive
-      ? "bg-brand-100 text-brand-700 border-brand-200"
-      : "hover:bg-brand-50 text-brand-600";
+      ? "bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 border-brand-200 dark:border-brand-800 dark:bg-brand-900/30 dark:text-brand-300 dark:border-brand-800"
+      : "hover:bg-brand-50 dark:hover:bg-brand-900/20 text-brand-600 dark:hover:bg-brand-900/20 dark:text-brand-400";
   };
 
   const ActiveIcon = getContextIcon(activeContext?.type);
@@ -111,7 +111,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           disabled={switchingContext}
-          className='flex items-center justify-center w-full py-3 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors duration-200'
+          className='flex items-center justify-center w-full py-3 rounded-lg text-gray-500 hover:bg-gray-50 dark:text-night-400 dark:hover:bg-night-800 transition-colors duration-200'
           title={`Modo: ${activeContext?.name}`}
         >
           {switchingContext ? (
@@ -127,10 +127,10 @@ const ContextSwitcher = ({ isCompact = false }) => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              className='absolute left-full ml-2 top-0 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[180px] z-50'
+              className='absolute left-full ml-2 top-0 bg-white dark:bg-night-800 rounded-lg shadow-xl border border-gray-200 dark:border-night-700 py-1 min-w-[180px] z-50'
             >
-              <div className='px-3 py-2 border-b border-gray-100'>
-                <p className='text-xs text-gray-500 font-medium'>
+              <div className='px-3 py-2 border-b border-gray-100 dark:border-night-700'>
+                <p className='text-xs text-gray-500 dark:text-night-400 font-medium'>
                   Cambiar modo
                 </p>
               </div>
@@ -144,8 +144,8 @@ const ContextSwitcher = ({ isCompact = false }) => {
                     disabled={switchingContext}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${
                       isActive
-                        ? "bg-gray-50 text-gray-900"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-gray-50 text-gray-900 dark:bg-night-700 dark:text-night-50"
+                        : "text-gray-700 hover:bg-gray-50 dark:text-night-300 dark:hover:bg-night-700"
                     }`}
                   >
                     {renderContextIcon(ctx, "w-4 h-4")}
@@ -179,7 +179,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
           renderContextIcon(activeContext, "w-5 h-5")
         )}
         <div className='flex-1 text-left'>
-          <p className='text-xs text-gray-500'>Modo actual</p>
+          <p className='text-xs text-gray-500 dark:text-night-400'>Modo actual</p>
           <p className='text-sm font-medium truncate'>{activeContext?.name}</p>
         </div>
         <ChevronDown
@@ -202,10 +202,10 @@ const ContextSwitcher = ({ isCompact = false }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className='absolute z-[200] bg-white rounded-lg shadow-xl border border-gray-200 py-1 w-full top-full mt-2'
+              className='absolute z-[200] bg-white dark:bg-night-800 rounded-lg shadow-xl border border-gray-200 dark:border-night-700 py-1 w-full top-full mt-2'
             >
-              <div className='px-3 py-2 border-b border-gray-100'>
-                <p className='text-xs text-gray-500 font-medium'>
+              <div className='px-3 py-2 border-b border-gray-100 dark:border-night-700'>
+                <p className='text-xs text-gray-500 dark:text-night-400 font-medium'>
                   Seleccionar modo de trabajo
                 </p>
               </div>
@@ -219,15 +219,15 @@ const ContextSwitcher = ({ isCompact = false }) => {
                     disabled={switchingContext}
                     className={`w-full flex items-center gap-3 px-3 py-3 text-left transition-all duration-200 ${
                       isActive
-                        ? "bg-gray-50 text-gray-900"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-gray-50 text-gray-900 dark:bg-night-700 dark:text-night-50"
+                        : "text-gray-700 hover:bg-gray-50 dark:text-night-300 dark:hover:bg-night-700"
                     }`}
                   >
                     <div
                       className={`p-2 rounded-lg ${
                         ctx.type === "organization"
-                          ? "bg-accent-100"
-                          : "bg-brand-100"
+                          ? "bg-accent-100 dark:bg-accent-900/30"
+                          : "bg-brand-100 dark:bg-brand-900/30"
                       }`}
                     >
                       {renderContextIcon(ctx, "w-4 h-4")}
@@ -235,7 +235,7 @@ const ContextSwitcher = ({ isCompact = false }) => {
                     <div className='flex-1'>
                       <p className='text-sm font-medium'>{ctx.name}</p>
                       {ctx.description && (
-                        <p className='text-xs text-gray-500'>
+                        <p className='text-xs text-gray-500 dark:text-night-400'>
                           {ctx.description}
                         </p>
                       )}

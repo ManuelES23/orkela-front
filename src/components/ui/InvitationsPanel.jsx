@@ -170,7 +170,7 @@ const InvitationsPanel = () => {
       {/* Botón de invitaciones */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors'
+        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-night-300 dark:hover:text-night-50 dark:hover:bg-night-800 rounded-lg transition-colors'
         title='Invitaciones pendientes'
       >
         <Mail className='w-5 h-5' />
@@ -195,20 +195,20 @@ const InvitationsPanel = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50'
+            className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white dark:bg-night-800 rounded-xl shadow-xl border border-gray-200 dark:border-night-700 overflow-hidden z-50'
           >
             {/* Header */}
-            <div className='px-4 py-3 bg-linear-to-r from-brand-50 to-white border-b border-gray-100'>
+            <div className='px-4 py-3 bg-linear-to-r from-brand-50 to-white dark:from-brand-900/20 dark:to-night-800 border-b border-gray-100 dark:border-night-700'>
               <div className='flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
                   <MailOpen className='w-5 h-5 text-brand-500' />
-                  <h3 className='font-semibold text-gray-900'>
+                  <h3 className='font-semibold text-gray-900 dark:text-night-50'>
                     Invitaciones Pendientes
                   </h3>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className='p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors'
+                  className='p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-night-400 dark:hover:text-night-100 dark:hover:bg-night-700 rounded-lg transition-colors'
                 >
                   <X className='w-4 h-4' />
                 </button>
@@ -223,17 +223,17 @@ const InvitationsPanel = () => {
                 </div>
               ) : invitations.length === 0 ? (
                 <div className='py-12 text-center'>
-                  <Mail className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                  <p className='text-gray-500 text-sm'>
+                  <Mail className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                  <p className='text-gray-500 dark:text-night-400 text-sm'>
                     No tienes invitaciones pendientes
                   </p>
-                  <p className='text-gray-400 text-xs mt-1'>
+                  <p className='text-gray-400 dark:text-night-500 text-xs mt-1'>
                     Las invitaciones a proyectos, equipos y organizaciones
                     aparecerán aquí
                   </p>
                 </div>
               ) : (
-                <div className='divide-y divide-gray-100'>
+                <div className='divide-y divide-gray-100 dark:divide-night-700'>
                   <AnimatePresence>
                     {invitations.map((invitation) => (
                       <motion.div
@@ -241,7 +241,7 @@ const InvitationsPanel = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className='px-4 py-3 hover:bg-gray-50 transition-colors'
+                        className='px-4 py-3 hover:bg-gray-50 dark:hover:bg-night-700 transition-colors'
                       >
                         <div className='flex items-start gap-3'>
                           {/* Ícono */}
@@ -259,25 +259,25 @@ const InvitationsPanel = () => {
                           {/* Contenido */}
                           <div className='flex-1 min-w-0'>
                             <div className='flex items-center gap-2 mb-1'>
-                              <span className='text-xs font-medium text-gray-500 uppercase'>
+                              <span className='text-xs font-medium text-gray-500 dark:text-night-400 uppercase'>
                                 {getTypeLabel(invitation.type)}
                               </span>
                               {invitation.role && (
-                                <span className='text-xs px-1.5 py-0.5 bg-brand-100 text-brand-700 rounded'>
+                                <span className='text-xs px-1.5 py-0.5 bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 dark:bg-brand-900/30 dark:text-brand-300 rounded'>
                                   {invitation.role}
                                 </span>
                               )}
                             </div>
-                            <p className='font-medium text-gray-900 truncate'>
+                            <p className='font-medium text-gray-900 dark:text-night-50 truncate'>
                               {invitation.resource_name}
                             </p>
-                            <p className='text-sm text-gray-600'>
+                            <p className='text-sm text-gray-600 dark:text-night-300'>
                               Invitado por{" "}
                               <span className='font-medium'>
                                 {invitation.invited_by}
                               </span>
                             </p>
-                            <div className='flex items-center gap-1 text-xs text-gray-400 mt-1'>
+                            <div className='flex items-center gap-1 text-xs text-gray-400 dark:text-night-500 mt-1'>
                               <Clock className='w-3 h-3' />
                               {formatDistanceToNow(invitation.created_at)}
                             </div>
@@ -299,7 +299,7 @@ const InvitationsPanel = () => {
                               <button
                                 onClick={() => handleDecline(invitation)}
                                 disabled={processingId === invitation.id}
-                                className='flex items-center gap-1 px-3 py-1.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                className='flex items-center gap-1 px-3 py-1.5 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-night-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
                               >
                                 <X className='w-4 h-4' />
                                 Rechazar
@@ -316,8 +316,8 @@ const InvitationsPanel = () => {
 
             {/* Footer */}
             {invitations.length > 0 && (
-              <div className='px-4 py-2 bg-gray-50 border-t border-gray-100'>
-                <p className='text-xs text-gray-500 text-center'>
+              <div className='px-4 py-2 bg-gray-50 dark:bg-night-900 border-t border-gray-100 dark:border-night-700'>
+                <p className='text-xs text-gray-500 dark:text-night-400 text-center'>
                   {invitations.length} invitación
                   {invitations.length !== 1 ? "es" : ""} pendiente
                   {invitations.length !== 1 ? "s" : ""}
@@ -348,16 +348,16 @@ const InvitationsPanel = () => {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className='fixed inset-0 z-101 flex items-center justify-center p-4'
             >
-              <div className='bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden'>
+              <div className='bg-white dark:bg-night-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden'>
                 {/* Header */}
-                <div className='p-6 text-center bg-linear-to-br from-brand-50 to-accent-50'>
-                  <div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-                    <Check className='w-8 h-8 text-green-600' />
+                <div className='p-6 text-center bg-linear-to-br from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20'>
+                  <div className='w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4'>
+                    <Check className='w-8 h-8 text-green-600 dark:text-green-400' />
                   </div>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-2'>
+                  <h2 className='text-xl font-semibold text-gray-900 dark:text-night-50 mb-2'>
                     ¡Bienvenido a {showOrgContextModal.name}!
                   </h2>
-                  <p className='text-gray-600'>
+                  <p className='text-gray-600 dark:text-night-300'>
                     Te has unido exitosamente a la organización. ¿Cómo deseas
                     continuar?
                   </p>
@@ -368,17 +368,17 @@ const InvitationsPanel = () => {
                   {/* Opción: Modo Organización */}
                   <button
                     onClick={() => handleOrgContextSelection("organization")}
-                    className='w-full p-4 border-2 border-brand-200 rounded-xl hover:border-brand-400 hover:bg-brand-50 transition-all group text-left'
+                    className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 rounded-xl hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all group text-left'
                   >
                     <div className='flex items-center gap-3'>
-                      <div className='p-2 bg-brand-100 rounded-lg group-hover:bg-brand-200 transition-colors'>
-                        <Building2 className='w-6 h-6 text-brand-600' />
+                      <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
+                        <Building2 className='w-6 h-6 text-brand-600 dark:text-brand-300' />
                       </div>
                       <div>
-                        <p className='font-semibold text-gray-900'>
+                        <p className='font-semibold text-gray-900 dark:text-night-50'>
                           Entrar como {showOrgContextModal.name}
                         </p>
-                        <p className='text-sm text-gray-500'>
+                        <p className='text-sm text-gray-500 dark:text-night-400'>
                           Ver proyectos y equipos de la organización
                         </p>
                       </div>
@@ -388,17 +388,17 @@ const InvitationsPanel = () => {
                   {/* Opción: Modo Personal */}
                   <button
                     onClick={() => handleOrgContextSelection("personal")}
-                    className='w-full p-4 border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all group text-left'
+                    className='w-full p-4 border-2 border-gray-200 dark:border-night-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-night-800 transition-all group text-left'
                   >
                     <div className='flex items-center gap-3'>
-                      <div className='p-2 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors'>
-                        <Users className='w-6 h-6 text-gray-600' />
+                      <div className='p-2 bg-gray-100 dark:bg-night-700 rounded-lg group-hover:bg-gray-200 dark:group-hover:bg-night-600 transition-colors'>
+                        <Users className='w-6 h-6 text-gray-600 dark:text-night-300' />
                       </div>
                       <div>
-                        <p className='font-semibold text-gray-900'>
+                        <p className='font-semibold text-gray-900 dark:text-night-50'>
                           Continuar en modo personal
                         </p>
-                        <p className='text-sm text-gray-500'>
+                        <p className='text-sm text-gray-500 dark:text-night-400'>
                           Ver tus proyectos y equipos personales
                         </p>
                       </div>

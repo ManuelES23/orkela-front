@@ -189,8 +189,8 @@ export default function Settings() {
             onClick={() => handleSelectProvider(provider)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
               selectedProvider === provider.key
-                ? "bg-brand-100 text-brand-700 border-brand-300"
-                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                ? "bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 border-brand-300 dark:border-brand-700"
+                : "bg-white dark:bg-night-900 text-gray-600 dark:text-night-300 border-gray-200 dark:border-night-700 hover:bg-gray-50 dark:hover:bg-night-800"
             }`}
           >
             {provider.label}
@@ -215,11 +215,11 @@ export default function Settings() {
                 {/* Servidor SMTP */}
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                       Servidor SMTP
                     </label>
                     <div className='relative'>
-                      <Server className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                      <Server className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                       <input
                         type='text'
                         value={config.mail_host}
@@ -230,7 +230,7 @@ export default function Settings() {
                           );
                           setSelectedProvider(matched ? matched.key : "custom");
                         }}
-                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                        className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         placeholder='smtp.office365.com'
                         required
                       />
@@ -238,7 +238,7 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                       Puerto
                     </label>
                     <input
@@ -247,7 +247,7 @@ export default function Settings() {
                       onChange={(e) =>
                         setConfig({ ...config, mail_port: e.target.value })
                       }
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                      className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                       placeholder='587'
                       required
                     />
@@ -256,7 +256,7 @@ export default function Settings() {
 
                 {/* Encriptación */}
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                     Encriptación
                   </label>
                   <select
@@ -264,7 +264,7 @@ export default function Settings() {
                     onChange={(e) =>
                       setConfig({ ...config, mail_encryption: e.target.value })
                     }
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                     required
                   >
                     <option value='tls'>TLS</option>
@@ -275,11 +275,11 @@ export default function Settings() {
                 {/* Credenciales */}
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                       Usuario (Email)
                     </label>
                     <div className='relative'>
-                      <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                      <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                       <input
                         type='email'
                         value={config.mail_username}
@@ -289,7 +289,7 @@ export default function Settings() {
                             mail_username: e.target.value,
                           })
                         }
-                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                        className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         placeholder='tu-email@empresa.com'
                         required
                       />
@@ -297,11 +297,11 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                       Contraseña
                     </label>
                     <div className='relative'>
-                      <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                      <Lock className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                       <input
                         type='password'
                         value={config.mail_password}
@@ -311,11 +311,11 @@ export default function Settings() {
                             mail_password: e.target.value,
                           })
                         }
-                        className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                        className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         placeholder='••••••••'
                       />
                     </div>
-                    <p className='text-xs text-gray-500 mt-1'>
+                    <p className='text-xs text-gray-500 dark:text-night-400 mt-1'>
                       Dejar vacío para mantener la contraseña actual
                     </p>
                   </div>
@@ -324,7 +324,7 @@ export default function Settings() {
                 {/* Remitente */}
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                       Email del remitente
                     </label>
                     <input
@@ -336,14 +336,14 @@ export default function Settings() {
                           mail_from_address: e.target.value,
                         })
                       }
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                      className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                       placeholder='noreply@orkela.com'
                       required
                     />
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                       Nombre del remitente
                     </label>
                     <input
@@ -352,7 +352,7 @@ export default function Settings() {
                       onChange={(e) =>
                         setConfig({ ...config, mail_from_name: e.target.value })
                       }
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                      className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                       placeholder='Orkela'
                       required
                     />
@@ -390,21 +390,21 @@ export default function Settings() {
               </div>
             </Card.Header>
             <Card.Body>
-              <p className='text-sm text-gray-600 mb-4'>
+              <p className='text-sm text-gray-600 dark:text-night-300 mb-4'>
                 Envía un email de prueba para verificar que la configuración
                 SMTP esté funcionando correctamente.
               </p>
 
               <div className='space-y-4'>
                 <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                     Email de destino
                   </label>
                   <input
                     type='email'
                     value={testEmail}
                     onChange={(e) => setTestEmail(e.target.value)}
-                    className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                     placeholder='test@ejemplo.com'
                   />
                 </div>
@@ -435,9 +435,9 @@ export default function Settings() {
           <Card className='mt-6'>
             <Card.Body>
               <div className='flex items-start gap-3'>
-                <AlertCircle className='w-5 h-5 text-blue-500 shrink-0 mt-0.5' />
-                <div className='text-sm text-gray-600'>
-                  <p className='font-medium text-gray-900 mb-1'>
+                <AlertCircle className='w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5' />
+                <div className='text-sm text-gray-600 dark:text-night-300'>
+                  <p className='font-medium text-gray-900 dark:text-night-50 mb-1'>
                     Proveedores SMTP comunes
                   </p>
                   <ul className='space-y-1 text-xs'>

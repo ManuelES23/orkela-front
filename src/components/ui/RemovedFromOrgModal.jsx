@@ -48,7 +48,7 @@ const RemovedFromOrgModal = ({
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className='fixed inset-0 z-100 flex items-center justify-center p-4'
           >
-            <div className='bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden'>
+            <div className='bg-white dark:bg-night-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden'>
               {/* Header con icono de alerta */}
               <div className='bg-linear-to-br from-orange-500 to-red-500 p-6 text-center'>
                 <motion.div
@@ -66,32 +66,32 @@ const RemovedFromOrgModal = ({
 
               {/* Contenido */}
               <div className='p-6'>
-                <div className='flex items-start gap-3 mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200'>
-                  <AlertTriangle className='w-6 h-6 text-orange-500 shrink-0 mt-0.5' />
+                <div className='flex items-start gap-3 mb-6 p-4 bg-orange-50 dark:bg-orange-950/40 rounded-xl border border-orange-200 dark:border-orange-800'>
+                  <AlertTriangle className='w-6 h-6 text-orange-500 dark:text-orange-400 shrink-0 mt-0.5' />
                   <div>
-                    <p className='text-gray-700'>
+                    <p className='text-gray-700 dark:text-night-300'>
                       <span className='font-semibold'>
                         {removerName || "Un administrador"}
                       </span>{" "}
                       te ha removido de la organización{" "}
-                      <span className='font-semibold text-orange-600'>
+                      <span className='font-semibold text-orange-600 dark:text-orange-400'>
                         "{organizationName || "la organización"}"
                       </span>
                     </p>
-                    <p className='text-sm text-gray-500 mt-2'>
+                    <p className='text-sm text-gray-500 dark:text-night-400 mt-2'>
                       Ya no tienes acceso a los recursos de esta organización.
                     </p>
                   </div>
                 </div>
 
                 <div className='space-y-3'>
-                  <p className='text-gray-600 text-center'>
+                  <p className='text-gray-600 dark:text-night-300 text-center'>
                     Continuarás en{" "}
                     <span className='font-semibold'>modo personal</span>, donde
                     podrás:
                   </p>
 
-                  <ul className='space-y-2 text-sm text-gray-600'>
+                  <ul className='space-y-2 text-sm text-gray-600 dark:text-night-300'>
                     <li className='flex items-center gap-2'>
                       <div className='w-1.5 h-1.5 bg-brand-500 rounded-full' />
                       Acceder a tus proyectos personales
@@ -118,7 +118,7 @@ const RemovedFromOrgModal = ({
                   Continuar en Modo Personal
                 </motion.button>
 
-                <p className='text-xs text-gray-400 text-center mt-4'>
+                <p className='text-xs text-gray-400 dark:text-night-500 text-center mt-4'>
                   Si crees que esto es un error, contacta al administrador de la
                   organización.
                 </p>

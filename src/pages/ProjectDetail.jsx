@@ -619,23 +619,23 @@ const ProjectDetail = () => {
     if (project.status === "completed") {
       return {
         label: "Completado",
-        color: "text-green-600",
-        bgColor: "bg-green-100",
+        color: "text-green-600 dark:text-green-400",
+        bgColor: "bg-green-100 dark:bg-green-950/40",
         icon: CheckCircle,
       };
     }
     if (project.status === "on_hold") {
       return {
         label: "En Pausa",
-        color: "text-yellow-600",
-        bgColor: "bg-yellow-100",
+        color: "text-yellow-600 dark:text-yellow-400",
+        bgColor: "bg-yellow-100 dark:bg-yellow-950/40",
         icon: AlertCircle,
       };
     }
     return {
       label: "Activo",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-100 dark:bg-blue-950/40",
       icon: Clock,
     };
   };
@@ -644,16 +644,16 @@ const ProjectDetail = () => {
     if (!project) return { label: "", color: "", bgColor: "" };
 
     if (project.priority === "high") {
-      return { label: "Alta", color: "text-red-600", bgColor: "bg-red-100" };
+      return { label: "Alta", color: "text-red-600 dark:text-red-400", bgColor: "bg-red-100 dark:bg-red-950/40" };
     }
     if (project.priority === "medium") {
       return {
         label: "Media",
-        color: "text-yellow-600",
-        bgColor: "bg-yellow-100",
+        color: "text-yellow-600 dark:text-yellow-400",
+        bgColor: "bg-yellow-100 dark:bg-yellow-950/40",
       };
     }
-    return { label: "Baja", color: "text-green-600", bgColor: "bg-green-100" };
+    return { label: "Baja", color: "text-green-600 dark:text-green-400", bgColor: "bg-green-100 dark:bg-green-950/40" };
   };
 
   const formatDate = (dateString) => {
@@ -673,8 +673,8 @@ const ProjectDetail = () => {
     if (project.status === "completed" || project.progress === 100) {
       return {
         label: "Completado",
-        color: "text-green-600",
-        bgColor: "bg-green-50",
+        color: "text-green-600 dark:text-green-400",
+        bgColor: "bg-green-50 dark:bg-green-950/40",
       };
     }
 
@@ -686,25 +686,25 @@ const ProjectDetail = () => {
     if (diffDays < 0)
       return {
         label: `${Math.abs(diffDays)} días de retraso`,
-        color: "text-red-600",
-        bgColor: "bg-red-50",
+        color: "text-red-600 dark:text-red-400",
+        bgColor: "bg-red-50 dark:bg-red-950/40",
       };
     if (diffDays === 0)
       return {
         label: "Vence hoy",
-        color: "text-orange-600",
-        bgColor: "bg-orange-50",
+        color: "text-orange-600 dark:text-orange-400",
+        bgColor: "bg-orange-50 dark:bg-orange-950/40",
       };
     if (diffDays <= 7)
       return {
         label: `${diffDays} días restantes`,
-        color: "text-yellow-600",
-        bgColor: "bg-yellow-50",
+        color: "text-yellow-600 dark:text-yellow-400",
+        bgColor: "bg-yellow-50 dark:bg-yellow-950/40",
       };
     return {
       label: `${diffDays} días restantes`,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-950/40",
     };
   };
 
@@ -735,7 +735,7 @@ const ProjectDetail = () => {
     return (
       <Layout title='Error'>
         <div className='text-center py-20'>
-          <p className='text-red-600 text-lg mb-4'>
+          <p className='text-red-600 dark:text-red-400 text-lg mb-4'>
             {error || "Proyecto no encontrado"}
           </p>
           <button
@@ -756,7 +756,7 @@ const ProjectDetail = () => {
         <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4'>
           <button
             onClick={() => navigate("/projects")}
-            className='flex items-center gap-2 text-gray-600 hover:text-gray-900 transition'
+            className='flex items-center gap-2 text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50 transition'
           >
             <ArrowLeft className='w-5 h-5' />
             <span>Volver a Proyectos</span>
@@ -771,7 +771,7 @@ const ProjectDetail = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setExportMenuOpen(!exportMenuOpen)}
                 disabled={exporting}
-                className='flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-all shadow-sm text-sm disabled:opacity-50'
+                className='flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-700 dark:text-night-300 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-all shadow-sm text-sm disabled:opacity-50'
               >
                 {exporting ? (
                   <Loader2 className='w-4 h-4 animate-spin' />
@@ -793,36 +793,36 @@ const ProjectDetail = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className='absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50'
+                    className='absolute right-0 mt-2 w-52 bg-white dark:bg-night-900 rounded-lg shadow-lg border border-gray-200 dark:border-night-700 py-2 z-50'
                   >
-                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wider'>
                       Exportar Proyecto
                     </div>
                     <button
                       onClick={() => handleExport("pdf")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                     >
-                      <FileText className='w-4 h-4 text-red-500' />
+                      <FileText className='w-4 h-4 text-red-500 dark:text-red-400' />
                       PDF con tareas
                     </button>
                     <button
                       onClick={() => handleExport("excel")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                     >
-                      <FileSpreadsheet className='w-4 h-4 text-green-600' />
+                      <FileSpreadsheet className='w-4 h-4 text-green-600 dark:text-green-400' />
                       Excel con tareas
                     </button>
 
                     {canUseGantt && (
                       <>
-                        <div className='border-t border-gray-100 my-2' />
+                        <div className='border-t border-gray-100 dark:border-night-700 my-2' />
 
-                        <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                        <div className='px-3 py-2 text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wider'>
                           Diagrama Gantt
                         </div>
                         <button
                           onClick={() => handleExport("gantt")}
-                          className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                          className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                         >
                           <GanttChartIcon className='w-4 h-4 text-accent-500' />
                           Exportar Gantt a PDF
@@ -865,7 +865,7 @@ const ProjectDetail = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm'
+          className='bg-white dark:bg-night-900 rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-night-700 shadow-sm'
         >
           <div className='flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6'>
             <div className='relative flex items-center justify-center shrink-0'>
@@ -876,14 +876,14 @@ const ProjectDetail = () => {
                 strokeWidth={7}
               />
               <div className='absolute flex flex-col items-center'>
-                <span className='text-xl font-bold text-gray-900 tabular-nums'>
+                <span className='text-xl font-bold text-gray-900 dark:text-night-50 tabular-nums'>
                   <AnimatedNumber value={project.progress || 0} suffix='%' />
                 </span>
               </div>
             </div>
 
             <div className='flex-1 text-center sm:text-left w-full'>
-              <h1 className='text-xl sm:text-3xl font-bold text-gray-900 mb-3'>
+              <h1 className='text-xl sm:text-3xl font-bold text-gray-900 dark:text-night-50 mb-3'>
                 {project.name}
               </h1>
 
@@ -908,7 +908,7 @@ const ProjectDetail = () => {
                 )}
               </div>
 
-              <p className='text-gray-600 leading-relaxed'>
+              <p className='text-gray-600 dark:text-night-300 leading-relaxed'>
                 {project.description || "Sin descripción disponible"}
               </p>
             </div>
@@ -924,18 +924,18 @@ const ProjectDetail = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           onClick={() => setIsMembersModalOpen(true)}
-          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:border-brand-300 hover:shadow-md transition-all group'
+          className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6 cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 hover:shadow-md transition-all group'
         >
           <div className='flex items-center gap-3 mb-2'>
-            <div className='p-2 bg-brand-100 rounded-lg group-hover:bg-brand-200 transition-colors'>
+            <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
               <Users className='w-5 h-5 text-brand-600' />
             </div>
-            <span className='text-sm font-medium text-gray-700'>Miembros</span>
+            <span className='text-sm font-medium text-gray-700 dark:text-night-300'>Miembros</span>
           </div>
           <div className='text-3xl font-bold text-brand-600 tabular-nums'>
             <AnimatedNumber value={getAllProjectMembers().length} />
           </div>
-          <div className='text-xs text-gray-500 mt-1'>
+          <div className='text-xs text-gray-500 dark:text-night-400 mt-1'>
             {project.team ? `Equipo: ${project.team.name}` : "Ver y gestionar"}
           </div>
         </motion.div>
@@ -945,18 +945,18 @@ const ProjectDetail = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
+          className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6'
         >
           <div className='flex items-center gap-3 mb-2'>
-            <div className='p-2 bg-green-100 rounded-lg'>
-              <ListChecks className='w-5 h-5 text-green-600' />
+            <div className='p-2 bg-green-100 dark:bg-green-950/40 rounded-lg'>
+              <ListChecks className='w-5 h-5 text-green-600 dark:text-green-400' />
             </div>
-            <span className='text-sm font-medium text-gray-700'>Tareas</span>
+            <span className='text-sm font-medium text-gray-700 dark:text-night-300'>Tareas</span>
           </div>
-          <div className='text-3xl font-bold text-green-600 tabular-nums'>
+          <div className='text-3xl font-bold text-green-600 dark:text-green-400 tabular-nums'>
             <AnimatedNumber value={tasks.length} />
           </div>
-          <div className='text-xs text-gray-500 mt-1'>
+          <div className='text-xs text-gray-500 dark:text-night-400 mt-1'>
             {completedTasks} completadas
           </div>
         </motion.div>
@@ -966,13 +966,13 @@ const ProjectDetail = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
+          className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6'
         >
           <div className='flex items-center gap-3 mb-2'>
-            <div className='p-2 bg-accent-100 rounded-lg'>
+            <div className='p-2 bg-accent-100 dark:bg-accent-900/30 rounded-lg'>
               <Calendar className='w-5 h-5 text-accent-600' />
             </div>
-            <span className='text-sm font-medium text-gray-700'>
+            <span className='text-sm font-medium text-gray-700 dark:text-night-300'>
               Vencimiento
             </span>
           </div>
@@ -991,45 +991,45 @@ const ProjectDetail = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
+          className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6'
         >
           <div className='flex items-center gap-3 mb-2'>
             <div
-              className={`p-2 rounded-lg ${overdueTasks > 0 ? "bg-red-100" : "bg-green-100"}`}
+              className={`p-2 rounded-lg ${overdueTasks > 0 ? "bg-red-100 dark:bg-red-950/40" : "bg-green-100 dark:bg-green-950/40"}`}
             >
               <AlertCircle
-                className={`w-5 h-5 ${overdueTasks > 0 ? "text-red-600" : "text-green-600"}`}
+                className={`w-5 h-5 ${overdueTasks > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}
               />
             </div>
-            <span className='text-sm font-medium text-gray-700'>Vencidas</span>
+            <span className='text-sm font-medium text-gray-700 dark:text-night-300'>Vencidas</span>
           </div>
           <div
-            className={`text-3xl font-bold tabular-nums ${overdueTasks > 0 ? "text-red-600" : "text-green-600"}`}
+            className={`text-3xl font-bold tabular-nums ${overdueTasks > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}
           >
             <AnimatedNumber value={overdueTasks} />
           </div>
-          <div className='text-xs text-gray-500 mt-1'>
+          <div className='text-xs text-gray-500 dark:text-night-400 mt-1'>
             {overdueTasks > 0 ? "Requieren atención" : "¡Todo al día!"}
           </div>
         </motion.div>
       </div>
 
       {/* Tasks Section */}
-      <div className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'>
+      <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6'>
         <div className='flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6'>
           <div>
-            <h2 className='text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2'>
+            <h2 className='text-lg sm:text-xl font-bold text-gray-900 dark:text-night-50 flex items-center gap-2'>
               <ListChecks className='w-5 sm:w-6 h-5 sm:h-6 text-brand-600' />
               Tareas del Proyecto
             </h2>
-            <p className='text-sm text-gray-600 mt-1'>
+            <p className='text-sm text-gray-600 dark:text-night-300 mt-1'>
               {completedTasks} de {tasks.length} completadas
             </p>
           </div>
 
           <div className='flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto'>
             {/* Vista Tabs */}
-            <div className='flex items-center bg-gray-100 rounded-lg p-1'>
+            <div className='flex items-center bg-gray-100 dark:bg-night-800 rounded-lg p-1'>
               {[
                 { key: "list", label: "Lista", Icon: LayoutList },
                 ...(canUseGantt
@@ -1043,14 +1043,14 @@ const ProjectDetail = () => {
                   className={`relative flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                     viewMode === tab.key
                       ? "text-brand-600"
-                      : "text-gray-600 hover:text-gray-900"
+                      : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
                   }`}
                 >
                   {viewMode === tab.key && (
                     <motion.span
                       layoutId='project-detail-view-tab'
                       transition={motionTokens.springSnappy}
-                      className='absolute inset-0 bg-white rounded-md shadow-sm'
+                      className='absolute inset-0 bg-white dark:bg-night-900 rounded-md shadow-sm'
                     />
                   )}
                   <tab.Icon className='relative w-4 h-4' />
@@ -1064,7 +1064,7 @@ const ProjectDetail = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsTagManagerOpen(true)}
-              className='flex items-center gap-2 px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all shadow-sm text-sm'
+              className='flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-night-900 text-gray-700 dark:text-night-300 rounded-lg border border-gray-300 dark:border-night-600 hover:bg-gray-50 dark:hover:bg-night-800 transition-all shadow-sm text-sm'
             >
               <Tag className='w-4 sm:w-5 h-4 sm:h-5' />
               <span className='hidden sm:inline'>Etiquetas</span>
@@ -1084,23 +1084,23 @@ const ProjectDetail = () => {
 
         {/* Tasks Stats */}
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
-          <div className='bg-gray-50 rounded-lg p-4 border border-gray-200'>
-            <div className='text-2xl font-bold text-gray-600'>
+          <div className='bg-gray-50 dark:bg-night-800 rounded-lg p-4 border border-gray-200 dark:border-night-700'>
+            <div className='text-2xl font-bold text-gray-600 dark:text-night-300'>
               {pendingTasks}
             </div>
-            <div className='text-sm text-gray-600'>Pendientes</div>
+            <div className='text-sm text-gray-600 dark:text-night-300'>Pendientes</div>
           </div>
-          <div className='bg-brand-50 rounded-lg p-4 border border-brand-200'>
+          <div className='bg-brand-50 dark:bg-brand-900/20 rounded-lg p-4 border border-brand-200 dark:border-brand-800'>
             <div className='text-2xl font-bold text-brand-600 tabular-nums'>
               {inProgressTasks}
             </div>
             <div className='text-sm text-brand-600'>En Progreso</div>
           </div>
-          <div className='bg-green-50 rounded-lg p-4 border border-green-200'>
-            <div className='text-2xl font-bold text-green-600'>
+          <div className='bg-green-50 dark:bg-green-950/40 rounded-lg p-4 border border-green-200 dark:border-green-800'>
+            <div className='text-2xl font-bold text-green-600 dark:text-green-400'>
               {completedTasks}
             </div>
-            <div className='text-sm text-green-600'>Completadas</div>
+            <div className='text-sm text-green-600 dark:text-green-400'>Completadas</div>
           </div>
         </div>
 
@@ -1124,9 +1124,9 @@ const ProjectDetail = () => {
         {viewMode === "list" && (
           <>
             {tasks.length === 0 ? (
-              <div className='text-center py-12 border-2 border-dashed border-gray-300 rounded-lg'>
-                <ListChecks className='w-12 h-12 text-gray-400 mx-auto mb-3' />
-                <p className='text-gray-500 mb-4'>
+              <div className='text-center py-12 border-2 border-dashed border-gray-300 dark:border-night-600 rounded-lg'>
+                <ListChecks className='w-12 h-12 text-gray-400 dark:text-night-500 mx-auto mb-3' />
+                <p className='text-gray-500 dark:text-night-400 mb-4'>
                   No hay tareas en este proyecto
                 </p>
                 <button
@@ -1144,7 +1144,7 @@ const ProjectDetail = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-all group'
+                    className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-night-800 hover:bg-gray-100 dark:hover:bg-night-800 border border-gray-200 dark:border-night-700 rounded-lg transition-all group'
                   >
                     {/* Row 1: Checkbox + Title */}
                     <div className='flex items-start sm:items-center gap-3 w-full sm:w-auto sm:flex-1'>
@@ -1154,7 +1154,7 @@ const ProjectDetail = () => {
                         className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all mt-0.5 sm:mt-0 ${
                           task.status === "done"
                             ? "bg-green-500 border-green-500"
-                            : "border-gray-300 hover:border-green-500"
+                            : "border-gray-300 dark:border-night-600 hover:border-green-500"
                         }`}
                       >
                         {task.status === "done" && (
@@ -1166,14 +1166,14 @@ const ProjectDetail = () => {
                         <h3
                           className={`font-medium text-sm sm:text-base ${
                             task.status === "done"
-                              ? "text-gray-500 line-through"
-                              : "text-gray-900"
+                              ? "text-gray-500 dark:text-night-400 line-through"
+                              : "text-gray-900 dark:text-night-50"
                           }`}
                         >
                           {task.title}
                         </h3>
                         {task.description && (
-                          <p className='text-xs sm:text-sm text-gray-600 line-clamp-1 mt-1'>
+                          <p className='text-xs sm:text-sm text-gray-600 dark:text-night-300 line-clamp-1 mt-1'>
                             {task.description}
                           </p>
                         )}
@@ -1183,7 +1183,7 @@ const ProjectDetail = () => {
                     {/* Row 2: Badges and actions - wraps on mobile */}
                     <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto pl-9 sm:pl-0'>
                       {task.is_urgent && (
-                        <span className='px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full flex items-center gap-1'>
+                        <span className='px-2 py-1 bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs font-medium rounded-full flex items-center gap-1'>
                           <Zap className='w-3 h-3' />
                           Urgente
                         </span>
@@ -1192,10 +1192,10 @@ const ProjectDetail = () => {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
                           task.priority === "high"
-                            ? "bg-red-100 text-red-700"
+                            ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                             : task.priority === "medium"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-green-100 text-green-700"
+                              ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
+                              : "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                         }`}
                       >
                         {task.priority === "high"
@@ -1213,10 +1213,10 @@ const ProjectDetail = () => {
                         }
                         className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer transition-colors ${
                           task.status === "done"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                             : task.status === "in-progress"
-                              ? "bg-brand-100 text-brand-700"
-                              : "bg-gray-100 text-gray-700"
+                              ? "bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300"
+                              : "bg-gray-100 dark:bg-night-800 text-gray-700 dark:text-night-300"
                         }`}
                       >
                         <option value='todo'>Por hacer</option>
@@ -1225,7 +1225,7 @@ const ProjectDetail = () => {
                       </select>
 
                       {task.due_date && (
-                        <span className='text-xs text-gray-600 flex items-center gap-1'>
+                        <span className='text-xs text-gray-600 dark:text-night-300 flex items-center gap-1'>
                           <Calendar className='w-3 h-3' />
                           {formatDate(task.due_date)}
                         </span>
@@ -1244,7 +1244,7 @@ const ProjectDetail = () => {
                               />
                             ))}
                             {task.assigned_users.length > 3 && (
-                              <div className='w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-gray-700 border-2 border-white'>
+                              <div className='w-6 h-6 rounded-full bg-gray-300 dark:bg-night-600 flex items-center justify-center text-xs font-medium text-gray-700 dark:text-night-300 border-2 border-white dark:border-night-900'>
                                 +{task.assigned_users.length - 3}
                               </div>
                             )}
@@ -1257,44 +1257,44 @@ const ProjectDetail = () => {
                           {task.tags.slice(0, 3).map((tag) => {
                             const colorClasses = {
                               red: {
-                                bg: "bg-red-100",
-                                text: "text-red-700",
+                                bg: "bg-red-100 dark:bg-red-950/40",
+                                text: "text-red-700 dark:text-red-300",
                               },
                               orange: {
-                                bg: "bg-orange-100",
-                                text: "text-orange-700",
+                                bg: "bg-orange-100 dark:bg-orange-950/40",
+                                text: "text-orange-700 dark:text-orange-300",
                               },
                               yellow: {
-                                bg: "bg-yellow-100",
-                                text: "text-yellow-700",
+                                bg: "bg-yellow-100 dark:bg-yellow-950/40",
+                                text: "text-yellow-700 dark:text-yellow-300",
                               },
                               green: {
-                                bg: "bg-green-100",
-                                text: "text-green-700",
+                                bg: "bg-green-100 dark:bg-green-950/40",
+                                text: "text-green-700 dark:text-green-300",
                               },
                               teal: {
-                                bg: "bg-teal-100",
-                                text: "text-teal-700",
+                                bg: "bg-teal-100 dark:bg-teal-950/40",
+                                text: "text-teal-700 dark:text-teal-300",
                               },
                               blue: {
-                                bg: "bg-blue-100",
-                                text: "text-blue-700",
+                                bg: "bg-blue-100 dark:bg-blue-950/40",
+                                text: "text-blue-700 dark:text-blue-300",
                               },
                               indigo: {
-                                bg: "bg-indigo-100",
-                                text: "text-indigo-700",
+                                bg: "bg-indigo-100 dark:bg-indigo-950/40",
+                                text: "text-indigo-700 dark:text-indigo-300",
                               },
                               purple: {
-                                bg: "bg-purple-100",
-                                text: "text-purple-700",
+                                bg: "bg-purple-100 dark:bg-purple-950/40",
+                                text: "text-purple-700 dark:text-purple-300",
                               },
                               pink: {
-                                bg: "bg-pink-100",
-                                text: "text-pink-700",
+                                bg: "bg-pink-100 dark:bg-pink-950/40",
+                                text: "text-pink-700 dark:text-pink-300",
                               },
                               gray: {
-                                bg: "bg-gray-100",
-                                text: "text-gray-700",
+                                bg: "bg-gray-100 dark:bg-night-800",
+                                text: "text-gray-700 dark:text-night-300",
                               },
                             };
                             const colors =
@@ -1310,7 +1310,7 @@ const ProjectDetail = () => {
                             );
                           })}
                           {task.tags.length > 3 && (
-                            <span className='px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600'>
+                            <span className='px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300'>
                               +{task.tags.length - 3}
                             </span>
                           )}
@@ -1321,15 +1321,15 @@ const ProjectDetail = () => {
                       <div className='flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-auto sm:ml-0'>
                         <button
                           onClick={() => handleEditTask(task)}
-                          className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
+                          className='p-2 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors'
                         >
-                          <Edit className='w-4 h-4 text-blue-600' />
+                          <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                         </button>
                         <button
                           onClick={() => handleDeleteTask(task.id)}
-                          className='p-2 hover:bg-red-50 rounded-lg transition-colors'
+                          className='p-2 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors'
                         >
-                          <Trash2 className='w-4 h-4 text-red-600' />
+                          <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
                         </button>
                       </div>
                     </div>
@@ -1404,15 +1404,15 @@ const ProjectDetail = () => {
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'
             >
-              <div className='bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col'>
+              <div className='bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col'>
                 {/* Header */}
-                <div className='flex items-center justify-between p-5 border-b border-gray-200'>
+                <div className='flex items-center justify-between p-5 border-b border-gray-200 dark:border-night-700'>
                   <div>
-                    <h2 className='text-lg font-bold text-gray-900 flex items-center gap-2'>
+                    <h2 className='text-lg font-bold text-gray-900 dark:text-night-50 flex items-center gap-2'>
                       <Users className='w-5 h-5 text-brand-600' />
                       Miembros del Proyecto
                     </h2>
-                    <p className='text-sm text-gray-500 mt-0.5'>
+                    <p className='text-sm text-gray-500 dark:text-night-400 mt-0.5'>
                       {hasTeamAssigned
                         ? `Equipo: ${project?.team?.name}`
                         : `${getAllProjectMembers().length} miembros`}
@@ -1424,9 +1424,9 @@ const ProjectDetail = () => {
                       setShowInviteForm(false);
                       setInviteEmail("");
                     }}
-                    className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+                    className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition-colors'
                   >
-                    <X className='w-5 h-5 text-gray-500' />
+                    <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
                   </button>
                 </div>
 
@@ -1434,8 +1434,8 @@ const ProjectDetail = () => {
                 <div className='flex-1 overflow-y-auto p-5'>
                   {/* Aviso si tiene equipo */}
                   {hasTeamAssigned && (
-                    <div className='mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg'>
-                      <p className='text-sm text-purple-700'>
+                    <div className='mb-4 p-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-lg'>
+                      <p className='text-sm text-purple-700 dark:text-purple-300'>
                         <strong>
                           Este proyecto está asignado a un equipo.
                         </strong>
@@ -1452,7 +1452,7 @@ const ProjectDetail = () => {
                       {!showInviteForm ? (
                         <button
                           onClick={() => setShowInviteForm(true)}
-                          className='w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors cursor-pointer'
+                          className='w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-600 bg-brand-50 dark:bg-brand-900/20 hover:bg-brand-100 dark:hover:bg-brand-900/30 rounded-lg transition-colors cursor-pointer'
                         >
                           <UserPlus className='w-4 h-4' />
                           Invitar colaborador
@@ -1468,7 +1468,7 @@ const ProjectDetail = () => {
                           {isOrganizationContext ? (
                             <>
                               <div>
-                                <label className='block text-xs font-medium text-gray-600 mb-1'>
+                                <label className='block text-xs font-medium text-gray-600 dark:text-night-300 mb-1'>
                                   Seleccionar miembro de la organización
                                 </label>
                                 <Select
@@ -1524,7 +1524,7 @@ const ProjectDetail = () => {
                                         <div className='text-sm font-medium'>
                                           {option.label}
                                         </div>
-                                        <div className='text-xs text-gray-500'>
+                                        <div className='text-xs text-gray-500 dark:text-night-400'>
                                           {option.email}
                                         </div>
                                       </div>
@@ -1555,7 +1555,7 @@ const ProjectDetail = () => {
                                   }}
                                 />
                               </div>
-                              <p className='text-xs text-gray-500 text-center'>
+                              <p className='text-xs text-gray-500 dark:text-night-400 text-center'>
                                 Solo puedes invitar miembros de tu organización
                               </p>
                               <div className='flex gap-2'>
@@ -1578,7 +1578,7 @@ const ProjectDetail = () => {
                                     setInviteEmail("");
                                     setSelectedOrgMember(null);
                                   }}
-                                  className='p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors'
+                                  className='p-2 text-gray-500 dark:text-night-400 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition-colors'
                                 >
                                   <X className='w-4 h-4' />
                                 </button>
@@ -1589,7 +1589,7 @@ const ProjectDetail = () => {
                             <>
                               <div className='flex gap-2'>
                                 <div className='relative flex-1'>
-                                  <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+                                  <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' />
                                   <input
                                     type='email'
                                     value={inviteEmail}
@@ -1597,7 +1597,7 @@ const ProjectDetail = () => {
                                       setInviteEmail(e.target.value)
                                     }
                                     placeholder='Correo electrónico'
-                                    className='w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                                    className='w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                                     required
                                     autoFocus
                                   />
@@ -1621,12 +1621,12 @@ const ProjectDetail = () => {
                                     setShowInviteForm(false);
                                     setInviteEmail("");
                                   }}
-                                  className='p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors'
+                                  className='p-2 text-gray-500 dark:text-night-400 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition-colors'
                                 >
                                   <X className='w-4 h-4' />
                                 </button>
                               </div>
-                              <p className='text-xs text-gray-500'>
+                              <p className='text-xs text-gray-500 dark:text-night-400'>
                                 Se enviará un email de invitación
                               </p>
                             </>
@@ -1643,7 +1643,7 @@ const ProjectDetail = () => {
                         key={member.id}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className='flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
+                        className='flex items-center justify-between p-3 bg-gray-50 dark:bg-night-800 rounded-lg hover:bg-gray-100 dark:hover:bg-night-800 transition-colors'
                       >
                         <div className='flex items-center gap-3'>
                           <UserAvatar
@@ -1658,33 +1658,33 @@ const ProjectDetail = () => {
                           />
                           <div>
                             <div className='flex items-center gap-2'>
-                              <span className='font-medium text-gray-900'>
+                              <span className='font-medium text-gray-900 dark:text-night-50'>
                                 {member.name}
                               </span>
                               {member.role === "owner" && (
-                                <span className='flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-yellow-700 bg-yellow-100 rounded-full'>
+                                <span className='flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-950/40 rounded-full'>
                                   <Crown className='w-3 h-3' />
                                   Propietario
                                 </span>
                               )}
                               {member.role === "collaborator" && (
-                                <span className='px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-full'>
+                                <span className='px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/40 rounded-full'>
                                   Colaborador
                                 </span>
                               )}
                               {member.role === "team_owner" && (
-                                <span className='flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-purple-700 bg-purple-100 rounded-full'>
+                                <span className='flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/40 rounded-full'>
                                   <Crown className='w-3 h-3' />
                                   Líder
                                 </span>
                               )}
                               {member.role === "team_member" && (
-                                <span className='px-2 py-0.5 text-xs font-medium text-purple-700 bg-purple-100 rounded-full'>
+                                <span className='px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/40 rounded-full'>
                                   Equipo
                                 </span>
                               )}
                             </div>
-                            <span className='text-sm text-gray-500'>
+                            <span className='text-sm text-gray-500 dark:text-night-400'>
                               {member.email}
                             </span>
                           </div>
@@ -1695,7 +1695,7 @@ const ProjectDetail = () => {
                           {/* Botón de estadísticas - visible para todos */}
                           <button
                             onClick={() => handleOpenCollaboratorStats(member)}
-                            className='p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors cursor-pointer'
+                            className='p-2 text-gray-400 dark:text-night-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition-colors cursor-pointer'
                             title='Ver estadísticas'
                           >
                             <TrendingUp className='w-4 h-4' />
@@ -1710,7 +1710,7 @@ const ProjectDetail = () => {
                                   handleRemoveMember(member.id, member.name)
                                 }
                                 disabled={removingMember === member.id}
-                                className='p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50'
+                                className='p-2 text-gray-400 dark:text-night-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors disabled:opacity-50'
                                 title='Remover del proyecto'
                               >
                                 {removingMember === member.id ? (
@@ -1725,8 +1725,8 @@ const ProjectDetail = () => {
                     ))}
 
                     {getAllProjectMembers().length === 0 && (
-                      <div className='text-center py-8 text-gray-500'>
-                        <Users className='w-12 h-12 mx-auto mb-2 text-gray-300' />
+                      <div className='text-center py-8 text-gray-500 dark:text-night-400'>
+                        <Users className='w-12 h-12 mx-auto mb-2 text-gray-300 dark:text-night-600' />
                         <p>No hay miembros en este proyecto</p>
                       </div>
                     )}
@@ -1734,14 +1734,14 @@ const ProjectDetail = () => {
                 </div>
 
                 {/* Footer */}
-                <div className='px-5 py-3 bg-gray-50 border-t border-gray-200'>
+                <div className='px-5 py-3 bg-gray-50 dark:bg-night-800 border-t border-gray-200 dark:border-night-700'>
                   <button
                     onClick={() => {
                       setIsMembersModalOpen(false);
                       setShowInviteForm(false);
                       setInviteEmail("");
                     }}
-                    className='w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+                    className='w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-night-300 bg-white dark:bg-night-900 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
                   >
                     Cerrar
                   </button>
@@ -1780,29 +1780,29 @@ const ProjectDetail = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className='relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
+              className='relative bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
             >
               {/* Header */}
-              <div className='sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10'>
+              <div className='sticky top-0 bg-white dark:bg-night-900 border-b border-gray-200 dark:border-night-700 px-6 py-4 flex items-center justify-between z-10'>
                 <div className='flex items-center gap-3'>
                   <UserAvatar
                     user={collaboratorStatsModal.collaborator}
                     size='md'
                   />
                   <div>
-                    <h3 className='text-lg font-semibold text-gray-900'>
+                    <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
                       {collaboratorStatsModal.collaborator?.name}
                     </h3>
-                    <p className='text-sm text-gray-500'>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>
                       {collaboratorStatsModal.collaborator?.email}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleCloseCollaboratorStats}
-                  className='p-2 hover:bg-gray-100 rounded-lg'
+                  className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg'
                 >
-                  <X className='w-5 h-5 text-gray-500' />
+                  <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
                 </button>
               </div>
 
@@ -1811,14 +1811,14 @@ const ProjectDetail = () => {
                 {loadingCollaboratorStats ? (
                   <div className='flex flex-col items-center justify-center py-12'>
                     <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
-                    <p className='text-gray-500'>Cargando estadísticas...</p>
+                    <p className='text-gray-500 dark:text-night-400'>Cargando estadísticas...</p>
                   </div>
                 ) : collaboratorStats ? (
                   <div className='space-y-6'>
                     {/* Info del proyecto */}
-                    <div className='text-center pb-4 border-b border-gray-100'>
-                      <p className='text-sm text-gray-500'>Estadísticas en</p>
-                      <p className='text-lg font-semibold text-gray-900'>
+                    <div className='text-center pb-4 border-b border-gray-100 dark:border-night-700'>
+                      <p className='text-sm text-gray-500 dark:text-night-400'>Estadísticas en</p>
+                      <p className='text-lg font-semibold text-gray-900 dark:text-night-50'>
                         {project?.name}
                       </p>
                     </div>
@@ -1843,7 +1843,7 @@ const ProjectDetail = () => {
                         </div>
                         <div className='w-full bg-white/20 rounded-full h-3'>
                           <div
-                            className='bg-white h-3 rounded-full transition-all duration-500'
+                            className='bg-white dark:bg-night-900 h-3 rounded-full transition-all duration-500'
                             style={{
                               width: `${
                                 collaboratorStats.productivity?.percentage || 0
@@ -1883,79 +1883,79 @@ const ProjectDetail = () => {
                     </div>
 
                     {/* Tareas */}
-                    <div className='bg-green-50 rounded-xl p-4'>
+                    <div className='bg-green-50 dark:bg-green-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
-                        <CheckCircle className='w-5 h-5 text-green-600' />
+                        <CheckCircle className='w-5 h-5 text-green-600 dark:text-green-400' />
                         <h4 className='font-semibold text-green-900'>Tareas</h4>
                         {collaboratorStats.tasks?.completion_rate > 0 && (
-                          <span className='ml-auto text-sm font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full'>
+                          <span className='ml-auto text-sm font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-950/40 px-2 py-0.5 rounded-full'>
                             {collaboratorStats.tasks.completion_rate}%
                             completado
                           </span>
                         )}
                       </div>
                       <div className='grid grid-cols-4 gap-3'>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {collaboratorStats.tasks?.created || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Creadas</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Creadas</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {collaboratorStats.tasks?.assigned || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Asignadas</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Asignadas</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-green-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
                             {collaboratorStats.tasks?.completed || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Completadas</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Completadas</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-yellow-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-yellow-600 dark:text-yellow-400'>
                             {collaboratorStats.tasks?.pending || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Pendientes</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Pendientes</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Checklist */}
-                    <div className='bg-blue-50 rounded-xl p-4'>
+                    <div className='bg-blue-50 dark:bg-blue-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
-                        <ListChecks className='w-5 h-5 text-blue-600' />
+                        <ListChecks className='w-5 h-5 text-blue-600 dark:text-blue-400' />
                         <h4 className='font-semibold text-blue-900'>
                           Subtareas (Checklist)
                         </h4>
                         {collaboratorStats.checklist?.completion_rate > 0 && (
-                          <span className='ml-auto text-sm font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full'>
+                          <span className='ml-auto text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/40 px-2 py-0.5 rounded-full'>
                             {collaboratorStats.checklist.completion_rate}%
                             completado
                           </span>
                         )}
                       </div>
                       <div className='grid grid-cols-2 gap-3'>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-blue-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                             {collaboratorStats.checklist?.completed || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Completados</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Completados</p>
                         </div>
-                        <div className='bg-white rounded-lg p-3 text-center'>
-                          <p className='text-2xl font-bold text-blue-600'>
+                        <div className='bg-white dark:bg-night-900 rounded-lg p-3 text-center'>
+                          <p className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
                             {collaboratorStats.checklist?.total || 0}
                           </p>
-                          <p className='text-xs text-gray-500'>Total</p>
+                          <p className='text-xs text-gray-500 dark:text-night-400'>Total</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className='text-center py-12'>
-                    <TrendingUp className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                    <p className='text-gray-500'>
+                    <TrendingUp className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                    <p className='text-gray-500 dark:text-night-400'>
                       No se pudieron cargar las estadísticas
                     </p>
                   </div>

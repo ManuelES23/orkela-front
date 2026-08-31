@@ -8,7 +8,7 @@ import { SkeletonTableRows } from "../ui/Skeleton";
 
 const getExpiryStatus = (org) => {
   if (org.plan?.is_default || !org.plan_expires_at) {
-    return { label: "Sin vencimiento", dot: "bg-gray-300" };
+    return { label: "Sin vencimiento", dot: "bg-gray-300 dark:bg-night-600" };
   }
   const dateOnly = org.plan_expires_at.slice(0, 10);
   const expiresAtUTC = new Date(`${dateOnly}T00:00:00Z`);
@@ -162,22 +162,22 @@ const LicensesManagement = () => {
 
   return (
     <div className='grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6'>
-      <div className='bg-white border border-gray-200 rounded-xl overflow-hidden'>
-        <div className='p-4 border-b border-gray-100 space-y-2'>
+      <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl overflow-hidden'>
+        <div className='p-4 border-b border-gray-100 dark:border-night-700 space-y-2'>
           <div className='relative'>
-            <Search className='w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2' />
+            <Search className='w-4 h-4 text-gray-400 dark:text-night-500 absolute left-3 top-1/2 -translate-y-1/2' />
             <input
               type='text'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder='Buscar organización'
-              className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+              className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
             />
           </div>
           <select
             value={planFilter}
             onChange={(e) => setPlanFilter(e.target.value)}
-            className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+            className='w-full px-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
           >
             <option value='all'>Todos los planes</option>
             {plansCatalog.map((p) => (
@@ -185,9 +185,9 @@ const LicensesManagement = () => {
             ))}
           </select>
         </div>
-        <div className='divide-y divide-gray-100 max-h-[560px] overflow-y-auto'>
+        <div className='divide-y divide-gray-100 dark:divide-night-700 max-h-[560px] overflow-y-auto'>
           {filtered.length === 0 && (
-            <p className='p-4 text-sm text-gray-500'>
+            <p className='p-4 text-sm text-gray-500 dark:text-night-400'>
               No se encontraron organizaciones.
             </p>
           )}
@@ -200,7 +200,7 @@ const LicensesManagement = () => {
                 type='button'
                 onClick={() => setSelectedId(org.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                  isSelected ? "bg-brand-50" : "hover:bg-gray-50"
+                  isSelected ? "bg-brand-50 dark:bg-brand-900/20" : "hover:bg-gray-50 dark:hover:bg-night-800"
                 }`}
               >
                 <span
@@ -208,12 +208,12 @@ const LicensesManagement = () => {
                   aria-hidden='true'
                 ></span>
                 <div className='min-w-0 flex-1'>
-                  <p className='text-sm font-medium text-gray-900 truncate'>
+                  <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                     {org.name}
                   </p>
-                  <p className='text-xs text-gray-500'>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>
                     {org.plan?.name || "Sin plan"}
-                    <span className='text-gray-400'> · {status.label}</span>
+                    <span className='text-gray-400 dark:text-night-500'> · {status.label}</span>
                   </p>
                 </div>
               </button>
@@ -222,13 +222,13 @@ const LicensesManagement = () => {
         </div>
       </div>
 
-      <div className='bg-white border border-gray-200 rounded-xl p-6'>
+      <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl p-6'>
         {organizations.length === 0 ? (
-          <p className='text-sm text-gray-500 text-center py-12'>
+          <p className='text-sm text-gray-500 dark:text-night-400 text-center py-12'>
             No hay organizaciones para mostrar.
           </p>
         ) : detailError ? (
-          <div className='text-sm text-gray-500 text-center py-12'>
+          <div className='text-sm text-gray-500 dark:text-night-400 text-center py-12'>
             <p className='mb-4'>{detailError}</p>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -251,14 +251,14 @@ const LicensesManagement = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className='flex items-center gap-3 mb-6'>
-              <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+              <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center'>
                 <Building2 className='w-5 h-5 text-brand-600' />
               </div>
               <div>
-                <h3 className='font-semibold text-gray-900'>
+                <h3 className='font-semibold text-gray-900 dark:text-night-50'>
                   {detail.organization.name}
                 </h3>
-                <p className='text-sm text-gray-500'>
+                <p className='text-sm text-gray-500 dark:text-night-400'>
                   {detail.organization.plan?.name || "Sin plan"}
                 </p>
               </div>
@@ -276,8 +276,8 @@ const LicensesManagement = () => {
               />
             </div>
 
-            <div className='border-t border-gray-100 pt-6'>
-              <h4 className='text-sm font-medium text-gray-900 mb-3'>
+            <div className='border-t border-gray-100 dark:border-night-700 pt-6'>
+              <h4 className='text-sm font-medium text-gray-900 dark:text-night-50 mb-3'>
                 Cambiar plan
               </h4>
               <div className='flex flex-col sm:flex-row gap-3 mb-3'>
@@ -286,7 +286,7 @@ const LicensesManagement = () => {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, plan_id: e.target.value }))
                   }
-                  className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                  className='flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 >
                   {plansCatalog
                     .filter((p) => p.is_active || p.id === Number(form.plan_id))
@@ -301,7 +301,7 @@ const LicensesManagement = () => {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, billing_cycle: e.target.value }))
                   }
-                  className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                  className='px-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 >
                   <option value='monthly'>Mensual</option>
                   <option value='annual'>Anual</option>
@@ -315,13 +315,13 @@ const LicensesManagement = () => {
                       plan_expires_at: e.target.value,
                     }))
                   }
-                  className='px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                  className='px-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
                 />
               </div>
 
               {plansCatalog.find((p) => p.id === Number(form.plan_id))?.is_custom && (
-                <div className='mb-3 p-3 bg-gray-50 rounded-lg space-y-2'>
-                  <p className='text-xs font-medium text-gray-700'>
+                <div className='mb-3 p-3 bg-gray-50 dark:bg-night-800 rounded-lg space-y-2'>
+                  <p className='text-xs font-medium text-gray-700 dark:text-night-300'>
                     Personalizar para esta organización
                   </p>
                   <div className='grid grid-cols-2 gap-2'>
@@ -332,7 +332,7 @@ const LicensesManagement = () => {
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, custom_monthly_price: e.target.value }))
                       }
-                      className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                      className='px-3 py-2 text-xs border border-gray-200 dark:border-night-700 rounded-lg'
                     />
                     <input
                       type='number'
@@ -341,7 +341,7 @@ const LicensesManagement = () => {
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, custom_annual_price: e.target.value }))
                       }
-                      className='px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                      className='px-3 py-2 text-xs border border-gray-200 dark:border-night-700 rounded-lg'
                     />
                     {[
                       { key: "members", label: "Miembros" },
@@ -352,7 +352,7 @@ const LicensesManagement = () => {
                       <div key={key}>
                         <label
                           htmlFor={`custom-limit-${key}`}
-                          className='block text-xs text-gray-500 mb-1'
+                          className='block text-xs text-gray-500 dark:text-night-400 mb-1'
                         >
                           {label}
                         </label>
@@ -367,7 +367,7 @@ const LicensesManagement = () => {
                               custom_limits: { ...prev.custom_limits, [key]: e.target.value },
                             }))
                           }
-                          className='w-full px-3 py-2 text-xs border border-gray-200 rounded-lg'
+                          className='w-full px-3 py-2 text-xs border border-gray-200 dark:border-night-700 rounded-lg'
                         />
                       </div>
                     ))}
@@ -385,7 +385,7 @@ const LicensesManagement = () => {
                 <Save className='w-4 h-4' />
                 {saving ? "Guardando..." : "Guardar"}
               </motion.button>
-              <p className='text-xs text-gray-400 mt-2'>
+              <p className='text-xs text-gray-400 dark:text-night-500 mt-2'>
                 Deja la fecha vacía para un plan sin vencimiento.
               </p>
             </div>

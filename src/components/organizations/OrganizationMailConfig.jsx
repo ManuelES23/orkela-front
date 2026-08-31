@@ -126,8 +126,8 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
   if (!isOwner) {
     return (
       <div className='text-center py-8'>
-        <Mail className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-        <p className='text-gray-500'>
+        <Mail className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+        <p className='text-gray-500 dark:text-night-400'>
           Solo el dueño de la organización puede configurar el correo
         </p>
       </div>
@@ -145,9 +145,9 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
   return (
     <div className='space-y-6'>
       {/* Info Banner */}
-      <div className='flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-        <Info className='w-5 h-5 text-blue-600 shrink-0 mt-0.5' />
-        <div className='text-sm text-blue-700'>
+      <div className='flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg'>
+        <Info className='w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5' />
+        <div className='text-sm text-blue-700 dark:text-blue-300'>
           <p className='font-medium mb-1'>
             Configuración de correo personalizado
           </p>
@@ -161,12 +161,12 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
 
       <form onSubmit={handleSave} className='space-y-6'>
         {/* Enable/Disable Toggle */}
-        <div className='flex items-center justify-between p-4 bg-gray-50 rounded-lg'>
+        <div className='flex items-center justify-between p-4 bg-gray-50 dark:bg-night-800 rounded-lg'>
           <div>
-            <h4 className='font-medium text-gray-900'>
+            <h4 className='font-medium text-gray-900 dark:text-night-50'>
               Usar correo personalizado
             </h4>
-            <p className='text-sm text-gray-500'>
+            <p className='text-sm text-gray-500 dark:text-night-400'>
               Habilita esta opción para enviar correos desde tu propio servidor
             </p>
           </div>
@@ -178,20 +178,20 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
               onChange={handleChange}
               className='sr-only peer'
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+            <div className="w-11 h-6 bg-gray-200 dark:bg-night-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white dark:border-night-900 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:bg-night-900 after:border-gray-300 dark:border-night-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
           </label>
         </div>
 
         {/* Status Badge */}
         {config.mail_enabled ? (
-          <div className='flex items-center gap-2 text-green-600'>
+          <div className='flex items-center gap-2 text-green-600 dark:text-green-400'>
             <CheckCircle className='w-4 h-4' />
             <span className='text-sm font-medium'>
               Correo personalizado activo
             </span>
           </div>
         ) : (
-          <div className='flex items-center gap-2 text-gray-500'>
+          <div className='flex items-center gap-2 text-gray-500 dark:text-night-400'>
             <AlertCircle className='w-4 h-4' />
             <span className='text-sm'>
               Usando configuración del sistema por defecto
@@ -210,7 +210,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
             !config.mail_enabled ? "pointer-events-none" : ""
           }`}
         >
-          <h4 className='font-medium text-gray-900 flex items-center gap-2'>
+          <h4 className='font-medium text-gray-900 dark:text-night-50 flex items-center gap-2'>
             <Server className='w-4 h-4' />
             Servidor SMTP
           </h4>
@@ -218,7 +218,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {/* Host */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 Servidor SMTP
               </label>
               <input
@@ -227,13 +227,13 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_host}
                 onChange={handleChange}
                 placeholder='smtp.tudominio.com'
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
             {/* Port */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 Puerto
               </label>
               <input
@@ -242,13 +242,13 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_port}
                 onChange={handleChange}
                 placeholder='587'
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
             {/* Username */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 <User className='w-4 h-4 inline mr-1' />
                 Usuario
               </label>
@@ -258,13 +258,13 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_username}
                 onChange={handleChange}
                 placeholder='noreply@tudominio.com'
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 <Lock className='w-4 h-4 inline mr-1' />
                 Contraseña
               </label>
@@ -277,12 +277,12 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                   placeholder={
                     hasExistingPassword ? "••••••• (sin cambios)" : "Contraseña"
                   }
-                  className='w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full px-3 py-2 pr-10 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 />
                 <button
                   type='button'
                   onClick={() => setShowPassword(!showPassword)}
-                  className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600'
+                  className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-night-500 hover:text-gray-600 dark:hover:text-night-300'
                 >
                   {showPassword ? (
                     <EyeOff className='w-4 h-4' />
@@ -292,7 +292,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 </button>
               </div>
               {hasExistingPassword && !passwordChanged && (
-                <p className='text-xs text-gray-500 mt-1'>
+                <p className='text-xs text-gray-500 dark:text-night-400 mt-1'>
                   Deja vacío para mantener la contraseña actual
                 </p>
               )}
@@ -300,7 +300,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
 
             {/* Encryption */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 <Key className='w-4 h-4 inline mr-1' />
                 Encriptación
               </label>
@@ -308,7 +308,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 name='mail_encryption'
                 value={config.mail_encryption}
                 onChange={handleChange}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               >
                 <option value='tls'>TLS</option>
                 <option value='ssl'>SSL</option>
@@ -318,7 +318,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
           </div>
 
           {/* From Address Settings */}
-          <h4 className='font-medium text-gray-900 flex items-center gap-2 pt-4'>
+          <h4 className='font-medium text-gray-900 dark:text-night-50 flex items-center gap-2 pt-4'>
             <Mail className='w-4 h-4' />
             Remitente
           </h4>
@@ -326,7 +326,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {/* From Address */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 Email remitente
               </label>
               <input
@@ -335,13 +335,13 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_from_address}
                 onChange={handleChange}
                 placeholder='noreply@tudominio.com'
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
             {/* From Name */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                 Nombre remitente
               </label>
               <input
@@ -350,7 +350,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_from_name}
                 onChange={handleChange}
                 placeholder='Mi Empresa'
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
           </div>
@@ -381,7 +381,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
       {/* Test Email Section */}
       {config.mail_enabled && (
         <div className='border-t pt-6'>
-          <h4 className='font-medium text-gray-900 mb-3'>
+          <h4 className='font-medium text-gray-900 dark:text-night-50 mb-3'>
             Probar configuración
           </h4>
           <div className='flex gap-3'>
@@ -390,13 +390,13 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
               placeholder='email@ejemplo.com'
-              className='flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+              className='flex-1 px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
             />
             <button
               type='button'
               onClick={handleTest}
               disabled={testing || !testEmail.trim()}
-              className='flex items-center gap-2 px-4 py-2 border border-brand-600 text-brand-600 rounded-lg hover:bg-brand-50 disabled:opacity-50 transition-colors'
+              className='flex items-center gap-2 px-4 py-2 border border-brand-600 text-brand-600 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20 disabled:opacity-50 transition-colors'
             >
               {testing ? (
                 <>
@@ -411,7 +411,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
               )}
             </button>
           </div>
-          <p className='text-sm text-gray-500 mt-2'>
+          <p className='text-sm text-gray-500 dark:text-night-400 mt-2'>
             Se enviará un correo de prueba para verificar que la configuración
             es correcta
           </p>

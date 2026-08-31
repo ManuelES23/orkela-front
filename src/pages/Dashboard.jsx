@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { parseLocalDate } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,6 +55,7 @@ ChartJS.register(
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const { isOrganizationContext: isInOrganizationMode } = useUserContext();
   const { registerRefresh, unregisterRefresh } = useRealtime();
@@ -284,12 +286,16 @@ const Dashboard = () => {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: "#9992ab", font: { size: 11 } },
+        ticks: { color: isDark ? "#8577a3" : "#9992ab", font: { size: 11 } },
       },
       y: {
         beginAtZero: true,
-        grid: { color: "#f0ebf9" },
-        ticks: { color: "#9992ab", font: { size: 11 }, precision: 0 },
+        grid: { color: isDark ? "#332752" : "#f0ebf9" },
+        ticks: {
+          color: isDark ? "#8577a3" : "#9992ab",
+          font: { size: 11 },
+          precision: 0,
+        },
       },
     },
   };
@@ -312,7 +318,7 @@ const Dashboard = () => {
           className='flex items-center justify-between'
         >
           <div>
-            <h1 className='text-3xl font-bold text-gray-900 flex items-center gap-3'>
+            <h1 className='text-3xl font-bold text-gray-900 dark:text-night-50 flex items-center gap-3'>
               {getGreeting()}, {user?.name?.split(" ")[0] || "Usuario"}
               <motion.span
                 animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
@@ -321,7 +327,7 @@ const Dashboard = () => {
                 👋
               </motion.span>
             </h1>
-            <p className='text-gray-500 mt-1'>
+            <p className='text-gray-500 dark:text-night-400 mt-1'>
               Aquí está el resumen de tu actividad
             </p>
           </div>
@@ -330,7 +336,7 @@ const Dashboard = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/tasks")}
-              className='flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors'
+              className='flex items-center gap-2 px-4 py-2 bg-white dark:bg-night-800 border border-gray-200 dark:border-night-700 rounded-lg text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-700 transition-colors'
             >
               <ListTodo className='w-4 h-4' />
               Ver Tareas
@@ -390,7 +396,7 @@ const Dashboard = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate("/tasks")}
-                  className='px-4 py-2 bg-white text-red-600 rounded-lg font-medium hover:bg-white/90 transition-colors'
+                  className='px-4 py-2 bg-white text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-white/90 transition-colors'
                 >
                   Ver todas
                 </motion.button>
@@ -405,15 +411,15 @@ const Dashboard = () => {
         <StaggerItem>
           <motion.div
             whileHover={{ y: -4 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
+            className='bg-white dark:bg-night-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-night-700 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/projects")}
           >
             <ProgressRing percentage={stats.avgProgress} color='#7c3aed' size={52} />
             <div>
-              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+              <h3 className='text-2xl font-bold text-gray-900 dark:text-night-50 tabular-nums'>
                 <AnimatedNumber value={stats.avgProgress} suffix='%' />
               </h3>
-              <p className='text-sm text-gray-500'>Progreso medio</p>
+              <p className='text-sm text-gray-500 dark:text-night-400'>Progreso medio</p>
             </div>
           </motion.div>
         </StaggerItem>
@@ -421,15 +427,15 @@ const Dashboard = () => {
         <StaggerItem>
           <motion.div
             whileHover={{ y: -4 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
+            className='bg-white dark:bg-night-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-night-700 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/tasks")}
           >
             <ProgressRing percentage={stats.completionRate} color='#16a34a' size={52} />
             <div>
-              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+              <h3 className='text-2xl font-bold text-gray-900 dark:text-night-50 tabular-nums'>
                 <AnimatedNumber value={stats.completedTasks} />
               </h3>
-              <p className='text-sm text-gray-500'>Completadas</p>
+              <p className='text-sm text-gray-500 dark:text-night-400'>Completadas</p>
             </div>
           </motion.div>
         </StaggerItem>
@@ -437,7 +443,7 @@ const Dashboard = () => {
         <StaggerItem>
           <motion.div
             whileHover={{ y: -4 }}
-            className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
+            className='bg-white dark:bg-night-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-night-700 cursor-pointer flex items-center gap-4'
             onClick={() => navigate("/tasks")}
           >
             <ProgressRing
@@ -446,13 +452,13 @@ const Dashboard = () => {
               size={52}
             />
             <div>
-              <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+              <h3 className='text-2xl font-bold text-gray-900 dark:text-night-50 tabular-nums'>
                 <AnimatedNumber value={stats.pendingTasks} />
               </h3>
-              <p className='text-sm text-gray-500'>
+              <p className='text-sm text-gray-500 dark:text-night-400'>
                 Pendientes
                 {stats.urgentTasks > 0 && (
-                  <span className='text-red-600 font-medium'>
+                  <span className='text-red-600 dark:text-red-400 font-medium'>
                     {" "}
                     · {stats.urgentTasks} urgente
                     {stats.urgentTasks > 1 ? "s" : ""}
@@ -467,7 +473,7 @@ const Dashboard = () => {
           <StaggerItem>
             <motion.div
               whileHover={{ y: -4 }}
-              className='bg-white rounded-xl p-5 shadow-sm border border-gray-100 cursor-pointer flex items-center gap-4'
+              className='bg-white dark:bg-night-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-night-700 cursor-pointer flex items-center gap-4'
               onClick={() => navigate("/teams")}
             >
               <ProgressRing
@@ -476,10 +482,10 @@ const Dashboard = () => {
                 size={52}
               />
               <div>
-                <h3 className='text-2xl font-bold text-gray-900 tabular-nums'>
+                <h3 className='text-2xl font-bold text-gray-900 dark:text-night-50 tabular-nums'>
                   <AnimatedNumber value={stats.totalTeams} />
                 </h3>
-                <p className='text-sm text-gray-500'>Equipos</p>
+                <p className='text-sm text-gray-500 dark:text-night-400'>Equipos</p>
               </div>
             </motion.div>
           </StaggerItem>
@@ -490,24 +496,24 @@ const Dashboard = () => {
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Proyectos Recientes */}
         <div className='lg:col-span-2 space-y-6'>
-          <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
-            <div className='p-5 border-b border-gray-100 flex items-center justify-between'>
+          <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700'>
+            <div className='p-5 border-b border-gray-100 dark:border-night-700 flex items-center justify-between'>
               <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center'>
                   <FolderKanban className='w-5 h-5 text-brand-600' />
                 </div>
                 <div>
-                  <h2 className='text-lg font-semibold text-gray-900'>
+                  <h2 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
                     Proyectos Recientes
                   </h2>
-                  <p className='text-sm text-gray-500'>
+                  <p className='text-sm text-gray-500 dark:text-night-400'>
                     Tus proyectos actualizados recientemente
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => navigate("/projects")}
-                className='text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1'
+                className='text-sm text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium flex items-center gap-1'
               >
                 Ver todos <ChevronRight className='w-4 h-4' />
               </button>
@@ -516,13 +522,13 @@ const Dashboard = () => {
             <div className='p-5'>
               {recentProjects.length === 0 ? (
                 <div className='text-center py-8'>
-                  <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3'>
-                    <FolderKanban className='w-8 h-8 text-gray-400' />
+                  <div className='w-16 h-16 bg-gray-100 dark:bg-night-800 rounded-full flex items-center justify-center mx-auto mb-3'>
+                    <FolderKanban className='w-8 h-8 text-gray-400 dark:text-night-500' />
                   </div>
-                  <p className='text-gray-500'>No tienes proyectos aún</p>
+                  <p className='text-gray-500 dark:text-night-400'>No tienes proyectos aún</p>
                   <button
                     onClick={() => navigate("/projects")}
-                    className='mt-3 text-brand-600 hover:text-brand-700 font-medium'
+                    className='mt-3 text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium'
                   >
                     Crear tu primer proyecto
                   </button>
@@ -547,7 +553,7 @@ const Dashboard = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -4, scale: 1.02 }}
                         onClick={() => navigate(`/projects/${project.id}`)}
-                        className='border border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-all group'
+                        className='border border-gray-200 dark:border-night-700 rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-all group'
                       >
                         <div
                           className={`h-1.5 ${
@@ -564,27 +570,27 @@ const Dashboard = () => {
                               {project.name?.charAt(0).toUpperCase() || "P"}
                             </div>
                             <div className='flex-1 min-w-0'>
-                              <h3 className='font-semibold text-gray-900 truncate group-hover:text-brand-600 transition-colors'>
+                              <h3 className='font-semibold text-gray-900 dark:text-night-50 truncate group-hover:text-brand-600 transition-colors'>
                                 {project.name}
                               </h3>
                               <div className='flex items-center gap-2 mt-1'>
                                 {isCompleted ? (
-                                  <span className='text-xs text-green-600 font-medium flex items-center gap-1'>
+                                  <span className='text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1'>
                                     <CheckCircle className='w-3 h-3' />
                                     Completado
                                   </span>
                                 ) : isOverdue ? (
-                                  <span className='text-xs text-red-600 font-medium flex items-center gap-1'>
+                                  <span className='text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1'>
                                     <AlertTriangle className='w-3 h-3' />
                                     Vencido
                                   </span>
                                 ) : isDueSoon ? (
-                                  <span className='text-xs text-orange-600 font-medium flex items-center gap-1'>
+                                  <span className='text-xs text-orange-600 dark:text-orange-400 font-medium flex items-center gap-1'>
                                     <Clock className='w-3 h-3' />
                                     {days === 0 ? "Hoy" : `${days}d`}
                                   </span>
                                 ) : (
-                                  <span className='text-xs text-gray-500'>
+                                  <span className='text-xs text-gray-500 dark:text-night-400'>
                                     {formatDate(project.due_date)}
                                   </span>
                                 )}
@@ -593,12 +599,12 @@ const Dashboard = () => {
                           </div>
                           <div className='mb-3'>
                             <div className='flex items-center justify-between text-xs mb-1'>
-                              <span className='text-gray-500'>Progreso</span>
-                              <span className='font-medium text-gray-700 tabular-nums'>
+                              <span className='text-gray-500 dark:text-night-400'>Progreso</span>
+                              <span className='font-medium text-gray-700 dark:text-night-300 tabular-nums'>
                                 {project.progress || 0}%
                               </span>
                             </div>
-                            <div className='w-full bg-gray-100 rounded-full h-2'>
+                            <div className='w-full bg-gray-100 dark:bg-night-800 rounded-full h-2'>
                               <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${project.progress || 0}%` }}
@@ -613,17 +619,17 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className='flex items-center justify-between'>
-                            <div className='flex items-center gap-1 text-xs text-gray-500'>
+                            <div className='flex items-center gap-1 text-xs text-gray-500 dark:text-night-400'>
                               <ListTodo className='w-3 h-3' />
                               {project.tasks?.length || 0} tareas
                             </div>
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                                 project.priority === "high"
-                                  ? "bg-red-100 text-red-700"
+                                  ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                                   : project.priority === "medium"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-green-100 text-green-700"
+                                    ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
+                                    : "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                               }`}
                             >
                               {project.priority === "high"
@@ -643,17 +649,17 @@ const Dashboard = () => {
           </div>
 
           {/* Tendencia de tareas completadas */}
-          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5'>
+          <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700 p-5'>
             <div className='flex items-center justify-between mb-4'>
               <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+                <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center'>
                   <BarChart3 className='w-5 h-5 text-brand-600' />
                 </div>
                 <div>
-                  <h2 className='text-lg font-semibold text-gray-900'>
+                  <h2 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
                     Tareas completadas · últimas 8 semanas
                   </h2>
-                  <p className='text-sm text-gray-500'>
+                  <p className='text-sm text-gray-500 dark:text-night-400'>
                     Promedio: <span className='tabular-nums'>{weeklyAvg}</span>/semana
                   </p>
                 </div>
@@ -668,15 +674,15 @@ const Dashboard = () => {
         {/* Panel lateral */}
         <div className='space-y-6'>
           {/* Próximas Tareas */}
-          <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
-            <div className='p-4 border-b border-gray-100 flex items-center justify-between'>
+          <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700'>
+            <div className='p-4 border-b border-gray-100 dark:border-night-700 flex items-center justify-between'>
               <div className='flex items-center gap-2'>
                 <CalendarClock className='w-5 h-5 text-brand-600' />
-                <h2 className='font-semibold text-gray-900'>Próximas Tareas</h2>
+                <h2 className='font-semibold text-gray-900 dark:text-night-50'>Próximas Tareas</h2>
               </div>
               <button
                 onClick={() => navigate("/tasks")}
-                className='text-xs text-brand-600 hover:text-brand-700 font-medium'
+                className='text-xs text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 font-medium'
               >
                 Ver todas
               </button>
@@ -688,15 +694,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-red-50 border border-red-100 rounded-lg cursor-pointer hover:shadow-sm transition-all'
+                  className='p-3 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg cursor-pointer hover:shadow-sm transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <AlertTriangle className='w-4 h-4 text-red-500 shrink-0 mt-0.5' />
+                    <AlertTriangle className='w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-900 truncate'>
+                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-red-600'>Vencida</p>
+                      <p className='text-xs text-red-600 dark:text-red-400'>Vencida</p>
                     </div>
                   </div>
                 </motion.div>
@@ -707,15 +713,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-orange-50 border border-orange-100 rounded-lg cursor-pointer hover:shadow-sm transition-all'
+                  className='p-3 bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900 rounded-lg cursor-pointer hover:shadow-sm transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <Timer className='w-4 h-4 text-orange-500 shrink-0 mt-0.5' />
+                    <Timer className='w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-900 truncate'>
+                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-orange-600'>Vence hoy</p>
+                      <p className='text-xs text-orange-600 dark:text-orange-400'>Vence hoy</p>
                     </div>
                   </div>
                 </motion.div>
@@ -726,15 +732,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-yellow-50 border border-yellow-100 rounded-lg cursor-pointer hover:shadow-sm transition-all'
+                  className='p-3 bg-yellow-50 dark:bg-yellow-950/40 border border-yellow-100 dark:border-yellow-900 rounded-lg cursor-pointer hover:shadow-sm transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <Clock className='w-4 h-4 text-yellow-600 shrink-0 mt-0.5' />
+                    <Clock className='w-4 h-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-900 truncate'>
+                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-yellow-700'>
+                      <p className='text-xs text-yellow-700 dark:text-yellow-300'>
                         {formatDate(task.due_date)}
                       </p>
                     </div>
@@ -747,15 +753,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all'
+                  className='p-3 bg-gray-50 dark:bg-night-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-night-700 transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <Calendar className='w-4 h-4 text-gray-400 shrink-0 mt-0.5' />
+                    <Calendar className='w-4 h-4 text-gray-400 dark:text-night-500 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-900 truncate'>
+                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-gray-500'>
+                      <p className='text-xs text-gray-500 dark:text-night-400'>
                         {formatDate(task.due_date)}
                       </p>
                     </div>
@@ -769,8 +775,8 @@ const Dashboard = () => {
                 tasksByDeadline.upcoming.length === 0 && (
                   <div className='text-center py-6'>
                     <CheckCircle2 className='w-10 h-10 text-green-400 mx-auto mb-2' />
-                    <p className='text-sm text-gray-500'>¡Todo al día!</p>
-                    <p className='text-xs text-gray-400'>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>¡Todo al día!</p>
+                    <p className='text-xs text-gray-400 dark:text-night-500'>
                       No tienes tareas próximas
                     </p>
                   </div>
@@ -826,15 +832,15 @@ const Dashboard = () => {
 
           {/* Equipos */}
           {isInOrganizationMode && teams.length > 0 && (
-            <div className='bg-white rounded-xl shadow-sm border border-gray-100'>
-              <div className='p-4 border-b border-gray-100 flex items-center justify-between'>
+            <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700'>
+              <div className='p-4 border-b border-gray-100 dark:border-night-700 flex items-center justify-between'>
                 <div className='flex items-center gap-2'>
                   <Users className='w-5 h-5 text-accent-600' />
-                  <h2 className='font-semibold text-gray-900'>Tus Equipos</h2>
+                  <h2 className='font-semibold text-gray-900 dark:text-night-50'>Tus Equipos</h2>
                 </div>
                 <button
                   onClick={() => navigate("/teams")}
-                  className='text-xs text-accent-600 hover:text-accent-700 font-medium'
+                  className='text-xs text-accent-600 hover:text-accent-700 dark:hover:text-accent-300 font-medium'
                 >
                   Ver todos
                 </button>
@@ -845,7 +851,7 @@ const Dashboard = () => {
                     key={team.id}
                     whileHover={{ x: 4 }}
                     onClick={() => navigate(`/teams/${team.id}`)}
-                    className='flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors'
+                    className='flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
                   >
                     <div
                       className={`w-8 h-8 rounded-lg ${
@@ -855,14 +861,14 @@ const Dashboard = () => {
                       {team.name?.charAt(0).toUpperCase() || "T"}
                     </div>
                     <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-gray-900 truncate'>
+                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {team.name}
                       </p>
-                      <p className='text-xs text-gray-500'>
+                      <p className='text-xs text-gray-500 dark:text-night-400'>
                         {team.members_count || 0} miembros
                       </p>
                     </div>
-                    <ChevronRight className='w-4 h-4 text-gray-400' />
+                    <ChevronRight className='w-4 h-4 text-gray-400 dark:text-night-500' />
                   </motion.div>
                 ))}
               </div>

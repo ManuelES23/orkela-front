@@ -34,74 +34,74 @@ const TagManager = ({ projectId, onClose }) => {
   // Mapeo de colores Tailwind a clases CSS
   const colorClasses = {
     red: {
-      bg: "bg-red-100",
-      text: "text-red-700",
-      border: "border-red-300",
+      bg: "bg-red-100 dark:bg-red-950/40",
+      text: "text-red-700 dark:text-red-300",
+      border: "border-red-300 dark:border-red-700",
       dot: "bg-red-500",
-      hover: "hover:bg-red-50",
+      hover: "hover:bg-red-50 dark:hover:bg-red-950/40",
     },
     orange: {
-      bg: "bg-orange-100",
-      text: "text-orange-700",
-      border: "border-orange-300",
+      bg: "bg-orange-100 dark:bg-orange-950/40",
+      text: "text-orange-700 dark:text-orange-300",
+      border: "border-orange-300 dark:border-orange-700",
       dot: "bg-orange-500",
-      hover: "hover:bg-orange-50",
+      hover: "hover:bg-orange-50 dark:hover:bg-orange-950/40",
     },
     yellow: {
-      bg: "bg-yellow-100",
-      text: "text-yellow-700",
-      border: "border-yellow-300",
+      bg: "bg-yellow-100 dark:bg-yellow-950/40",
+      text: "text-yellow-700 dark:text-yellow-300",
+      border: "border-yellow-300 dark:border-yellow-700",
       dot: "bg-yellow-500",
-      hover: "hover:bg-yellow-50",
+      hover: "hover:bg-yellow-50 dark:hover:bg-yellow-950/40",
     },
     green: {
-      bg: "bg-green-100",
-      text: "text-green-700",
-      border: "border-green-300",
+      bg: "bg-green-100 dark:bg-green-950/40",
+      text: "text-green-700 dark:text-green-300",
+      border: "border-green-300 dark:border-green-700",
       dot: "bg-green-500",
-      hover: "hover:bg-green-50",
+      hover: "hover:bg-green-50 dark:hover:bg-green-950/40",
     },
     teal: {
-      bg: "bg-teal-100",
-      text: "text-teal-700",
-      border: "border-teal-300",
+      bg: "bg-teal-100 dark:bg-teal-950/40",
+      text: "text-teal-700 dark:text-teal-300",
+      border: "border-teal-300 dark:border-teal-700",
       dot: "bg-teal-500",
-      hover: "hover:bg-teal-50",
+      hover: "hover:bg-teal-50 dark:hover:bg-teal-950/40",
     },
     blue: {
-      bg: "bg-blue-100",
-      text: "text-blue-700",
-      border: "border-blue-300",
+      bg: "bg-blue-100 dark:bg-blue-950/40",
+      text: "text-blue-700 dark:text-blue-300",
+      border: "border-blue-300 dark:border-blue-700",
       dot: "bg-blue-500",
-      hover: "hover:bg-blue-50",
+      hover: "hover:bg-blue-50 dark:hover:bg-blue-950/40",
     },
     indigo: {
-      bg: "bg-indigo-100",
-      text: "text-indigo-700",
-      border: "border-indigo-300",
+      bg: "bg-indigo-100 dark:bg-indigo-950/40",
+      text: "text-indigo-700 dark:text-indigo-300",
+      border: "border-indigo-300 dark:border-indigo-700",
       dot: "bg-indigo-500",
-      hover: "hover:bg-indigo-50",
+      hover: "hover:bg-indigo-50 dark:hover:bg-indigo-950/40",
     },
     purple: {
-      bg: "bg-purple-100",
-      text: "text-purple-700",
-      border: "border-purple-300",
+      bg: "bg-purple-100 dark:bg-purple-950/40",
+      text: "text-purple-700 dark:text-purple-300",
+      border: "border-purple-300 dark:border-purple-700",
       dot: "bg-purple-500",
-      hover: "hover:bg-purple-50",
+      hover: "hover:bg-purple-50 dark:hover:bg-purple-950/40",
     },
     pink: {
-      bg: "bg-pink-100",
-      text: "text-pink-700",
-      border: "border-pink-300",
+      bg: "bg-pink-100 dark:bg-pink-950/40",
+      text: "text-pink-700 dark:text-pink-300",
+      border: "border-pink-300 dark:border-pink-700",
       dot: "bg-pink-500",
-      hover: "hover:bg-pink-50",
+      hover: "hover:bg-pink-50 dark:hover:bg-pink-950/40",
     },
     gray: {
-      bg: "bg-gray-100",
-      text: "text-gray-700",
-      border: "border-gray-300",
+      bg: "bg-gray-100 dark:bg-night-800",
+      text: "text-gray-700 dark:text-night-300",
+      border: "border-gray-300 dark:border-night-600",
       dot: "bg-gray-500",
-      hover: "hover:bg-gray-50",
+      hover: "hover:bg-gray-50 dark:hover:bg-night-800",
     },
   };
 
@@ -250,7 +250,7 @@ const TagManager = ({ projectId, onClose }) => {
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <Tag className='w-5 h-5 text-brand-600' />
-          <h3 className='font-semibold text-gray-900'>
+          <h3 className='font-semibold text-gray-900 dark:text-night-50'>
             Etiquetas del proyecto
           </h3>
         </div>
@@ -258,14 +258,14 @@ const TagManager = ({ projectId, onClose }) => {
           <button
             type='button'
             onClick={onClose}
-            className='p-1 hover:bg-gray-100 rounded-full transition-colors'
+            className='p-1 hover:bg-gray-100 dark:hover:bg-night-800 rounded-full transition-colors'
           >
-            <X className='w-5 h-5 text-gray-500' />
+            <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
           </button>
         )}
       </div>
 
-      <p className='text-sm text-gray-500'>
+      <p className='text-sm text-gray-500 dark:text-night-400'>
         Personaliza los nombres de las etiquetas para este proyecto. Los colores
         son fijos.
       </p>
@@ -302,7 +302,7 @@ const TagManager = ({ projectId, onClose }) => {
                         if (e.key === "Enter") saveTagName(tag.id);
                         if (e.key === "Escape") cancelEditing();
                       }}
-                      className='flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                      className='flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-night-600 rounded focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                       autoFocus
                       disabled={saving}
                     />
@@ -322,23 +322,23 @@ const TagManager = ({ projectId, onClose }) => {
                           type='button'
                           onClick={() => saveTagName(tag.id)}
                           disabled={saving}
-                          className='p-1.5 hover:bg-green-100 rounded-full transition-colors'
+                          className='p-1.5 hover:bg-green-100 dark:hover:bg-green-950/40 rounded-full transition-colors'
                           title='Guardar'
                         >
                           {saving ? (
-                            <Loader2 className='w-4 h-4 animate-spin text-gray-400' />
+                            <Loader2 className='w-4 h-4 animate-spin text-gray-400 dark:text-night-500' />
                           ) : (
-                            <Check className='w-4 h-4 text-green-600' />
+                            <Check className='w-4 h-4 text-green-600 dark:text-green-400' />
                           )}
                         </button>
                         <button
                           type='button'
                           onClick={cancelEditing}
                           disabled={saving}
-                          className='p-1.5 hover:bg-red-100 rounded-full transition-colors'
+                          className='p-1.5 hover:bg-red-100 dark:hover:bg-red-950/40 rounded-full transition-colors'
                           title='Cancelar'
                         >
-                          <X className='w-4 h-4 text-red-600' />
+                          <X className='w-4 h-4 text-red-600 dark:text-red-400' />
                         </button>
                       </>
                     ) : (
@@ -350,16 +350,16 @@ const TagManager = ({ projectId, onClose }) => {
                           className='p-1.5 hover:bg-white/50 rounded-full transition-colors'
                           title='Editar nombre'
                         >
-                          <Pencil className='w-4 h-4 text-gray-500' />
+                          <Pencil className='w-4 h-4 text-gray-500 dark:text-night-400' />
                         </button>
                         <button
                           type='button'
                           onClick={() => handleDeleteTag(tag.id)}
                           disabled={saving}
-                          className='p-1.5 hover:bg-red-100 rounded-full transition-colors'
+                          className='p-1.5 hover:bg-red-100 dark:hover:bg-red-950/40 rounded-full transition-colors'
                           title='Eliminar'
                         >
-                          <Trash2 className='w-4 h-4 text-red-500' />
+                          <Trash2 className='w-4 h-4 text-red-500 dark:text-red-400' />
                         </button>
                       </>
                     )}
@@ -374,7 +374,7 @@ const TagManager = ({ projectId, onClose }) => {
       {/* Colores disponibles para crear */}
       {unusedColors.length > 0 && (
         <div className='space-y-2'>
-          <h4 className='text-sm font-medium text-gray-700'>
+          <h4 className='text-sm font-medium text-gray-700 dark:text-night-300'>
             Agregar etiqueta:
           </h4>
           <div className='flex flex-wrap gap-2'>
@@ -391,10 +391,10 @@ const TagManager = ({ projectId, onClose }) => {
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${colors.border} ${colors.hover} transition-colors disabled:opacity-50`}
                 >
                   <span className={`w-3 h-3 rounded-full ${colors.dot}`} />
-                  <span className='text-sm text-gray-600'>
+                  <span className='text-sm text-gray-600 dark:text-night-300'>
                     {colorItem.default_name}
                   </span>
-                  <Plus className='w-3 h-3 text-gray-400' />
+                  <Plus className='w-3 h-3 text-gray-400 dark:text-night-500' />
                 </button>
               );
             })}
@@ -405,7 +405,7 @@ const TagManager = ({ projectId, onClose }) => {
       {/* Botón para crear todas las etiquetas por defecto */}
       {tags.length === 0 && (
         <div className='text-center py-4'>
-          <p className='text-gray-500 mb-3'>
+          <p className='text-gray-500 dark:text-night-400 mb-3'>
             Este proyecto no tiene etiquetas configuradas.
           </p>
           <button
@@ -425,7 +425,7 @@ const TagManager = ({ projectId, onClose }) => {
       )}
 
       {/* Info */}
-      <p className='text-xs text-gray-400 mt-4'>
+      <p className='text-xs text-gray-400 dark:text-night-500 mt-4'>
         Las etiquetas eliminadas se quitarán de todas las tareas que las tengan
         asignadas.
       </p>

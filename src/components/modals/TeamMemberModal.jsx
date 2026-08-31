@@ -63,17 +63,17 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
       <form onSubmit={handleSubmit} className='space-y-5'>
         {/* Nombre completo */}
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
             Nombre Completo *
           </label>
           <div className='relative'>
-            <User className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors' />
+            <User className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500 transition-colors' />
             <input
               type='text'
               name='name'
               value={formData.name}
               onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+              className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
               placeholder='Ej: Juan Pérez'
               required
             />
@@ -82,17 +82,17 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
 
         {/* Email */}
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
             Correo Electrónico *
           </label>
           <div className='relative'>
-            <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+            <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
             <input
               type='email'
               name='email'
               value={formData.email}
               onChange={handleChange}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+              className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               placeholder='juan.perez@orkela.com'
               required
             />
@@ -102,17 +102,17 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
         {/* Rol y Departamento */}
         <div className='grid grid-cols-2 gap-4'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Rol *
             </label>
             <div className='relative'>
-              <Briefcase className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Briefcase className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 name='role'
                 value={formData.role}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 placeholder='Ej: Frontend Developer'
                 required
               />
@@ -120,17 +120,17 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Departamento
             </label>
             <div className='relative'>
-              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 name='department'
                 value={formData.department}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 placeholder='Ej: Desarrollo'
               />
             </div>
@@ -139,7 +139,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
 
         {/* Error message */}
         {error && (
-          <div className='p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm'>
+          <div className='p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm'>
             {error}
           </div>
         )}
@@ -161,7 +161,7 @@ const TeamMemberModal = ({ isOpen, onClose, member = null, onSuccess }) => {
             type='button'
             onClick={onClose}
             disabled={loading}
-            className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
+            className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             Cancelar
           </button>

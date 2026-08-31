@@ -25,7 +25,7 @@ export const SkeletonGroup = ({ className = "", children }) => (
 export const SkeletonCard = () => (
   <motion.div
     variants={itemVariants}
-    className='bg-white rounded-xl p-5 border border-gray-100 space-y-4'
+    className='bg-white dark:bg-night-900 rounded-xl p-5 border border-gray-100 dark:border-night-700 space-y-4'
   >
     <div className='flex items-center gap-3'>
       <Skeleton className='w-10 h-10 rounded-lg shrink-0' />
@@ -55,7 +55,7 @@ export const SkeletonCardGrid = ({ count = 6, className = "grid-cols-1 md:grid-c
 export const SkeletonRow = () => (
   <motion.div
     variants={itemVariants}
-    className='flex items-center gap-4 bg-white rounded-lg p-4 border border-gray-100'
+    className='flex items-center gap-4 bg-white dark:bg-night-900 rounded-lg p-4 border border-gray-100 dark:border-night-700'
   >
     <Skeleton className='w-9 h-9 rounded-lg shrink-0' />
     <div className='flex-1 space-y-2'>
@@ -108,7 +108,7 @@ export const SkeletonDetailHeader = () => (
 export const SkeletonPanel = ({ className = "" }) => (
   <motion.div
     variants={itemVariants}
-    className={`bg-white rounded-xl border border-gray-100 p-5 space-y-3 ${className}`}
+    className={`bg-white dark:bg-night-900 rounded-xl border border-gray-100 dark:border-night-700 p-5 space-y-3 ${className}`}
   >
     <Skeleton className='h-4 w-1/3' />
     <Skeleton className='h-3 w-full' />
@@ -125,7 +125,7 @@ export const SkeletonDetail = () => (
     <SkeletonDetailHeader />
     <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-8'>
       {[0, 1, 2, 3].map((i) => (
-        <motion.div key={i} variants={itemVariants} className='bg-white rounded-xl p-4 border border-gray-100 space-y-2'>
+        <motion.div key={i} variants={itemVariants} className='bg-white dark:bg-night-900 rounded-xl p-4 border border-gray-100 dark:border-night-700 space-y-2'>
           <Skeleton className='h-6 w-12' />
           <Skeleton className='h-3 w-20' />
         </motion.div>
@@ -142,7 +142,7 @@ export const SkeletonDetail = () => (
 export const SkeletonSettings = ({ sections = 3 }) => (
   <SkeletonGroup className='space-y-6'>
     {Array.from({ length: sections }).map((_, i) => (
-      <motion.div key={i} variants={itemVariants} className='bg-white rounded-xl border border-gray-100 p-6 space-y-4'>
+      <motion.div key={i} variants={itemVariants} className='bg-white dark:bg-night-900 rounded-xl border border-gray-100 dark:border-night-700 p-6 space-y-4'>
         <Skeleton className='h-4 w-40' />
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='space-y-2'>

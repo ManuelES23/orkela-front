@@ -96,21 +96,21 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
 
           {/* Estadísticas */}
           <div className='grid grid-cols-2 gap-4'>
-            <div className='bg-blue-50 rounded-lg p-4'>
-              <div className='flex items-center gap-2 text-blue-600 mb-1'>
+            <div className='bg-blue-50 dark:bg-blue-950/40 rounded-lg p-4'>
+              <div className='flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1'>
                 <FolderKanban className='w-5 h-5' />
                 <span className='font-semibold'>Proyectos</span>
               </div>
-              <p className='text-2xl font-bold text-blue-700'>
+              <p className='text-2xl font-bold text-blue-700 dark:text-blue-300'>
                 {teamDetails.projects?.length || 0}
               </p>
             </div>
-            <div className='bg-green-50 rounded-lg p-4'>
-              <div className='flex items-center gap-2 text-green-600 mb-1'>
+            <div className='bg-green-50 dark:bg-green-950/40 rounded-lg p-4'>
+              <div className='flex items-center gap-2 text-green-600 dark:text-green-400 mb-1'>
                 <Users className='w-5 h-5' />
                 <span className='font-semibold'>Miembros</span>
               </div>
-              <p className='text-2xl font-bold text-green-700'>
+              <p className='text-2xl font-bold text-green-700 dark:text-green-300'>
                 {(teamDetails.members?.length || 0) + 1}
               </p>
             </div>
@@ -118,7 +118,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
 
           {/* Miembros */}
           <div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+            <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-3 flex items-center gap-2'>
               <Users className='w-5 h-5' />
               Miembros del Equipo
             </h3>
@@ -127,14 +127,14 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
               <div className='flex items-center gap-3 p-3 bg-gradient-to-r from-brand-50 to-accent-50 rounded-lg border border-brand-100'>
                 <UserAvatar user={teamDetails.user} size='md' />
                 <div className='flex-1'>
-                  <p className='font-semibold text-gray-900'>
+                  <p className='font-semibold text-gray-900 dark:text-night-50'>
                     {teamDetails.user?.name}
                   </p>
-                  <p className='text-xs text-gray-500'>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>
                     {teamDetails.user?.email}
                   </p>
                 </div>
-                <div className='flex items-center gap-1 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-medium'>
+                <div className='flex items-center gap-1 bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full text-xs font-medium'>
                   <Crown className='w-3 h-3' />
                   Dueño
                 </div>
@@ -144,14 +144,14 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
               {teamDetails.members?.map((member) => (
                 <div
                   key={member.id}
-                  className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
+                  className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-night-800 rounded-lg hover:bg-gray-100 dark:hover:bg-night-800 transition-colors'
                 >
                   <UserAvatar user={member} size='md' />
                   <div className='flex-1'>
-                    <p className='font-medium text-gray-900'>{member.name}</p>
-                    <p className='text-xs text-gray-500'>{member.email}</p>
+                    <p className='font-medium text-gray-900 dark:text-night-50'>{member.name}</p>
+                    <p className='text-xs text-gray-500 dark:text-night-400'>{member.email}</p>
                   </div>
-                  <div className='flex items-center gap-1 bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs'>
+                  <div className='flex items-center gap-1 bg-gray-200 dark:bg-night-700 text-gray-700 dark:text-night-300 px-3 py-1 rounded-full text-xs'>
                     <User className='w-3 h-3' />
                     {member.pivot?.role || "Miembro"}
                   </div>
@@ -159,7 +159,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
               ))}
 
               {teamDetails.members?.length === 0 && (
-                <p className='text-center text-gray-500 py-4'>
+                <p className='text-center text-gray-500 dark:text-night-400 py-4'>
                   No hay miembros adicionales aún
                 </p>
               )}
@@ -169,20 +169,20 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
           {/* Invitar por email */}
           {teamDetails.is_owner && (
             <div className='border-t pt-6'>
-              <h3 className='text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-3 flex items-center gap-2'>
                 <Mail className='w-5 h-5' />
                 Invitar Nuevos Miembros
               </h3>
               <form onSubmit={handleSendInvite} className='flex gap-2'>
                 <div className='flex-1 relative'>
-                  <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+                  <Mail className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
                   <input
                     type='email'
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder='email@ejemplo.com'
                     disabled={sendingInvite}
-                    className='w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100'
+                    className='w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:bg-night-800'
                   />
                 </div>
                 <button
@@ -198,7 +198,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                   Enviar
                 </button>
               </form>
-              <p className='mt-2 text-xs text-gray-500'>
+              <p className='mt-2 text-xs text-gray-500 dark:text-night-400'>
                 Se enviará una invitación por correo electrónico
               </p>
             </div>
@@ -207,7 +207,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
           {/* Proyectos del equipo */}
           {teamDetails.projects && teamDetails.projects.length > 0 && (
             <div className='border-t pt-6'>
-              <h3 className='text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-3 flex items-center gap-2'>
                 <FolderKanban className='w-5 h-5' />
                 Proyectos del Equipo
               </h3>
@@ -215,21 +215,21 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                 {teamDetails.projects.map((project) => (
                   <div
                     key={project.id}
-                    className='flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
+                    className='flex items-center gap-3 p-3 bg-gray-50 dark:bg-night-800 rounded-lg hover:bg-gray-100 dark:hover:bg-night-800 transition-colors'
                   >
                     <div
                       className={`w-3 h-3 rounded-full ${project.color}`}
                     ></div>
                     <div className='flex-1'>
-                      <p className='font-medium text-gray-900'>
+                      <p className='font-medium text-gray-900 dark:text-night-50'>
                         {project.name}
                       </p>
-                      <p className='text-xs text-gray-500'>
+                      <p className='text-xs text-gray-500 dark:text-night-400'>
                         {project.description}
                       </p>
                     </div>
                     {project.due_date && (
-                      <div className='flex items-center gap-1 text-xs text-gray-500'>
+                      <div className='flex items-center gap-1 text-xs text-gray-500 dark:text-night-400'>
                         <Calendar className='w-3 h-3' />
                         {parseLocalDate(project.due_date).toLocaleDateString(
                           "es-ES",
@@ -243,7 +243,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
           )}
         </div>
       ) : (
-        <div className='text-center py-8 text-gray-500'>
+        <div className='text-center py-8 text-gray-500 dark:text-night-400'>
           No se pudo cargar la información del equipo
         </div>
       )}

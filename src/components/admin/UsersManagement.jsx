@@ -145,27 +145,27 @@ const UsersManagement = ({ onStatsUpdate }) => {
       layout
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      className={`flex items-center gap-3 bg-white border border-gray-200 border-l-4 rounded-xl px-4 py-3 ${
+      className={`flex items-center gap-3 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-xl px-4 py-3 ${
         user.status === "active" ? "border-l-green-500" : "border-l-gray-300"
       }`}
     >
       <UserAvatar user={user} size='md' />
       <div className='min-w-0 flex-1'>
-        <p className='font-medium text-gray-900 truncate'>{user.name}</p>
-        <p className='text-sm text-gray-500 flex items-center gap-1 truncate'>
+        <p className='font-medium text-gray-900 dark:text-night-50 truncate'>{user.name}</p>
+        <p className='text-sm text-gray-500 dark:text-night-400 flex items-center gap-1 truncate'>
           <Mail className='w-3 h-3 shrink-0' />
           {user.email}
         </p>
       </div>
 
-      <div className='hidden sm:flex items-center gap-1.5 text-sm text-gray-600 shrink-0 w-40'>
+      <div className='hidden sm:flex items-center gap-1.5 text-sm text-gray-600 dark:text-night-300 shrink-0 w-40'>
         {user.organization ? (
           <>
             <Building2 className='w-4 h-4 text-brand-500 shrink-0' />
             <span className='truncate'>{user.organization.name}</span>
           </>
         ) : (
-          <span className='italic text-gray-400'>Sin organización</span>
+          <span className='italic text-gray-400 dark:text-night-500'>Sin organización</span>
         )}
       </div>
 
@@ -173,8 +173,8 @@ const UsersManagement = ({ onStatsUpdate }) => {
         onClick={() => handleToggleStatus(user.id, user.status)}
         className={`hidden xs:inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors shrink-0 ${
           user.status === "active"
-            ? "bg-green-100 text-green-700 hover:bg-green-200"
-            : "bg-red-100 text-red-700 hover:bg-red-200"
+            ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50"
+            : "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50"
         }`}
       >
         {user.status === "active" ? (
@@ -190,7 +190,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
         )}
       </button>
 
-      <span className='hidden lg:flex items-center gap-1 text-xs text-gray-400 shrink-0 w-24'>
+      <span className='hidden lg:flex items-center gap-1 text-xs text-gray-400 dark:text-night-500 shrink-0 w-24'>
         <Calendar className='w-3 h-3' />
         {formatDate(user.created_at)}
       </span>
@@ -201,17 +201,17 @@ const UsersManagement = ({ onStatsUpdate }) => {
             setSelectedUser(user);
             setIsModalOpen(true);
           }}
-          className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
+          className='p-2 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors'
           title='Editar usuario'
         >
-          <Edit className='w-4 h-4 text-blue-600' />
+          <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
         </button>
         <button
           onClick={() => openDeleteConfirm(user.id)}
-          className='p-2 hover:bg-red-50 rounded-lg transition-colors'
+          className='p-2 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors'
           title='Eliminar usuario'
         >
-          <Trash2 className='w-4 h-4 text-red-600' />
+          <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
         </button>
       </div>
     </motion.div>
@@ -221,33 +221,33 @@ const UsersManagement = ({ onStatsUpdate }) => {
     <div>
       {/* Header con título */}
       <div className='mb-6'>
-        <h2 className='text-2xl font-bold text-gray-900'>
+        <h2 className='text-2xl font-bold text-gray-900 dark:text-night-50'>
           Usuarios de la Aplicación
         </h2>
-        <p className='text-gray-600 mt-1'>
+        <p className='text-gray-600 dark:text-night-300 mt-1'>
           Gestiona los usuarios que utilizan el sistema
         </p>
       </div>
 
       {/* Stats compactas */}
       <div className='grid grid-cols-3 gap-3 mb-6'>
-        <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-          <p className='text-xl font-bold text-gray-900 font-mono'>
+        <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+          <p className='text-xl font-bold text-gray-900 dark:text-night-50 font-mono'>
             {stats.total}
           </p>
-          <p className='text-xs text-gray-500'>Total</p>
+          <p className='text-xs text-gray-500 dark:text-night-400'>Total</p>
         </div>
-        <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-          <p className='text-xl font-bold text-green-600 font-mono'>
+        <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+          <p className='text-xl font-bold text-green-600 dark:text-green-400 font-mono'>
             {stats.active}
           </p>
-          <p className='text-xs text-gray-500'>Activos</p>
+          <p className='text-xs text-gray-500 dark:text-night-400'>Activos</p>
         </div>
-        <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-          <p className='text-xl font-bold text-red-600 font-mono'>
+        <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+          <p className='text-xl font-bold text-red-600 dark:text-red-400 font-mono'>
             {stats.inactive}
           </p>
-          <p className='text-xs text-gray-500'>Inactivos</p>
+          <p className='text-xs text-gray-500 dark:text-night-400'>Inactivos</p>
         </div>
       </div>
 
@@ -255,13 +255,13 @@ const UsersManagement = ({ onStatsUpdate }) => {
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6'>
         <div className='flex-1 flex flex-wrap items-center gap-4'>
           <div className='relative flex-1 min-w-[200px] max-w-md'>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
             <input
               type='text'
               placeholder='Buscar usuarios...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
           </div>
 
@@ -269,7 +269,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+            className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
           >
             <option value='all'>Todos los estados</option>
             <option value='active'>Activos</option>
@@ -280,7 +280,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
           <select
             value={orgFilter}
             onChange={(e) => setOrgFilter(e.target.value)}
-            className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+            className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
           >
             <option value='all'>Todas las organizaciones</option>
             <option value='none'>Sin organización</option>
@@ -305,15 +305,15 @@ const UsersManagement = ({ onStatsUpdate }) => {
 
       {/* Usuarios agrupados por estado */}
       {filteredUsers.length === 0 ? (
-        <div className='text-center py-12 bg-white rounded-xl border border-gray-200'>
-          <Users className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-          <p className='text-gray-500'>No se encontraron usuarios</p>
+        <div className='text-center py-12 bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700'>
+          <Users className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+          <p className='text-gray-500 dark:text-night-400'>No se encontraron usuarios</p>
         </div>
       ) : (
         <>
           {activeUsers.length > 0 && (
             <>
-              <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2'>
+              <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-2'>
                 Activos
               </p>
               <div className='space-y-2 mb-6'>
@@ -324,7 +324,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
 
           {inactiveUsers.length > 0 && (
             <>
-              <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2'>
+              <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-2'>
                 Inactivos
               </p>
               <div className='space-y-2'>{inactiveUsers.map(renderUserRow)}</div>
@@ -413,17 +413,17 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className='bg-white rounded-xl shadow-2xl w-full max-w-md'
+        className='bg-white dark:bg-night-900 rounded-xl shadow-2xl w-full max-w-md'
       >
-        <div className='p-6 border-b border-gray-200'>
-          <h2 className='text-xl font-bold text-gray-900'>
+        <div className='p-6 border-b border-gray-200 dark:border-night-700'>
+          <h2 className='text-xl font-bold text-gray-900 dark:text-night-50'>
             {user ? "Editar Usuario" : "Nuevo Usuario"}
           </h2>
         </div>
 
         <form onSubmit={handleSubmit} className='p-6 space-y-4'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
               Nombre completo
             </label>
             <input
@@ -433,12 +433,12 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
               Email
             </label>
             <input
@@ -448,14 +448,14 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
             />
           </div>
 
           {!user && (
             <>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                   Contraseña
                 </label>
                 <input
@@ -465,12 +465,12 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                  className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                 />
               </div>
 
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
                   Confirmar contraseña
                 </label>
                 <input
@@ -483,7 +483,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                       password_confirmation: e.target.value,
                     })
                   }
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                  className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                 />
               </div>
             </>
@@ -491,17 +491,17 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
 
           {/* Organización */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
               Organización
             </label>
             <div className='relative'>
-              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <select
                 value={formData.organization_id}
                 onChange={(e) =>
                   setFormData({ ...formData, organization_id: e.target.value })
                 }
-                className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none'
+                className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none'
               >
                 <option value=''>Sin organización (Usuario libre)</option>
                 {organizations.map((org) => (
@@ -511,7 +511,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
                 ))}
               </select>
             </div>
-            <p className='mt-1 text-xs text-gray-500'>
+            <p className='mt-1 text-xs text-gray-500 dark:text-night-400'>
               Los usuarios sin organización solo tienen acceso al plan gratuito
             </p>
           </div>
@@ -520,7 +520,7 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
             <button
               type='button'
               onClick={onClose}
-              className='px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition'
+              className='px-4 py-2 text-gray-700 dark:text-night-300 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition'
             >
               Cancelar
             </button>

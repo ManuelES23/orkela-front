@@ -195,7 +195,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
     if (task.is_urgent) return "bg-red-400 border-red-500";
     if (task.priority === "high") return "bg-orange-400 border-orange-500";
     if (task.priority === "medium") return "bg-yellow-400 border-yellow-500";
-    return "bg-gray-300 border-gray-400";
+    return "bg-gray-300 dark:bg-night-600 border-gray-400";
   };
 
   // Obtener color de texto para las barras
@@ -205,17 +205,17 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
     if (task.is_urgent) return "text-red-900";
     if (task.priority === "high") return "text-orange-900";
     if (task.priority === "medium") return "text-yellow-900";
-    return "text-gray-700";
+    return "text-gray-700 dark:text-night-300";
   };
 
   // Obtener icono de estado
   const getStatusIcon = (task) => {
     if (task.status === "done")
-      return <CheckCircle className='w-4 h-4 text-green-500' />;
+      return <CheckCircle className='w-4 h-4 text-green-500 dark:text-green-400' />;
     if (task.status === "in-progress")
-      return <Clock className='w-4 h-4 text-blue-500' />;
-    if (task.is_urgent) return <Zap className='w-4 h-4 text-red-500' />;
-    return <AlertCircle className='w-4 h-4 text-gray-400' />;
+      return <Clock className='w-4 h-4 text-blue-500 dark:text-blue-400' />;
+    if (task.is_urgent) return <Zap className='w-4 h-4 text-red-500 dark:text-red-400' />;
+    return <AlertCircle className='w-4 h-4 text-gray-400 dark:text-night-500' />;
   };
 
   const weekDays = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -296,30 +296,30 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
         )}
         {/* Mostrar icono de urgente si no hay espacio */}
         {task.is_urgent && isStartWeek && span < 2 && (
-          <Zap className='w-3 h-3 mx-auto mt-1 text-red-700' />
+          <Zap className='w-3 h-3 mx-auto mt-1 text-red-700 dark:text-red-300' />
         )}
       </motion.div>
     );
   };
 
   return (
-    <div className='bg-white rounded-xl border border-gray-200 overflow-hidden'>
+    <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 overflow-hidden'>
       {/* Header con navegación */}
-      <div className='flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200'>
+      <div className='flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-night-800 border-b border-gray-200 dark:border-night-700'>
         <div className='flex items-center gap-2'>
           <Calendar className='w-5 h-5 text-brand-600' />
-          <h3 className='font-semibold text-gray-900'>Vista de Calendario</h3>
+          <h3 className='font-semibold text-gray-900 dark:text-night-50'>Vista de Calendario</h3>
         </div>
 
         <div className='flex items-center gap-4'>
           {/* Toggle de vista */}
-          <div className='flex items-center bg-gray-200 rounded-lg p-0.5'>
+          <div className='flex items-center bg-gray-200 dark:bg-night-700 rounded-lg p-0.5'>
             <button
               onClick={() => setViewMode("timeline")}
               className={`px-2 py-1 text-xs font-medium rounded-md transition flex items-center gap-1 ${
                 viewMode === "timeline"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <CalendarDays className='w-3.5 h-3.5' />
@@ -329,8 +329,8 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
               onClick={() => setViewMode("classic")}
               className={`px-2 py-1 text-xs font-medium rounded-md transition flex items-center gap-1 ${
                 viewMode === "classic"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <LayoutList className='w-3.5 h-3.5' />
@@ -341,17 +341,17 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
           <div className='flex items-center gap-2'>
             <button
               onClick={goToToday}
-              className='px-3 py-1 text-sm bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition'
+              className='px-3 py-1 text-sm bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-lg hover:bg-brand-200 dark:hover:bg-brand-900/50 transition'
             >
               Hoy
             </button>
             <button
               onClick={() => navigateMonth(-1)}
-              className='p-1.5 hover:bg-gray-200 rounded-lg transition'
+              className='p-1.5 hover:bg-gray-200 dark:hover:bg-night-700 rounded-lg transition'
             >
-              <ChevronLeft className='w-5 h-5 text-gray-600' />
+              <ChevronLeft className='w-5 h-5 text-gray-600 dark:text-night-300' />
             </button>
-            <span className='font-medium text-gray-900 min-w-[140px] text-center capitalize'>
+            <span className='font-medium text-gray-900 dark:text-night-50 min-w-[140px] text-center capitalize'>
               {currentMonth.toLocaleDateString("es-ES", {
                 month: "long",
                 year: "numeric",
@@ -359,9 +359,9 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
             </span>
             <button
               onClick={() => navigateMonth(1)}
-              className='p-1.5 hover:bg-gray-200 rounded-lg transition'
+              className='p-1.5 hover:bg-gray-200 dark:hover:bg-night-700 rounded-lg transition'
             >
-              <ChevronRight className='w-5 h-5 text-gray-600' />
+              <ChevronRight className='w-5 h-5 text-gray-600 dark:text-night-300' />
             </button>
           </div>
         </div>
@@ -375,7 +375,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
             {weekDays.map((day) => (
               <div
                 key={day}
-                className='text-center text-xs font-medium text-gray-500 py-2'
+                className='text-center text-xs font-medium text-gray-500 dark:text-night-400 py-2'
               >
                 {day}
               </div>
@@ -450,13 +450,13 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                               ${dayIndex === 6 ? "border-r" : ""}
                               ${
                                 !day.isCurrentMonth
-                                  ? "text-gray-300 bg-gray-50/50"
-                                  : "text-gray-700 bg-white"
+                                  ? "text-gray-300 dark:text-night-600 bg-gray-50/50"
+                                  : "text-gray-700 dark:text-night-300 bg-white dark:bg-night-900"
                               }
                               ${
                                 isToday(day.date)
-                                  ? "bg-brand-50"
-                                  : "hover:bg-gray-50"
+                                  ? "bg-brand-50 dark:bg-brand-900/20"
+                                  : "hover:bg-gray-50 dark:hover:bg-night-800"
                               }
                               ${
                                 isSelected
@@ -493,7 +493,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                         {[...Array(7)].map((_, i) => (
                           <div
                             key={i}
-                            className={`border-r border-gray-100 ${
+                            className={`border-r border-gray-100 dark:border-night-700 ${
                               i === 6 ? "border-r-0" : ""
                             }`}
                           />
@@ -513,7 +513,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
 
                       {/* Mensaje si no hay tareas */}
                       {weekTasks.length === 0 && (
-                        <div className='absolute inset-0 flex items-center justify-center text-gray-300 text-xs'>
+                        <div className='absolute inset-0 flex items-center justify-center text-gray-300 dark:text-night-600 text-xs'>
                           Sin tareas esta semana
                         </div>
                       )}
@@ -549,13 +549,13 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                           min-h-[80px] p-1 rounded-lg border transition-all relative flex flex-col
                           ${
                             !day.isCurrentMonth
-                              ? "text-gray-300 bg-gray-50"
-                              : "text-gray-700 bg-white"
+                              ? "text-gray-300 dark:text-night-600 bg-gray-50 dark:bg-night-800"
+                              : "text-gray-700 dark:text-night-300 bg-white dark:bg-night-900"
                           }
                           ${
                             isToday(day.date)
-                              ? "border-brand-500 bg-brand-50"
-                              : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                              ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20"
+                              : "border-gray-200 dark:border-night-700 hover:border-gray-300 dark:hover:border-night-600 hover:bg-gray-50 dark:hover:bg-night-800"
                           }
                           ${isSelected ? "ring-2 ring-brand-500" : ""}
                         `}
@@ -591,7 +591,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                               />
                             ))}
                             {uniqueTaskCount > 3 && (
-                              <span className='text-[8px] text-gray-400 text-center block'>
+                              <span className='text-[8px] text-gray-400 dark:text-night-500 text-center block'>
                                 +{uniqueTaskCount - 3}
                               </span>
                             )}
@@ -614,35 +614,35 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
               animate={{ width: 280, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className='border-l border-gray-200 bg-gray-50 overflow-hidden'
+              className='border-l border-gray-200 dark:border-night-700 bg-gray-50 dark:bg-night-800 overflow-hidden'
             >
               <div className='w-[280px]'>
-                <div className='px-4 py-3 bg-white border-b border-gray-200 flex items-center justify-between'>
+                <div className='px-4 py-3 bg-white dark:bg-night-900 border-b border-gray-200 dark:border-night-700 flex items-center justify-between'>
                   <div>
-                    <h4 className='font-semibold text-gray-900 capitalize'>
+                    <h4 className='font-semibold text-gray-900 dark:text-night-50 capitalize'>
                       {selectedDay.toLocaleDateString("es-ES", {
                         weekday: "long",
                         day: "numeric",
                         month: "short",
                       })}
                     </h4>
-                    <p className='text-xs text-gray-500'>
+                    <p className='text-xs text-gray-500 dark:text-night-400'>
                       {selectedDayTasks.length} tarea
                       {selectedDayTasks.length !== 1 ? "s" : ""}
                     </p>
                   </div>
                   <button
                     onClick={() => setSelectedDay(null)}
-                    className='p-1 hover:bg-gray-100 rounded-lg transition'
+                    className='p-1 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition'
                   >
-                    <X className='w-4 h-4 text-gray-500' />
+                    <X className='w-4 h-4 text-gray-500 dark:text-night-400' />
                   </button>
                 </div>
 
                 <div className='p-3 space-y-2 max-h-[400px] overflow-y-auto'>
                   {selectedDayTasks.length === 0 ? (
-                    <div className='text-center py-8 text-gray-500'>
-                      <Calendar className='w-8 h-8 mx-auto mb-2 text-gray-300' />
+                    <div className='text-center py-8 text-gray-500 dark:text-night-400'>
+                      <Calendar className='w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-night-600' />
                       <p className='text-sm'>No hay tareas para este día</p>
                     </div>
                   ) : (
@@ -651,7 +651,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                         key={task.id}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className={`p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition ${
+                        className={`p-3 bg-white dark:bg-night-900 rounded-lg border border-gray-200 dark:border-night-700 cursor-pointer hover:shadow-md transition ${
                           task.status === "done" ? "opacity-60" : ""
                         }`}
                         onClick={() => onTaskClick?.(task)}
@@ -662,14 +662,14 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                             <h5
                               className={`text-sm font-medium ${
                                 task.status === "done"
-                                  ? "text-gray-400 line-through"
-                                  : "text-gray-900"
+                                  ? "text-gray-400 dark:text-night-500 line-through"
+                                  : "text-gray-900 dark:text-night-50"
                               }`}
                             >
                               {task.title}
                             </h5>
                             {task.description && (
-                              <p className='text-xs text-gray-500 line-clamp-2 mt-1'>
+                              <p className='text-xs text-gray-500 dark:text-night-400 line-clamp-2 mt-1'>
                                 {task.description}
                               </p>
                             )}
@@ -696,10 +696,10 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                               <span
                                 className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                                   task.priority === "high"
-                                    ? "bg-red-100 text-red-700"
+                                    ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                                     : task.priority === "medium"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-gray-100 text-gray-700"
+                                    ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
+                                    : "bg-gray-100 dark:bg-night-800 text-gray-700 dark:text-night-300"
                                 }`}
                               >
                                 {task.priority === "high"
@@ -709,7 +709,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                                   : "Baja"}
                               </span>
                               {task.is_urgent && (
-                                <span className='text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-medium flex items-center gap-0.5'>
+                                <span className='text-[10px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 font-medium flex items-center gap-0.5'>
                                   <Zap className='w-2 h-2' />
                                   Urgente
                                 </span>
@@ -728,27 +728,27 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
       </div>
 
       {/* Leyenda */}
-      <div className='px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center gap-4 text-xs'>
-        <span className='text-gray-500 font-medium'>Estados:</span>
+      <div className='px-4 py-3 bg-gray-50 dark:bg-night-800 border-t border-gray-200 dark:border-night-700 flex flex-wrap items-center gap-4 text-xs'>
+        <span className='text-gray-500 dark:text-night-400 font-medium'>Estados:</span>
         <div className='flex items-center gap-1'>
           <span className='w-4 h-2 rounded-full bg-green-400' />
-          <span className='text-gray-600'>Completada</span>
+          <span className='text-gray-600 dark:text-night-300'>Completada</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-4 h-2 rounded-full bg-blue-400' />
-          <span className='text-gray-600'>En progreso</span>
+          <span className='text-gray-600 dark:text-night-300'>En progreso</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-4 h-2 rounded-full bg-orange-400' />
-          <span className='text-gray-600'>Alta prioridad</span>
+          <span className='text-gray-600 dark:text-night-300'>Alta prioridad</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-4 h-2 rounded-full bg-red-400' />
-          <span className='text-gray-600'>Urgente</span>
+          <span className='text-gray-600 dark:text-night-300'>Urgente</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-4 h-2 rounded-full bg-yellow-400' />
-          <span className='text-gray-600'>Media prioridad</span>
+          <span className='text-gray-600 dark:text-night-300'>Media prioridad</span>
         </div>
       </div>
     </div>

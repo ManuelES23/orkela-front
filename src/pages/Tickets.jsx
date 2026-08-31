@@ -247,43 +247,43 @@ const Tickets = () => {
 
   const priorityConfig = {
     urgent: {
-      color: "text-red-600 bg-red-50 border-red-200",
+      color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
       label: "Urgente",
     },
     high: {
-      color: "text-orange-600 bg-orange-50 border-orange-200",
+      color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800",
       label: "Alta",
     },
     medium: {
-      color: "text-yellow-600 bg-yellow-50 border-yellow-200",
+      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
       label: "Media",
     },
-    low: { color: "text-gray-600 bg-gray-50 border-gray-200", label: "Baja" },
+    low: { color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700", label: "Baja" },
   };
 
   const statusConfig = {
     open: {
-      color: "text-blue-600 bg-blue-50",
+      color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40",
       icon: AlertCircle,
       label: "Abierto",
     },
     in_progress: {
-      color: "text-brand-600 bg-brand-50",
+      color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20",
       icon: PlayCircle,
       label: "En progreso",
     },
     pending: {
-      color: "text-yellow-600 bg-yellow-50",
+      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40",
       icon: PauseCircle,
       label: "Pendiente",
     },
     resolved: {
-      color: "text-green-600 bg-green-50",
+      color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40",
       icon: CheckCircle2,
       label: "Resuelto",
     },
     closed: {
-      color: "text-gray-600 bg-gray-50",
+      color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800",
       icon: XCircle,
       label: "Cerrado",
     },
@@ -293,17 +293,17 @@ const Tickets = () => {
     request: {
       icon: MessageSquare,
       label: "Solicitud",
-      color: "text-blue-500",
+      color: "text-blue-500 dark:text-blue-400",
     },
-    bug: { icon: Bug, label: "Bug", color: "text-red-500" },
+    bug: { icon: Bug, label: "Bug", color: "text-red-500 dark:text-red-400" },
     question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500" },
     feature: {
       icon: Lightbulb,
       label: "Funcionalidad",
-      color: "text-yellow-500",
+      color: "text-yellow-500 dark:text-yellow-400",
     },
-    support: { icon: Headphones, label: "Soporte", color: "text-green-500" },
-    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500" },
+    support: { icon: Headphones, label: "Soporte", color: "text-green-500 dark:text-green-400" },
+    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500 dark:text-night-400" },
   };
 
   const statusDotColor = {
@@ -311,14 +311,14 @@ const Tickets = () => {
     in_progress: "bg-brand-600",
     pending: "bg-yellow-500",
     resolved: "bg-green-500",
-    closed: "bg-gray-400",
+    closed: "bg-gray-400 dark:bg-night-500",
   };
 
   const priorityFlagColor = {
-    urgent: "text-red-500",
-    high: "text-orange-500",
-    medium: "text-yellow-500",
-    low: "text-gray-300",
+    urgent: "text-red-500 dark:text-red-400",
+    high: "text-orange-500 dark:text-orange-400",
+    medium: "text-yellow-500 dark:text-yellow-400",
+    low: "text-gray-300 dark:text-night-600",
   };
 
   const viewFilters = [
@@ -347,14 +347,14 @@ const Tickets = () => {
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6'>
           {stats && (
             <div className='flex flex-wrap items-center gap-x-4 gap-y-1 text-sm'>
-              <span className='text-gray-500'>
-                <span className='font-semibold text-gray-900 font-mono'>
+              <span className='text-gray-500 dark:text-night-400'>
+                <span className='font-semibold text-gray-900 dark:text-night-50 font-mono'>
                   {stats.total || 0}
                 </span>{" "}
                 tickets
               </span>
-              <span className='text-gray-300'>·</span>
-              <span className='text-green-600'>
+              <span className='text-gray-300 dark:text-night-600'>·</span>
+              <span className='text-green-600 dark:text-green-400'>
                 <span className='font-semibold font-mono'>
                   {stats.resolved || 0}
                 </span>{" "}
@@ -362,8 +362,8 @@ const Tickets = () => {
               </span>
               {stats.high_priority > 0 && (
                 <>
-                  <span className='text-gray-300'>·</span>
-                  <span className='flex items-center gap-1 text-red-600'>
+                  <span className='text-gray-300 dark:text-night-600'>·</span>
+                  <span className='flex items-center gap-1 text-red-600 dark:text-red-400'>
                     <Flag className='w-3.5 h-3.5' />
                     <span className='font-semibold font-mono'>
                       {stats.high_priority}
@@ -393,13 +393,13 @@ const Tickets = () => {
           {/* Rail */}
           <div className='md:w-56 shrink-0'>
             <div className='relative mb-3'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 placeholder='Buscar tickets...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-9 pr-3 py-2 w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='pl-9 pr-3 py-2 w-full text-sm border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
 
@@ -413,22 +413,22 @@ const Tickets = () => {
                     onClick={() => setActiveFilter(f.key)}
                     className={`relative flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                       active
-                        ? "text-brand-700"
-                        : "text-gray-600 hover:bg-gray-50"
+                        ? "text-brand-700 dark:text-brand-300"
+                        : "text-gray-600 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800"
                     }`}
                   >
                     {active && (
                       <motion.span
                         layoutId='tickets-rail-active'
                         transition={motionTokens.springSnappy}
-                        className='absolute inset-0 rounded-lg bg-brand-50'
+                        className='absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/20'
                       />
                     )}
                     <span className='relative flex items-center gap-2 font-medium'>
                       <f.icon className='w-4 h-4' />
                       {f.label}
                     </span>
-                    <span className='relative font-mono text-xs text-gray-400'>
+                    <span className='relative font-mono text-xs text-gray-400 dark:text-night-500'>
                       {f.count ?? 0}
                     </span>
                   </button>
@@ -438,8 +438,8 @@ const Tickets = () => {
 
             {userTeams.length > 0 && (
               <>
-                <div className='h-px bg-gray-200 my-3' />
-                <p className='px-3 text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1'>
+                <div className='h-px bg-gray-200 dark:bg-night-700 my-3' />
+                <p className='px-3 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-1'>
                   Equipos
                 </p>
                 <div className='flex flex-row flex-wrap md:flex-col gap-1'>
@@ -448,15 +448,15 @@ const Tickets = () => {
                     onClick={() => setSelectedTeamId("")}
                     className={`relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                       !selectedTeamId
-                        ? "text-brand-700"
-                        : "text-gray-600 hover:bg-gray-50"
+                        ? "text-brand-700 dark:text-brand-300"
+                        : "text-gray-600 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800"
                     }`}
                   >
                     {!selectedTeamId && (
                       <motion.span
                         layoutId='tickets-team-active'
                         transition={motionTokens.springSnappy}
-                        className='absolute inset-0 rounded-lg bg-brand-50'
+                        className='absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/20'
                       />
                     )}
                     <span className='relative flex items-center gap-2 font-medium'>
@@ -473,15 +473,15 @@ const Tickets = () => {
                         onClick={() => setSelectedTeamId(team.id.toString())}
                         className={`relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                           active
-                            ? "text-brand-700"
-                            : "text-gray-600 hover:bg-gray-50"
+                            ? "text-brand-700 dark:text-brand-300"
+                            : "text-gray-600 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800"
                         }`}
                       >
                         {active && (
                           <motion.span
                             layoutId='tickets-team-active'
                             transition={motionTokens.springSnappy}
-                            className='absolute inset-0 rounded-lg bg-brand-50'
+                            className='absolute inset-0 rounded-lg bg-brand-50 dark:bg-brand-900/20'
                           />
                         )}
                         <span className='relative flex items-center gap-2 font-medium truncate'>
@@ -503,7 +503,7 @@ const Tickets = () => {
           {/* Contenido principal */}
           <div className='flex-1 min-w-0'>
             {/* Tabs de estado - subrayado deslizante */}
-            <div className='relative flex flex-wrap gap-x-5 gap-y-1 mb-4 border-b border-gray-200 text-sm'>
+            <div className='relative flex flex-wrap gap-x-5 gap-y-1 mb-4 border-b border-gray-200 dark:border-night-700 text-sm'>
               {statusTabsCfg.map((tab) => {
                 const active = activeTab === tab.key;
                 return (
@@ -512,8 +512,8 @@ const Tickets = () => {
                     onClick={() => setActiveTab(tab.key)}
                     className={`relative pb-3 font-medium transition-colors ${
                       active
-                        ? "text-gray-900"
-                        : "text-gray-500 hover:text-gray-800"
+                        ? "text-gray-900 dark:text-night-50"
+                        : "text-gray-500 dark:text-night-400 hover:text-gray-800 dark:hover:text-night-100"
                     }`}
                   >
                     {tab.label} ({tab.count ?? 0})
@@ -533,7 +533,7 @@ const Tickets = () => {
             {loading && <SkeletonRows count={6} />}
 
             {error && (
-              <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
+              <div className='bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg'>
                 {error}
               </div>
             )}
@@ -543,13 +543,13 @@ const Tickets = () => {
               <>
                 {filteredTickets.length === 0 ? (
                   <div className='text-center py-12'>
-                    <Ticket className='w-16 h-16 text-gray-300 mx-auto mb-4' />
-                    <p className='text-gray-500 text-lg'>
+                    <Ticket className='w-16 h-16 text-gray-300 dark:text-night-600 mx-auto mb-4' />
+                    <p className='text-gray-500 dark:text-night-400 text-lg'>
                       {searchTerm
                         ? "No se encontraron tickets con ese criterio"
                         : "No hay tickets en esta categoría"}
                     </p>
-                    <p className='text-gray-400 text-sm mt-2'>
+                    <p className='text-gray-400 dark:text-night-500 text-sm mt-2'>
                       Crea un ticket para hacer una solicitud a un equipo o
                       usuario
                     </p>
@@ -572,14 +572,14 @@ const Tickets = () => {
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.2 }}
                             onClick={() => handleView(ticket)}
-                            className='group flex items-start gap-3 py-4 px-2 -mx-2 border-b border-gray-100 last:border-b-0 rounded-lg cursor-pointer hover:bg-gray-50/70 transition-colors'
+                            className='group flex items-start gap-3 py-4 px-2 -mx-2 border-b border-gray-100 dark:border-night-700 last:border-b-0 rounded-lg cursor-pointer hover:bg-gray-50/70 transition-colors'
                           >
                             {/* Punto de estado */}
                             <span
                               title={statusConfig[ticket.status]?.label}
                               className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
                                 statusDotColor[ticket.status] ||
-                                "bg-gray-400"
+                                "bg-gray-400 dark:bg-night-500"
                               }`}
                             />
 
@@ -587,10 +587,10 @@ const Tickets = () => {
                               <div className='flex items-start justify-between gap-3'>
                                 <div className='min-w-0 flex-1'>
                                   <p className='flex items-center flex-wrap gap-1.5'>
-                                    <span className='font-mono text-xs text-gray-400'>
+                                    <span className='font-mono text-xs text-gray-400 dark:text-night-500'>
                                       #{ticket.id}
                                     </span>
-                                    <span className='font-semibold text-gray-900 text-sm'>
+                                    <span className='font-semibold text-gray-900 dark:text-night-50 text-sm'>
                                       {ticket.title}
                                     </span>
                                     <Flag
@@ -603,17 +603,17 @@ const Tickets = () => {
                                       }
                                     />
                                     {ticket.is_in_inbox && (
-                                      <span className='px-1.5 py-0.5 bg-accent-50 text-accent-700 rounded text-[10px] font-semibold'>
+                                      <span className='px-1.5 py-0.5 bg-accent-50 dark:bg-accent-900/20 text-accent-700 dark:text-accent-300 rounded text-[10px] font-semibold'>
                                         Buzón
                                       </span>
                                     )}
                                   </p>
-                                  <p className='text-sm text-gray-500 line-clamp-1 mt-0.5'>
+                                  <p className='text-sm text-gray-500 dark:text-night-400 line-clamp-1 mt-0.5'>
                                     {ticket.description}
                                   </p>
 
                                   {/* Metadatos */}
-                                  <div className='flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1.5'>
+                                  <div className='flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-night-400 mt-1.5'>
                                     <span className='flex items-center gap-1'>
                                       <TypeIcon
                                         className={`w-3 h-3 ${
@@ -624,7 +624,7 @@ const Tickets = () => {
                                     </span>
 
                                     {ticket.assigned_user && (
-                                      <span className='flex items-center gap-1 text-brand-700 font-medium'>
+                                      <span className='flex items-center gap-1 text-brand-700 dark:text-brand-300 font-medium'>
                                         <User className='w-3.5 h-3.5' />
                                         {ticket.assigned_user.name}
                                         {ticket.can_resolve &&
@@ -637,22 +637,22 @@ const Tickets = () => {
                                                 )
                                               }
                                               disabled={isProcessing}
-                                              className='ml-0.5 p-0.5 hover:bg-gray-200 rounded'
+                                              className='ml-0.5 p-0.5 hover:bg-gray-200 dark:hover:bg-night-700 rounded'
                                               title='Devolver al buzón'
                                             >
-                                              <ArrowLeft className='w-3 h-3 text-gray-500' />
+                                              <ArrowLeft className='w-3 h-3 text-gray-500 dark:text-night-400' />
                                             </button>
                                           )}
                                       </span>
                                     )}
 
                                     {ticket.team && (
-                                      <span className='flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 rounded-lg font-medium'>
+                                      <span className='flex items-center gap-1 px-2 py-0.5 bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 rounded-lg font-medium'>
                                         <Users className='w-3.5 h-3.5' />
                                         {ticket.team.name}
                                         {ticket.is_team_leader && (
                                           <Crown
-                                            className='w-3 h-3 text-yellow-500'
+                                            className='w-3 h-3 text-yellow-500 dark:text-yellow-400'
                                             title='Eres líder de este equipo'
                                           />
                                         )}
@@ -682,7 +682,7 @@ const Tickets = () => {
                                     </span>
 
                                     {ticket.is_creator && (
-                                      <span className='px-2 py-0.5 bg-brand-50 text-brand-700 rounded text-[11px] font-medium'>
+                                      <span className='px-2 py-0.5 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 rounded text-[11px] font-medium'>
                                         Creado por mí
                                       </span>
                                     )}
@@ -716,10 +716,10 @@ const Tickets = () => {
                                         e.stopPropagation();
                                         handleView(ticket);
                                       }}
-                                      className='p-1 hover:bg-gray-100 rounded transition-all duration-200'
+                                      className='p-1 hover:bg-gray-100 dark:hover:bg-night-800 rounded transition-all duration-200'
                                       title='Ver detalles'
                                     >
-                                      <Eye className='w-4 h-4 text-gray-600' />
+                                      <Eye className='w-4 h-4 text-gray-600 dark:text-night-300' />
                                     </button>
                                     {ticket.can_edit && (
                                       <button
@@ -727,10 +727,10 @@ const Tickets = () => {
                                           e.stopPropagation();
                                           handleEdit(ticket);
                                         }}
-                                        className='p-1 hover:bg-blue-50 rounded transition-all duration-200'
+                                        className='p-1 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded transition-all duration-200'
                                         title='Editar'
                                       >
-                                        <Edit className='w-4 h-4 text-blue-600' />
+                                        <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                                       </button>
                                     )}
                                     {ticket.can_edit && (
@@ -742,10 +742,10 @@ const Tickets = () => {
                                             ticketId: ticket.id,
                                           });
                                         }}
-                                        className='p-1 hover:bg-red-50 rounded transition-all duration-200'
+                                        className='p-1 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-all duration-200'
                                         title='Eliminar'
                                       >
-                                        <Trash2 className='w-4 h-4 text-red-600' />
+                                        <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
                                       </button>
                                     )}
                                   </div>

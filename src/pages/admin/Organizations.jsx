@@ -207,16 +207,16 @@ const AdminOrganizations = () => {
   const getPlanBadge = (plan) => {
     if (!plan) {
       return (
-        <span className='px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium'>
+        <span className='px-2 py-1 bg-gray-100 dark:bg-night-800 text-gray-700 dark:text-night-300 rounded-full text-xs font-medium'>
           Sin plan
         </span>
       );
     }
     const style = plan.is_custom
-      ? { bg: "bg-accent-100", text: "text-accent-700" }
+      ? { bg: "bg-accent-100 dark:bg-accent-900/30", text: "text-accent-700 dark:text-accent-300" }
       : plan.is_default
-        ? { bg: "bg-gray-100", text: "text-gray-700" }
-        : { bg: "bg-brand-100", text: "text-brand-700" };
+        ? { bg: "bg-gray-100 dark:bg-night-800", text: "text-gray-700 dark:text-night-300" }
+        : { bg: "bg-brand-100 dark:bg-brand-900/30", text: "text-brand-700 dark:text-brand-300" };
     return (
       <span
         className={`px-2 py-1 ${style.bg} ${style.text} rounded-full text-xs font-medium`}
@@ -229,32 +229,32 @@ const AdminOrganizations = () => {
   const getStatusBadge = (status) => {
     const statuses = {
       active: {
-        bg: "bg-green-100",
-        text: "text-green-700",
+        bg: "bg-green-100 dark:bg-green-950/40",
+        text: "text-green-700 dark:text-green-300",
         icon: CheckCircle,
         label: "Activa",
       },
       suspended: {
-        bg: "bg-red-100",
-        text: "text-red-700",
+        bg: "bg-red-100 dark:bg-red-950/40",
+        text: "text-red-700 dark:text-red-300",
         icon: XCircle,
         label: "Suspendida",
       },
       trial: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
+        bg: "bg-yellow-100 dark:bg-yellow-950/40",
+        text: "text-yellow-700 dark:text-yellow-300",
         icon: Clock,
         label: "Prueba",
       },
       pending: {
-        bg: "bg-orange-100",
-        text: "text-orange-700",
+        bg: "bg-orange-100 dark:bg-orange-950/40",
+        text: "text-orange-700 dark:text-orange-300",
         icon: AlertTriangle,
         label: "Sin Admin",
       },
       inactive: {
-        bg: "bg-gray-100",
-        text: "text-gray-700",
+        bg: "bg-gray-100 dark:bg-night-800",
+        text: "text-gray-700 dark:text-night-300",
         icon: XCircle,
         label: "Inactiva",
       },
@@ -329,29 +329,29 @@ const AdminOrganizations = () => {
       {/* Estadísticas compactas */}
       <FadeIn delay={0.1}>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-3 mb-6'>
-          <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-            <p className='text-xl font-bold text-gray-900 font-mono'>
+          <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+            <p className='text-xl font-bold text-gray-900 dark:text-night-50 font-mono'>
               {stats.total}
             </p>
-            <p className='text-xs text-gray-500'>Total</p>
+            <p className='text-xs text-gray-500 dark:text-night-400'>Total</p>
           </div>
-          <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-            <p className='text-xl font-bold text-green-600 font-mono'>
+          <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+            <p className='text-xl font-bold text-green-600 dark:text-green-400 font-mono'>
               {stats.active}
             </p>
-            <p className='text-xs text-gray-500'>Activas</p>
+            <p className='text-xs text-gray-500 dark:text-night-400'>Activas</p>
           </div>
-          <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-            <p className='text-xl font-bold text-orange-600 font-mono'>
+          <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+            <p className='text-xl font-bold text-orange-600 dark:text-orange-400 font-mono'>
               {stats.pending}
             </p>
-            <p className='text-xs text-gray-500'>Sin Admin</p>
+            <p className='text-xs text-gray-500 dark:text-night-400'>Sin Admin</p>
           </div>
-          <div className='bg-white border border-gray-200 rounded-xl px-4 py-3'>
-            <p className='text-xl font-bold text-red-600 font-mono'>
+          <div className='bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl px-4 py-3'>
+            <p className='text-xl font-bold text-red-600 dark:text-red-400 font-mono'>
               {stats.suspended}
             </p>
-            <p className='text-xs text-gray-500'>Suspendidas</p>
+            <p className='text-xs text-gray-500 dark:text-night-400'>Suspendidas</p>
           </div>
         </div>
       </FadeIn>
@@ -361,20 +361,20 @@ const AdminOrganizations = () => {
         <div className='flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6'>
           <div className='flex flex-col sm:flex-row gap-3 flex-1 w-full'>
             <div className='relative flex-1'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 placeholder='Buscar por nombre, descripción o email del dueño...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='pl-10 pr-4 py-2.5 w-full border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
 
             <select
               value={filterPlan}
               onChange={(e) => setFilterPlan(e.target.value)}
-              className='px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none bg-white'
+              className='px-4 py-2.5 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none bg-white dark:bg-night-900'
             >
               <option value='all'>Todos los planes</option>
               {plansCatalog.map((p) => (
@@ -385,7 +385,7 @@ const AdminOrganizations = () => {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className='px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none bg-white'
+              className='px-4 py-2.5 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none bg-white dark:bg-night-900'
             >
               <option value='all'>Todos los estados</option>
               <option value='active'>Activas</option>
@@ -415,14 +415,14 @@ const AdminOrganizations = () => {
         <>
           {filteredOrganizations.length === 0 ? (
             <FadeIn>
-              <div className='text-center py-12 bg-white rounded-xl border border-gray-200'>
-                <Building2 className='w-16 h-16 text-gray-300 mx-auto mb-4' />
-                <h3 className='text-lg font-medium text-gray-900 mb-2'>
+              <div className='text-center py-12 bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700'>
+                <Building2 className='w-16 h-16 text-gray-300 dark:text-night-600 mx-auto mb-4' />
+                <h3 className='text-lg font-medium text-gray-900 dark:text-night-50 mb-2'>
                   {searchTerm || filterPlan !== "all" || filterStatus !== "all"
                     ? "No se encontraron organizaciones"
                     : "No hay organizaciones"}
                 </h3>
-                <p className='text-gray-500 mb-4'>
+                <p className='text-gray-500 dark:text-night-400 mb-4'>
                   {searchTerm || filterPlan !== "all" || filterStatus !== "all"
                     ? "Intenta con otros filtros de búsqueda"
                     : "Crea la primera organización para comenzar"}
@@ -446,7 +446,7 @@ const AdminOrganizations = () => {
                 (group) =>
                   group.orgs.length > 0 && (
                     <div key={group.key} className='mb-6'>
-                      <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2'>
+                      <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-2'>
                         {group.label}
                       </p>
                       <div className='space-y-2'>
@@ -457,12 +457,12 @@ const AdminOrganizations = () => {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className={`bg-white border border-gray-200 border-l-4 rounded-xl px-4 py-3 hover:shadow-sm transition-shadow ${group.stripe}`}
+                              className={`bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-xl px-4 py-3 hover:shadow-sm transition-shadow ${group.stripe}`}
                             >
                               <div className='flex flex-col lg:flex-row lg:items-center gap-3'>
                                 {/* Identidad */}
                                 <div className='flex items-center gap-3 flex-1 min-w-0'>
-                                  <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center overflow-hidden shrink-0'>
+                                  <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center overflow-hidden shrink-0'>
                                     {org.logo ? (
                                       <img
                                         src={getAssetUrl(org.logo)}
@@ -474,7 +474,7 @@ const AdminOrganizations = () => {
                                     )}
                                   </div>
                                   <div className='min-w-0'>
-                                    <p className='font-medium text-gray-900 truncate'>
+                                    <p className='font-medium text-gray-900 dark:text-night-50 truncate'>
                                       {org.name}
                                     </p>
                                     {org.website && (
@@ -498,14 +498,14 @@ const AdminOrganizations = () => {
                                 <div className='flex items-center flex-wrap gap-3 shrink-0'>
                                   {org.owner ? (
                                     <div className='flex items-center gap-2'>
-                                      <div className='w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center shrink-0'>
-                                        <Crown className='w-3.5 h-3.5 text-amber-600' />
+                                      <div className='w-7 h-7 bg-amber-100 dark:bg-amber-950/40 rounded-full flex items-center justify-center shrink-0'>
+                                        <Crown className='w-3.5 h-3.5 text-amber-600 dark:text-amber-400' />
                                       </div>
                                       <div className='leading-tight'>
-                                        <p className='text-sm font-medium text-gray-900'>
+                                        <p className='text-sm font-medium text-gray-900 dark:text-night-50'>
                                           {org.owner.name}
                                         </p>
-                                        <p className='text-xs text-gray-500'>
+                                        <p className='text-xs text-gray-500 dark:text-night-400'>
                                           {org.owner.email}
                                         </p>
                                       </div>
@@ -513,10 +513,10 @@ const AdminOrganizations = () => {
                                         onClick={(e) =>
                                           handleOpenAssignOwner(org, e)
                                         }
-                                        className='p-1 hover:bg-amber-50 rounded transition-colors'
+                                        className='p-1 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded transition-colors'
                                         title='Cambiar propietario'
                                       >
-                                        <Edit className='w-3 h-3 text-amber-600' />
+                                        <Edit className='w-3 h-3 text-amber-600 dark:text-amber-400' />
                                       </button>
                                     </div>
                                   ) : (
@@ -524,7 +524,7 @@ const AdminOrganizations = () => {
                                       onClick={(e) =>
                                         handleOpenAssignOwner(org, e)
                                       }
-                                      className='flex items-center gap-2 px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors text-sm font-medium'
+                                      className='flex items-center gap-2 px-3 py-1.5 bg-orange-100 dark:bg-orange-950/40 hover:bg-orange-200 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-lg transition-colors text-sm font-medium'
                                     >
                                       <UserPlus className='w-4 h-4' />
                                       Asignar Admin
@@ -535,27 +535,27 @@ const AdminOrganizations = () => {
                                   {getStatusBadge(org.status)}
 
                                   <span
-                                    className='flex items-center gap-1 text-sm text-gray-600'
+                                    className='flex items-center gap-1 text-sm text-gray-600 dark:text-night-300'
                                     title='Miembros'
                                   >
                                     <Users className='w-4 h-4' />
                                     {org.active_members_count || 0}
                                   </span>
                                   <span
-                                    className='flex items-center gap-1 text-sm text-gray-600'
+                                    className='flex items-center gap-1 text-sm text-gray-600 dark:text-night-300'
                                     title='Equipos'
                                   >
                                     <Users className='w-4 h-4' />
                                     {org.teams_count || 0}
                                   </span>
                                   <span
-                                    className='flex items-center gap-1 text-sm text-gray-600'
+                                    className='flex items-center gap-1 text-sm text-gray-600 dark:text-night-300'
                                     title='Proyectos'
                                   >
                                     <FolderKanban className='w-4 h-4' />
                                     {org.projects_count || 0}
                                   </span>
-                                  <span className='hidden xl:flex items-center gap-1 text-xs text-gray-400'>
+                                  <span className='hidden xl:flex items-center gap-1 text-xs text-gray-400 dark:text-night-500'>
                                     <Calendar className='w-3 h-3' />
                                     {new Date(
                                       org.created_at
@@ -565,26 +565,26 @@ const AdminOrganizations = () => {
                                   <div className='flex items-center gap-1'>
                                     <button
                                       onClick={() => handleViewOrg(org.id)}
-                                      className='p-2 hover:bg-brand-50 rounded-lg transition-colors'
+                                      className='p-2 hover:bg-brand-50 dark:hover:bg-brand-900/20 dark:hover:bg-brand-900/30 rounded-lg transition-colors'
                                       title='Ver detalles'
                                     >
                                       <Eye className='w-4 h-4 text-brand-600' />
                                     </button>
                                     <button
                                       onClick={(e) => handleEditOrg(org, e)}
-                                      className='p-2 hover:bg-blue-50 rounded-lg transition-colors'
+                                      className='p-2 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors'
                                       title='Editar'
                                     >
-                                      <Edit className='w-4 h-4 text-blue-600' />
+                                      <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                                     </button>
                                     <button
                                       onClick={(e) =>
                                         handleDeleteConfirm(org, e)
                                       }
-                                      className='p-2 hover:bg-red-50 rounded-lg transition-colors'
+                                      className='p-2 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors'
                                       title='Eliminar'
                                     >
-                                      <Trash2 className='w-4 h-4 text-red-600' />
+                                      <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
                                     </button>
                                   </div>
                                 </div>
@@ -639,16 +639,16 @@ const AdminOrganizations = () => {
       >
         <div className='space-y-5'>
           {/* Info de la organización */}
-          <div className='p-4 bg-gray-50 rounded-lg'>
+          <div className='p-4 bg-gray-50 dark:bg-night-800 rounded-lg'>
             <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center'>
+              <div className='w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center'>
                 <Building2 className='w-5 h-5 text-brand-600' />
               </div>
               <div>
-                <p className='font-medium text-gray-900'>
+                <p className='font-medium text-gray-900 dark:text-night-50'>
                   {assignOwnerModal.org?.name}
                 </p>
-                <p className='text-sm text-gray-500'>
+                <p className='text-sm text-gray-500 dark:text-night-400'>
                   Plan: {assignOwnerModal.org?.plan?.name || "Sin plan"}
                 </p>
               </div>
@@ -657,20 +657,20 @@ const AdminOrganizations = () => {
 
           {/* Info actual del owner (si existe) */}
           {assignOwnerModal.org?.owner && (
-            <div className='p-4 bg-amber-50 border border-amber-200 rounded-lg'>
-              <p className='text-sm font-medium text-amber-800 mb-2'>
+            <div className='p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg'>
+              <p className='text-sm font-medium text-amber-800 dark:text-amber-300 mb-2'>
                 Propietario actual:
               </p>
               <div className='flex items-center gap-2'>
-                <Crown className='w-4 h-4 text-amber-600' />
-                <span className='text-amber-700'>
+                <Crown className='w-4 h-4 text-amber-600 dark:text-amber-400' />
+                <span className='text-amber-700 dark:text-amber-300'>
                   {assignOwnerModal.org.owner.name}
                 </span>
-                <span className='text-amber-600 text-sm'>
+                <span className='text-amber-600 dark:text-amber-400 text-sm'>
                   ({assignOwnerModal.org.owner.email})
                 </span>
               </div>
-              <p className='mt-2 text-xs text-amber-600'>
+              <p className='mt-2 text-xs text-amber-600 dark:text-amber-400'>
                 El propietario actual será convertido a administrador.
               </p>
             </div>
@@ -678,7 +678,7 @@ const AdminOrganizations = () => {
 
           {/* Selector de nuevo owner */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               <UserPlus className='inline w-4 h-4 mr-1' />
               {assignOwnerModal.org?.owner_id
                 ? "Nuevo Propietario"
@@ -689,7 +689,7 @@ const AdminOrganizations = () => {
               value={selectedOwnerId}
               onChange={(e) => setSelectedOwnerId(e.target.value)}
               disabled={loadingUsers}
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none bg-white dark:bg-night-900'
             >
               <option value=''>
                 {loadingUsers
@@ -702,7 +702,7 @@ const AdminOrganizations = () => {
                 </option>
               ))}
             </select>
-            <p className='mt-1 text-xs text-gray-500'>
+            <p className='mt-1 text-xs text-gray-500 dark:text-night-400'>
               Este usuario será el dueño y administrador principal de la
               organización.
             </p>
@@ -736,7 +736,7 @@ const AdminOrganizations = () => {
             <button
               onClick={() => setAssignOwnerModal({ isOpen: false, org: null })}
               disabled={assigningOwner}
-              className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50'
+              className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all disabled:opacity-50'
             >
               Cancelar
             </button>

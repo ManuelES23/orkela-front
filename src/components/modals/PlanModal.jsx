@@ -103,8 +103,8 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
 
   const limitField = (name, label) => (
     <div>
-      <label className='block text-sm font-medium text-gray-700 mb-2'>
-        {label} <span className='text-gray-400'>(-1 = ilimitado)</span>
+      <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
+        {label} <span className='text-gray-400 dark:text-night-500'>(-1 = ilimitado)</span>
       </label>
       <input
         type='number'
@@ -113,7 +113,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
         onChange={handleChange}
         min={-1}
         required
-        className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+        className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
       />
     </div>
   );
@@ -127,7 +127,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
     >
       <form onSubmit={handleSubmit} className='space-y-5'>
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
             Nombre del plan *
           </label>
           <input
@@ -136,13 +136,13 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
             value={formData.name}
             onChange={handleChange}
             required
-            className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+            className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
             placeholder='Ej: Business'
           />
         </div>
 
         <div>
-          <label className='block text-sm font-medium text-gray-700 mb-2'>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
             Orden de visualización
           </label>
           <input
@@ -151,7 +151,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
             value={formData.display_order}
             onChange={handleChange}
             min={0}
-            className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+            className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
           />
         </div>
 
@@ -171,25 +171,25 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
         )}
 
         {isPersonal && (
-          <div className='space-y-3 border-t border-gray-100 pt-4'>
-            <label className='flex items-center gap-2 text-sm text-gray-700'>
+          <div className='space-y-3 border-t border-gray-100 dark:border-night-700 pt-4'>
+            <label className='flex items-center gap-2 text-sm text-gray-700 dark:text-night-300'>
               <input
                 type='checkbox'
                 checked={formData.features.gantt}
                 onChange={handleFeatureChange("gantt")}
-                className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+                className='rounded border-gray-300 dark:border-night-600 text-brand-600 focus:ring-brand-500'
               />
-              <GanttChartSquare className='w-4 h-4 text-gray-400' />
+              <GanttChartSquare className='w-4 h-4 text-gray-400 dark:text-night-500' />
               Incluye Gantt
             </label>
-            <label className='flex items-center gap-2 text-sm text-gray-700'>
+            <label className='flex items-center gap-2 text-sm text-gray-700 dark:text-night-300'>
               <input
                 type='checkbox'
                 checked={formData.features.exports}
                 onChange={handleFeatureChange("exports")}
-                className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+                className='rounded border-gray-300 dark:border-night-600 text-brand-600 focus:ring-brand-500'
               />
-              <FileDown className='w-4 h-4 text-gray-400' />
+              <FileDown className='w-4 h-4 text-gray-400 dark:text-night-500' />
               Incluye exportar reportes
             </label>
           </div>
@@ -197,7 +197,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
 
         <div className='grid grid-cols-2 gap-4'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Precio mensual (MXN)
             </label>
             <input
@@ -207,11 +207,11 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
               onChange={handleChange}
               min={0}
               step='0.01'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
             />
           </div>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Precio anual (MXN)
             </label>
             <input
@@ -221,45 +221,45 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
               onChange={handleChange}
               min={0}
               step='0.01'
-              className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
             />
           </div>
         </div>
 
-        <div className='space-y-3 border-t border-gray-100 pt-4'>
-          <label className='flex items-center gap-2 text-sm text-gray-700'>
+        <div className='space-y-3 border-t border-gray-100 dark:border-night-700 pt-4'>
+          <label className='flex items-center gap-2 text-sm text-gray-700 dark:text-night-300'>
             <input
               type='checkbox'
               name='is_active'
               checked={formData.is_active}
               onChange={handleChange}
-              className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+              className='rounded border-gray-300 dark:border-night-600 text-brand-600 focus:ring-brand-500'
             />
-            <Eye className='w-4 h-4 text-gray-400' />
+            <Eye className='w-4 h-4 text-gray-400 dark:text-night-500' />
             Activo (visible para asignar)
           </label>
           {!isPersonal && (
-            <label className='flex items-center gap-2 text-sm text-gray-700'>
+            <label className='flex items-center gap-2 text-sm text-gray-700 dark:text-night-300'>
               <input
                 type='checkbox'
                 name='is_custom'
                 checked={formData.is_custom}
                 onChange={handleChange}
-                className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+                className='rounded border-gray-300 dark:border-night-600 text-brand-600 focus:ring-brand-500'
               />
-              <Layers className='w-4 h-4 text-gray-400' />
+              <Layers className='w-4 h-4 text-gray-400 dark:text-night-500' />
               Personalizable por organización (tipo Enterprise)
             </label>
           )}
-          <label className='flex items-center gap-2 text-sm text-gray-700'>
+          <label className='flex items-center gap-2 text-sm text-gray-700 dark:text-night-300'>
             <input
               type='checkbox'
               name='is_default'
               checked={formData.is_default}
               onChange={handleChange}
-              className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+              className='rounded border-gray-300 dark:border-night-600 text-brand-600 focus:ring-brand-500'
             />
-            <Star className='w-4 h-4 text-gray-400' />
+            <Star className='w-4 h-4 text-gray-400 dark:text-night-500' />
             Plan default {isPersonal ? "(usuarios nuevos y downgrades caen acá)" : "(nuevas organizaciones y downgrades caen acá)"}
           </label>
         </div>
@@ -285,7 +285,7 @@ const PlanModal = ({ isOpen, onClose, plan = null, defaultScope = "organization"
             type='button'
             onClick={onClose}
             disabled={loading}
-            className='px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50'
+            className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all disabled:opacity-50'
           >
             Cancelar
           </button>

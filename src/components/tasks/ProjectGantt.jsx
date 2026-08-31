@@ -12,14 +12,14 @@ import {
 import AnimatedNumber from "../ui/AnimatedNumber";
 
 const GROUP_META = {
-  late: { label: "Atrasadas", stripe: "bg-red-500", text: "text-red-700" },
+  late: { label: "Atrasadas", stripe: "bg-red-500", text: "text-red-700 dark:text-red-300" },
   progress: {
     label: "En progreso",
     stripe: "bg-brand-600",
-    text: "text-brand-700",
+    text: "text-brand-700 dark:text-brand-300",
   },
-  upcoming: { label: "Próximas", stripe: "bg-gray-400", text: "text-gray-600" },
-  done: { label: "Completadas", stripe: "bg-green-500", text: "text-green-700" },
+  upcoming: { label: "Próximas", stripe: "bg-gray-400 dark:bg-night-500", text: "text-gray-600 dark:text-night-300" },
+  done: { label: "Completadas", stripe: "bg-green-500", text: "text-green-700 dark:text-green-300" },
 };
 
 const getBarFill = (groupKey) => {
@@ -31,7 +31,7 @@ const getBarFill = (groupKey) => {
     case "done":
       return "bg-linear-to-r from-green-400 to-green-600";
     default:
-      return "bg-gray-400";
+      return "bg-gray-400 dark:bg-night-500";
   }
 };
 
@@ -133,7 +133,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
     // Por prioridad
     if (task.priority === "high") return "bg-orange-500";
     if (task.priority === "medium") return "bg-yellow-500";
-    return "bg-gray-400";
+    return "bg-gray-400 dark:bg-night-500";
   };
 
   // Obtener icono de estado
@@ -217,13 +217,13 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
   const isWeekend = (date) => date.getDay() === 0 || date.getDay() === 6;
 
   return (
-    <div className='bg-white rounded-xl border border-gray-200 overflow-hidden'>
+    <div className='bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700 overflow-hidden'>
       {/* Header con navegación */}
-      <div className='flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200'>
+      <div className='flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-night-800 border-b border-gray-200 dark:border-night-700'>
         <div className='flex items-center gap-2'>
           <Calendar className='w-5 h-5 text-brand-600' />
-          <h3 className='font-semibold text-gray-900'>Diagrama de Gantt</h3>
-          <span className='text-sm text-gray-500'>
+          <h3 className='font-semibold text-gray-900 dark:text-night-50'>Diagrama de Gantt</h3>
+          <span className='text-sm text-gray-500 dark:text-night-400'>
             ({visibleTasks.length} tareas visibles)
           </span>
         </div>
@@ -231,17 +231,17 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
         <div className='flex items-center gap-2'>
           <button
             onClick={goToToday}
-            className='px-3 py-1 text-sm bg-brand-100 text-brand-700 rounded-lg hover:bg-brand-200 transition'
+            className='px-3 py-1 text-sm bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-lg hover:bg-brand-200 dark:hover:bg-brand-900/50 transition'
           >
             Hoy
           </button>
           <button
             onClick={() => navigateMonth(-1)}
-            className='p-1.5 hover:bg-gray-200 rounded-lg transition'
+            className='p-1.5 hover:bg-gray-200 dark:hover:bg-night-700 rounded-lg transition'
           >
-            <ChevronLeft className='w-5 h-5 text-gray-600' />
+            <ChevronLeft className='w-5 h-5 text-gray-600 dark:text-night-300' />
           </button>
-          <span className='font-medium text-gray-900 min-w-[140px] text-center'>
+          <span className='font-medium text-gray-900 dark:text-night-50 min-w-[140px] text-center'>
             {currentMonth.toLocaleDateString("es-ES", {
               month: "long",
               year: "numeric",
@@ -249,23 +249,23 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
           </span>
           <button
             onClick={() => navigateMonth(1)}
-            className='p-1.5 hover:bg-gray-200 rounded-lg transition'
+            className='p-1.5 hover:bg-gray-200 dark:hover:bg-night-700 rounded-lg transition'
           >
-            <ChevronRight className='w-5 h-5 text-gray-600' />
+            <ChevronRight className='w-5 h-5 text-gray-600 dark:text-night-300' />
           </button>
         </div>
       </div>
 
       {/* Franja de métricas por estado */}
       {sortedTasks.length > 0 && (
-        <div className='grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 border-b border-gray-200 bg-gray-50/60'>
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 border-b border-gray-200 dark:border-night-700 bg-gray-50/60'>
           {["late", "progress", "upcoming", "done"].map((key) => {
             const meta = GROUP_META[key];
             const group = groupedSections.find((g) => g.key === key);
             return (
               <div
                 key={key}
-                className={`bg-white border border-gray-200 border-l-4 rounded-lg px-3 py-2 ${
+                className={`bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-lg px-3 py-2 ${
                   key === "late"
                     ? "border-l-red-500"
                     : key === "progress"
@@ -277,9 +277,9 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
               >
                 <AnimatedNumber
                   value={group?.tasks.length || 0}
-                  className='block font-mono text-lg font-bold text-gray-900'
+                  className='block font-mono text-lg font-bold text-gray-900 dark:text-night-50'
                 />
-                <span className='text-[11px] font-medium text-gray-500'>
+                <span className='text-[11px] font-medium text-gray-500 dark:text-night-400'>
                   {meta.label}
                 </span>
               </div>
@@ -292,9 +292,9 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
       <div className='overflow-x-auto'>
         <div className='min-w-[800px]'>
           {/* Encabezado de días */}
-          <div className='flex border-b border-gray-200'>
-            <div className='w-48 shrink-0 px-3 py-2 bg-gray-50 border-r border-gray-200'>
-              <span className='text-xs font-medium text-gray-500 uppercase'>
+          <div className='flex border-b border-gray-200 dark:border-night-700'>
+            <div className='w-48 shrink-0 px-3 py-2 bg-gray-50 dark:bg-night-800 border-r border-gray-200 dark:border-night-700'>
+              <span className='text-xs font-medium text-gray-500 dark:text-night-400 uppercase'>
                 Tarea
               </span>
             </div>
@@ -302,16 +302,16 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
               {daysInMonth.map((day, index) => (
                 <div
                   key={index}
-                  className={`flex-1 min-w-[30px] px-1 py-2 text-center border-r border-gray-100 ${
-                    isWeekend(day) ? "bg-gray-50" : ""
-                  } ${isToday(day) ? "bg-brand-50" : ""}`}
+                  className={`flex-1 min-w-[30px] px-1 py-2 text-center border-r border-gray-100 dark:border-night-700 ${
+                    isWeekend(day) ? "bg-gray-50 dark:bg-night-800" : ""
+                  } ${isToday(day) ? "bg-brand-50 dark:bg-brand-900/20" : ""}`}
                 >
-                  <div className='text-[10px] text-gray-400 uppercase'>
+                  <div className='text-[10px] text-gray-400 dark:text-night-500 uppercase'>
                     {day.toLocaleDateString("es-ES", { weekday: "narrow" })}
                   </div>
                   <div
                     className={`text-xs font-medium ${
-                      isToday(day) ? "text-brand-600" : "text-gray-600"
+                      isToday(day) ? "text-brand-600" : "text-gray-600 dark:text-night-300"
                     }`}
                   >
                     {day.getDate()}
@@ -323,7 +323,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
 
           {/* Filas de tareas */}
           {sortedTasks.length === 0 ? (
-            <div className='flex items-center justify-center py-12 text-gray-500'>
+            <div className='flex items-center justify-center py-12 text-gray-500 dark:text-night-400'>
               <p>No hay tareas en este proyecto</p>
             </div>
           ) : (
@@ -331,12 +331,12 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
               {groupedSections.map((group) => (
                 <div key={group.key}>
                   {/* Cabecera de sección */}
-                  <div className='flex items-center gap-2 px-3 py-1.5 bg-gray-50'>
+                  <div className='flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-night-800'>
                     <span className={`w-1 h-4 rounded-full ${group.stripe}`} />
                     <span className={`text-xs font-semibold ${group.text}`}>
                       {group.label}
                     </span>
-                    <span className='text-[11px] font-mono text-gray-400'>
+                    <span className='text-[11px] font-mono text-gray-400 dark:text-night-500'>
                       {group.tasks.length}
                     </span>
                   </div>
@@ -352,13 +352,13 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ delay: index * 0.03 }}
-                          className={`flex border-b border-gray-100 hover:bg-gray-50 transition border-l-4 ${group.stripe.replace(
+                          className={`flex border-b border-gray-100 dark:border-night-700 hover:bg-gray-50 dark:hover:bg-night-800 transition border-l-4 ${group.stripe.replace(
                             "bg-",
                             "border-l-",
                           )}`}
                         >
                     {/* Nombre de la tarea */}
-                    <div className='w-48 shrink-0 px-3 py-3 border-r border-gray-200'>
+                    <div className='w-48 shrink-0 px-3 py-3 border-r border-gray-200 dark:border-night-700'>
                       <div className='flex items-center gap-2'>
                         <span
                           className={`w-2 h-2 rounded-full shrink-0 ${getBarColor(
@@ -368,8 +368,8 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                         <span
                           className={`text-sm truncate ${
                             task.status === "done"
-                              ? "text-gray-400 line-through"
-                              : "text-gray-700 font-medium"
+                              ? "text-gray-400 dark:text-night-500 line-through"
+                              : "text-gray-700 dark:text-night-300 font-medium"
                           }`}
                           title={task.title}
                         >
@@ -385,7 +385,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                         {daysInMonth.map((day, i) => (
                           <div
                             key={i}
-                            className={`flex-1 border-r border-gray-100 ${
+                            className={`flex-1 border-r border-gray-100 dark:border-night-700 ${
                               isWeekend(day) ? "bg-gray-50/50" : ""
                             } ${isToday(day) ? "bg-brand-50/50" : ""}`}
                           />
@@ -421,7 +421,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
 
                       {/* Indicador de tarea sin fecha visible */}
                       {!position && !task.due_date && (
-                        <div className='absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 italic'>
+                        <div className='absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-night-500 italic'>
                           Sin fecha
                         </div>
                       )}
@@ -438,27 +438,27 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
       </div>
 
       {/* Leyenda */}
-      <div className='px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center gap-4 text-xs'>
-        <span className='text-gray-500 font-medium'>Leyenda:</span>
+      <div className='px-4 py-3 bg-gray-50 dark:bg-night-800 border-t border-gray-200 dark:border-night-700 flex items-center gap-4 text-xs'>
+        <span className='text-gray-500 dark:text-night-400 font-medium'>Leyenda:</span>
         <div className='flex items-center gap-1'>
           <span className='w-3 h-3 rounded-full bg-green-500' />
-          <span className='text-gray-600'>Completada</span>
+          <span className='text-gray-600 dark:text-night-300'>Completada</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-3 h-3 rounded-full bg-linear-to-r from-brand-500 to-accent-500' />
-          <span className='text-gray-600'>En progreso</span>
+          <span className='text-gray-600 dark:text-night-300'>En progreso</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-3 h-3 rounded-full bg-orange-500' />
-          <span className='text-gray-600'>Alta prioridad</span>
+          <span className='text-gray-600 dark:text-night-300'>Alta prioridad</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-3 h-3 rounded-full bg-yellow-500' />
-          <span className='text-gray-600'>Media prioridad</span>
+          <span className='text-gray-600 dark:text-night-300'>Media prioridad</span>
         </div>
         <div className='flex items-center gap-1'>
           <span className='w-3 h-3 rounded-full bg-red-500' />
-          <span className='text-gray-600'>Vencida</span>
+          <span className='text-gray-600 dark:text-night-300'>Vencida</span>
         </div>
       </div>
     </div>

@@ -111,10 +111,10 @@ const Login = () => {
       description='Gestiona equipos, tareas y tickets de forma simple, ordenada y sin complicaciones.'
       formHeader={
         <div className='mb-9'>
-          <h2 className='text-3xl font-extrabold text-gray-900 mb-2 tracking-tight'>
+          <h2 className='text-3xl font-extrabold text-gray-900 dark:text-night-50 mb-2 tracking-tight'>
             Bienvenido de nuevo
           </h2>
-          <p className='text-gray-500 text-base'>
+          <p className='text-gray-500 dark:text-night-400 text-base'>
             Inicia sesión para continuar en tu espacio de trabajo.
           </p>
         </div>
@@ -128,9 +128,9 @@ const Login = () => {
             transition={{ duration: motionTokens.duration.base }}
             className='overflow-hidden'
           >
-            <div className='mb-4 p-3 bg-brand-50 border border-brand-200 rounded-lg flex items-start gap-2'>
-              <Info className='w-5 h-5 text-brand-600 shrink-0 mt-0.5' />
-              <p className='text-brand-700 text-sm'>{invitationMessage}</p>
+            <div className='mb-4 p-3 bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 dark:bg-brand-900/20 dark:border-brand-800 rounded-lg flex items-start gap-2'>
+              <Info className='w-5 h-5 text-brand-600 dark:text-brand-300 shrink-0 mt-0.5' />
+              <p className='text-brand-700 dark:text-brand-300 text-sm'>{invitationMessage}</p>
             </div>
           </motion.div>
         )}
@@ -156,7 +156,7 @@ const Login = () => {
             >
               <div
                 role='alert'
-                className='mb-1 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-2'
+                className='mb-1 p-3 bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-lg text-red-700 dark:text-red-300 text-sm flex items-start gap-2'
               >
                 <AlertCircle className='w-4 h-4 shrink-0 mt-0.5' />
                 {error}
@@ -188,16 +188,16 @@ const Login = () => {
             required
           />
           <div className='flex justify-end mt-2.5'>
-            <a href='#' className='text-sm font-semibold text-brand-600 hover:text-brand-700'>
+            <a href='#' className='text-sm font-semibold text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 dark:text-brand-400 dark:hover:text-brand-300'>
               ¿Olvidaste tu contraseña?
             </a>
           </div>
         </div>
 
-        <label className='flex items-center gap-2.5 text-base text-gray-600'>
+        <label className='flex items-center gap-2.5 text-base text-gray-600 dark:text-night-300'>
           <input
             type='checkbox'
-            className='w-[18px] h-[18px] rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+            className='w-[18px] h-[18px] rounded border-gray-300 dark:border-night-600 dark:bg-night-800 text-brand-600 focus:ring-brand-500'
           />
           Recordarme en este dispositivo
         </label>
@@ -214,9 +214,9 @@ const Login = () => {
           Iniciar sesión
         </Button>
 
-        <p className='text-center text-base text-gray-500 pt-1'>
+        <p className='text-center text-base text-gray-500 dark:text-night-400 pt-1'>
           ¿No tienes cuenta?{" "}
-          <Link to='/register' className='font-semibold text-brand-600 hover:text-brand-700'>
+          <Link to='/register' className='font-semibold text-brand-600 hover:text-brand-700 dark:hover:text-brand-300 dark:text-brand-400 dark:hover:text-brand-300'>
             Regístrate gratis
           </Link>
         </p>

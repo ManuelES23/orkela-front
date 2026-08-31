@@ -15,7 +15,7 @@ const LoadingScreen = ({ message = "Cargando...", fullScreen = true, className =
 
   return (
     <div
-      className={`${fullScreen ? "min-h-screen" : "py-24"} flex items-center justify-center bg-[radial-gradient(120%_100%_at_50%_38%,var(--color-brand-100)_0%,transparent_60%)] ${className}`}
+      className={`${fullScreen ? "min-h-screen" : "py-24"} flex items-center justify-center bg-[radial-gradient(120%_100%_at_50%_38%,var(--color-brand-100)_0%,transparent_60%)] dark:bg-[radial-gradient(120%_100%_at_50%_38%,var(--color-brand-900)_0%,transparent_60%)] ${className}`}
     >
       <div className='flex flex-col items-center gap-4'>
         <div className='relative w-12 h-12'>
@@ -38,7 +38,7 @@ const LoadingScreen = ({ message = "Cargando...", fullScreen = true, className =
           />
         </div>
 
-        <div className='w-28 h-[3px] rounded-full bg-brand-100 overflow-hidden'>
+        <div className='w-28 h-[3px] rounded-full bg-brand-100 dark:bg-brand-900/30 dark:bg-night-800 overflow-hidden'>
           <motion.div
             className='h-full w-[46%] rounded-full bg-brand-600'
             animate={prefersReducedMotion ? {} : { x: ["-120%", "260%"] }}
@@ -51,7 +51,7 @@ const LoadingScreen = ({ message = "Cargando...", fullScreen = true, className =
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.15, duration: motionTokens.duration.base }}
-            className='text-xs font-medium tracking-wide text-gray-400'
+            className='text-xs font-medium tracking-wide text-gray-400 dark:text-night-500'
           >
             {message}
           </motion.p>

@@ -4,14 +4,15 @@ import Select from "react-select";
 import Layout from "../components/layout/Layout";
 import { ticketsAPI, teamsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
+import { selectStyles } from "../utils/reactSelectStyles";
 import { Inbox } from "lucide-react";
 
 const statusBadgeColor = {
-  open: "bg-blue-50 text-blue-600",
-  in_progress: "bg-brand-50 text-brand-600",
-  pending: "bg-yellow-50 text-yellow-600",
-  resolved: "bg-green-50 text-green-600",
-  closed: "bg-gray-100 text-gray-600",
+  open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+  in_progress: "bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-300",
+  pending: "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400",
+  resolved: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
+  closed: "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300",
 };
 
 const statusLabels = {
@@ -87,35 +88,35 @@ const ClientTicketsInbox = () => {
 
   return (
     <Layout title='Bandeja de Clientes' subtitle='Tickets creados desde el portal de clientes'>
-      <div className='bg-white rounded-2xl border border-gray-200 p-4'>
+      <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-200 dark:border-night-700 p-4'>
         <div className='flex items-center justify-between mb-4'>
-          <label className='flex items-center gap-2 text-sm text-gray-600'>
+          <label className='flex items-center gap-2 text-sm text-gray-600 dark:text-night-300'>
             <input
               type='checkbox'
               checked={onlyUnassigned}
               onChange={(e) => setOnlyUnassigned(e.target.checked)}
-              className='rounded border-gray-300 text-brand-600 focus:ring-brand-500'
+              className='rounded border-gray-300 dark:border-night-600 dark:bg-night-800 text-brand-600 focus:ring-brand-500'
             />
             Solo sin asignar
           </label>
         </div>
 
         {!loading && loadError ? (
-          <div className='py-12 text-center text-gray-400'>
+          <div className='py-12 text-center text-gray-400 dark:text-night-500'>
             <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
             <p className='text-sm'>No se pudieron cargar los tickets.</p>
           </div>
         ) : !loading && visibleTickets.length === 0 ? (
-          <div className='py-12 text-center text-gray-400'>
+          <div className='py-12 text-center text-gray-400 dark:text-night-500'>
             <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
             <p className='text-sm'>No hay tickets de clientes {onlyUnassigned ? "sin asignar" : "todavía"}.</p>
           </div>
         ) : (
-          <div className='divide-y divide-gray-100'>
+          <div className='divide-y divide-gray-100 dark:divide-night-800'>
             {visibleTickets.map((ticket) => (
               <div key={ticket.id} className='py-3 flex items-center justify-between gap-4'>
                 <div className='min-w-0 flex-1'>
-                  <p className='text-sm font-medium text-gray-900 truncate'>
+                  <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                     {ticket.client?.company_name || ticket.client?.name} · {ticket.title}
                   </p>
                   <div className='flex items-center gap-2 mt-1'>
@@ -125,7 +126,7 @@ const ClientTicketsInbox = () => {
                       {statusLabels[ticket.status] || ticket.status}
                     </span>
                     {ticket.team && (
-                      <span className='text-xs text-gray-400'>→ {ticket.team.name}</span>
+                      <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>
                     )}
                   </div>
                 </div>
@@ -138,6 +139,7 @@ const ClientTicketsInbox = () => {
                       placeholder='Asignar a equipo...'
                       onChange={(selected) => selected && handleAssign(ticket.id, selected.value)}
                       classNamePrefix='react-select'
+                      styles={selectStyles}
                     />
                   </div>
                 )}

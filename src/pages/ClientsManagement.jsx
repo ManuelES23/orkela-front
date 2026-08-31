@@ -7,11 +7,11 @@ import { useNotification } from "../context/NotificationContext";
 import { Plus, Search, Send, Archive, ArchiveRestore } from "lucide-react";
 
 const statusBadgeColor = {
-  open: "bg-blue-50 text-blue-600",
-  in_progress: "bg-brand-50 text-brand-600",
-  pending: "bg-yellow-50 text-yellow-600",
-  resolved: "bg-green-50 text-green-600",
-  closed: "bg-gray-100 text-gray-600",
+  open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+  in_progress: "bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-300",
+  pending: "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400",
+  resolved: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
+  closed: "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300",
 };
 
 const statusLabels = {
@@ -158,11 +158,11 @@ const ClientsManagement = () => {
 
   return (
     <Layout title='Clientes' subtitle='Empresas y contactos con acceso al portal de soporte'>
-      <div className='bg-white rounded-2xl border border-gray-200 flex h-[calc(100vh-220px)] min-h-[420px] overflow-hidden'>
-        <div className='w-full md:w-80 border-r border-gray-200 shrink-0 flex flex-col'>
-          <div className='p-4 border-b border-gray-200 space-y-3'>
+      <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-200 dark:border-night-700 flex h-[calc(100vh-220px)] min-h-[420px] overflow-hidden'>
+        <div className='w-full md:w-80 border-r border-gray-200 dark:border-night-700 shrink-0 flex flex-col'>
+          <div className='p-4 border-b border-gray-200 dark:border-night-700 space-y-3'>
             <div className='flex items-center justify-between'>
-              <h2 className='font-bold text-gray-900'>Clientes</h2>
+              <h2 className='font-bold text-gray-900 dark:text-night-50'>Clientes</h2>
               <button
                 onClick={() => {
                   setEditingClient(null);
@@ -175,23 +175,23 @@ const ClientsManagement = () => {
               </button>
             </div>
             <div className='relative'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' aria-hidden='true' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' aria-hidden='true' />
               <input
                 type='text'
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder='Buscar cliente...'
-                className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
+                className='w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-night-600 dark:bg-night-800 dark:text-night-50 dark:placeholder-night-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500'
               />
             </div>
           </div>
           <div className='flex-1 overflow-y-auto'>
             {!loading && loadError ? (
-              <div className='p-6 text-center text-gray-500 text-sm'>
+              <div className='p-6 text-center text-gray-500 dark:text-night-400 text-sm'>
                 No se pudieron cargar los clientes.
               </div>
             ) : !loading && filteredClients.length === 0 ? (
-              <div className='p-6 text-center text-gray-500 text-sm'>
+              <div className='p-6 text-center text-gray-500 dark:text-night-400 text-sm'>
                 {clients.length === 0
                   ? "Aún no hay clientes. Da de alta el primero con el botón +."
                   : "Ningún cliente coincide con la búsqueda."}
@@ -201,18 +201,18 @@ const ClientsManagement = () => {
                 <button
                   key={c.id}
                   onClick={() => navigate(`/clients/${c.id}`)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-100 transition-colors ${
-                    Number(id) === c.id ? "bg-brand-50" : "hover:bg-gray-50"
+                  className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-night-800 transition-colors ${
+                    Number(id) === c.id ? "bg-brand-50 dark:bg-brand-900/20" : "hover:bg-gray-50 dark:hover:bg-night-800"
                   } ${c.status === "archived" ? "opacity-60" : ""}`}
                 >
                   <p
                     className={`text-sm font-medium truncate ${
-                      Number(id) === c.id ? "text-brand-700" : "text-gray-900"
+                      Number(id) === c.id ? "text-brand-700 dark:text-brand-300" : "text-gray-900 dark:text-night-50"
                     }`}
                   >
                     {c.company_name || c.name}
                   </p>
-                  <p className='text-xs text-gray-500 truncate'>
+                  <p className='text-xs text-gray-500 dark:text-night-400 truncate'>
                     {c.status === "archived" ? "Archivado" : `${c.tickets_count ?? 0} tickets`}
                   </p>
                 </button>
@@ -223,22 +223,22 @@ const ClientsManagement = () => {
 
         <div className='flex-1 min-w-0 p-6 overflow-y-auto'>
           {!selected ? (
-            <div className='h-full flex items-center justify-center text-gray-400 text-sm'>
+            <div className='h-full flex items-center justify-center text-gray-400 dark:text-night-500 text-sm'>
               Selecciona un cliente para ver su detalle
             </div>
           ) : (
             <div>
               <div className='flex items-start justify-between mb-6'>
                 <div>
-                  <h2 className='text-xl font-bold text-gray-900'>{selected.company_name || selected.name}</h2>
-                  <p className='text-gray-500 text-sm mt-0.5'>{selected.name} · {selected.email}</p>
+                  <h2 className='text-xl font-bold text-gray-900 dark:text-night-50'>{selected.company_name || selected.name}</h2>
+                  <p className='text-gray-500 dark:text-night-400 text-sm mt-0.5'>{selected.name} · {selected.email}</p>
                 </div>
                 <button
                   onClick={() => {
                     setEditingClient(selected);
                     setIsModalOpen(true);
                   }}
-                  className='text-sm font-semibold text-brand-600 hover:text-brand-700'
+                  className='text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'
                 >
                   Editar
                 </button>
@@ -248,7 +248,7 @@ const ClientsManagement = () => {
                 <button
                   onClick={handleResendAccess}
                   disabled={resending || selected.status !== "active"}
-                  className='inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-gray-200 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   <Send className='w-3.5 h-3.5' />
                   Reenviar acceso
@@ -256,7 +256,7 @@ const ClientsManagement = () => {
                 <button
                   onClick={handleToggleArchive}
                   disabled={archiving}
-                  className='inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-gray-200 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {selected.status === "active" ? (
                     <>
@@ -273,28 +273,28 @@ const ClientsManagement = () => {
               </div>
 
               {selected.notes && (
-                <p className='text-sm text-gray-600 bg-gray-50 rounded-lg p-3 mb-6'>{selected.notes}</p>
+                <p className='text-sm text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 rounded-lg p-3 mb-6'>{selected.notes}</p>
               )}
 
               <div className='flex items-center justify-between mb-3'>
-                <h3 className='text-sm font-semibold text-gray-700'>Tickets recientes</h3>
+                <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300'>Tickets recientes</h3>
                 <a
                   href={`/client-tickets?client=${selected.id}`}
-                  className='text-sm text-brand-600 hover:text-brand-700 font-medium'
+                  className='text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium'
                 >
                   Ver todos
                 </a>
               </div>
               {(selected.tickets || []).length === 0 ? (
-                <p className='text-sm text-gray-400'>Este cliente aún no tiene tickets.</p>
+                <p className='text-sm text-gray-400 dark:text-night-500'>Este cliente aún no tiene tickets.</p>
               ) : (
                 <div className='space-y-2'>
                   {selected.tickets.slice(0, 5).map((t) => (
                     <div
                       key={t.id}
-                      className='flex items-center justify-between px-3 py-2 border border-gray-100 rounded-lg'
+                      className='flex items-center justify-between px-3 py-2 border border-gray-100 dark:border-night-800 rounded-lg'
                     >
-                      <span className='text-sm text-gray-700 truncate'>{t.title}</span>
+                      <span className='text-sm text-gray-700 dark:text-night-300 truncate'>{t.title}</span>
                       <span
                         className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${statusBadgeColor[t.status]}`}
                       >

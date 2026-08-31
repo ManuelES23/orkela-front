@@ -34,6 +34,7 @@ const ClientsManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
   const [resending, setResending] = useState(false);
+  const [archiving, setArchiving] = useState(false);
 
   const loadClients = useCallback(async () => {
     setLoading(true);
@@ -97,19 +98,28 @@ const ClientsManagement = () => {
 
   const handleToggleArchive = async () => {
     if (!selected) return;
+    // Captura el cliente sobre el que se actúa — si el usuario navega a otro
+    // cliente antes de que esta cadena de awaits resuelva, el `getById` de
+    // abajo no debe pisar el `selected` que ya corresponde a otro cliente.
+    const targetId = selected.id;
+    setArchiving(true);
     try {
       if (selected.status === "active") {
-        await clientsAPI.archive(selected.id);
+        await clientsAPI.archive(targetId);
         success("Cliente archivado");
       } else {
-        await clientsAPI.update(selected.id, { status: "active" });
+        await clientsAPI.update(targetId, { status: "active" });
         success("Cliente reactivado");
       }
-      const updated = await clientsAPI.getById(selected.id);
-      setSelected(updated);
+      const updated = await clientsAPI.getById(targetId);
+      if (String(targetId) === id) {
+        setSelected(updated);
+      }
       loadClients();
     } catch {
       showError("No se pudo actualizar el estado del cliente");
+    } finally {
+      setArchiving(false);
     }
   };
 
@@ -118,7 +128,15 @@ const ClientsManagement = () => {
     setEditingClient(null);
     loadClients();
     if (selected) {
-      clientsAPI.getById(selected.id).then(setSelected);
+      // Mismo resguardo que en handleToggleArchive: si el usuario cambia de
+      // cliente justo cuando se cierra el modal, esta respuesta ya no debe
+      // pisar el `selected` actual.
+      const targetId = selected.id;
+      clientsAPI.getById(targetId).then((updated) => {
+        if (String(targetId) === id) {
+          setSelected(updated);
+        }
+      });
     }
   };
 
@@ -217,7 +235,8 @@ const ClientsManagement = () => {
                 </button>
                 <button
                   onClick={handleToggleArchive}
-                  className='inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50'
+                  disabled={archiving}
+                  className='inline-flex items-center gap-1.5 text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {selected.status === "active" ? (
                     <>

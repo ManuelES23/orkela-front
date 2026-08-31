@@ -396,7 +396,7 @@ const Dashboard = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate("/tasks")}
-                  className='px-4 py-2 bg-white text-red-600 rounded-lg font-medium hover:bg-white/90 transition-colors'
+                  className='px-4 py-2 bg-white text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-white/90 transition-colors'
                 >
                   Ver todas
                 </motion.button>
@@ -458,7 +458,7 @@ const Dashboard = () => {
               <p className='text-sm text-gray-500 dark:text-night-400'>
                 Pendientes
                 {stats.urgentTasks > 0 && (
-                  <span className='text-red-600 font-medium'>
+                  <span className='text-red-600 dark:text-red-400 font-medium'>
                     {" "}
                     · {stats.urgentTasks} urgente
                     {stats.urgentTasks > 1 ? "s" : ""}
@@ -575,17 +575,17 @@ const Dashboard = () => {
                               </h3>
                               <div className='flex items-center gap-2 mt-1'>
                                 {isCompleted ? (
-                                  <span className='text-xs text-green-600 font-medium flex items-center gap-1'>
+                                  <span className='text-xs text-green-600 dark:text-green-400 font-medium flex items-center gap-1'>
                                     <CheckCircle className='w-3 h-3' />
                                     Completado
                                   </span>
                                 ) : isOverdue ? (
-                                  <span className='text-xs text-red-600 font-medium flex items-center gap-1'>
+                                  <span className='text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1'>
                                     <AlertTriangle className='w-3 h-3' />
                                     Vencido
                                   </span>
                                 ) : isDueSoon ? (
-                                  <span className='text-xs text-orange-600 font-medium flex items-center gap-1'>
+                                  <span className='text-xs text-orange-600 dark:text-orange-400 font-medium flex items-center gap-1'>
                                     <Clock className='w-3 h-3' />
                                     {days === 0 ? "Hoy" : `${days}d`}
                                   </span>
@@ -626,10 +626,10 @@ const Dashboard = () => {
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                                 project.priority === "high"
-                                  ? "bg-red-100 text-red-700"
+                                  ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                                   : project.priority === "medium"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-green-100 text-green-700"
+                                    ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
+                                    : "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                               }`}
                             >
                               {project.priority === "high"
@@ -694,15 +694,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-red-50 border border-red-100 rounded-lg cursor-pointer hover:shadow-sm transition-all'
+                  className='p-3 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900 rounded-lg cursor-pointer hover:shadow-sm transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <AlertTriangle className='w-4 h-4 text-red-500 shrink-0 mt-0.5' />
+                    <AlertTriangle className='w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
                       <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-red-600'>Vencida</p>
+                      <p className='text-xs text-red-600 dark:text-red-400'>Vencida</p>
                     </div>
                   </div>
                 </motion.div>
@@ -713,15 +713,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-orange-50 border border-orange-100 rounded-lg cursor-pointer hover:shadow-sm transition-all'
+                  className='p-3 bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900 rounded-lg cursor-pointer hover:shadow-sm transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <Timer className='w-4 h-4 text-orange-500 shrink-0 mt-0.5' />
+                    <Timer className='w-4 h-4 text-orange-500 dark:text-orange-400 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
                       <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-orange-600'>Vence hoy</p>
+                      <p className='text-xs text-orange-600 dark:text-orange-400'>Vence hoy</p>
                     </div>
                   </div>
                 </motion.div>
@@ -732,15 +732,15 @@ const Dashboard = () => {
                   key={task.id}
                   whileHover={{ x: 4 }}
                   onClick={() => navigate("/tasks")}
-                  className='p-3 bg-yellow-50 border border-yellow-100 rounded-lg cursor-pointer hover:shadow-sm transition-all'
+                  className='p-3 bg-yellow-50 dark:bg-yellow-950/40 border border-yellow-100 dark:border-yellow-900 rounded-lg cursor-pointer hover:shadow-sm transition-all'
                 >
                   <div className='flex items-start gap-2'>
-                    <Clock className='w-4 h-4 text-yellow-600 shrink-0 mt-0.5' />
+                    <Clock className='w-4 h-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5' />
                     <div className='flex-1 min-w-0'>
                       <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
                         {task.title}
                       </p>
-                      <p className='text-xs text-yellow-700'>
+                      <p className='text-xs text-yellow-700 dark:text-yellow-300'>
                         {formatDate(task.due_date)}
                       </p>
                     </div>

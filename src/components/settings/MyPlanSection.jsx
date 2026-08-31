@@ -71,8 +71,8 @@ const MyPlanSection = () => {
   }
 
   return (
-    <div className='bg-white rounded-2xl border border-gray-100 shadow-sm p-6'>
-      <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-4'>
+    <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-100 dark:border-night-700 shadow-sm p-6'>
+      <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-4'>
         Mi plan
       </h3>
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
@@ -83,38 +83,38 @@ const MyPlanSection = () => {
               key={plan.id}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`border rounded-xl p-4 ${isCurrent ? "border-brand-400 ring-1 ring-brand-200" : "border-gray-200"}`}
+              className={`border rounded-xl p-4 ${isCurrent ? "border-brand-400 ring-1 ring-brand-200" : "border-gray-200 dark:border-night-700"}`}
             >
               <div className='flex items-start justify-between mb-2'>
-                <p className='font-semibold text-gray-900'>{plan.name}</p>
+                <p className='font-semibold text-gray-900 dark:text-night-50'>{plan.name}</p>
                 {isCurrent && (
                   <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full'>
                     <Check className='w-3 h-3' /> Actual
                   </span>
                 )}
               </div>
-              <p className='text-2xl font-semibold text-gray-900'>
+              <p className='text-2xl font-semibold text-gray-900 dark:text-night-50'>
                 {formatPrice(plan.monthly_price)}
               </p>
-              <p className='text-xs text-gray-500 mb-3'>
+              <p className='text-xs text-gray-500 dark:text-night-400 mb-3'>
                 por mes · o {formatPrice(plan.annual_price)}/año
               </p>
-              <p className='text-xs text-gray-500 mb-1'>
+              <p className='text-xs text-gray-500 dark:text-night-400 mb-1'>
                 {plan.projects_limit === -1 ? "Proyectos ilimitados" : `${plan.projects_limit} proyectos`}
               </p>
-              <p className='text-xs text-gray-500 mb-3'>
+              <p className='text-xs text-gray-500 dark:text-night-400 mb-3'>
                 {plan.collaborators_per_project_limit === -1
                   ? "Colaboradores ilimitados por proyecto"
                   : `${plan.collaborators_per_project_limit} colaboradores por proyecto`}
               </p>
               <div className='flex gap-2 mb-4'>
                 {plan.features?.gantt && (
-                  <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full'>
+                  <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300 rounded-full'>
                     <GanttChartSquare className='w-3 h-3' /> Gantt
                   </span>
                 )}
                 {plan.features?.exports && (
-                  <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full'>
+                  <span className='flex items-center gap-1 text-xs px-2 py-0.5 bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300 rounded-full'>
                     <FileDown className='w-3 h-3' /> Exports
                   </span>
                 )}
@@ -123,7 +123,7 @@ const MyPlanSection = () => {
                 type='button'
                 disabled={isCurrent || switchingPlanId === plan.id}
                 onClick={() => handleSwitch(plan.id)}
-                className='w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                className='w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 {switchingPlanId === plan.id ? (
                   <Loader2 className='w-3.5 h-3.5 animate-spin' />
@@ -137,7 +137,7 @@ const MyPlanSection = () => {
           );
         })}
       </div>
-      <p className='flex items-start gap-1.5 text-xs text-gray-400 mt-4'>
+      <p className='flex items-start gap-1.5 text-xs text-gray-400 dark:text-night-500 mt-4'>
         <AlertTriangle className='w-3.5 h-3.5 shrink-0 mt-0.5' />
         El cambio de plan es inmediato y sin cargo por ahora. Si tu uso actual excede los límites del plan elegido, el cambio se bloqueará hasta que reduzcas lo necesario.
       </p>

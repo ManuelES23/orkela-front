@@ -228,16 +228,16 @@ const Settings = () => {
 
           {/* Formulario editorial: secciones divididas por línea, sin doble card */}
           <StaggerItem>
-            <div className='bg-white rounded-2xl border border-gray-100 shadow-sm px-6'>
+            <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-100 dark:border-night-700 shadow-sm px-6'>
               {/* Información personal */}
-              <div className='py-6 border-b border-gray-100'>
-                <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-4'>
+              <div className='py-6 border-b border-gray-100 dark:border-night-700'>
+                <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-4'>
                   Información personal
                 </h3>
                 <div className='space-y-4'>
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                         Nombre completo
                       </label>
                       <input
@@ -245,20 +245,20 @@ const Settings = () => {
                         name='name'
                         value={profile.name}
                         onChange={handleChange}
-                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                       />
                     </div>
                     <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                         Correo Electrónico
                       </label>
                       <input
                         type='email'
                         value={profile.email}
                         disabled
-                        className='w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
+                        className='w-full px-4 py-2 border border-gray-200 dark:border-night-700 rounded-lg bg-gray-50 dark:bg-night-800 text-gray-500 dark:text-night-400 cursor-not-allowed'
                       />
-                      <p className='text-xs text-gray-400 mt-1'>
+                      <p className='text-xs text-gray-400 dark:text-night-500 mt-1'>
                         El correo no se puede cambiar
                       </p>
                     </div>
@@ -266,7 +266,7 @@ const Settings = () => {
 
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                         Teléfono
                       </label>
                       <input
@@ -275,11 +275,11 @@ const Settings = () => {
                         value={profile.phone || ""}
                         onChange={handleChange}
                         placeholder='+51 999 999 999'
-                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                       />
                     </div>
                     <div>
-                      <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                         Cargo / Puesto
                       </label>
                       <input
@@ -288,13 +288,13 @@ const Settings = () => {
                         value={profile.job_title || ""}
                         onChange={handleChange}
                         placeholder='Ej: Project Manager'
-                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
                       Biografía
                     </label>
                     <textarea
@@ -303,10 +303,10 @@ const Settings = () => {
                       onChange={handleChange}
                       rows='3'
                       maxLength={500}
-                      className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none'
+                      className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none'
                       placeholder='Cuéntanos sobre ti...'
                     />
-                    <p className='text-xs text-gray-400 mt-1 text-right'>
+                    <p className='text-xs text-gray-400 dark:text-night-500 mt-1 text-right'>
                       {(profile.bio || "").length}/500
                     </p>
                   </div>
@@ -315,14 +315,14 @@ const Settings = () => {
 
               {/* Preferencias */}
               <div className='py-6'>
-                <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-4'>
+                <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-4'>
                   Preferencias
                 </h3>
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between gap-4'>
                     <div>
-                      <p className='font-medium text-gray-900'>Idioma</p>
-                      <p className='text-sm text-gray-500'>
+                      <p className='font-medium text-gray-900 dark:text-night-50'>Idioma</p>
+                      <p className='text-sm text-gray-500 dark:text-night-400'>
                         Selecciona tu idioma preferido
                       </p>
                     </div>
@@ -330,7 +330,7 @@ const Settings = () => {
                       name='language'
                       value={profile.language}
                       onChange={handleChange}
-                      className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                     >
                       <option value='es'>Español</option>
                       <option value='en'>English</option>
@@ -341,8 +341,8 @@ const Settings = () => {
 
                   <div className='flex items-center justify-between gap-4'>
                     <div>
-                      <p className='font-medium text-gray-900'>Zona Horaria</p>
-                      <p className='text-sm text-gray-500'>
+                      <p className='font-medium text-gray-900 dark:text-night-50'>Zona Horaria</p>
+                      <p className='text-sm text-gray-500 dark:text-night-400'>
                         Configura tu zona horaria
                       </p>
                     </div>
@@ -350,7 +350,7 @@ const Settings = () => {
                       name='timezone'
                       value={profile.timezone}
                       onChange={handleChange}
-                      className='px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                     >
                       <option value='America/Lima'>GMT-5 (Lima)</option>
                       <option value='America/Mexico_City'>

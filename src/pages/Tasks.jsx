@@ -269,9 +269,9 @@ const Tasks = () => {
   };
 
   const priorityColors = {
-    high: "text-red-600 bg-red-50 border-red-200",
-    medium: "text-yellow-600 bg-yellow-50 border-yellow-200",
-    low: "text-gray-600 bg-gray-50 border-gray-200",
+    high: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
+    medium: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
+    low: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700",
   };
 
   const priorityLabels = {
@@ -373,19 +373,19 @@ const Tasks = () => {
         <div className='flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6'>
           <div className='flex gap-3 flex-1 w-full md:w-auto'>
             <div className='relative flex-1 md:flex-initial'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 placeholder='Buscar tareas...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+              className='flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition'
             >
               <Filter className='w-4 h-4' />
               <span className='hidden sm:inline'>Filtros</span>
@@ -417,18 +417,18 @@ const Tasks = () => {
             transition={motionTokens.springSnappy}
             className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               activeTab === "today"
-                ? "bg-orange-50 border-orange-300 ring-1 ring-orange-300"
-                : "bg-white border-gray-200 hover:border-orange-200"
+                ? "bg-orange-50 dark:bg-orange-950/40 border-orange-300 dark:border-orange-700 ring-1 ring-orange-300"
+                : "bg-white dark:bg-night-900 border-gray-200 dark:border-night-700 hover:border-orange-200 dark:hover:border-orange-800"
             }`}
           >
-            <div className='w-10 h-10 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0'>
+            <div className='w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0'>
               <Clock className='w-5 h-5' />
             </div>
             <div>
-              <p className='text-2xl font-bold text-gray-900 leading-none font-mono'>
+              <p className='text-2xl font-bold text-gray-900 dark:text-night-50 leading-none font-mono'>
                 <AnimatedNumber value={taskCounts.dueToday} />
               </p>
-              <p className='text-xs font-medium text-gray-500 mt-1'>
+              <p className='text-xs font-medium text-gray-500 dark:text-night-400 mt-1'>
                 Vencen hoy
               </p>
             </div>
@@ -444,18 +444,18 @@ const Tasks = () => {
             transition={motionTokens.springSnappy}
             className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               activeTab === "upcoming"
-                ? "bg-yellow-50 border-yellow-300 ring-1 ring-yellow-300"
-                : "bg-white border-gray-200 hover:border-yellow-200"
+                ? "bg-yellow-50 dark:bg-yellow-950/40 border-yellow-300 dark:border-yellow-700 ring-1 ring-yellow-300"
+                : "bg-white dark:bg-night-900 border-gray-200 dark:border-night-700 hover:border-yellow-200 dark:hover:border-yellow-800"
             }`}
           >
-            <div className='w-10 h-10 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center shrink-0'>
+            <div className='w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400 flex items-center justify-center shrink-0'>
               <CalendarClock className='w-5 h-5' />
             </div>
             <div>
-              <p className='text-2xl font-bold text-gray-900 leading-none font-mono'>
+              <p className='text-2xl font-bold text-gray-900 dark:text-night-50 leading-none font-mono'>
                 <AnimatedNumber value={taskCounts.dueSoon} />
               </p>
-              <p className='text-xs font-medium text-gray-500 mt-1'>
+              <p className='text-xs font-medium text-gray-500 dark:text-night-400 mt-1'>
                 Próximas (3 días)
               </p>
             </div>
@@ -472,26 +472,26 @@ const Tasks = () => {
             transition={motionTokens.springSnappy}
             className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               taskCounts.overdue === 0
-                ? "bg-green-50 border-green-200 cursor-default"
+                ? "bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800 cursor-default"
                 : activeTab === "overdue"
-                  ? "bg-red-50 border-red-300 ring-1 ring-red-300"
-                  : "bg-white border-gray-200 hover:border-red-200 animate-pulse"
+                  ? "bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-700 ring-1 ring-red-300"
+                  : "bg-white dark:bg-night-900 border-gray-200 dark:border-night-700 hover:border-red-200 dark:hover:border-red-800 animate-pulse"
             }`}
           >
             <div
               className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                 taskCounts.overdue === 0
-                  ? "bg-green-100 text-green-600"
-                  : "bg-red-100 text-red-600"
+                  ? "bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400"
+                  : "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
               }`}
             >
               <AlertTriangle className='w-5 h-5' />
             </div>
             <div>
-              <p className='text-2xl font-bold text-gray-900 leading-none font-mono'>
+              <p className='text-2xl font-bold text-gray-900 dark:text-night-50 leading-none font-mono'>
                 <AnimatedNumber value={taskCounts.overdue} />
               </p>
-              <p className='text-xs font-medium text-gray-500 mt-1'>
+              <p className='text-xs font-medium text-gray-500 dark:text-night-400 mt-1'>
                 {taskCounts.overdue === 0 ? "¡Todo al día!" : "Vencidas"}
               </p>
             </div>
@@ -501,7 +501,7 @@ const Tasks = () => {
 
       {/* Tabs de estado - píldoras con indicador deslizante */}
       <FadeIn delay={0.2}>
-        <div className='flex flex-wrap gap-1 mb-6 p-1 bg-gray-100 rounded-xl w-fit'>
+        <div className='flex flex-wrap gap-1 mb-6 p-1 bg-gray-100 dark:bg-night-800 rounded-xl w-fit'>
           {statusTabs.map((tab) => {
             const count =
               tab.key === "all"
@@ -515,14 +515,14 @@ const Tasks = () => {
                 className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   active
                     ? "text-brand-700"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
                 }`}
               >
                 {active && (
                   <motion.span
                     layoutId='tasks-status-tab'
                     transition={motionTokens.springSnappy}
-                    className='absolute inset-0 rounded-lg bg-white shadow-sm'
+                    className='absolute inset-0 rounded-lg bg-white dark:bg-night-900 shadow-sm'
                   />
                 )}
                 <span className='relative'>
@@ -538,7 +538,7 @@ const Tasks = () => {
       {loading && <SkeletonRows count={6} />}
 
       {error && (
-        <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg'>
+        <div className='bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg'>
           {error}
         </div>
       )}
@@ -548,7 +548,7 @@ const Tasks = () => {
         <>
           {filteredTasks.length === 0 ? (
             <div className='text-center py-12'>
-              <p className='text-gray-500 text-lg'>
+              <p className='text-gray-500 dark:text-night-400 text-lg'>
                 {searchTerm
                   ? "No se encontraron tareas con ese criterio"
                   : "No hay tareas en esta categoría"}
@@ -567,7 +567,7 @@ const Tasks = () => {
                     transition={{ duration: 0.2 }}
                     whileHover={{ scale: 1.01, x: 4 }}
                     onClick={() => handleViewDetail(task)}
-                    className='bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer group'
+                    className='bg-white dark:bg-night-900 rounded-lg shadow-sm border border-gray-200 dark:border-night-700 p-4 cursor-pointer group'
                   >
                     <div className='flex items-start gap-4'>
                       {/* Checkbox */}
@@ -579,9 +579,9 @@ const Tasks = () => {
                         className='mt-1 hover:scale-110 transition-transform'
                       >
                         {task.status === "done" ? (
-                          <CheckCircle2 className='w-5 h-5 text-green-500' />
+                          <CheckCircle2 className='w-5 h-5 text-green-500 dark:text-green-400' />
                         ) : (
-                          <Circle className='w-5 h-5 text-gray-300 hover:text-gray-400' />
+                          <Circle className='w-5 h-5 text-gray-300 dark:text-night-600 hover:text-gray-400 dark:hover:text-night-500' />
                         )}
                       </button>
 
@@ -590,15 +590,15 @@ const Tasks = () => {
                         <div className='flex items-start justify-between gap-4 mb-2'>
                           <div className='flex-1'>
                             <h3
-                              className={`font-semibold text-gray-900 mb-1 ${
+                              className={`font-semibold text-gray-900 dark:text-night-50 mb-1 ${
                                 task.status === "done"
-                                  ? "line-through text-gray-500"
+                                  ? "line-through text-gray-500 dark:text-night-400"
                                   : ""
                               }`}
                             >
                               {task.title}
                             </h3>
-                            <p className='text-sm text-gray-600'>
+                            <p className='text-sm text-gray-600 dark:text-night-300'>
                               {task.description || "Sin descripción"}
                             </p>
                           </div>
@@ -622,18 +622,18 @@ const Tasks = () => {
                                     e.stopPropagation();
                                     handleEdit(task);
                                   }}
-                                  className='p-1 hover:bg-blue-50 rounded transition-all duration-200'
+                                  className='p-1 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded transition-all duration-200'
                                 >
-                                  <Edit className='w-4 h-4 text-blue-600' />
+                                  <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                                 </button>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     openDeleteConfirm(task.id);
                                   }}
-                                  className='p-1 hover:bg-red-50 rounded transition-all duration-200'
+                                  className='p-1 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-all duration-200'
                                 >
-                                  <Trash2 className='w-4 h-4 text-red-600' />
+                                  <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
                                 </button>
                               </div>
                             )}
@@ -643,7 +643,7 @@ const Tasks = () => {
                         {/* Metadatos */}
                         <div className='flex flex-wrap items-center gap-4 text-sm'>
                           {task.project && (
-                            <span className='px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium'>
+                            <span className='px-2 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded text-xs font-medium'>
                               {task.project.name}
                             </span>
                           )}
@@ -654,44 +654,44 @@ const Tasks = () => {
                               {task.tags.slice(0, 4).map((tag) => {
                                 const colorClasses = {
                                   red: {
-                                    bg: "bg-red-100",
-                                    text: "text-red-700",
+                                    bg: "bg-red-100 dark:bg-red-950/40",
+                                    text: "text-red-700 dark:text-red-300",
                                   },
                                   orange: {
-                                    bg: "bg-orange-100",
-                                    text: "text-orange-700",
+                                    bg: "bg-orange-100 dark:bg-orange-950/40",
+                                    text: "text-orange-700 dark:text-orange-300",
                                   },
                                   yellow: {
-                                    bg: "bg-yellow-100",
-                                    text: "text-yellow-700",
+                                    bg: "bg-yellow-100 dark:bg-yellow-950/40",
+                                    text: "text-yellow-700 dark:text-yellow-300",
                                   },
                                   green: {
-                                    bg: "bg-green-100",
-                                    text: "text-green-700",
+                                    bg: "bg-green-100 dark:bg-green-950/40",
+                                    text: "text-green-700 dark:text-green-300",
                                   },
                                   teal: {
-                                    bg: "bg-teal-100",
-                                    text: "text-teal-700",
+                                    bg: "bg-teal-100 dark:bg-teal-950/40",
+                                    text: "text-teal-700 dark:text-teal-300",
                                   },
                                   blue: {
-                                    bg: "bg-blue-100",
-                                    text: "text-blue-700",
+                                    bg: "bg-blue-100 dark:bg-blue-950/40",
+                                    text: "text-blue-700 dark:text-blue-300",
                                   },
                                   indigo: {
-                                    bg: "bg-indigo-100",
-                                    text: "text-indigo-700",
+                                    bg: "bg-indigo-100 dark:bg-indigo-950/40",
+                                    text: "text-indigo-700 dark:text-indigo-300",
                                   },
                                   purple: {
-                                    bg: "bg-purple-100",
-                                    text: "text-purple-700",
+                                    bg: "bg-purple-100 dark:bg-purple-950/40",
+                                    text: "text-purple-700 dark:text-purple-300",
                                   },
                                   pink: {
-                                    bg: "bg-pink-100",
-                                    text: "text-pink-700",
+                                    bg: "bg-pink-100 dark:bg-pink-950/40",
+                                    text: "text-pink-700 dark:text-pink-300",
                                   },
                                   gray: {
-                                    bg: "bg-gray-100",
-                                    text: "text-gray-700",
+                                    bg: "bg-gray-100 dark:bg-night-800",
+                                    text: "text-gray-700 dark:text-night-300",
                                   },
                                 };
                                 const colors =
@@ -707,7 +707,7 @@ const Tasks = () => {
                                 );
                               })}
                               {task.tags.length > 4 && (
-                                <span className='px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600'>
+                                <span className='px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300'>
                                   +{task.tags.length - 4}
                                 </span>
                               )}
@@ -721,7 +721,7 @@ const Tasks = () => {
 
                             if (!task.due_date) {
                               return (
-                                <div className='flex items-center gap-1 text-gray-400'>
+                                <div className='flex items-center gap-1 text-gray-400 dark:text-night-500'>
                                   <Calendar className='w-4 h-4' />
                                   Sin fecha
                                 </div>
@@ -729,7 +729,7 @@ const Tasks = () => {
                             }
 
                             // Determinar estilo según días restantes
-                            let dateStyle = "text-gray-600";
+                            let dateStyle = "text-gray-600 dark:text-night-300";
                             let bgStyle = "";
                             let icon = <Calendar className='w-4 h-4' />;
                             let badge = null;
@@ -737,10 +737,10 @@ const Tasks = () => {
                             if (!isCompleted) {
                               if (days < 0) {
                                 // Vencida
-                                dateStyle = "text-red-700 font-medium";
-                                bgStyle = "bg-red-50 px-2 py-1 rounded-lg";
+                                dateStyle = "text-red-700 dark:text-red-300 font-medium";
+                                bgStyle = "bg-red-50 dark:bg-red-950/40 px-2 py-1 rounded-lg";
                                 icon = (
-                                  <AlertTriangle className='w-4 h-4 text-red-500' />
+                                  <AlertTriangle className='w-4 h-4 text-red-500 dark:text-red-400' />
                                 );
                                 badge = (
                                   <span className='ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded'>
@@ -749,10 +749,10 @@ const Tasks = () => {
                                 );
                               } else if (days === 0) {
                                 // Vence hoy
-                                dateStyle = "text-orange-700 font-medium";
-                                bgStyle = "bg-orange-50 px-2 py-1 rounded-lg";
+                                dateStyle = "text-orange-700 dark:text-orange-300 font-medium";
+                                bgStyle = "bg-orange-50 dark:bg-orange-950/40 px-2 py-1 rounded-lg";
                                 icon = (
-                                  <Clock className='w-4 h-4 text-orange-500' />
+                                  <Clock className='w-4 h-4 text-orange-500 dark:text-orange-400' />
                                 );
                                 badge = (
                                   <span className='ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-orange-500 text-white rounded'>
@@ -761,13 +761,13 @@ const Tasks = () => {
                                 );
                               } else if (days <= 3) {
                                 // Próxima a vencer
-                                dateStyle = "text-yellow-700 font-medium";
-                                bgStyle = "bg-yellow-50 px-2 py-1 rounded-lg";
+                                dateStyle = "text-yellow-700 dark:text-yellow-300 font-medium";
+                                bgStyle = "bg-yellow-50 dark:bg-yellow-950/40 px-2 py-1 rounded-lg";
                                 icon = (
-                                  <CalendarClock className='w-4 h-4 text-yellow-500' />
+                                  <CalendarClock className='w-4 h-4 text-yellow-500 dark:text-yellow-400' />
                                 );
                                 badge = (
-                                  <span className='ml-1 text-[10px] font-medium text-yellow-600'>
+                                  <span className='ml-1 text-[10px] font-medium text-yellow-600 dark:text-yellow-400'>
                                     {days === 1 ? "mañana" : `en ${days} días`}
                                   </span>
                                 );
@@ -803,12 +803,12 @@ const Tasks = () => {
                                       />
                                     ))}
                                   {task.assigned_users.length > 3 && (
-                                    <div className='w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border-2 border-white'>
+                                    <div className='w-6 h-6 rounded-full bg-gray-200 dark:bg-night-700 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-night-300 border-2 border-white dark:border-night-900'>
                                       +{task.assigned_users.length - 3}
                                     </div>
                                   )}
                                 </div>
-                                <span className='text-gray-500 text-xs ml-1'>
+                                <span className='text-gray-500 dark:text-night-400 text-xs ml-1'>
                                   {task.assigned_users.length === 1
                                     ? task.assigned_users[0].name
                                     : `${task.assigned_users.length} asignados`}
@@ -825,7 +825,7 @@ const Tasks = () => {
                                   user={task.assigned_user}
                                   size='sm'
                                 />
-                                <span className='text-gray-700'>
+                                <span className='text-gray-700 dark:text-night-300'>
                                   {task.assigned_user.name}
                                 </span>
                               </div>
@@ -850,7 +850,7 @@ const Tasks = () => {
                                     e.stopPropagation();
                                     toggleChecklist(task.id);
                                   }}
-                                  className='flex items-center gap-1.5 text-gray-600 hover:text-brand-600 transition-colors'
+                                  className='flex items-center gap-1.5 text-gray-600 dark:text-night-300 hover:text-brand-600 transition-colors'
                                 >
                                   <ProgressRing
                                     percentage={pct}
@@ -859,7 +859,6 @@ const Tasks = () => {
                                     color={
                                       pct === 100 ? "#22c55e" : "#7c3aed"
                                     }
-                                    trackColor='#e5e7eb'
                                   />
                                   <span className='text-xs'>
                                     {completedCount}/{totalCount}
@@ -888,10 +887,10 @@ const Tasks = () => {
                               onClick={(e) => e.stopPropagation()}
                               className={`text-xs font-medium px-2 py-1 rounded-lg border cursor-pointer transition-colors ${
                                 task.status === "done"
-                                  ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                                  ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-950/40"
                                   : task.status === "in-progress"
-                                    ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                                    : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                    ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-950/40"
+                                    : "bg-gray-50 dark:bg-night-800 text-gray-700 dark:text-night-300 border-gray-200 dark:border-night-700 hover:bg-gray-100 dark:hover:bg-night-800"
                               }`}
                             >
                               <option value='todo'>Por hacer</option>
@@ -902,10 +901,10 @@ const Tasks = () => {
                             <span
                               className={`text-xs font-medium px-2 py-1 rounded-lg ${
                                 task.status === "done"
-                                  ? "bg-green-50 text-green-700"
+                                  ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                                   : task.status === "in-progress"
-                                    ? "bg-blue-50 text-blue-700"
-                                    : "bg-gray-50 text-gray-700"
+                                    ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300"
+                                    : "bg-gray-50 dark:bg-night-800 text-gray-700 dark:text-night-300"
                               }`}
                             >
                               {statusLabels[task.status]}
@@ -921,7 +920,7 @@ const Tasks = () => {
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
-                              className='mt-3 pt-3 border-t border-gray-100'
+                              className='mt-3 pt-3 border-t border-gray-100 dark:border-night-700'
                             >
                               <div className='space-y-1.5'>
                                 {task.checklist_items.map((item) => (
@@ -935,18 +934,18 @@ const Tasks = () => {
                                         e,
                                       )
                                     }
-                                    className='flex items-center gap-2 text-sm w-full text-left py-1 px-2 -mx-2 rounded hover:bg-gray-100 transition-colors'
+                                    className='flex items-center gap-2 text-sm w-full text-left py-1 px-2 -mx-2 rounded hover:bg-gray-100 dark:hover:bg-night-800 transition-colors'
                                   >
                                     {item.is_completed ? (
-                                      <CheckSquare className='w-4 h-4 text-green-500 shrink-0' />
+                                      <CheckSquare className='w-4 h-4 text-green-500 dark:text-green-400 shrink-0' />
                                     ) : (
-                                      <Square className='w-4 h-4 text-gray-400 shrink-0' />
+                                      <Square className='w-4 h-4 text-gray-400 dark:text-night-500 shrink-0' />
                                     )}
                                     <span
                                       className={
                                         item.is_completed
-                                          ? "text-gray-400 line-through"
-                                          : "text-gray-600"
+                                          ? "text-gray-400 dark:text-night-500 line-through"
+                                          : "text-gray-600 dark:text-night-300"
                                       }
                                     >
                                       {item.text}

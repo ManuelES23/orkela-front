@@ -216,16 +216,16 @@ const Projects = () => {
   });
 
   const statusColors = {
-    active: "bg-blue-100 text-blue-700",
-    on_hold: "bg-yellow-100 text-yellow-700",
-    completed: "bg-green-100 text-green-700",
-    cancelled: "bg-red-100 text-red-700",
+    active: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
+    on_hold: "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300",
+    completed: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
+    cancelled: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300",
   };
 
   const priorityColors = {
-    high: "text-red-600",
-    medium: "text-yellow-600",
-    low: "text-gray-500",
+    high: "text-red-600 dark:text-red-400",
+    medium: "text-yellow-600 dark:text-yellow-400",
+    low: "text-gray-500 dark:text-night-400",
   };
 
   const priorityLabels = {
@@ -324,7 +324,7 @@ const Projects = () => {
         transition={{ duration: 0.2 }}
         whileHover={{ y: -6, scale: 1.01 }}
         onClick={() => handleViewDetails(project)}
-        className={`bg-white rounded-xl shadow-sm border border-gray-100 group cursor-pointer overflow-hidden ${
+        className={`bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700 group cursor-pointer overflow-hidden ${
           featured ? "md:col-span-2 lg:col-span-2" : ""
         }`}
       >
@@ -351,14 +351,14 @@ const Projects = () => {
                   </span>
                 )}
                 <h3
-                  className={`font-semibold text-gray-900 line-clamp-1 ${featured ? "text-lg" : ""}`}
+                  className={`font-semibold text-gray-900 dark:text-night-50 line-clamp-1 ${featured ? "text-lg" : ""}`}
                 >
                   {project.name}
                 </h3>
                 <div className='flex items-center gap-2 mt-0.5'>
                   <span
                     className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      statusColors[project.status] || "bg-gray-100 text-gray-800"
+                      statusColors[project.status] || "bg-gray-100 dark:bg-night-800 text-gray-800 dark:text-night-100"
                     }`}
                   >
                     {project.status === "active"
@@ -389,9 +389,9 @@ const Projects = () => {
                     e.stopPropagation();
                     handleEdit(project);
                   }}
-                  className='p-1.5 opacity-0 group-hover:opacity-100 hover:bg-blue-50 rounded-lg transition-all duration-200 cursor-pointer'
+                  className='p-1.5 opacity-0 group-hover:opacity-100 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-all duration-200 cursor-pointer'
                 >
-                  <Edit className='w-4 h-4 text-blue-600' />
+                  <Edit className='w-4 h-4 text-blue-600 dark:text-blue-400' />
                 </button>
               )}
               {project.can_delete && (
@@ -400,16 +400,16 @@ const Projects = () => {
                     e.stopPropagation();
                     openDeleteConfirm(project.id);
                   }}
-                  className='p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded-lg transition-all duration-200 cursor-pointer'
+                  className='p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all duration-200 cursor-pointer'
                 >
-                  <Trash2 className='w-4 h-4 text-red-600' />
+                  <Trash2 className='w-4 h-4 text-red-600 dark:text-red-400' />
                 </button>
               )}
             </div>
           </div>
 
           {featured && (
-            <p className='text-sm text-gray-500 line-clamp-2 mb-1'>
+            <p className='text-sm text-gray-500 dark:text-night-400 line-clamp-2 mb-1'>
               {project.description || "Sin descripción"}
             </p>
           )}
@@ -426,34 +426,34 @@ const Projects = () => {
             />
             <div>
               <div
-                className={`font-bold text-gray-900 tabular-nums ${featured ? "text-3xl" : "text-xl"}`}
+                className={`font-bold text-gray-900 dark:text-night-50 tabular-nums ${featured ? "text-3xl" : "text-xl"}`}
               >
                 <AnimatedNumber value={project.progress || 0} suffix='%' />
               </div>
-              <div className='text-xs text-gray-500'>Progreso</div>
+              <div className='text-xs text-gray-500 dark:text-night-400'>Progreso</div>
             </div>
           </div>
 
           {/* Estadísticas de tareas (solo en la card destacada) */}
           {featured && (
             <div className='grid grid-cols-2 sm:grid-cols-4 gap-2'>
-              <div className='text-center p-2 bg-gray-50 rounded-lg'>
+              <div className='text-center p-2 bg-gray-50 dark:bg-night-800 rounded-lg'>
                 <div className='flex items-center justify-center gap-1'>
-                  <ListTodo className='w-3.5 h-3.5 text-gray-400' />
-                  <span className='text-sm font-bold text-gray-700 tabular-nums'>
+                  <ListTodo className='w-3.5 h-3.5 text-gray-400 dark:text-night-500' />
+                  <span className='text-sm font-bold text-gray-700 dark:text-night-300 tabular-nums'>
                     {taskStats.total}
                   </span>
                 </div>
-                <div className='text-[10px] text-gray-500'>Total</div>
+                <div className='text-[10px] text-gray-500 dark:text-night-400'>Total</div>
               </div>
-              <div className='text-center p-2 bg-green-50 rounded-lg'>
+              <div className='text-center p-2 bg-green-50 dark:bg-green-950/40 rounded-lg'>
                 <div className='flex items-center justify-center gap-1'>
-                  <CheckCircle2 className='w-3.5 h-3.5 text-green-500' />
-                  <span className='text-sm font-bold text-green-700 tabular-nums'>
+                  <CheckCircle2 className='w-3.5 h-3.5 text-green-500 dark:text-green-400' />
+                  <span className='text-sm font-bold text-green-700 dark:text-green-300 tabular-nums'>
                     {taskStats.completed}
                   </span>
                 </div>
-                <div className='text-[10px] text-green-600'>Listas</div>
+                <div className='text-[10px] text-green-600 dark:text-green-400'>Listas</div>
               </div>
               <div className='text-center p-2 bg-brand-50 rounded-lg'>
                 <div className='flex items-center justify-center gap-1'>
@@ -466,18 +466,18 @@ const Projects = () => {
               </div>
               <div
                 className={`text-center p-2 rounded-lg ${
-                  taskStats.overdue > 0 ? "bg-red-50" : "bg-yellow-50"
+                  taskStats.overdue > 0 ? "bg-red-50 dark:bg-red-950/40" : "bg-yellow-50 dark:bg-yellow-950/40"
                 }`}
               >
                 <div className='flex items-center justify-center gap-1'>
                   <AlertCircle
                     className={`w-3.5 h-3.5 ${
-                      taskStats.overdue > 0 ? "text-red-500" : "text-yellow-500"
+                      taskStats.overdue > 0 ? "text-red-500 dark:text-red-400" : "text-yellow-500 dark:text-yellow-400"
                     }`}
                   />
                   <span
                     className={`text-sm font-bold tabular-nums ${
-                      taskStats.overdue > 0 ? "text-red-700" : "text-yellow-700"
+                      taskStats.overdue > 0 ? "text-red-700 dark:text-red-300" : "text-yellow-700 dark:text-yellow-300"
                     }`}
                   >
                     {taskStats.overdue > 0 ? taskStats.overdue : taskStats.pending}
@@ -485,7 +485,7 @@ const Projects = () => {
                 </div>
                 <div
                   className={`text-[10px] ${
-                    taskStats.overdue > 0 ? "text-red-600" : "text-yellow-600"
+                    taskStats.overdue > 0 ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"
                   }`}
                 >
                   {taskStats.overdue > 0 ? "Vencidas" : "Pendientes"}
@@ -520,10 +520,10 @@ const Projects = () => {
                       )}
                       {featured && (
                         <div className='flex flex-col min-w-0'>
-                          <span className='text-xs font-medium text-gray-700 truncate'>
+                          <span className='text-xs font-medium text-gray-700 dark:text-night-300 truncate'>
                             {project.team.name}
                           </span>
-                          <span className='text-[10px] text-gray-400'>
+                          <span className='text-[10px] text-gray-400 dark:text-night-500'>
                             {totalMembers} {totalMembers === 1 ? "miembro" : "miembros"}
                           </span>
                         </div>
@@ -533,7 +533,7 @@ const Projects = () => {
                           {allMembers.slice(0, featured ? 3 : 2).map((member, idx) => (
                             <div
                               key={member.id}
-                              className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shrink-0 ${
+                              className={`w-6 h-6 rounded-full border-2 border-white dark:border-night-900 flex items-center justify-center shrink-0 ${
                                 idx === 0 && teamOwner && member.id === teamOwner.id
                                   ? "bg-gradient-to-br from-amber-500 to-orange-600"
                                   : "bg-gradient-to-br from-brand-500 to-accent-600"
@@ -548,8 +548,8 @@ const Projects = () => {
                             </div>
                           ))}
                           {allMembers.length > (featured ? 3 : 2) && (
-                            <div className='w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center shrink-0'>
-                              <span className='text-[9px] font-medium text-gray-600'>
+                            <div className='w-6 h-6 rounded-full bg-gray-200 dark:bg-night-700 border-2 border-white dark:border-night-900 flex items-center justify-center shrink-0'>
+                              <span className='text-[9px] font-medium text-gray-600 dark:text-night-300'>
                                 +{allMembers.length - (featured ? 3 : 2)}
                               </span>
                             </div>
@@ -566,22 +566,22 @@ const Projects = () => {
                       <UserAvatar key={user.id} user={user} size='sm' showBorder />
                     ))}
                     {project.users.length > (featured ? 4 : 2) && (
-                      <div className='w-7 h-7 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center'>
-                        <span className='text-[10px] font-medium text-gray-600'>
+                      <div className='w-7 h-7 rounded-full bg-gray-200 dark:bg-night-700 border-2 border-white dark:border-night-900 flex items-center justify-center'>
+                        <span className='text-[10px] font-medium text-gray-600 dark:text-night-300'>
                           +{project.users.length - (featured ? 4 : 2)}
                         </span>
                       </div>
                     )}
                   </div>
                   {featured && (
-                    <span className='text-xs text-gray-500'>
+                    <span className='text-xs text-gray-500 dark:text-night-400'>
                       {project.users.length}{" "}
                       {project.users.length === 1 ? "colaborador" : "colaboradores"}
                     </span>
                   )}
                 </>
               ) : (
-                <span className='text-xs text-gray-400 flex items-center gap-1'>
+                <span className='text-xs text-gray-400 dark:text-night-500 flex items-center gap-1'>
                   <Users className='w-3.5 h-3.5' />
                   {featured ? "Sin equipo asignado" : "Sin equipo"}
                 </span>
@@ -590,11 +590,11 @@ const Projects = () => {
           </div>
 
           {/* Footer con fecha */}
-          <div className='flex items-center justify-between pt-3 border-t border-gray-100'>
+          <div className='flex items-center justify-between pt-3 border-t border-gray-100 dark:border-night-700'>
             {featured && (
               <div className='flex items-center gap-1.5 text-sm'>
-                <Calendar className='w-4 h-4 text-gray-400' />
-                <span className='text-gray-600'>
+                <Calendar className='w-4 h-4 text-gray-400 dark:text-night-500' />
+                <span className='text-gray-600 dark:text-night-300'>
                   {project.due_date
                     ? parseLocalDate(project.due_date).toLocaleDateString("es-ES", {
                         day: "numeric",
@@ -609,14 +609,14 @@ const Projects = () => {
               <span
                 className={`text-xs font-medium px-2 py-1 rounded-full ${
                   isCompleted
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                     : isOverdue
-                      ? "bg-red-100 text-red-700"
+                      ? "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300"
                       : daysRemaining <= 3
-                        ? "bg-yellow-100 text-yellow-700"
+                        ? "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300"
                         : isDueSoon
                           ? "bg-brand-100 text-brand-700"
-                          : "bg-gray-100 text-gray-600"
+                          : "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300"
                 }`}
               >
                 {isCompleted
@@ -645,15 +645,15 @@ const Projects = () => {
       <FadeIn delay={0.1}>
         <div className='flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6'>
           {/* Toggle de vista */}
-          <div className='flex gap-2 bg-gray-100 p-1 rounded-lg'>
+          <div className='flex gap-2 bg-gray-100 dark:bg-night-800 p-1 rounded-lg'>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setView("grid")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
                 view === "grid"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <LayoutGrid className='w-4 h-4' />
@@ -665,8 +665,8 @@ const Projects = () => {
               onClick={() => setView("gantt")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
                 view === "gantt"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <GanttChartIcon className='w-4 h-4' />
@@ -676,19 +676,19 @@ const Projects = () => {
 
           <div className='flex gap-3 flex-1 w-full md:w-auto'>
             <div className='relative flex-1 md:flex-initial'>
-              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
                 type='text'
                 placeholder='Buscar proyectos...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition'
+              className='flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition'
             >
               <Filter className='w-4 h-4' />
               <span className='hidden sm:inline'>Filtros</span>
@@ -703,7 +703,7 @@ const Projects = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setExportMenuOpen(!exportMenuOpen)}
                 disabled={exporting || projects.length === 0}
-                className='flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed'
+                className='flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 {exporting ? (
                   <Loader2 className='w-4 h-4 animate-spin' />
@@ -725,41 +725,41 @@ const Projects = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className='absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50'
+                    className='absolute right-0 mt-2 w-56 bg-white dark:bg-night-900 rounded-lg shadow-lg border border-gray-200 dark:border-night-700 py-2 z-50'
                   >
-                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wider'>
                       Lista de Proyectos
                     </div>
                     <button
                       onClick={() => handleExport("pdf")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                     >
-                      <FileText className='w-4 h-4 text-red-500' />
+                      <FileText className='w-4 h-4 text-red-500 dark:text-red-400' />
                       Exportar a PDF
                     </button>
                     <button
                       onClick={() => handleExport("excel")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                     >
-                      <FileSpreadsheet className='w-4 h-4 text-green-600' />
+                      <FileSpreadsheet className='w-4 h-4 text-green-600 dark:text-green-400' />
                       Exportar a Excel
                     </button>
                     <button
                       onClick={() => handleExport("csv")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                     >
-                      <FileDown className='w-4 h-4 text-blue-500' />
+                      <FileDown className='w-4 h-4 text-blue-500 dark:text-blue-400' />
                       Exportar a CSV
                     </button>
 
-                    <div className='border-t border-gray-100 my-2' />
+                    <div className='border-t border-gray-100 dark:border-night-700 my-2' />
 
-                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                    <div className='px-3 py-2 text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wider'>
                       Diagrama Gantt
                     </div>
                     <button
                       onClick={() => handleExport("gantt")}
-                      className='w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3'
+                      className='w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 flex items-center gap-3'
                     >
                       <GanttChartIcon className='w-4 h-4 text-accent-500' />
                       Gantt de todos los proyectos
@@ -784,7 +784,7 @@ const Projects = () => {
 
       {/* Error message */}
       {error && (
-        <div className='mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600'>
+        <div className='mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400'>
           {error}
         </div>
       )}
@@ -795,7 +795,7 @@ const Projects = () => {
       {/* Vista de tabs */}
       {view === "grid" && !loading && (
         <FadeIn delay={0.2}>
-          <div className='flex gap-2 mb-6 border-b border-gray-200 overflow-x-auto'>
+          <div className='flex gap-2 mb-6 border-b border-gray-200 dark:border-night-700 overflow-x-auto'>
             {[
               { key: "all", label: "Todos", count: projects.length },
               {
@@ -820,7 +820,7 @@ const Projects = () => {
                 className={`relative px-4 py-2 font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   statusFilter === tab.key
                     ? "text-brand-600"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -842,7 +842,7 @@ const Projects = () => {
         <>
           {filteredProjects.length === 0 ? (
             <div className='text-center py-12'>
-              <p className='text-gray-500 text-lg'>
+              <p className='text-gray-500 dark:text-night-400 text-lg'>
                 {searchTerm
                   ? "No se encontraron proyectos con ese criterio"
                   : "No hay proyectos aún"}

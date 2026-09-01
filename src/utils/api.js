@@ -13,7 +13,7 @@ export class APIError extends Error {
 }
 
 // Función helper para hacer peticiones
-const request = async (endpoint, options = {}) => {
+export const request = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
 
   const config = {

@@ -170,7 +170,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
                 title={isPinned ? "Desanclar sidebar" : "Fijar sidebar abierto"}
                 className={`shrink-0 p-1.5 rounded-lg transition-colors duration-200 ${
                   isPinned
-                    ? "bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:bg-brand-900/40 dark:text-brand-300"
+                    ? "bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300"
                     : "text-gray-300 hover:bg-gray-50 hover:text-gray-500 dark:text-night-600 dark:hover:bg-night-800 dark:hover:text-night-400"
                 }`}
               >

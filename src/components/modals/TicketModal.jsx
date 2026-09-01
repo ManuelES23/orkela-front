@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import Select from "react-select";
+import { selectStyles } from "../../utils/reactSelectStyles";
 import {
   Ticket,
   MessageSquare,
@@ -153,27 +154,6 @@ const TicketModal = ({
     { value: "high", label: "Alta", color: "bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400" },
     { value: "urgent", label: "Urgente", color: "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400" },
   ];
-
-  // Estilos para react-select
-  const selectStyles = {
-    control: (base, state) => ({
-      ...base,
-      borderColor: state.isFocused ? "#6366f1" : "#d1d5db",
-      boxShadow: state.isFocused ? "0 0 0 2px rgba(99, 102, 241, 0.2)" : "none",
-      "&:hover": {
-        borderColor: state.isFocused ? "#6366f1" : "#9ca3af",
-      },
-      padding: "4px",
-      borderRadius: "0.5rem",
-    }),
-    menu: (base) => ({
-      ...base,
-      borderRadius: "0.5rem",
-      boxShadow:
-        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-      zIndex: 20,
-    }),
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

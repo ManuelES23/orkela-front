@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import Select from "react-select";
 import UserAvatar from "../ui/UserAvatar";
+import { selectStyles } from "../../utils/reactSelectStyles";
 import {
   Users,
   Type,
@@ -152,49 +153,6 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
       </button>
     </div>
   );
-
-  // Estilos personalizados para react-select
-  const selectStyles = {
-    control: (base, state) => ({
-      ...base,
-      borderColor: state.isFocused ? "#6366f1" : "#d1d5db",
-      boxShadow: state.isFocused ? "0 0 0 2px rgba(99, 102, 241, 0.2)" : "none",
-      "&:hover": {
-        borderColor: state.isFocused ? "#6366f1" : "#9ca3af",
-      },
-      padding: "4px",
-      borderRadius: "0.5rem",
-    }),
-    menu: (base) => ({
-      ...base,
-      borderRadius: "0.5rem",
-      boxShadow:
-        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-      zIndex: 20,
-    }),
-    menuList: (base) => ({
-      ...base,
-      padding: 0,
-    }),
-    multiValue: (base) => ({
-      ...base,
-      backgroundColor: "transparent",
-      margin: 0,
-    }),
-    multiValueRemove: (base) => ({
-      ...base,
-      display: "none",
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: "#9ca3af",
-    }),
-    input: (base) => ({
-      ...base,
-      margin: 0,
-      padding: 0,
-    }),
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

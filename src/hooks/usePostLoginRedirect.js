@@ -28,8 +28,13 @@ export const usePostLoginRedirect = () => {
       return;
     }
 
+    const socialReturnTo = localStorage.getItem("socialReturnTo");
+
     if (returnTo) {
       navigate(returnTo);
+    } else if (socialReturnTo) {
+      localStorage.removeItem("socialReturnTo");
+      navigate(socialReturnTo);
     } else if (userData.isSystemAdmin) {
       navigate("/admin/users");
     } else {

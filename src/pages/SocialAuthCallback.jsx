@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
@@ -10,6 +10,18 @@ import ContextSelectionModal from "../components/modals/ContextSelectionModal";
 import { usePostLoginRedirect } from "../hooks/usePostLoginRedirect";
 
 const PROVIDER_LABEL = { google: "Google", microsoft: "Microsoft" };
+
+// Solo confiamos en err.message cuando parece un error de API real (no un
+// SyntaxError/TypeError crudo de un response.json() sobre HTML/red caída).
+const getFriendlyErrorMessage = (err, fallback) => {
+  const message = err?.message || "";
+  const looksLikeParseError =
+    message.includes("Unexpected token") || message.includes("JSON");
+  if (err?.name === "Error" && message && !looksLikeParseError) {
+    return message;
+  }
+  return fallback;
+};
 
 const SocialAuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -28,6 +40,7 @@ const SocialAuthCallback = () => {
   const [confirming, setConfirming] = useState(false);
 
   const ticket = searchParams.get("ticket");
+  const hasExchangedRef = useRef(false);
 
   useEffect(() => {
     if (!ticket) {
@@ -35,6 +48,9 @@ const SocialAuthCallback = () => {
       setError("Falta el ticket de acceso. Volvé a intentarlo desde el login.");
       return;
     }
+
+    if (hasExchangedRef.current) return;
+    hasExchangedRef.current = true;
 
     (async () => {
       try {
@@ -51,7 +67,9 @@ const SocialAuthCallback = () => {
       } catch (err) {
         console.error("Error en el callback de login social:", err);
         setStatus("error");
-        setError(err.message || "El enlace de acceso expiró o no es válido.");
+        setError(
+          getFriendlyErrorMessage(err, "El enlace de acceso expiró o no es válido.")
+        );
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,7 +84,13 @@ const SocialAuthCallback = () => {
       completeLogin(userData);
     } catch (err) {
       console.error("Error confirmando cuenta social:", err);
-      setError(err.message || "No se pudo crear la cuenta. Volvé a intentarlo.");
+      setStatus("error");
+      setError(
+        getFriendlyErrorMessage(
+          err,
+          "El enlace de acceso expiró. Volvé a intentarlo desde el login."
+        )
+      );
       setConfirming(false);
     }
   };

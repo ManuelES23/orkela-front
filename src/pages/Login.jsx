@@ -19,6 +19,9 @@ const SOCIAL_ERROR_MESSAGES = {
   default: "No pudimos completar el inicio de sesión. Volvé a intentarlo.",
 };
 
+const getSocialErrorMessage = (key) =>
+  key && Object.hasOwn(SOCIAL_ERROR_MESSAGES, key) ? SOCIAL_ERROR_MESSAGES[key] : null;
+
 const Login = () => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,8 +60,8 @@ const Login = () => {
     if (socialError) {
       const reason = searchParams.get("reason");
       setError(
-        SOCIAL_ERROR_MESSAGES[reason] ||
-          SOCIAL_ERROR_MESSAGES[socialError] ||
+        getSocialErrorMessage(reason) ||
+          getSocialErrorMessage(socialError) ||
           SOCIAL_ERROR_MESSAGES.default
       );
       setShakeKey((k) => k + 1);
@@ -85,6 +88,9 @@ const Login = () => {
   };
 
   const handleSocialLogin = (provider) => {
+    if (location.state?.returnTo) {
+      localStorage.setItem("socialReturnTo", location.state.returnTo);
+    }
     window.location.href = socialAuthAPI.redirectUrl(provider);
   };
 

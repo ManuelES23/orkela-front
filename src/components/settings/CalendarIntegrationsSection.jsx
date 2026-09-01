@@ -181,18 +181,32 @@ const CalendarIntegrationsSection = () => {
               )}
 
               {status === "needs_reauth" && (
-                <button
-                  type='button'
-                  disabled={isActioning}
-                  onClick={() => handleConnect(provider.key)}
-                  className='flex items-center gap-1.5 px-3 py-1.5 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0'
-                >
-                  {isActioning ? (
-                    <Loader2 className='w-3.5 h-3.5 animate-spin' />
-                  ) : (
-                    "Reconectar"
-                  )}
-                </button>
+                <div className='flex items-center gap-2 shrink-0'>
+                  <button
+                    type='button'
+                    disabled={isActioning}
+                    onClick={() => handleConnect(provider.key)}
+                    className='flex items-center gap-1.5 px-3 py-1.5 text-sm bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {isActioning ? (
+                      <Loader2 className='w-3.5 h-3.5 animate-spin' />
+                    ) : (
+                      "Reconectar"
+                    )}
+                  </button>
+                  <button
+                    type='button'
+                    disabled={isActioning}
+                    onClick={() => handleDisconnect(provider.key)}
+                    className='flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 text-gray-700 dark:text-night-300 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                  >
+                    {isActioning ? (
+                      <Loader2 className='w-3.5 h-3.5 animate-spin' />
+                    ) : (
+                      "Desconectar"
+                    )}
+                  </button>
+                </div>
               )}
 
               {status === "not_connected" && (
@@ -213,6 +227,10 @@ const CalendarIntegrationsSection = () => {
           );
         })}
       </div>
+      <p className='flex items-start gap-1.5 text-xs text-gray-400 dark:text-night-500 mt-4'>
+        <AlertTriangle className='w-3.5 h-3.5 shrink-0 mt-0.5' />
+        Al desconectar un calendario se eliminan los eventos que Orkela creó en tu cuenta externa.
+      </p>
     </div>
   );
 };

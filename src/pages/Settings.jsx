@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { User, Camera, Trash2, Save, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -17,6 +18,7 @@ import { SkeletonSettings } from "../components/ui/Skeleton";
 const Settings = () => {
   const { user, refreshUser } = useAuth();
   const { success, error: showError } = useNotification();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -43,8 +45,7 @@ const Settings = () => {
   // Toast de éxito tras volver del flujo OAuth de calendario (ver
   // CalendarIntegrationsSection) y limpieza del query param en la URL.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const calendarConnected = params.get("calendar_connected");
+    const calendarConnected = searchParams.get("calendar_connected");
     if (calendarConnected) {
       const providerLabel =
         calendarConnected === "microsoft"
@@ -52,15 +53,11 @@ const Settings = () => {
           : "Google Calendar";
       success(`${providerLabel} conectado`);
 
-      params.delete("calendar_connected");
-      const newSearch = params.toString();
-      const newUrl =
-        window.location.pathname +
-        (newSearch ? `?${newSearch}` : "") +
-        window.location.hash;
-      window.history.replaceState({}, "", newUrl);
+      const next = new URLSearchParams(searchParams);
+      next.delete("calendar_connected");
+      setSearchParams(next, { replace: true });
     }
-  }, [success]);
+  }, [searchParams, success, setSearchParams]);
 
   const loadProfile = async () => {
     try {

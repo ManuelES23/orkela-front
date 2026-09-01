@@ -24,11 +24,12 @@ const PROVIDERS = [
   },
 ];
 
-// Normaliza la respuesta de calendarAPI.listConnections() (un arreglo con
-// una entrada por conexión existente) a un mapa provider -> conexión, para
-// poder mirar el estado de cada proveedor sin importar si tiene fila o no.
+// Normaliza la respuesta de calendarAPI.listConnections() (un arreglo plano
+// con una entrada por conexión existente — así serializa el
+// CalendarConnection::get() del backend) a un mapa provider -> conexión,
+// para poder mirar el estado de cada proveedor sin importar si tiene fila o no.
 const toConnectionMap = (data) => {
-  const list = Array.isArray(data) ? data : data?.connections || [];
+  const list = Array.isArray(data) ? data : [];
   const map = {};
   list.forEach((conn) => {
     if (conn?.provider) {
@@ -36,6 +37,16 @@ const toConnectionMap = (data) => {
     }
   });
   return map;
+};
+
+// El backend usa "active" para una conexión vigente; lo traducimos a
+// "connected" (la etiqueta interna que usa el resto del componente).
+// Cualquier valor no reconocido se trata como "not_connected" para no
+// dejar una fila sin texto ni botón si el backend agrega un estado nuevo.
+const toDisplayStatus = (rawStatus) => {
+  if (rawStatus === "active") return "connected";
+  if (rawStatus === "needs_reauth") return "needs_reauth";
+  return "not_connected";
 };
 
 const CalendarIntegrationsSection = () => {
@@ -109,7 +120,7 @@ const CalendarIntegrationsSection = () => {
       <div>
         {PROVIDERS.map((provider, index) => {
           const conn = connections[provider.key];
-          const status = conn?.status || "not_connected";
+          const status = toDisplayStatus(conn?.status);
           const isLastRow = index === PROVIDERS.length - 1;
           const isActioning = actioningProvider === provider.key;
 

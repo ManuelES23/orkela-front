@@ -21,6 +21,7 @@ const PageLoader = () => <LoadingScreen />;
 // Pages - Lazy loaded
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const SocialAuthCallback = lazy(() => import("./pages/SocialAuthCallback"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Projects = lazy(() => import("./pages/Projects"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
@@ -83,6 +84,7 @@ function App() {
                   {/* Rutas públicas */}
                   <Route path='/login' element={<Login />} />
                 <Route path='/register' element={<Register />} />
+                <Route path='/auth/callback' element={<SocialAuthCallback />} />
                 <Route
                   path='/accept-invitation/:token'
                   element={<AcceptInvitation />}

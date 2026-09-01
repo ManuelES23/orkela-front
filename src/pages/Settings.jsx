@@ -11,6 +11,7 @@ import { getAssetUrl } from "../utils/assetUrl";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 import MyPlanSection from "../components/settings/MyPlanSection";
+import CalendarIntegrationsSection from "../components/settings/CalendarIntegrationsSection";
 import { SkeletonSettings } from "../components/ui/Skeleton";
 
 const Settings = () => {
@@ -38,6 +39,28 @@ const Settings = () => {
   useEffect(() => {
     loadProfile();
   }, []);
+
+  // Toast de éxito tras volver del flujo OAuth de calendario (ver
+  // CalendarIntegrationsSection) y limpieza del query param en la URL.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const calendarConnected = params.get("calendar_connected");
+    if (calendarConnected) {
+      const providerLabel =
+        calendarConnected === "microsoft"
+          ? "Microsoft Calendar"
+          : "Google Calendar";
+      success(`${providerLabel} conectado`);
+
+      params.delete("calendar_connected");
+      const newSearch = params.toString();
+      const newUrl =
+        window.location.pathname +
+        (newSearch ? `?${newSearch}` : "") +
+        window.location.hash;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [success]);
 
   const loadProfile = async () => {
     try {
@@ -224,6 +247,10 @@ const Settings = () => {
 
           <StaggerItem>
             <MyPlanSection />
+          </StaggerItem>
+
+          <StaggerItem>
+            <CalendarIntegrationsSection />
           </StaggerItem>
 
           {/* Formulario editorial: secciones divididas por línea, sin doble card */}

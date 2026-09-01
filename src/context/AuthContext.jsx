@@ -153,12 +153,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Completa la sesión con el {token, user} que devuelven
+   * socialAuthAPI.exchange()/confirm() tras un login con Google/Microsoft.
+   * El token ya quedó guardado en localStorage por esas funciones; acá solo
+   * falta reflejar el usuario en el estado, igual que hace login().
+   */
+  const loginWithSocialResult = (data) => {
+    setUser(data.user);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    return data.user;
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
     loading,
+    loginWithSocialResult,
     // Nuevas funciones de contexto
     switchContext,
     switchingContext,

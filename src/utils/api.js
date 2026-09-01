@@ -835,3 +835,34 @@ export const clientsAPI = {
     });
   },
 };
+
+// Social Auth API (login con Google/Microsoft)
+export const socialAuthAPI = {
+  redirectUrl: (provider) => `${API_URL}/auth/social/${provider}/redirect`,
+
+  exchange: async (ticket) => {
+    const data = await publicRequest("/auth/social/exchange", {
+      method: "POST",
+      body: JSON.stringify({ ticket }),
+    });
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+    }
+
+    return data;
+  },
+
+  confirm: async (ticket) => {
+    const data = await publicRequest("/auth/social/confirm", {
+      method: "POST",
+      body: JSON.stringify({ ticket }),
+    });
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+    }
+
+    return data;
+  },
+};

@@ -164,13 +164,13 @@ const GanttChart = ({ projects }) => {
       },
       todo: {
         bg: "bg-gray-400 dark:bg-night-500",
-        border: "border-gray-400",
+        border: "border-gray-400 dark:border-night-500",
         text: "text-gray-600 dark:text-night-300",
         light: "bg-gray-100 dark:bg-night-800",
       },
       pending: {
         bg: "bg-gray-400 dark:bg-night-500",
-        border: "border-gray-400",
+        border: "border-gray-400 dark:border-night-500",
         text: "text-gray-600 dark:text-night-300",
         light: "bg-gray-100 dark:bg-night-800",
       },
@@ -787,12 +787,12 @@ const GanttChart = ({ projects }) => {
                 key={key}
                 className={`bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-lg px-3.5 py-2.5 ${
                   key === "late"
-                    ? "border-l-red-500"
+                    ? "border-l-red-500 dark:border-l-red-500"
                     : key === "progress"
-                      ? "border-l-brand-600"
+                      ? "border-l-brand-600 dark:border-l-brand-500"
                       : key === "done"
-                        ? "border-l-green-500"
-                        : "border-l-gray-400"
+                        ? "border-l-green-500 dark:border-l-green-500"
+                        : "border-l-gray-400 dark:border-l-night-500"
                 }`}
               >
                 <AnimatedNumber
@@ -827,7 +827,7 @@ const GanttChart = ({ projects }) => {
                     key={index}
                     className={`flex-1 min-w-7.5 text-center border-r border-gray-100 dark:border-night-700 ${
                       isToday ? "bg-brand-100 dark:bg-brand-900/30" : isWeekend ? "bg-gray-100 dark:bg-night-800" : ""
-                    } ${isFirstOfMonth ? "border-l-2 border-l-gray-300" : ""}`}
+                    } ${isFirstOfMonth ? "border-l-2 border-l-gray-300 dark:border-l-night-600" : ""}`}
                   >
                     <div
                       className={`text-[10px] font-medium ${
@@ -898,8 +898,17 @@ const GanttChart = ({ projects }) => {
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ delay: index * 0.02 }}
                           className={`flex hover:bg-gray-50 dark:hover:bg-night-800 transition-colors border-l-4 ${
-                            group.stripe.replace("bg-", "border-l-")
-                          } ${isSubTask ? "bg-gray-50/50" : ""}`}
+                            // .replace("bg-", "border-l-") ingenuo solo convertía la
+                            // primera ocurrencia — en "bg-gray-400 dark:bg-night-500"
+                            // dejaba "dark:bg-night-500" intacto como clase suelta,
+                            // pintando el fondo de toda la fila de un morado claro en
+                            // modo oscuro en vez de solo el borde. Se convierte cada
+                            // token bg-/dark:bg- por separado.
+                            group.stripe
+                              .split(" ")
+                              .map((cls) => cls.replace(/^(dark:)?bg-/, "$1border-l-"))
+                              .join(" ")
+                          } ${isSubTask ? "bg-gray-50/50 dark:bg-night-800/50" : ""}`}
                         >
                           {/* Info del item */}
                           <div
@@ -1074,7 +1083,7 @@ const GanttChart = ({ projects }) => {
                                   isWeekend ? "bg-gray-50 dark:bg-night-800" : ""
                                 } ${
                                   isFirstOfMonth
-                                    ? "border-l-2 border-l-gray-200"
+                                    ? "border-l-2 border-l-gray-200 dark:border-l-night-700"
                                     : ""
                                 }`}
                               />
@@ -1225,7 +1234,7 @@ const GanttChart = ({ projects }) => {
                                 <div className='font-semibold mb-1'>
                                   {item.name}
                                 </div>
-                                <div className='text-gray-300 dark:text-night-600 space-y-0.5'>
+                                <div className='text-gray-300 space-y-0.5'>
                                   <div>
                                     Inicio:{" "}
                                     {item.startDate.toLocaleDateString(

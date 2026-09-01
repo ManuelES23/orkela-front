@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Git worktrees (local isolation, not part of the repo)
+.worktrees/

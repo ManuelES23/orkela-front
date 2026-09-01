@@ -117,8 +117,8 @@ const GanttChart = ({ projects }) => {
       return {
         bg: "bg-red-500",
         border: "border-red-500",
-        text: "text-red-700",
-        light: "bg-red-100",
+        text: "text-red-700 dark:text-red-300",
+        light: "bg-red-100 dark:bg-red-950/40",
       };
     }
     // Si es urgente y no está completado
@@ -126,8 +126,8 @@ const GanttChart = ({ projects }) => {
       return {
         bg: "bg-orange-500",
         border: "border-orange-500",
-        text: "text-orange-700",
-        light: "bg-orange-100",
+        text: "text-orange-700 dark:text-orange-300",
+        light: "bg-orange-100 dark:bg-orange-950/40",
       };
     }
     // Por estado
@@ -135,56 +135,56 @@ const GanttChart = ({ projects }) => {
       done: {
         bg: "bg-green-500",
         border: "border-green-500",
-        text: "text-green-700",
-        light: "bg-green-100",
+        text: "text-green-700 dark:text-green-300",
+        light: "bg-green-100 dark:bg-green-950/40",
       },
       completed: {
         bg: "bg-green-500",
         border: "border-green-500",
-        text: "text-green-700",
-        light: "bg-green-100",
+        text: "text-green-700 dark:text-green-300",
+        light: "bg-green-100 dark:bg-green-950/40",
       },
       "in-progress": {
         bg: "bg-blue-500",
         border: "border-blue-500",
-        text: "text-blue-700",
-        light: "bg-blue-100",
+        text: "text-blue-700 dark:text-blue-300",
+        light: "bg-blue-100 dark:bg-blue-950/40",
       },
       in_progress: {
         bg: "bg-blue-500",
         border: "border-blue-500",
-        text: "text-blue-700",
-        light: "bg-blue-100",
+        text: "text-blue-700 dark:text-blue-300",
+        light: "bg-blue-100 dark:bg-blue-950/40",
       },
       active: {
         bg: "bg-blue-500",
         border: "border-blue-500",
-        text: "text-blue-700",
-        light: "bg-blue-100",
+        text: "text-blue-700 dark:text-blue-300",
+        light: "bg-blue-100 dark:bg-blue-950/40",
       },
       todo: {
-        bg: "bg-gray-400",
-        border: "border-gray-400",
-        text: "text-gray-600",
-        light: "bg-gray-100",
+        bg: "bg-gray-400 dark:bg-night-500",
+        border: "border-gray-400 dark:border-night-500",
+        text: "text-gray-600 dark:text-night-300",
+        light: "bg-gray-100 dark:bg-night-800",
       },
       pending: {
-        bg: "bg-gray-400",
-        border: "border-gray-400",
-        text: "text-gray-600",
-        light: "bg-gray-100",
+        bg: "bg-gray-400 dark:bg-night-500",
+        border: "border-gray-400 dark:border-night-500",
+        text: "text-gray-600 dark:text-night-300",
+        light: "bg-gray-100 dark:bg-night-800",
       },
       cancelled: {
-        bg: "bg-gray-300",
-        border: "border-gray-300",
-        text: "text-gray-500",
-        light: "bg-gray-50",
+        bg: "bg-gray-300 dark:bg-night-600",
+        border: "border-gray-300 dark:border-night-600",
+        text: "text-gray-500 dark:text-night-400",
+        light: "bg-gray-50 dark:bg-night-800",
       },
       on_hold: {
         bg: "bg-yellow-500",
         border: "border-yellow-500",
-        text: "text-yellow-700",
-        light: "bg-yellow-100",
+        text: "text-yellow-700 dark:text-yellow-300",
+        light: "bg-yellow-100 dark:bg-yellow-950/40",
       },
     };
     return colors[status] || colors.pending;
@@ -193,10 +193,10 @@ const GanttChart = ({ projects }) => {
   // Colores por prioridad (solo para badges)
   const getPriorityBadgeColor = (priority) => {
     const colors = {
-      high: "bg-red-100 text-red-700",
-      urgent: "bg-red-100 text-red-700",
-      medium: "bg-yellow-100 text-yellow-700",
-      low: "bg-green-100 text-green-700",
+      high: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300",
+      urgent: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300",
+      medium: "bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300",
+      low: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
     };
     return colors[priority] || colors.medium;
   };
@@ -494,14 +494,14 @@ const GanttChart = ({ projects }) => {
   };
 
   const GROUP_META = {
-    late: { label: "Atrasados", stripe: "bg-red-500", text: "text-red-700" },
+    late: { label: "Atrasados", stripe: "bg-red-500", text: "text-red-700 dark:text-red-300" },
     progress: {
       label: "En progreso",
       stripe: "bg-brand-600",
-      text: "text-brand-700",
+      text: "text-brand-700 dark:text-brand-300",
     },
-    upcoming: { label: "Próximos", stripe: "bg-gray-400", text: "text-gray-600" },
-    done: { label: "Completados", stripe: "bg-green-500", text: "text-green-700" },
+    upcoming: { label: "Próximos", stripe: "bg-gray-400 dark:bg-night-500", text: "text-gray-600 dark:text-night-300" },
+    done: { label: "Completados", stripe: "bg-green-500", text: "text-green-700 dark:text-green-300" },
   };
 
   // Fondo de la barra según el grupo (más coherente con la franja de
@@ -515,7 +515,7 @@ const GanttChart = ({ projects }) => {
       case "done":
         return "bg-linear-to-r from-green-400 to-green-600";
       default:
-        return "bg-gray-400";
+        return "bg-gray-400 dark:bg-night-500";
     }
   };
 
@@ -636,20 +636,20 @@ const GanttChart = ({ projects }) => {
   }, [currentDate, timeScale, dateRange]);
 
   return (
-    <div className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'>
+    <div className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-100 dark:border-night-700 overflow-hidden'>
       {/* Header */}
-      <div className='p-4 border-b border-gray-200 space-y-4'>
+      <div className='p-4 border-b border-gray-200 dark:border-night-700 space-y-4'>
         {/* Fila superior: Título y navegación */}
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
-            <div className='p-2 bg-brand-100 rounded-lg'>
+            <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg'>
               <Calendar className='w-5 h-5 text-brand-600' />
             </div>
             <div>
-              <h2 className='text-lg font-semibold text-gray-900'>
+              <h2 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
                 Diagrama de Gantt
               </h2>
-              <p className='text-sm text-gray-500'>{items.length} elementos</p>
+              <p className='text-sm text-gray-500 dark:text-night-400'>{items.length} elementos</p>
             </div>
           </div>
 
@@ -657,29 +657,29 @@ const GanttChart = ({ projects }) => {
           <div className='flex items-center gap-2'>
             <button
               onClick={goToToday}
-              className='px-3 py-1.5 text-sm font-medium text-brand-600 hover:bg-brand-50 rounded-lg transition'
+              className='px-3 py-1.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 rounded-lg transition'
             >
               Hoy
             </button>
-            <div className='flex items-center bg-gray-100 rounded-lg'>
+            <div className='flex items-center bg-gray-100 dark:bg-night-800 rounded-lg'>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => navigate(-1)}
-                className='p-2 hover:bg-gray-200 rounded-l-lg transition'
+                className='p-2 hover:bg-gray-200 dark:hover:bg-night-700 rounded-l-lg transition'
               >
-                <ChevronLeft className='w-4 h-4 text-gray-600' />
+                <ChevronLeft className='w-4 h-4 text-gray-600 dark:text-night-300' />
               </motion.button>
-              <span className='px-4 py-1.5 text-sm font-medium text-gray-700 min-w-45 text-center capitalize'>
+              <span className='px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-night-300 min-w-45 text-center capitalize'>
                 {periodTitle}
               </span>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => navigate(1)}
-                className='p-2 hover:bg-gray-200 rounded-r-lg transition'
+                className='p-2 hover:bg-gray-200 dark:hover:bg-night-700 rounded-r-lg transition'
               >
-                <ChevronRight className='w-4 h-4 text-gray-600' />
+                <ChevronRight className='w-4 h-4 text-gray-600 dark:text-night-300' />
               </motion.button>
             </div>
           </div>
@@ -688,13 +688,13 @@ const GanttChart = ({ projects }) => {
         {/* Fila de controles */}
         <div className='flex flex-wrap items-center gap-3'>
           {/* Selector de vista */}
-          <div className='flex bg-gray-100 p-1 rounded-lg'>
+          <div className='flex bg-gray-100 dark:bg-night-800 p-1 rounded-lg'>
             <button
               onClick={() => setViewMode("projects")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 viewMode === "projects"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <FolderKanban className='w-4 h-4' />
@@ -704,8 +704,8 @@ const GanttChart = ({ projects }) => {
               onClick={() => setViewMode("tasks")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 viewMode === "tasks"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <ListChecks className='w-4 h-4' />
@@ -714,13 +714,13 @@ const GanttChart = ({ projects }) => {
           </div>
 
           {/* Escala temporal */}
-          <div className='flex bg-gray-100 p-1 rounded-lg'>
+          <div className='flex bg-gray-100 dark:bg-night-800 p-1 rounded-lg'>
             <button
               onClick={() => setTimeScale("month")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeScale === "month"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <CalendarDays className='w-4 h-4' />
@@ -730,8 +730,8 @@ const GanttChart = ({ projects }) => {
               onClick={() => setTimeScale("week")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeScale === "week"
-                  ? "bg-white text-brand-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-night-900 text-brand-600 shadow-sm"
+                  : "text-gray-600 dark:text-night-300 hover:text-gray-900 dark:hover:text-night-50"
               }`}
             >
               <CalendarRange className='w-4 h-4' />
@@ -741,13 +741,13 @@ const GanttChart = ({ projects }) => {
 
           {/* Búsqueda */}
           <div className='relative flex-1 min-w-50 max-w-xs'>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-night-500' />
             <input
               type='text'
               placeholder='Buscar...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+              className='w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
 
@@ -755,7 +755,7 @@ const GanttChart = ({ projects }) => {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
+            className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
           >
             <option value='all'>Todas las prioridades</option>
             <option value='high'>Alta</option>
@@ -767,7 +767,7 @@ const GanttChart = ({ projects }) => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
+            className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
           >
             <option value='all'>Todos los estados</option>
             <option value='active'>Activos</option>
@@ -778,28 +778,28 @@ const GanttChart = ({ projects }) => {
 
       {/* Franja de métricas por estado */}
       {!loading && items.length > 0 && (
-        <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-gray-200 bg-gray-50/60'>
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-gray-200 dark:border-night-700 bg-gray-50/60'>
           {["late", "progress", "upcoming", "done"].map((key) => {
             const meta = GROUP_META[key];
             const group = groupedSections.find((g) => g.key === key);
             return (
               <div
                 key={key}
-                className={`bg-white border border-gray-200 border-l-4 rounded-lg px-3.5 py-2.5 ${
+                className={`bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-lg px-3.5 py-2.5 ${
                   key === "late"
-                    ? "border-l-red-500"
+                    ? "border-l-red-500 dark:border-l-red-500"
                     : key === "progress"
-                      ? "border-l-brand-600"
+                      ? "border-l-brand-600 dark:border-l-brand-500"
                       : key === "done"
-                        ? "border-l-green-500"
-                        : "border-l-gray-400"
+                        ? "border-l-green-500 dark:border-l-green-500"
+                        : "border-l-gray-400 dark:border-l-night-500"
                 }`}
               >
                 <AnimatedNumber
                   value={group?.topLevelCount || 0}
-                  className='block font-mono text-xl font-bold text-gray-900'
+                  className='block font-mono text-xl font-bold text-gray-900 dark:text-night-50'
                 />
-                <span className='text-xs font-medium text-gray-500'>
+                <span className='text-xs font-medium text-gray-500 dark:text-night-400'>
                   {meta.label}
                 </span>
               </div>
@@ -812,8 +812,8 @@ const GanttChart = ({ projects }) => {
       <div className='overflow-x-auto'>
         <div className='min-w-225'>
           {/* Header de días */}
-          <div className='flex border-b border-gray-200 bg-gray-50 sticky top-0 z-10'>
-            <div className='w-72 shrink-0 p-3 font-medium text-gray-700 border-r border-gray-200 text-sm'>
+          <div className='flex border-b border-gray-200 dark:border-night-700 bg-gray-50 dark:bg-night-800 sticky top-0 z-10'>
+            <div className='w-72 shrink-0 p-3 font-medium text-gray-700 dark:text-night-300 border-r border-gray-200 dark:border-night-700 text-sm'>
               {viewMode === "projects" ? "Proyecto" : "Tarea"}
             </div>
             <div className='flex-1 flex'>
@@ -825,13 +825,13 @@ const GanttChart = ({ projects }) => {
                 return (
                   <div
                     key={index}
-                    className={`flex-1 min-w-7.5 text-center border-r border-gray-100 ${
-                      isToday ? "bg-brand-100" : isWeekend ? "bg-gray-100" : ""
-                    } ${isFirstOfMonth ? "border-l-2 border-l-gray-300" : ""}`}
+                    className={`flex-1 min-w-7.5 text-center border-r border-gray-100 dark:border-night-700 ${
+                      isToday ? "bg-brand-100 dark:bg-brand-900/30" : isWeekend ? "bg-gray-100 dark:bg-night-800" : ""
+                    } ${isFirstOfMonth ? "border-l-2 border-l-gray-300 dark:border-l-night-600" : ""}`}
                   >
                     <div
                       className={`text-[10px] font-medium ${
-                        isToday ? "text-brand-700" : "text-gray-500"
+                        isToday ? "text-brand-700 dark:text-brand-300" : "text-gray-500 dark:text-night-400"
                       }`}
                     >
                       {day
@@ -841,7 +841,7 @@ const GanttChart = ({ projects }) => {
                     </div>
                     <div
                       className={`text-xs font-semibold ${
-                        isToday ? "text-brand-700" : "text-gray-700"
+                        isToday ? "text-brand-700 dark:text-brand-300" : "text-gray-700 dark:text-night-300"
                       }`}
                     >
                       {day.getDate()}
@@ -853,17 +853,17 @@ const GanttChart = ({ projects }) => {
           </div>
 
           {/* Filas */}
-          <div className='divide-y divide-gray-100'>
+          <div className='divide-y divide-gray-100 dark:divide-night-700'>
             {loading ? (
               <div className='p-8 text-center'>
                 <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600 mx-auto'></div>
-                <p className='mt-2 text-gray-500 text-sm'>Cargando...</p>
+                <p className='mt-2 text-gray-500 dark:text-night-400 text-sm'>Cargando...</p>
               </div>
             ) : items.length === 0 ? (
               <div className='p-12 text-center'>
-                <FolderKanban className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-                <p className='text-gray-500'>No hay elementos para mostrar</p>
-                <p className='text-gray-400 text-sm mt-1'>
+                <FolderKanban className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+                <p className='text-gray-500 dark:text-night-400'>No hay elementos para mostrar</p>
+                <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>
                   {searchTerm
                     ? "Intenta con otros términos de búsqueda"
                     : "Crea proyectos con fechas para verlos aquí"}
@@ -873,12 +873,12 @@ const GanttChart = ({ projects }) => {
               groupedSections.map((group) => (
                 <div key={group.key}>
                   {/* Cabecera de sección */}
-                  <div className='flex items-center gap-2 px-3 py-1.5 bg-gray-50'>
+                  <div className='flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-night-800'>
                     <span className={`w-1 h-4 rounded-full ${group.stripe}`} />
                     <span className={`text-xs font-semibold ${group.text}`}>
                       {group.label}
                     </span>
-                    <span className='text-[11px] font-mono text-gray-400'>
+                    <span className='text-[11px] font-mono text-gray-400 dark:text-night-500'>
                       {group.topLevelCount}
                     </span>
                   </div>
@@ -897,13 +897,22 @@ const GanttChart = ({ projects }) => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ delay: index * 0.02 }}
-                          className={`flex hover:bg-gray-50 transition-colors border-l-4 ${
-                            group.stripe.replace("bg-", "border-l-")
-                          } ${isSubTask ? "bg-gray-50/50" : ""}`}
+                          className={`flex hover:bg-gray-50 dark:hover:bg-night-800 transition-colors border-l-4 ${
+                            // .replace("bg-", "border-l-") ingenuo solo convertía la
+                            // primera ocurrencia — en "bg-gray-400 dark:bg-night-500"
+                            // dejaba "dark:bg-night-500" intacto como clase suelta,
+                            // pintando el fondo de toda la fila de un morado claro en
+                            // modo oscuro en vez de solo el borde. Se convierte cada
+                            // token bg-/dark:bg- por separado.
+                            group.stripe
+                              .split(" ")
+                              .map((cls) => cls.replace(/^(dark:)?bg-/, "$1border-l-"))
+                              .join(" ")
+                          } ${isSubTask ? "bg-gray-50/50 dark:bg-night-800/50" : ""}`}
                         >
                           {/* Info del item */}
                           <div
-                            className={`w-72 shrink-0 p-3 border-r border-gray-200 ${
+                            className={`w-72 shrink-0 p-3 border-r border-gray-200 dark:border-night-700 ${
                               isSubTask ? "pl-8" : ""
                             }`}
                           >
@@ -914,8 +923,8 @@ const GanttChart = ({ projects }) => {
                               onClick={() => toggleProject(item.projectId)}
                               className={`w-5 h-5 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                                 item.isExpanded
-                                  ? "bg-brand-100 text-brand-600"
-                                  : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                                  ? "bg-brand-100 dark:bg-brand-900/30 text-brand-600"
+                                  : "bg-gray-100 dark:bg-night-800 text-gray-400 dark:text-night-500 hover:bg-gray-200 dark:hover:bg-night-700"
                               }`}
                             >
                               <ChevronRight
@@ -933,19 +942,19 @@ const GanttChart = ({ projects }) => {
                           <div className='flex-1 min-w-0'>
                             <div className='flex items-center gap-1.5'>
                               <span
-                                className={`font-medium text-gray-900 text-sm truncate ${
-                                  isSubTask ? "text-gray-700" : ""
+                                className={`font-medium text-gray-900 dark:text-night-50 text-sm truncate ${
+                                  isSubTask ? "text-gray-700 dark:text-night-300" : ""
                                 }`}
                               >
                                 {item.name}
                               </span>
                               {item.isUrgent && (
-                                <AlertCircle className='w-3.5 h-3.5 text-red-500 shrink-0' />
+                                <AlertCircle className='w-3.5 h-3.5 text-red-500 dark:text-red-400 shrink-0' />
                               )}
                             </div>
 
                             {/* Métricas según tipo */}
-                            <div className='flex items-center gap-2 mt-1 text-xs text-gray-500'>
+                            <div className='flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-night-400'>
                               {item.type === "project" ? (
                                 <>
                                   <span className='flex items-center gap-0.5'>
@@ -988,11 +997,11 @@ const GanttChart = ({ projects }) => {
                                   className={`${
                                     item.status === "done" ||
                                     item.status === "completed"
-                                      ? "text-green-600"
+                                      ? "text-green-600 dark:text-green-400"
                                       : daysRemaining < 0
-                                        ? "text-red-600"
+                                        ? "text-red-600 dark:text-red-400"
                                         : daysRemaining <= 3
-                                          ? "text-yellow-600"
+                                          ? "text-yellow-600 dark:text-yellow-400"
                                           : ""
                                   }`}
                                 >
@@ -1022,12 +1031,12 @@ const GanttChart = ({ projects }) => {
                                 className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
                                   item.status === "done" ||
                                   item.status === "completed"
-                                    ? "bg-green-100 text-green-700"
+                                    ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                                     : item.status === "in-progress"
-                                      ? "bg-blue-100 text-blue-700"
+                                      ? "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300"
                                       : item.status === "active"
-                                        ? "bg-blue-100 text-blue-700"
-                                        : "bg-gray-100 text-gray-600"
+                                        ? "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300"
+                                        : "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300"
                                 }`}
                               >
                                 {item.status === "done" ||
@@ -1070,11 +1079,11 @@ const GanttChart = ({ projects }) => {
                             return (
                               <div
                                 key={i}
-                                className={`flex-1 min-w-7.5 border-r border-gray-100 ${
-                                  isWeekend ? "bg-gray-50" : ""
+                                className={`flex-1 min-w-7.5 border-r border-gray-100 dark:border-night-700 ${
+                                  isWeekend ? "bg-gray-50 dark:bg-night-800" : ""
                                 } ${
                                   isFirstOfMonth
-                                    ? "border-l-2 border-l-gray-200"
+                                    ? "border-l-2 border-l-gray-200 dark:border-l-night-700"
                                     : ""
                                 }`}
                               />
@@ -1273,9 +1282,9 @@ const GanttChart = ({ projects }) => {
           </div>
 
           {/* Leyenda */}
-          <div className='p-3 bg-gray-50 border-t border-gray-200'>
-            <div className='flex flex-wrap items-center gap-4 text-xs text-gray-600'>
-              <span className='font-medium text-gray-700'>Estados:</span>
+          <div className='p-3 bg-gray-50 dark:bg-night-800 border-t border-gray-200 dark:border-night-700'>
+            <div className='flex flex-wrap items-center gap-4 text-xs text-gray-600 dark:text-night-300'>
+              <span className='font-medium text-gray-700 dark:text-night-300'>Estados:</span>
               <div className='flex items-center gap-1.5'>
                 <div className='w-4 h-2 bg-green-500 rounded' />
                 <span>Completado</span>
@@ -1285,7 +1294,7 @@ const GanttChart = ({ projects }) => {
                 <span>En progreso</span>
               </div>
               <div className='flex items-center gap-1.5'>
-                <div className='w-4 h-2 bg-gray-400 rounded' />
+                <div className='w-4 h-2 bg-gray-400 dark:bg-night-500 rounded' />
                 <span>Pendiente</span>
               </div>
               <div className='flex items-center gap-1.5'>
@@ -1296,11 +1305,11 @@ const GanttChart = ({ projects }) => {
                 <div className='w-4 h-2 bg-red-500 rounded' />
                 <span>Atrasado</span>
               </div>
-              <div className='flex items-center gap-1.5 ml-2 pl-2 border-l border-gray-300'>
+              <div className='flex items-center gap-1.5 ml-2 pl-2 border-l border-gray-300 dark:border-night-600'>
                 <div className='w-0.5 h-4 bg-brand-500 rounded' />
                 <span>Hoy</span>
               </div>
-              <div className='ml-auto text-gray-400'>
+              <div className='ml-auto text-gray-400 dark:text-night-500'>
                 Click en ▶ para expandir tareas del proyecto
               </div>
             </div>

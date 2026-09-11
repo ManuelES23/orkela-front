@@ -17,7 +17,7 @@ const PortalInboxScreen = () => {
   const [loadError, setLoadError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sending, setSending] = useState(false);
-  const [clientId, setClientId] = useState(null);
+  const [contactId, setContactId] = useState(null);
 
   const selectedId = id ? Number(id) : null;
 
@@ -42,7 +42,7 @@ const PortalInboxScreen = () => {
     portalAPI
       .me()
       .then((data) => {
-        setClientId(data.client.id);
+        setContactId(data.contact.id);
         setTickets(data.tickets);
         setOrganization(data.organization);
         setLoading(false);
@@ -88,10 +88,10 @@ const PortalInboxScreen = () => {
   }, [selectedId]);
 
   useEffect(() => {
-    if (!clientId) return;
+    if (!contactId) return;
 
     const echo = getPortalEcho(getPortalToken());
-    const channel = echo.private(`client-portal.${clientId}`);
+    const channel = echo.private(`client-portal.${contactId}`);
 
     channel.listen(".client-notification", (payload) => {
       const ticketId = payload.data?.ticket_id;
@@ -120,9 +120,9 @@ const PortalInboxScreen = () => {
     });
 
     return () => {
-      echo.leave(`client-portal.${clientId}`);
+      echo.leave(`client-portal.${contactId}`);
     };
-  }, [clientId, selectedId]);
+  }, [contactId, selectedId]);
 
   useEffect(() => {
     return () => disconnectPortalEcho();

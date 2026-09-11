@@ -127,7 +127,7 @@ const PortalThread = ({ ticketId, ticket, onBack, onSendComment, sending }) => {
           {ticket.description}
         </div>
         {(ticket.comments || []).map((comment) => {
-          const isClient = Boolean(comment.client_id);
+          const isClient = Boolean(comment.contact_id);
           return (
             <div key={comment.id} className={`max-w-[80%] ${isClient ? "ml-auto" : ""}`}>
               <div

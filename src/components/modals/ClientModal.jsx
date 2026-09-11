@@ -1,6 +1,8 @@
 import { useId, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Contact, User, Building2, Mail, Phone, FileText } from "lucide-react";
+import { X, Contact, User, Mail, Phone, FileText } from "lucide-react";
+import CreatableSelect from "react-select/creatable";
+import { selectStyles } from "../../utils/reactSelectStyles";
 import Button from "../ui/Button";
 import { motionTokens } from "../animations/variants";
 import { clientsAPI } from "../../utils/api";
@@ -77,7 +79,7 @@ const Field = ({ icon: Icon, label, id, error, helper, textarea, ...props }) => 
   );
 };
 
-const ClientModal = ({ isOpen, client, onClose, onSaved }) => {
+const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onClose, onSaved }) => {
   const { success, error: showError } = useNotification();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
@@ -259,16 +261,23 @@ const ClientModal = ({ isOpen, client, onClose, onSaved }) => {
                   Empresa y notas
                 </p>
                 <div className='space-y-4'>
-                  <Field
-                    icon={Building2}
-                    label='Empresa'
-                    id={`${formId}-company`}
-                    type='text'
-                    placeholder='Ej. Comercializadora del Norte S.A.'
-                    autoComplete='organization'
-                    value={form.company_name}
-                    onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-                  />
+                  <motion.div variants={fieldItem}>
+                    <label htmlFor={`${formId}-company`} className='block text-sm font-semibold text-gray-700 mb-1.5'>
+                      Empresa
+                    </label>
+                    <CreatableSelect
+                      inputId={`${formId}-company`}
+                      options={existingCompanies.map((co) => ({ value: co.name, label: co.name }))}
+                      value={form.company_name ? { value: form.company_name, label: form.company_name } : null}
+                      onChange={(opt) => setForm({ ...form, company_name: opt ? opt.value : "" })}
+                      onCreateOption={(inputValue) => setForm({ ...form, company_name: inputValue })}
+                      formatCreateLabel={(inputValue) => `Crear nueva empresa "${inputValue}"`}
+                      isClearable
+                      placeholder='Buscar o crear una empresa...'
+                      classNamePrefix='react-select'
+                      styles={selectStyles}
+                    />
+                  </motion.div>
                   <Field
                     icon={FileText}
                     label='Notas'

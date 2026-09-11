@@ -43,7 +43,12 @@ const ClientsManagement = () => {
   const [editingClient, setEditingClient] = useState(null);
   const [resending, setResending] = useState(false);
   const [archiving, setArchiving] = useState(false);
-  const [collapsedGroups, setCollapsedGroups] = useState(() => new Set(["none"]));
+  const [collapsedGroups, setCollapsedGroups] = useState(() => new Set());
+  // Guarda que el colapso inicial de "Sin empresa" solo se calcule una vez,
+  // en la primera carga — loadClients() se vuelve a llamar tras guardar o
+  // archivar, y no queremos pisar el colapso/expansión manual que el
+  // usuario ya haya elegido en esas recargas posteriores.
+  const initialCollapseSetRef = useRef(false);
 
   const toggleGroup = (key) => {
     setCollapsedGroups((prev) => {
@@ -72,6 +77,15 @@ const ClientsManagement = () => {
     try {
       const data = await clientsAPI.getAll();
       setClients(data);
+      if (!initialCollapseSetRef.current) {
+        initialCollapseSetRef.current = true;
+        // Solo arrancar con "Sin empresa" colapsado cuando hay al menos otro
+        // grupo (empresa) del cual "esconderse" — si todos los clientes son
+        // sin empresa, colapsarlo de entrada deja la barra lateral entera
+        // como un único encabezado vacío (Finding 3 del review final).
+        const hasOtherGroups = data.some((c) => c.company_id);
+        setCollapsedGroups(hasOtherGroups ? new Set(["none"]) : new Set());
+      }
       if (!id && data.length > 0) {
         navigate(`/clients/${data[0].id}`, { replace: true });
       }
@@ -242,7 +256,13 @@ const ClientsManagement = () => {
               </div>
             ) : (
               groupedClients.map((group) => {
-                const isCollapsed = collapsedGroups.has(group.key);
+                // Mientras hay una búsqueda activa, todos los grupos se
+                // muestran expandidos — de lo contrario un query que solo
+                // matchea contactos sin empresa deja el encabezado "Sin
+                // empresa" colapsado con cero filas visibles (Finding 3).
+                // `collapsedGroups` no se toca para esto: al borrar la
+                // búsqueda se restaura el colapso/expansión manual previo.
+                const isCollapsed = search.trim() ? false : collapsedGroups.has(group.key);
                 const ticketTotal = group.clients.reduce((sum, c) => sum + (c.tickets_count ?? 0), 0);
                 return (
                   <div key={group.key}>

@@ -2,7 +2,6 @@ import { useId, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Contact, User, Mail, Phone, FileText } from "lucide-react";
 import CreatableSelect from "react-select/creatable";
-import { selectStyles } from "../../utils/reactSelectStyles";
 import Button from "../ui/Button";
 import { motionTokens } from "../animations/variants";
 import { clientsAPI } from "../../utils/api";
@@ -11,6 +10,74 @@ import { useNotification } from "../../context/NotificationContext";
 const emptyForm = { name: "", company_name: "", email: "", phone: "", notes: "", is_company_admin: false };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ClientModal no tiene soporte de modo oscuro en ningún otro lugar (a
+// diferencia de TeamModal/TicketModal/TaskModal/TicketDetailModal), así que
+// el combobox de empresa no puede usar el `selectStyles` compartido de
+// reactSelectStyles.js: ese helper lee las custom properties --select-* que
+// SÍ cambian con el tema global, y en modo oscuro terminaría pintando un
+// combobox oscuro dentro de esta tarjeta blanca. Esta es una copia fijada a
+// los valores literales del bloque :root (light) de index.css — a propósito
+// no theme-aware — para que el combobox combine con el resto del modal
+// (siempre claro) sin importar el tema activo de la app. Darle soporte de
+// modo oscuro a todo el modal es un trabajo aparte, fuera de este alcance.
+const lightSelectStyles = {
+  control: (base, state) => ({
+    ...base,
+    backgroundColor: "#ffffff",
+    borderColor: state.isFocused ? "#8b5cf6" : "#d1d5db",
+    boxShadow: state.isFocused ? "0 0 0 2px #8b5cf6" : "none",
+    "&:hover": {
+      borderColor: state.isFocused ? "#8b5cf6" : "#9ca3af",
+    },
+    padding: "4px",
+    borderRadius: "0.5rem",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "#111827",
+  }),
+  input: (base) => ({
+    ...base,
+    color: "#111827",
+    margin: 0,
+    padding: 0,
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "#9ca3af",
+  }),
+  menu: (base) => ({
+    ...base,
+    backgroundColor: "#ffffff",
+    borderRadius: "0.5rem",
+    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15)",
+    zIndex: 20,
+  }),
+  menuList: (base) => ({
+    ...base,
+    padding: 0,
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected ? "#ede9fe" : state.isFocused ? "#f5f3ff" : "transparent",
+    color: "#111827",
+    cursor: "pointer",
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: "transparent",
+    margin: 0,
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    color: "#111827",
+  }),
+  multiValueRemove: (base) => ({
+    ...base,
+    display: "none",
+  }),
+};
 
 // Stagger de los campos al abrir el modal: mismo lenguaje que containerVariants/
 // itemVariants (src/components/animations/variants.js) pero con timings propios
@@ -281,13 +348,36 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
                       inputId={`${formId}-company`}
                       options={existingCompanies.map((co) => ({ value: co.name, label: co.name }))}
                       value={form.company_name ? { value: form.company_name, label: form.company_name } : null}
-                      onChange={(opt) => setForm({ ...form, company_name: opt ? opt.value : "" })}
-                      onCreateOption={(inputValue) => setForm({ ...form, company_name: inputValue })}
+                      onChange={(opt) => {
+                        const nextCompanyName = opt ? opt.value : "";
+                        setForm({
+                          ...form,
+                          company_name: nextCompanyName,
+                          // El admin no acompaña al contacto a una empresa distinta —
+                          // ver Finding 1 del review final: si se deja en `true`, el
+                          // payload manda `is_company_admin: true` junto con la nueva
+                          // empresa y el backend desplaza silenciosamente al admin real
+                          // de esa empresa. Resetear aquí hace que el toggle, el aviso
+                          // de "se le quitará el rol" y `currentAdmin` (derivado de
+                          // `clients`) queden todos alineados con la empresa destino.
+                          is_company_admin:
+                            nextCompanyName === (client?.company_name || "") ? form.is_company_admin : false,
+                        });
+                      }}
+                      onCreateOption={(inputValue) =>
+                        setForm({
+                          ...form,
+                          company_name: inputValue,
+                          // Una empresa recién creada tampoco tiene admin previo —
+                          // mismo reset que en onChange.
+                          is_company_admin: false,
+                        })
+                      }
                       formatCreateLabel={(inputValue) => `Crear nueva empresa "${inputValue}"`}
                       isClearable
                       placeholder='Buscar o crear una empresa...'
                       classNamePrefix='react-select'
-                      styles={selectStyles}
+                      styles={lightSelectStyles}
                     />
                   </motion.div>
                   {client && form.company_name.trim() && (

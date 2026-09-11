@@ -117,7 +117,7 @@ const ClientTicketsInbox = () => {
               <div key={ticket.id} className='py-3 flex items-center justify-between gap-4'>
                 <div className='min-w-0 flex-1'>
                   <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
-                    {ticket.client?.company_name || ticket.client?.name} · {ticket.title}
+                    {[ticket.client?.company_name, ticket.client?.name, ticket.title].filter(Boolean).join(" · ")}
                   </p>
                   <div className='flex items-center gap-2 mt-1'>
                     <span
@@ -127,6 +127,11 @@ const ClientTicketsInbox = () => {
                     </span>
                     {ticket.team && (
                       <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>
+                    )}
+                    {ticket.client?.company_id && ticket.client?.is_company_admin === false && (
+                      <span className='text-xs text-brand-600 dark:text-brand-400 font-medium'>
+                        También visible para el admin de la empresa
+                      </span>
                     )}
                   </div>
                 </div>

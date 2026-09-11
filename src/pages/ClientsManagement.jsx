@@ -4,7 +4,7 @@ import Layout from "../components/layout/Layout";
 import ClientModal from "../components/modals/ClientModal";
 import { clientsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
-import { Plus, Search, Send, Archive, ArchiveRestore } from "lucide-react";
+import { Plus, Search, Send, Archive, ArchiveRestore, Star, ChevronRight } from "lucide-react";
 
 const statusBadgeColor = {
   open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
@@ -22,6 +22,13 @@ const statusLabels = {
   closed: "Cerrado",
 };
 
+const AdminBadge = () => (
+  <span className='inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 rounded-full px-1.5 py-0.5 shrink-0'>
+    <Star className='w-2.5 h-2.5 fill-current' aria-hidden='true' />
+    Admin
+  </span>
+);
+
 const ClientsManagement = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -36,6 +43,16 @@ const ClientsManagement = () => {
   const [editingClient, setEditingClient] = useState(null);
   const [resending, setResending] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState(() => new Set(["none"]));
+
+  const toggleGroup = (key) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   // Ref con el `id` de la URL "actual" — necesario porque las promesas en
   // vuelo (getById tras archivar/guardar) capturan el `id` del render en el
@@ -98,6 +115,33 @@ const ClientsManagement = () => {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+
+  const groupedClients = Object.values(
+    filteredClients.reduce((groups, c) => {
+      const key = c.company_id ? String(c.company_id) : "none";
+      if (!groups[key]) {
+        groups[key] = { key, name: c.company_id ? c.company_name : "Sin empresa", clients: [] };
+      }
+      groups[key].clients.push(c);
+      return groups;
+    }, {})
+  ).sort((a, b) => {
+    if (a.key === "none") return 1;
+    if (b.key === "none") return -1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const existingCompanies = Array.from(
+    new Map(
+      clients
+        .filter((c) => c.company_id && c.company_name)
+        .map((c) => [c.company_id, { id: c.company_id, name: c.company_name }])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const companySiblings = selected?.company_id
+    ? clients.filter((c) => c.company_id === selected.company_id && c.id !== selected.id)
+    : [];
 
   const handleResendAccess = async () => {
     if (!selected) return;
@@ -197,26 +241,53 @@ const ClientsManagement = () => {
                   : "Ningún cliente coincide con la búsqueda."}
               </div>
             ) : (
-              filteredClients.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => navigate(`/clients/${c.id}`)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-night-800 transition-colors ${
-                    Number(id) === c.id ? "bg-brand-50 dark:bg-brand-900/20" : "hover:bg-gray-50 dark:hover:bg-night-800"
-                  } ${c.status === "archived" ? "opacity-60" : ""}`}
-                >
-                  <p
-                    className={`text-sm font-medium truncate ${
-                      Number(id) === c.id ? "text-brand-700 dark:text-brand-300" : "text-gray-900 dark:text-night-50"
-                    }`}
-                  >
-                    {c.company_name || c.name}
-                  </p>
-                  <p className='text-xs text-gray-500 dark:text-night-400 truncate'>
-                    {c.status === "archived" ? "Archivado" : `${c.tickets_count ?? 0} tickets`}
-                  </p>
-                </button>
-              ))
+              groupedClients.map((group) => {
+                const isCollapsed = collapsedGroups.has(group.key);
+                const ticketTotal = group.clients.reduce((sum, c) => sum + (c.tickets_count ?? 0), 0);
+                return (
+                  <div key={group.key}>
+                    <button
+                      onClick={() => toggleGroup(group.key)}
+                      className={`w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide hover:bg-gray-50 dark:hover:bg-night-800 transition-colors ${
+                        group.key === "none" ? "text-gray-400 dark:text-night-500" : "text-gray-500 dark:text-night-400"
+                      }`}
+                    >
+                      <ChevronRight
+                        className={`w-3.5 h-3.5 shrink-0 transition-transform ${isCollapsed ? "" : "rotate-90"}`}
+                        aria-hidden='true'
+                      />
+                      <span className='truncate'>{group.name}</span>
+                      <span className='ml-auto normal-case font-medium text-gray-400 dark:text-night-500 shrink-0'>
+                        {group.key === "none" ? group.clients.length : `${ticketTotal} tickets`}
+                      </span>
+                    </button>
+                    {!isCollapsed &&
+                      group.clients.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => navigate(`/clients/${c.id}`)}
+                          className={`w-full text-left px-4 py-2.5 border-b border-gray-100 dark:border-night-800 transition-colors ${
+                            group.key !== "none" ? "pl-9" : ""
+                          } ${
+                            Number(id) === c.id ? "bg-brand-50 dark:bg-brand-900/20" : "hover:bg-gray-50 dark:hover:bg-night-800"
+                          } ${c.status === "archived" ? "opacity-60" : ""}`}
+                        >
+                          <p
+                            className={`text-sm font-medium truncate flex items-center gap-1.5 ${
+                              Number(id) === c.id ? "text-brand-700 dark:text-brand-300" : "text-gray-900 dark:text-night-50"
+                            }`}
+                          >
+                            <span className='truncate'>{c.name}</span>
+                            {c.is_company_admin && <AdminBadge />}
+                          </p>
+                          <p className='text-xs text-gray-500 dark:text-night-400 truncate'>
+                            {c.status === "archived" ? "Archivado" : `${c.tickets_count ?? 0} tickets`}
+                          </p>
+                        </button>
+                      ))}
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -231,7 +302,10 @@ const ClientsManagement = () => {
               <div className='flex items-start justify-between mb-6'>
                 <div>
                   <h2 className='text-xl font-bold text-gray-900 dark:text-night-50'>{selected.company_name || selected.name}</h2>
-                  <p className='text-gray-500 dark:text-night-400 text-sm mt-0.5'>{selected.name} · {selected.email}</p>
+                  <p className='text-gray-500 dark:text-night-400 text-sm mt-0.5 flex items-center gap-2'>
+                    <span>{selected.name} · {selected.email}</span>
+                    {selected.is_company_admin && <AdminBadge />}
+                  </p>
                 </div>
                 <button
                   onClick={() => {
@@ -276,6 +350,30 @@ const ClientsManagement = () => {
                 <p className='text-sm text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 rounded-lg p-3 mb-6'>{selected.notes}</p>
               )}
 
+              {selected.company_id && (
+                <div className='mb-6'>
+                  <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300 mb-2'>
+                    Otros contactos de esta empresa
+                  </h3>
+                  <div className='flex flex-wrap gap-2'>
+                    <span className='inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-full border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 font-medium'>
+                      {selected.name}
+                      {selected.is_company_admin && <AdminBadge />}
+                    </span>
+                    {companySiblings.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => navigate(`/clients/${c.id}`)}
+                        className='inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-full border border-gray-200 dark:border-night-600 hover:bg-gray-50 dark:hover:bg-night-800 text-gray-700 dark:text-night-300 font-medium'
+                      >
+                        {c.name}
+                        {c.is_company_admin && <AdminBadge />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className='flex items-center justify-between mb-3'>
                 <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300'>Tickets recientes</h3>
                 <a
@@ -312,6 +410,8 @@ const ClientsManagement = () => {
       <ClientModal
         isOpen={isModalOpen}
         client={editingClient}
+        clients={clients}
+        existingCompanies={existingCompanies}
         onClose={() => setIsModalOpen(false)}
         onSaved={handleSaved}
       />

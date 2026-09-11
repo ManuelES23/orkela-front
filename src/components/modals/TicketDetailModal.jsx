@@ -638,10 +638,14 @@ const TicketDetailModal = ({
                     >
                       <div className='flex items-start justify-between mb-1'>
                         <div className='flex items-center gap-2'>
-                          <UserAvatar user={comment.user} size='sm' />
+                          <UserAvatar
+                            user={comment.user}
+                            name={!comment.user ? comment.contact?.name : undefined}
+                            size='sm'
+                          />
                           <div>
                             <span className='font-medium text-gray-900 dark:text-night-50 text-sm'>
-                              {comment.user?.name}
+                              {comment.user?.name || comment.contact?.name}
                             </span>
                             {comment.is_internal && (
                               <span className='ml-2 px-2 py-0.5 bg-amber-200 text-amber-700 dark:text-amber-300 rounded text-xs inline-flex items-center gap-1'>

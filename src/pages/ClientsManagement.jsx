@@ -310,7 +310,9 @@ const ClientsManagement = () => {
                     setEditingContact(null);
                     setIsContactModalOpen(true);
                   }}
-                  className='inline-flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium'
+                  disabled={selected.status !== "active"}
+                  title={selected.status !== "active" ? "Reactiva el cliente para agregar contactos" : undefined}
+                  className='inline-flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-brand-600 dark:disabled:hover:text-brand-400'
                 >
                   <UserPlus className='w-3.5 h-3.5' />
                   Agregar contacto
@@ -352,9 +354,10 @@ const ClientsManagement = () => {
                       </button>
                       <button
                         onClick={() => handleResendAccess(contact.id)}
-                        disabled={actioningContactId === contact.id || contact.status !== "active"}
+                        disabled={actioningContactId === contact.id || contact.status !== "active" || selected.status !== "active"}
                         aria-label='Reenviar acceso'
-                        className='text-gray-400 hover:text-gray-600 dark:hover:text-night-200 disabled:opacity-40 p-1'
+                        title={selected.status !== "active" ? "Reactiva el cliente para reenviar el acceso" : undefined}
+                        className='text-gray-400 hover:text-gray-600 dark:hover:text-night-200 disabled:opacity-40 disabled:cursor-not-allowed p-1'
                       >
                         <Send className='w-3.5 h-3.5' />
                       </button>

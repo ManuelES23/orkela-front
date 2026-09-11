@@ -828,9 +828,37 @@ export const clientsAPI = {
       method: "DELETE",
     });
   },
+};
+
+export const contactsAPI = {
+  create: async (clientId, contactData) => {
+    return await request(`/clients/${clientId}/contacts`, {
+      method: "POST",
+      body: JSON.stringify(contactData),
+    });
+  },
+
+  update: async (id, contactData) => {
+    return await request(`/contacts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(contactData),
+    });
+  },
+
+  archive: async (id) => {
+    return await request(`/contacts/${id}`, {
+      method: "DELETE",
+    });
+  },
 
   resendAccess: async (id) => {
-    return await request(`/clients/${id}/resend-access`, {
+    return await request(`/contacts/${id}/resend-access`, {
+      method: "POST",
+    });
+  },
+
+  promote: async (id) => {
+    return await request(`/contacts/${id}/promote`, {
       method: "POST",
     });
   },

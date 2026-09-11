@@ -8,7 +8,7 @@ import { motionTokens } from "../animations/variants";
 import { clientsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
 
-const emptyForm = { name: "", company_name: "", email: "", phone: "", notes: "" };
+const emptyForm = { name: "", company_name: "", email: "", phone: "", notes: "", is_company_admin: false };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -86,6 +86,16 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
   const [fieldError, setFieldError] = useState(null);
   const formId = useId();
 
+  const normalizedCompany = (form.company_name || "").trim().toLowerCase();
+  const currentAdmin = normalizedCompany
+    ? clients.find(
+        (c) =>
+          (c.company_name || "").trim().toLowerCase() === normalizedCompany &&
+          c.is_company_admin &&
+          c.id !== client?.id
+      )
+    : null;
+
   // Se resetea cada vez que el modal se abre (no solo cuando cambia `client`),
   // así editar el cliente A, cerrar y luego editar el cliente B no arrastra
   // datos del formulario anterior.
@@ -99,6 +109,7 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
               email: client.email || "",
               phone: client.phone || "",
               notes: client.notes || "",
+              is_company_admin: client.is_company_admin || false,
             }
           : emptyForm
       );
@@ -137,6 +148,7 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
         email: form.email.trim(),
         phone: form.phone.trim(),
         notes: form.notes.trim(),
+        ...(client ? { is_company_admin: form.is_company_admin } : {}),
       };
       const saved = client
         ? await clientsAPI.update(client.id, payload)
@@ -278,6 +290,40 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
                       styles={selectStyles}
                     />
                   </motion.div>
+                  {client && form.company_name.trim() && (
+                    <motion.div
+                      variants={fieldItem}
+                      className='flex items-start justify-between gap-3 bg-gray-50 rounded-lg px-3.5 py-3'
+                    >
+                      <div>
+                        <p className='text-sm font-semibold text-gray-700'>Admin de esta empresa</p>
+                        <p className='text-xs text-gray-400 mt-0.5'>
+                          Ve y responde los tickets de todos los contactos de la empresa.
+                        </p>
+                        {!form.is_company_admin && currentAdmin && (
+                          <p className='text-xs text-amber-600 mt-1.5'>
+                            {currentAdmin.name} es hoy el admin — al activar esto, se le quitará el rol.
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        type='button'
+                        role='switch'
+                        aria-checked={form.is_company_admin}
+                        aria-label='Admin de esta empresa'
+                        onClick={() => setForm({ ...form, is_company_admin: !form.is_company_admin })}
+                        className={`shrink-0 w-10 h-6 rounded-full transition-colors relative ${
+                          form.is_company_admin ? "bg-brand-600" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
+                            form.is_company_admin ? "translate-x-4" : ""
+                          }`}
+                        />
+                      </button>
+                    </motion.div>
+                  )}
                   <Field
                     icon={FileText}
                     label='Notas'

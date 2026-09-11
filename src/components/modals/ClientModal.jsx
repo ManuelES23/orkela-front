@@ -1,87 +1,22 @@
 import { useId, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Contact, User, Mail, Phone, FileText } from "lucide-react";
-import CreatableSelect from "react-select/creatable";
+import { X, Building2, User, Mail, Phone, FileText, Users } from "lucide-react";
 import Button from "../ui/Button";
 import { motionTokens } from "../animations/variants";
 import { clientsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
 
-const emptyForm = { name: "", company_name: "", email: "", phone: "", notes: "", is_company_admin: false };
+const emptyForm = {
+  name: "",
+  type: "company",
+  notes: "",
+  contactName: "",
+  contactEmail: "",
+  contactPhone: "",
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// ClientModal no tiene soporte de modo oscuro en ningún otro lugar (a
-// diferencia de TeamModal/TicketModal/TaskModal/TicketDetailModal), así que
-// el combobox de empresa no puede usar el `selectStyles` compartido de
-// reactSelectStyles.js: ese helper lee las custom properties --select-* que
-// SÍ cambian con el tema global, y en modo oscuro terminaría pintando un
-// combobox oscuro dentro de esta tarjeta blanca. Esta es una copia fijada a
-// los valores literales del bloque :root (light) de index.css — a propósito
-// no theme-aware — para que el combobox combine con el resto del modal
-// (siempre claro) sin importar el tema activo de la app. Darle soporte de
-// modo oscuro a todo el modal es un trabajo aparte, fuera de este alcance.
-const lightSelectStyles = {
-  control: (base, state) => ({
-    ...base,
-    backgroundColor: "#ffffff",
-    borderColor: state.isFocused ? "#8b5cf6" : "#d1d5db",
-    boxShadow: state.isFocused ? "0 0 0 2px #8b5cf6" : "none",
-    "&:hover": {
-      borderColor: state.isFocused ? "#8b5cf6" : "#9ca3af",
-    },
-    padding: "4px",
-    borderRadius: "0.5rem",
-  }),
-  singleValue: (base) => ({
-    ...base,
-    color: "#111827",
-  }),
-  input: (base) => ({
-    ...base,
-    color: "#111827",
-    margin: 0,
-    padding: 0,
-  }),
-  placeholder: (base) => ({
-    ...base,
-    color: "#9ca3af",
-  }),
-  menu: (base) => ({
-    ...base,
-    backgroundColor: "#ffffff",
-    borderRadius: "0.5rem",
-    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15)",
-    zIndex: 20,
-  }),
-  menuList: (base) => ({
-    ...base,
-    padding: 0,
-  }),
-  option: (base, state) => ({
-    ...base,
-    backgroundColor: state.isSelected ? "#ede9fe" : state.isFocused ? "#f5f3ff" : "transparent",
-    color: "#111827",
-    cursor: "pointer",
-  }),
-  multiValue: (base) => ({
-    ...base,
-    backgroundColor: "transparent",
-    margin: 0,
-  }),
-  multiValueLabel: (base) => ({
-    ...base,
-    color: "#111827",
-  }),
-  multiValueRemove: (base) => ({
-    ...base,
-    display: "none",
-  }),
-};
-
-// Stagger de los campos al abrir el modal: mismo lenguaje que containerVariants/
-// itemVariants (src/components/animations/variants.js) pero con timings propios
-// para que el fade+desplazamiento sea sutil dentro de un panel pequeño.
 const fieldsContainer = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.045, delayChildren: 0.05 } },
@@ -92,8 +27,6 @@ const fieldItem = {
   visible: { opacity: 1, y: 0, transition: motionTokens.springSoft },
 };
 
-// Input reutilizable dentro del modal: ícono a la izquierda, label enlazado
-// por id, placeholder y error inline animado (mismo patrón que AuthInput.jsx).
 const Field = ({ icon: Icon, label, id, error, helper, textarea, ...props }) => {
   const Tag = textarea ? "textarea" : "input";
   return (
@@ -146,37 +79,50 @@ const Field = ({ icon: Icon, label, id, error, helper, textarea, ...props }) => 
   );
 };
 
-const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onClose, onSaved }) => {
+const TypeToggle = ({ value, onChange }) => (
+  <motion.div variants={fieldItem}>
+    <label className='block text-sm font-semibold text-gray-700 mb-1.5'>Tipo de cliente</label>
+    <div className='grid grid-cols-2 gap-2'>
+      {[
+        { value: "company", label: "Empresa", icon: Building2 },
+        { value: "individual", label: "Individual", icon: User },
+      ].map((opt) => (
+        <button
+          key={opt.value}
+          type='button'
+          onClick={() => onChange(opt.value)}
+          className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
+            value === opt.value
+              ? "border-brand-500 bg-brand-50 text-brand-700"
+              : "border-gray-200 text-gray-500 hover:border-gray-300"
+          }`}
+        >
+          <opt.icon className='w-4 h-4' aria-hidden='true' />
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  </motion.div>
+);
+
+const ClientModal = ({ isOpen, client, onClose, onSaved }) => {
   const { success, error: showError } = useNotification();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [fieldError, setFieldError] = useState(null);
   const formId = useId();
 
-  const normalizedCompany = (form.company_name || "").trim().toLowerCase();
-  const currentAdmin = normalizedCompany
-    ? clients.find(
-        (c) =>
-          (c.company_name || "").trim().toLowerCase() === normalizedCompany &&
-          c.is_company_admin &&
-          c.id !== client?.id
-      )
-    : null;
-
-  // Se resetea cada vez que el modal se abre (no solo cuando cambia `client`),
-  // así editar el cliente A, cerrar y luego editar el cliente B no arrastra
-  // datos del formulario anterior.
   useEffect(() => {
     if (isOpen) {
       setForm(
         client
           ? {
               name: client.name || "",
-              company_name: client.company_name || "",
-              email: client.email || "",
-              phone: client.phone || "",
+              type: client.type || "company",
               notes: client.notes || "",
-              is_company_admin: client.is_company_admin || false,
+              contactName: "",
+              contactEmail: "",
+              contactPhone: "",
             }
           : emptyForm
       );
@@ -186,13 +132,18 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
 
   const validate = () => {
     if (!form.name.trim()) {
-      return "El nombre del contacto es obligatorio.";
+      return client ? "El nombre del cliente es obligatorio." : "El nombre es obligatorio.";
     }
-    if (!form.email.trim()) {
-      return "El correo es obligatorio.";
-    }
-    if (!EMAIL_PATTERN.test(form.email.trim())) {
-      return "Ingresa un correo válido.";
+    if (!client) {
+      if (!form.contactName.trim()) {
+        return "El nombre del primer contacto es obligatorio.";
+      }
+      if (!form.contactEmail.trim()) {
+        return "El correo del primer contacto es obligatorio.";
+      }
+      if (!EMAIL_PATTERN.test(form.contactEmail.trim())) {
+        return "Ingresa un correo válido para el primer contacto.";
+      }
     }
     return null;
   };
@@ -209,22 +160,27 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
     setFieldError(null);
     setLoading(true);
     try {
-      const payload = {
-        name: form.name.trim(),
-        company_name: form.company_name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        notes: form.notes.trim(),
-        ...(client ? { is_company_admin: form.is_company_admin } : {}),
-      };
       const saved = client
-        ? await clientsAPI.update(client.id, payload)
-        : await clientsAPI.create(payload);
+        ? await clientsAPI.update(client.id, {
+            name: form.name.trim(),
+            type: form.type,
+            notes: form.notes.trim(),
+          })
+        : await clientsAPI.create({
+            name: form.name.trim(),
+            type: form.type,
+            notes: form.notes.trim(),
+            contact: {
+              name: form.contactName.trim(),
+              email: form.contactEmail.trim(),
+              phone: form.contactPhone.trim(),
+            },
+          });
       success(client ? "Cliente actualizado" : "Cliente creado");
       onSaved(saved);
     } catch (err) {
       if (err.status === 422) {
-        setFieldError(err.data?.message || "Ya existe un cliente con este correo");
+        setFieldError(err.data?.message || "Ya existe un cliente o contacto con este correo");
       } else {
         showError("No se pudo guardar el cliente");
       }
@@ -254,14 +210,14 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
           >
             <div className='flex items-center gap-3 mb-5'>
               <span className='shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-brand-50 to-accent-50 text-brand-600 flex items-center justify-center'>
-                <Contact className='w-5 h-5' />
+                <Building2 className='w-5 h-5' />
               </span>
               <div className='flex-1 min-w-0'>
                 <h2 className='text-xl font-bold text-gray-900 truncate'>
                   {client ? "Editar cliente" : "Nuevo cliente"}
                 </h2>
                 <p className='text-sm text-gray-400'>
-                  {client ? "Actualiza los datos de contacto" : "Registra un nuevo cliente externo"}
+                  {client ? "Actualiza los datos del cliente" : "Registra un nuevo cliente y su primer contacto"}
                 </p>
               </div>
               <motion.button
@@ -299,133 +255,70 @@ const ClientModal = ({ isOpen, client, clients = [], existingCompanies = [], onC
               className='space-y-4'
               noValidate
             >
-              <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide'>Contacto</p>
+              <TypeToggle value={form.type} onChange={(type) => setForm({ ...form, type })} />
               <Field
-                icon={User}
-                label='Nombre del contacto'
+                icon={Building2}
+                label={form.type === "company" ? "Nombre de la empresa" : "Nombre"}
                 id={`${formId}-name`}
                 type='text'
                 required
-                placeholder='Ej. Ana Torres'
-                autoComplete='name'
+                placeholder={form.type === "company" ? "Ej. Comercializadora del Norte S.A." : "Ej. Ana Torres"}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Field
-                icon={Mail}
-                label='Correo'
-                id={`${formId}-email`}
-                type='email'
-                required
-                disabled={Boolean(client)}
-                placeholder='ana@empresa.com'
-                autoComplete='email'
-                helper={client ? "El correo no se puede modificar." : undefined}
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-              <Field
-                icon={Phone}
-                label='Teléfono'
-                id={`${formId}-phone`}
-                type='tel'
-                placeholder='+52 55 1234 5678'
-                autoComplete='tel'
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                icon={FileText}
+                label='Notas'
+                id={`${formId}-notes`}
+                textarea
+                rows={3}
+                placeholder='Contexto interno sobre este cliente (opcional)'
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
               />
 
-              <div className='border-t border-gray-100 pt-4'>
-                <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4'>
-                  Empresa y notas
-                </p>
-                <div className='space-y-4'>
-                  <motion.div variants={fieldItem}>
-                    <label htmlFor={`${formId}-company`} className='block text-sm font-semibold text-gray-700 mb-1.5'>
-                      Empresa
-                    </label>
-                    <CreatableSelect
-                      inputId={`${formId}-company`}
-                      options={existingCompanies.map((co) => ({ value: co.name, label: co.name }))}
-                      value={form.company_name ? { value: form.company_name, label: form.company_name } : null}
-                      onChange={(opt) => {
-                        const nextCompanyName = opt ? opt.value : "";
-                        setForm({
-                          ...form,
-                          company_name: nextCompanyName,
-                          // El admin no acompaña al contacto a una empresa distinta —
-                          // ver Finding 1 del review final: si se deja en `true`, el
-                          // payload manda `is_company_admin: true` junto con la nueva
-                          // empresa y el backend desplaza silenciosamente al admin real
-                          // de esa empresa. Resetear aquí hace que el toggle, el aviso
-                          // de "se le quitará el rol" y `currentAdmin` (derivado de
-                          // `clients`) queden todos alineados con la empresa destino.
-                          is_company_admin:
-                            nextCompanyName === (client?.company_name || "") ? form.is_company_admin : false,
-                        });
-                      }}
-                      onCreateOption={(inputValue) =>
-                        setForm({
-                          ...form,
-                          company_name: inputValue,
-                          // Una empresa recién creada tampoco tiene admin previo —
-                          // mismo reset que en onChange.
-                          is_company_admin: false,
-                        })
-                      }
-                      formatCreateLabel={(inputValue) => `Crear nueva empresa "${inputValue}"`}
-                      isClearable
-                      placeholder='Buscar o crear una empresa...'
-                      classNamePrefix='react-select'
-                      styles={lightSelectStyles}
+              {!client && (
+                <div className='border-t border-gray-100 pt-4'>
+                  <p className='text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-1.5'>
+                    <Users className='w-3.5 h-3.5' aria-hidden='true' />
+                    Primer contacto
+                  </p>
+                  <div className='space-y-4'>
+                    <Field
+                      icon={User}
+                      label='Nombre del contacto'
+                      id={`${formId}-contact-name`}
+                      type='text'
+                      required
+                      placeholder='Ej. Ana Torres'
+                      autoComplete='name'
+                      value={form.contactName}
+                      onChange={(e) => setForm({ ...form, contactName: e.target.value })}
                     />
-                  </motion.div>
-                  {client && form.company_name.trim() && (
-                    <motion.div
-                      variants={fieldItem}
-                      className='flex items-start justify-between gap-3 bg-gray-50 rounded-lg px-3.5 py-3'
-                    >
-                      <div>
-                        <p className='text-sm font-semibold text-gray-700'>Admin de esta empresa</p>
-                        <p className='text-xs text-gray-400 mt-0.5'>
-                          Ve y responde los tickets de todos los contactos de la empresa.
-                        </p>
-                        {!form.is_company_admin && currentAdmin && (
-                          <p className='text-xs text-amber-600 mt-1.5'>
-                            {currentAdmin.name} es hoy el admin — al activar esto, se le quitará el rol.
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        type='button'
-                        role='switch'
-                        aria-checked={form.is_company_admin}
-                        aria-label='Admin de esta empresa'
-                        onClick={() => setForm({ ...form, is_company_admin: !form.is_company_admin })}
-                        className={`shrink-0 w-10 h-6 rounded-full transition-colors relative ${
-                          form.is_company_admin ? "bg-brand-600" : "bg-gray-300"
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                            form.is_company_admin ? "translate-x-4" : ""
-                          }`}
-                        />
-                      </button>
-                    </motion.div>
-                  )}
-                  <Field
-                    icon={FileText}
-                    label='Notas'
-                    id={`${formId}-notes`}
-                    textarea
-                    rows={3}
-                    placeholder='Contexto interno sobre este cliente (opcional)'
-                    value={form.notes}
-                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  />
+                    <Field
+                      icon={Mail}
+                      label='Correo del contacto'
+                      id={`${formId}-contact-email`}
+                      type='email'
+                      required
+                      placeholder='ana@empresa.com'
+                      autoComplete='email'
+                      value={form.contactEmail}
+                      onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
+                    />
+                    <Field
+                      icon={Phone}
+                      label='Teléfono del contacto'
+                      id={`${formId}-contact-phone`}
+                      type='tel'
+                      placeholder='+52 55 1234 5678'
+                      autoComplete='tel'
+                      value={form.contactPhone}
+                      onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <motion.div variants={fieldItem}>
                 <Button

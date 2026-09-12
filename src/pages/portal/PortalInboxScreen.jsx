@@ -9,6 +9,7 @@ import PortalNewTicketModal from "../../components/portal/PortalNewTicketModal";
 import PortalTicketDetailsPanel from "../../components/portal/PortalTicketDetailsPanel";
 import { portalAPI, getPortalToken } from "../../utils/portalApi";
 import { getPortalEcho, disconnectPortalEcho } from "../../utils/echo";
+import { applyTicketNotification } from "../../utils/portalTicketNotifications";
 import { modalBackdropVariants, slideVariants } from "../../components/animations/variants";
 
 const PortalInboxScreen = () => {
@@ -143,9 +144,7 @@ const PortalInboxScreen = () => {
 
       if (payload.type === "status_changed" || payload.type === "ticket_assigned") {
         setTickets((prev) =>
-          prev.map((t) =>
-            t.id === ticketId ? { ...t, status: payload.data?.new_status || t.status } : t
-          )
+          prev.map((t) => (t.id === ticketId ? applyTicketNotification(t, payload) : t))
         );
         if (ticketId === selectedIdRef.current) {
           portalAPI.getTicket(ticketId).then(setSelectedTicket).catch(() => {});

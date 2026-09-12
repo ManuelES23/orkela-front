@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 import PortalLayout from "../../components/portal/PortalLayout";
 import PortalInbox from "../../components/portal/PortalInbox";
 import PortalThread from "../../components/portal/PortalThread";
 import PortalNewTicketModal from "../../components/portal/PortalNewTicketModal";
+import PortalTicketDetailsPanel from "../../components/portal/PortalTicketDetailsPanel";
 import { portalAPI, getPortalToken } from "../../utils/portalApi";
 import { getPortalEcho, disconnectPortalEcho } from "../../utils/echo";
+import { modalBackdropVariants, slideVariants } from "../../components/animations/variants";
 
 const PortalInboxScreen = () => {
   const { id } = useParams();
@@ -18,8 +22,15 @@ const PortalInboxScreen = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [contactId, setContactId] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const selectedId = id ? Number(id) : null;
+
+  // El drawer de detalles es por-ticket — cambiar de ticket no debe dejar
+  // el panel de uno abierto sobre la conversación del siguiente.
+  useEffect(() => {
+    setDetailsOpen(false);
+  }, [selectedId]);
 
   // Ref con el ticket seleccionado "actual" — necesario porque las promesas
   // en vuelo (fetch de ticket, envío de comentario) capturan el valor de
@@ -211,14 +222,59 @@ const PortalInboxScreen = () => {
             onBack={() => navigate("/portal/dashboard")}
             onSendComment={handleSendComment}
             sending={sending}
+            onShowDetails={
+              selectedTicket?.id === selectedId
+                ? () => setDetailsOpen(true)
+                : undefined
+            }
           />
         </div>
+        {selectedId && (
+          <div className='hidden lg:block w-72 border-l border-gray-200 shrink-0 overflow-y-auto'>
+            <PortalTicketDetailsPanel
+              ticket={selectedTicket?.id === selectedId ? selectedTicket : null}
+            />
+          </div>
+        )}
       </div>
       <PortalNewTicketModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateTicket}
       />
+      <AnimatePresence>
+        {detailsOpen && selectedTicket?.id === selectedId && (
+          <div className='fixed inset-0 z-50 lg:hidden'>
+            <motion.div
+              variants={modalBackdropVariants}
+              initial='hidden'
+              animate='visible'
+              exit='hidden'
+              className='absolute inset-0 bg-black/40'
+              onClick={() => setDetailsOpen(false)}
+            />
+            <motion.div
+              variants={slideVariants.right}
+              initial='initial'
+              animate='animate'
+              exit='exit'
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className='absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-xl overflow-y-auto'
+            >
+              <div className='flex items-center justify-end p-3 border-b border-gray-100'>
+                <button
+                  onClick={() => setDetailsOpen(false)}
+                  aria-label='Cerrar detalles'
+                  className='text-gray-400 hover:text-gray-600 transition-colors'
+                >
+                  <X className='w-5 h-5' />
+                </button>
+              </div>
+              <PortalTicketDetailsPanel ticket={selectedTicket} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </PortalLayout>
   );
 };

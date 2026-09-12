@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Info, Send } from "lucide-react";
 import { motionTokens } from "../animations/variants";
 
 const statusLabels = {
@@ -27,7 +27,14 @@ const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 // tickets vía efectos, evitando una carrera entre "restaurar borrador
 // del ticket nuevo" y "persistir borrador" que podía escribir texto del
 // ticket anterior en la sessionStorage del ticket nuevo por un instante.
-const PortalThread = ({ ticketId, ticket, onBack, onSendComment, sending }) => {
+const PortalThread = ({
+  ticketId,
+  ticket,
+  onBack,
+  onSendComment,
+  sending,
+  onShowDetails,
+}) => {
   // Restaura el borrador de este ticket si había uno guardado — cubre el
   // caso de que el token haya expirado a medio escribir: PortalLayout
   // redirige (desmontando este componente) antes de que el envío pueda
@@ -120,6 +127,15 @@ const PortalThread = ({ ticketId, ticket, onBack, onSendComment, sending }) => {
         >
           {statusLabels[ticket.status] || ticket.status}
         </motion.span>
+        {onShowDetails && (
+          <button
+            onClick={onShowDetails}
+            aria-label='Ver detalles del ticket'
+            className='lg:hidden text-gray-400 hover:text-brand-600 transition-colors shrink-0'
+          >
+            <Info className='w-5 h-5' />
+          </button>
+        )}
       </div>
 
       <div className='flex-1 overflow-y-auto p-4 space-y-3'>

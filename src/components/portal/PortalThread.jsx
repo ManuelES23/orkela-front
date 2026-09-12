@@ -2,22 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Info, Send } from "lucide-react";
 import { motionTokens } from "../animations/variants";
-
-const statusLabels = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  pending: "Pendiente",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
-
-const statusBadgeColor = {
-  open: "bg-blue-50 text-blue-600",
-  in_progress: "bg-brand-50 text-brand-600",
-  pending: "bg-yellow-50 text-yellow-600",
-  resolved: "bg-green-50 text-green-600",
-  closed: "bg-gray-100 text-gray-600",
-};
+import { STATUS_LABELS, STATUS_BADGE_COLOR } from "./ticketVocabulary";
 
 const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 
@@ -123,9 +108,9 @@ const PortalThread = ({
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: motionTokens.duration.fast }}
-          className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${statusBadgeColor[ticket.status]}`}
+          className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${STATUS_BADGE_COLOR[ticket.status]}`}
         >
-          {statusLabels[ticket.status] || ticket.status}
+          {STATUS_LABELS[ticket.status] || ticket.status}
         </motion.span>
         {onShowDetails && (
           <button

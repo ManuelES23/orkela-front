@@ -1,40 +1,15 @@
 import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "../animations/variants";
+import { formatDateTime } from "../../utils/dateUtils";
+import { TYPE_LABELS, PRIORITY_LABELS } from "./ticketVocabulary";
 import Avatar from "./PortalAvatar";
-
-// No reutiliza formatDateTime de dateUtils.js: ese helper pasa por
-// parseLocalDate, que trunca la hora a medianoche a propósito (está pensado
-// para fechas de vencimiento sin hora, no para timestamps de eventos). Un
-// timeline de "creado hace 3h / tomado hace 1h" necesita la hora real.
-const formatTimelineDate = (isoString) =>
-  new Date(isoString).toLocaleString("es-ES", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-// Mismo vocabulario que PortalNewTicketModal.jsx (typeOptions/priorityOptions)
-// — el ticket debe leerse igual en el portal que al crearlo.
-const typeLabels = {
-  request: "Solicitud",
-  bug: "Reportar un problema",
-  feature: "Pedir una función nueva",
-  question: "Pregunta",
-  support: "Soporte",
-  other: "Otro",
-};
-
-const priorityLabels = {
-  low: "Baja",
-  medium: "Media",
-  high: "Alta",
-  urgent: "Urgente",
-};
 
 // Construye la línea de tiempo solo con los pasos que realmente ocurrieron —
 // un ticket recién creado no debe mostrar "Resuelto" ni "Cerrado" vacíos.
+// Se ordena por fecha (no por el orden en que se agregan los pasos): un
+// ticket reabierto y vuelto a cerrar puede dejar un resolved_at más nuevo
+// que su closed_at anterior, y el timeline debe reflejar eso, no el orden
+// "feliz" open→taken→resolved→closed.
 const buildTimeline = (ticket) => {
   const steps = [{ label: "Creado", at: ticket.created_at }];
 
@@ -53,7 +28,7 @@ const buildTimeline = (ticket) => {
     steps.push({ label: "Cerrado", at: ticket.closed_at });
   }
 
-  return steps;
+  return steps.sort((a, b) => new Date(a.at) - new Date(b.at));
 };
 
 const PortalTicketDetailsPanel = ({ ticket }) => {
@@ -79,7 +54,7 @@ const PortalTicketDetailsPanel = ({ ticket }) => {
         <motion.div variants={itemVariants}>
           <p className='text-xs text-gray-400 mb-1.5'>Creado por</p>
           <div className='flex items-center gap-2'>
-            <Avatar name={ticket.created_by.name} size='sm' />
+            <Avatar name={ticket.created_by.name} size='sm' decorative />
             <span className='text-sm font-semibold text-gray-900'>
               {ticket.created_by.name}
             </span>
@@ -91,7 +66,7 @@ const PortalTicketDetailsPanel = ({ ticket }) => {
         <p className='text-xs text-gray-400 mb-1.5'>Atendido por</p>
         {ticket.assigned_agent ? (
           <div className='flex items-center gap-2'>
-            <Avatar name={ticket.assigned_agent.name} size='sm' />
+            <Avatar name={ticket.assigned_agent.name} size='sm' decorative />
             <div className='min-w-0'>
               <p className='text-sm font-semibold text-gray-900 truncate'>
                 {ticket.assigned_agent.name}
@@ -103,6 +78,15 @@ const PortalTicketDetailsPanel = ({ ticket }) => {
               )}
             </div>
           </div>
+        ) : ticket.team ? (
+          // Ticket ya enrutado al equipo pero aún sin tomar por nadie — el
+          // estado más común para un ticket recién asignado (es literalmente
+          // lo que el backend le notifica al cliente: "asignado a un equipo
+          // de soporte"). No debe leerse como "sin asignar".
+          <p className='text-sm text-gray-700'>
+            <span className='font-semibold'>{ticket.team.name}</span>
+            <span className='text-gray-400'> · aún sin agente asignado</span>
+          </p>
         ) : (
           <p className='text-sm text-gray-500'>Aún sin asignar</p>
         )}
@@ -112,13 +96,13 @@ const PortalTicketDetailsPanel = ({ ticket }) => {
         <div>
           <p className='text-xs text-gray-400 mb-1'>Tipo</p>
           <p className='text-sm font-medium text-gray-900'>
-            {typeLabels[ticket.type] || ticket.type}
+            {TYPE_LABELS[ticket.type] || ticket.type}
           </p>
         </div>
         <div>
           <p className='text-xs text-gray-400 mb-1'>Prioridad</p>
           <p className='text-sm font-medium text-gray-900'>
-            {priorityLabels[ticket.priority] || ticket.priority}
+            {PRIORITY_LABELS[ticket.priority] || ticket.priority}
           </p>
         </div>
       </motion.div>
@@ -130,7 +114,7 @@ const PortalTicketDetailsPanel = ({ ticket }) => {
             <li key={index} className='pl-4 relative'>
               <span className='absolute -left-[4.5px] top-1 w-2 h-2 rounded-full bg-brand-600' />
               <p className='text-sm font-medium text-gray-900'>{step.label}</p>
-              <p className='text-xs text-gray-400'>{formatTimelineDate(step.at)}</p>
+              <p className='text-xs text-gray-400'>{formatDateTime(step.at)}</p>
             </li>
           ))}
         </ol>

@@ -23,6 +23,8 @@ const PortalInboxScreen = () => {
   const [sending, setSending] = useState(false);
   const [contactId, setContactId] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const detailsCloseButtonRef = useRef(null);
+  const detailsTriggerRef = useRef(null);
 
   const selectedId = id ? Number(id) : null;
 
@@ -31,6 +33,37 @@ const PortalInboxScreen = () => {
   useEffect(() => {
     setDetailsOpen(false);
   }, [selectedId]);
+
+  const openDetails = () => {
+    // Guarda qué tenía el foco (el botón "i" del hilo) para devolvérselo al
+    // cerrar — sin esto, cerrar el drawer deja el foco del teclado en el
+    // vacío.
+    detailsTriggerRef.current = document.activeElement;
+    setDetailsOpen(true);
+  };
+
+  const closeDetails = () => {
+    setDetailsOpen(false);
+    detailsTriggerRef.current?.focus?.();
+  };
+
+  // Semántica mínima de diálogo modal para el drawer: foco al abrir, Escape
+  // para cerrar. No implementa un focus-trap completo (Tab cíclico dentro
+  // del panel) — el panel es de solo lectura y corto, así que perder el
+  // foco hacia el resto de la página vía Tab es una degradación aceptable,
+  // no una trampa de teclado.
+  useEffect(() => {
+    if (!detailsOpen) return;
+
+    detailsCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") closeDetails();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailsOpen]);
 
   // Ref con el ticket seleccionado "actual" — necesario porque las promesas
   // en vuelo (fetch de ticket, envío de comentario) capturan el valor de
@@ -222,11 +255,7 @@ const PortalInboxScreen = () => {
             onBack={() => navigate("/portal/dashboard")}
             onSendComment={handleSendComment}
             sending={sending}
-            onShowDetails={
-              selectedTicket?.id === selectedId
-                ? () => setDetailsOpen(true)
-                : undefined
-            }
+            onShowDetails={openDetails}
           />
         </div>
         {selectedId && (
@@ -242,28 +271,44 @@ const PortalInboxScreen = () => {
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateTicket}
       />
+      {/*
+        AnimatePresence's direct child must itself be a motion component with
+        an `exit` — that's how it gets told the exit finished and it's safe
+        to unmount. An earlier version wrapped the backdrop+panel motion.divs
+        in a plain <div>: the nested exits visually finished (opacity 0,
+        translated off-screen — confirmed live) but AnimatePresence never
+        unmounted the plain wrapper, so the full-screen backdrop stayed in
+        the DOM and kept swallowing clicks on the thread underneath long
+        after the drawer looked closed. Mirrors PortalNewTicketModal.jsx's
+        already-working shape: outer motion.div *is* the backdrop, panel
+        nests inside it as its own motion.div.
+      */}
       <AnimatePresence>
         {detailsOpen && selectedTicket?.id === selectedId && (
-          <div className='fixed inset-0 z-50 lg:hidden'>
-            <motion.div
-              variants={modalBackdropVariants}
-              initial='hidden'
-              animate='visible'
-              exit='hidden'
-              className='absolute inset-0 bg-black/40'
-              onClick={() => setDetailsOpen(false)}
-            />
+          <motion.div
+            variants={modalBackdropVariants}
+            initial='hidden'
+            animate='visible'
+            exit='hidden'
+            className='fixed inset-0 z-50 bg-black/40 lg:hidden'
+            onClick={closeDetails}
+          >
             <motion.div
               variants={slideVariants.right}
               initial='initial'
               animate='animate'
               exit='exit'
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              role='dialog'
+              aria-modal='true'
+              aria-label='Detalles del ticket'
+              onClick={(event) => event.stopPropagation()}
               className='absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-xl overflow-y-auto'
             >
               <div className='flex items-center justify-end p-3 border-b border-gray-100'>
                 <button
-                  onClick={() => setDetailsOpen(false)}
+                  ref={detailsCloseButtonRef}
+                  onClick={closeDetails}
                   aria-label='Cerrar detalles'
                   className='text-gray-400 hover:text-gray-600 transition-colors'
                 >
@@ -272,7 +317,7 @@ const PortalInboxScreen = () => {
               </div>
               <PortalTicketDetailsPanel ticket={selectedTicket} />
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </PortalLayout>

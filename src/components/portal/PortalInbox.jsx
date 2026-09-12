@@ -9,6 +9,7 @@ import {
   Plus,
 } from "lucide-react";
 import Avatar from "./PortalAvatar";
+import { STATUS_DOT_COLOR, STATUS_LABELS, STATUS_FILTERS } from "./ticketVocabulary";
 
 const typeIcons = {
   request: MessageSquare,
@@ -18,33 +19,6 @@ const typeIcons = {
   support: Headphones,
   other: MoreHorizontal,
 };
-
-const statusDotColor = {
-  open: "bg-blue-500",
-  in_progress: "bg-brand-600",
-  pending: "bg-yellow-500",
-  resolved: "bg-green-500",
-  closed: "bg-gray-400",
-};
-
-const statusLabels = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  pending: "Pendiente",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
-
-// Orden fijo — no alfabético — para que el flujo de un ticket (abierto →
-// en proceso → pendiente → resuelto/cerrado) se lea de izquierda a derecha.
-const FILTERS = [
-  { value: "all", label: "Todos" },
-  { value: "open", label: "Abierto" },
-  { value: "in_progress", label: "En proceso" },
-  { value: "pending", label: "Pendiente" },
-  { value: "resolved", label: "Resuelto" },
-  { value: "closed", label: "Cerrado" },
-];
 
 const PortalInbox = ({ tickets, selectedId, onSelect, onNewTicket }) => {
   const [statusFilter, setStatusFilter] = useState("all");
@@ -71,14 +45,13 @@ const PortalInbox = ({ tickets, selectedId, onSelect, onNewTicket }) => {
       </div>
       <div
         className='flex items-center gap-1.5 px-3 py-2.5 border-b border-gray-200 overflow-x-auto shrink-0'
-        role='tablist'
+        role='group'
         aria-label='Filtrar tickets por estado'
       >
-        {FILTERS.map((filter) => (
+        {STATUS_FILTERS.map((filter) => (
           <button
             key={filter.value}
-            role='tab'
-            aria-selected={statusFilter === filter.value}
+            aria-pressed={statusFilter === filter.value}
             onClick={() => setStatusFilter(filter.value)}
             className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
               statusFilter === filter.value
@@ -134,12 +107,12 @@ const PortalInbox = ({ tickets, selectedId, onSelect, onNewTicket }) => {
                   <div className='flex items-center gap-1.5 mt-1'>
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${
-                        statusDotColor[ticket.status]
+                        STATUS_DOT_COLOR[ticket.status]
                       }`}
                       aria-hidden='true'
                     />
                     <span className='text-xs text-gray-500'>
-                      {statusLabels[ticket.status] || ticket.status}
+                      {STATUS_LABELS[ticket.status] || ticket.status}
                     </span>
                     {ticket.assigned_agent && (
                       <Avatar

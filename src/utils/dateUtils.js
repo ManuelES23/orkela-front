@@ -97,11 +97,19 @@ export const formatDate = (date, options = {}) => {
 
 /**
  * Formatea una fecha con hora
+ *
+ * A diferencia de formatDate/isToday/etc, NO pasa por parseLocalDate: ese
+ * helper trunca deliberadamente a medianoche (está pensado para fechas de
+ * vencimiento sin hora, tipo "2026-01-16"). Un timestamp de evento
+ * (created_at, resolved_at...) sí trae una hora real que hay que conservar,
+ * así que este formateador construye el Date directo desde el ISO string.
  * @param {Date|string} date - La fecha a formatear
- * @returns {string} - La fecha con hora formateada
+ * @returns {string} - La fecha con hora formateada, o "—" si la fecha es inválida
  */
 export const formatDateTime = (date) => {
-  const d = parseLocalDate(date);
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return "—";
+
   return d.toLocaleString("es-ES", {
     day: "numeric",
     month: "short",

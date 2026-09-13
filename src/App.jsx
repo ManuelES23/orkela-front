@@ -24,6 +24,8 @@ const Register = lazy(() => import("./pages/Register"));
 const SocialAuthCallback = lazy(() => import("./pages/SocialAuthCallback"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const CheckEmail = lazy(() => import("./pages/CheckEmail"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Projects = lazy(() => import("./pages/Projects"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
@@ -89,6 +91,8 @@ function App() {
                 <Route path='/auth/callback' element={<SocialAuthCallback />} />
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/reset-password' element={<ResetPassword />} />
+                <Route path='/check-email' element={<CheckEmail />} />
+                <Route path='/verify-email' element={<VerifyEmail />} />
                 <Route
                   path='/accept-invitation/:token'
                   element={<AcceptInvitation />}

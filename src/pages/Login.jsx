@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { LogIn, Mail, Lock, Info, AlertCircle } from "lucide-react";
+import { LogIn, Mail, Lock, Info, AlertCircle, MailWarning } from "lucide-react";
 import AuthShell from "../components/auth/AuthShell";
 import AuthInput from "../components/auth/AuthInput";
 import Button from "../components/ui/Button";
 import { motionTokens, shakeVariants } from "../components/animations/variants";
 import ContextSelectionModal from "../components/modals/ContextSelectionModal";
 import { usePostLoginRedirect } from "../hooks/usePostLoginRedirect";
-import { socialAuthAPI } from "../utils/api";
+import { authAPI, socialAuthAPI } from "../utils/api";
+import { getRetryMessage } from "../utils/authErrors";
 
 const SOCIAL_ERROR_MESSAGES = {
   unverified_email:
     "Tu cuenta de Google/Microsoft no tiene el email verificado. No podemos usarla para iniciar sesión.",
   admin_account:
     "Ese email pertenece a una cuenta de administrador. Iniciá sesión con tu usuario y contraseña de administrador.",
+  link_required:
+    "Ya existe una cuenta con ese email. Iniciá sesión con tu contraseña para seguir usándola.",
   default: "No pudimos completar el inicio de sesión. Volvé a intentarlo.",
 };
 
@@ -60,6 +63,7 @@ const MicrosoftIcon = (props) => (
 
 const Login = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { login } = useAuth();
   const {
@@ -76,6 +80,9 @@ const Login = () => {
 
   const [email, setEmail] = useState(prefilledEmail || "");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resending, setResending] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [shakeKey, setShakeKey] = useState(0);
@@ -109,17 +116,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setUnverifiedEmail("");
     setLoading(true);
 
     try {
-      const userData = await login(email, password);
+      const userData = await login(email, password, remember);
       completeLogin(userData);
     } catch (err) {
-      console.error("Error al iniciar sesión:", err);
-      setError("Error al iniciar sesión. Verifica tus credenciales.");
-      setShakeKey((k) => k + 1);
+      if (err?.code === "email_unverified") {
+        setUnverifiedEmail(email);
+      } else {
+        setError(getRetryMessage(err) || "Error al iniciar sesión. Verifica tus credenciales.");
+        setShakeKey((k) => k + 1);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      await authAPI.resendVerification(unverifiedEmail);
+      navigate("/check-email", { state: { email: unverifiedEmail } });
+    } catch (err) {
+      setError(getRetryMessage(err) || "No pudimos reenviar el correo. Inténtalo de nuevo.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -191,6 +214,34 @@ const Login = () => {
           )}
         </AnimatePresence>
 
+        <AnimatePresence>
+          {unverifiedEmail && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: motionTokens.duration.fast }}
+              className='overflow-hidden'
+            >
+              <div className='p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-200 text-sm space-y-3'>
+                <p className='flex items-start gap-2'>
+                  <MailWarning className='w-4 h-4 shrink-0 mt-0.5' aria-hidden='true' />
+                  Debes confirmar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada o pide un nuevo enlace.
+                </p>
+                <div className='flex items-center gap-2'>
+                  <i className='w-[22px] h-[5px] rounded-full bg-current opacity-100' aria-hidden='true' />
+                  <i className='w-[22px] h-[5px] rounded-full bg-current opacity-100' aria-hidden='true' />
+                  <i className='w-[22px] h-[5px] rounded-full bg-current opacity-30' aria-hidden='true' />
+                  <span className='text-xs font-medium'>Paso 2 de 3 · Confirma tu correo</span>
+                </div>
+                <Button type='button' variant='outline' size='md' loading={resending} loadingText='Reenviando...' onClick={handleResendVerification}>
+                  Reenviar correo de confirmación
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AuthInput
           label='Correo electrónico'
           icon={Mail}
@@ -214,15 +265,21 @@ const Login = () => {
             required
           />
           <div className='flex justify-end mt-2.5'>
-            <a href='#' className='text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
+            <Link
+              to='/forgot-password'
+              state={{ email }}
+              className='text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'
+            >
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </div>
         </div>
 
         <label className='flex items-center gap-2.5 text-base text-gray-600 dark:text-night-300'>
           <input
             type='checkbox'
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
             className='w-[18px] h-[18px] rounded border-gray-300 dark:border-night-600 dark:bg-night-800 text-brand-600 focus:ring-brand-500'
           />
           Recordarme en este dispositivo

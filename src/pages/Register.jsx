@@ -7,6 +7,9 @@ import AuthShell from "../components/auth/AuthShell";
 import AuthInput from "../components/auth/AuthInput";
 import Button from "../components/ui/Button";
 import { motionTokens, shakeVariants } from "../components/animations/variants";
+import PasswordChecklist from "../components/auth/PasswordChecklist";
+import { isPasswordValid } from "../utils/passwordRules";
+import { getRetryMessage, getPasswordError } from "../utils/authErrors";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -48,8 +51,8 @@ const Register = () => {
 
   const validate = () => {
     const errors = {};
-    if (formData.password.length < 6) {
-      errors.password = "Debe tener al menos 6 caracteres";
+    if (!isPasswordValid(formData.password)) {
+      errors.password = "La contraseña no cumple los requisitos";
     }
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = "Las contraseñas no coinciden";
@@ -73,23 +76,19 @@ const Register = () => {
     try {
       await register(formData.name, formData.email, formData.password);
 
-      // Verificar si hay una invitación de equipo pendiente
-      const pendingInvitation = localStorage.getItem("pendingTeamInvitation");
-      if (pendingInvitation) {
-        localStorage.removeItem("pendingTeamInvitation");
-        navigate(`/accept-team-invitation/${pendingInvitation}`);
-        return;
+      // La sesión empieza después de confirmar el correo (en otra pestaña,
+      // sin location.state): guardar el destino donde usePostLoginRedirect
+      // ya lo busca. pendingTeamInvitation se conserva en localStorage.
+      if (returnTo) {
+        localStorage.setItem("socialReturnTo", returnTo);
       }
 
-      // Si hay URL de retorno (invitación), redirigir ahí
-      if (returnTo) {
-        navigate(returnTo);
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/check-email", { state: { email: formData.email } });
     } catch (err) {
       console.error("Error al crear la cuenta:", err);
-      setError("Error al crear la cuenta. Intenta de nuevo.");
+      setError(
+        getRetryMessage(err) || getPasswordError(err) || "Error al crear la cuenta. Intenta de nuevo."
+      );
       setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
@@ -177,18 +176,21 @@ const Register = () => {
           required
         />
 
-        <AuthInput
-          label='Contraseña'
-          icon={Lock}
-          type='password'
-          name='password'
-          value={formData.password}
-          onChange={handleChange}
-          placeholder='••••••••'
-          autoComplete='new-password'
-          error={fieldErrors.password}
-          required
-        />
+        <div>
+          <AuthInput
+            label='Contraseña'
+            icon={Lock}
+            type='password'
+            name='password'
+            value={formData.password}
+            onChange={handleChange}
+            placeholder='••••••••'
+            autoComplete='new-password'
+            error={fieldErrors.password}
+            required
+          />
+          <PasswordChecklist password={formData.password} />
+        </div>
 
         <AuthInput
           label='Confirmar contraseña'

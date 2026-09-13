@@ -1,4 +1,12 @@
 import "@testing-library/jest-dom/vitest";
+import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
+
+// Con `globals: false` Testing Library no registra su cleanup automático:
+// sin esto los renders se acumulan entre tests del mismo archivo.
+afterEach(() => {
+  cleanup();
+});
 
 // jsdom no implementa estos dos — framer-motion (useReducedMotion) y
 // PortalThread (scrollIntoView al recibir un comentario nuevo) los llaman

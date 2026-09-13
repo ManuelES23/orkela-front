@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { authAPI } from "../utils/api";
+import { authAPI, AUTH_EXPIRED_EVENT } from "../utils/api";
 
 const AuthContext = createContext(null);
 
@@ -33,44 +33,26 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email, password) => {
-    try {
-      const data = await authAPI.login(email, password);
+  // La API emite este evento ante un 401 (token vencido o revocado tras
+  // restablecer/cambiar la contraseña): reflejarlo en el estado.
+  useEffect(() => {
+    const handleExpired = () => setUser(null);
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleExpired);
+  }, []);
 
-      // Debug: ver respuesta completa de la API
-      console.log("AuthContext - API response data:", data);
-      console.log("AuthContext - data.user:", data.user);
-      console.log(
-        "AuthContext - available_contexts:",
-        data.user?.available_contexts
-      );
+  const login = async (email, password, remember = false) => {
+    const data = await authAPI.login(email, password, remember);
+    const userData = { ...data.user };
 
-      // El backend ya devuelve isSystemAdmin correctamente
-      const userData = {
-        ...data.user,
-      };
-
-      console.log("AuthContext - userData final:", userData);
-
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-      return userData;
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    }
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    return userData;
   };
 
+  // Crea la cuenta pero NO inicia sesión: hay que confirmar el correo.
   const register = async (name, email, password) => {
-    try {
-      const data = await authAPI.register(name, email, password, password);
-      setUser(data.user);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      return data.user;
-    } catch (error) {
-      console.error("Register error:", error);
-      throw error;
-    }
+    return await authAPI.register(name, email, password, password);
   };
 
   const logout = async () => {
@@ -154,12 +136,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Completa la sesión con el {token, user} que devuelven
-   * socialAuthAPI.exchange()/confirm() tras un login con Google/Microsoft.
-   * El token ya quedó guardado en localStorage por esas funciones; acá solo
-   * falta reflejar el usuario en el estado, igual que hace login().
+   * Completa la sesión con un {token, user} ya guardado en localStorage por
+   * la API (login social, verificación de correo).
    */
-  const loginWithSocialResult = (data) => {
+  const loginWithResult = (data) => {
     setUser(data.user);
     localStorage.setItem("user", JSON.stringify(data.user));
     return data.user;
@@ -171,7 +151,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loading,
-    loginWithSocialResult,
+    loginWithResult,
+    loginWithSocialResult: loginWithResult,
     // Nuevas funciones de contexto
     switchContext,
     switchingContext,

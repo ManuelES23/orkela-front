@@ -9,8 +9,14 @@ export class APIError extends Error {
     this.data = data;
     this.errorCode = data.error || null;
     this.requiredContext = data.required_context || null;
+    this.code = data.code || null;
+    this.retryAfter = data.retryAfter ?? null;
   }
 }
+
+// Se emite en window cuando la API responde 401 con un token guardado
+// (vencido o revocado); AuthContext lo escucha para cerrar la sesión.
+export const AUTH_EXPIRED_EVENT = "orkela:auth-expired";
 
 // Función helper para hacer peticiones
 export const request = async (endpoint, options = {}) => {
@@ -31,11 +37,19 @@ export const request = async (endpoint, options = {}) => {
     const data = await response.json();
 
     if (!response.ok) {
+      const retryAfter = Number(response.headers.get("Retry-After")) || null;
+
+      if (response.status === 401 && token) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+      }
+
       // Crear error con información adicional
       throw new APIError(
         data.message || "Error en la petición",
         response.status,
-        data
+        { ...data, retryAfter }
       );
     }
 
@@ -78,10 +92,18 @@ const publicRequest = async (endpoint, options = {}) => {
 
 // Auth API
 export const authAPI = {
+  // Ya no inicia sesión: el backend responde 202 y envía el correo de confirmación.
   register: async (name, email, password, password_confirmation) => {
-    const data = await request("/register", {
+    return await request("/register", {
       method: "POST",
       body: JSON.stringify({ name, email, password, password_confirmation }),
+    });
+  },
+
+  login: async (email, password, remember = false) => {
+    const data = await request("/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password, remember }),
     });
 
     if (data.token) {
@@ -91,10 +113,10 @@ export const authAPI = {
     return data;
   },
 
-  login: async (email, password) => {
-    const data = await request("/login", {
+  verifyEmail: async ({ id, hash, expires, signature }) => {
+    const data = await request("/auth/email/verify", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ id, hash, expires, signature }),
     });
 
     if (data.token) {
@@ -102,6 +124,27 @@ export const authAPI = {
     }
 
     return data;
+  },
+
+  resendVerification: async (email) => {
+    return await request("/auth/email/resend", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  forgotPassword: async (email) => {
+    return await request("/auth/password/forgot", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async ({ token, email, password, password_confirmation }) => {
+    return await request("/auth/password/reset", {
+      method: "POST",
+      body: JSON.stringify({ token, email, password, password_confirmation }),
+    });
   },
 
   logout: async () => {

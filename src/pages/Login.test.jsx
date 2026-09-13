@@ -65,6 +65,7 @@ describe("Login", () => {
     renderPage();
 
     fillAndSubmit();
+    expect(await screen.findByRole("status")).toHaveTextContent("Debes confirmar tu correo");
     fireEvent.click(await screen.findByRole("button", { name: "Reenviar correo de confirmación" }));
 
     expect(await screen.findByText("check-email:ana@example.com")).toBeInTheDocument();

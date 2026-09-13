@@ -223,7 +223,10 @@ const Login = () => {
               transition={{ duration: motionTokens.duration.fast }}
               className='overflow-hidden'
             >
-              <div className='p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-200 text-sm space-y-3'>
+              <div
+                role='status'
+                className='p-4 bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-200 text-sm space-y-3'
+              >
                 <p className='flex items-start gap-2'>
                   <MailWarning className='w-4 h-4 shrink-0 mt-0.5' aria-hidden='true' />
                   Debes confirmar tu correo antes de iniciar sesión. Revisa tu bandeja de entrada o pide un nuevo enlace.

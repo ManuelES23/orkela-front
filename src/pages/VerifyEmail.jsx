@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Loader2, CheckCircle2, MailCheck, Clock, Link2Off, Mail, Send, LogIn } from "lucide-react";
+import { Loader2, CheckCircle2, MailCheck, Clock, Link2Off, Hourglass, Mail, Send, LogIn } from "lucide-react";
 import AuthStepperShell from "../components/auth/AuthStepperShell";
 import AuthInput from "../components/auth/AuthInput";
 import { AuthPanelHeading, AuthPanelTile, AuthAlert, AuthButtonLink } from "../components/auth/AuthPanel";
@@ -53,6 +53,15 @@ const SCREENS = {
     tile: { icon: Link2Off, tone: "error" },
     title: "Enlace no válido",
     body: "El enlace está incompleto o ya se usó. Revisa que copiaste la dirección completa o pide un correo nuevo.",
+  },
+  // Distinto de link_invalid: el enlace en sí es válido, solo hay que
+  // esperar el límite de intentos (auth-link) antes de reintentar.
+  rate_limited: {
+    current: 2,
+    status: "warning",
+    tile: { icon: Hourglass, tone: "warning" },
+    title: "Demasiados intentos",
+    body: null,
   },
 };
 
@@ -113,28 +122,42 @@ const VerifyEmail = () => {
   const params = Object.fromEntries(LINK_PARAMS.map((key) => [key, searchParams.get(key)]));
   const hasAllParams = LINK_PARAMS.every((key) => params[key]);
 
-  // verifying | success | already_verified | link_expired | link_invalid
+  // verifying | success | already_verified | link_expired | link_invalid | rate_limited
   const [status, setStatus] = useState(hasAllParams ? "verifying" : "link_invalid");
+  const [retryMessage, setRetryMessage] = useState("");
+  const [retrying, setRetrying] = useState(false);
   const hasRequestedRef = useRef(false);
   const focusHeading = useHasChanged(status);
   const prefersReducedMotion = useReducedMotion();
+
+  const attemptVerify = async () => {
+    try {
+      const data = await authAPI.verifyEmail(params);
+      setStatus("success");
+      completeLogin(loginWithResult(data));
+    } catch (err) {
+      if (err?.status === 429) {
+        setRetryMessage(getRetryMessage(err));
+        setStatus("rate_limited");
+      } else {
+        setStatus(["already_verified", "link_expired"].includes(err?.code) ? err.code : "link_invalid");
+      }
+    }
+  };
 
   useEffect(() => {
     // El POST consume el enlace: evitar el doble efecto de StrictMode.
     if (!hasAllParams || hasRequestedRef.current) return;
     hasRequestedRef.current = true;
-
-    (async () => {
-      try {
-        const data = await authAPI.verifyEmail(params);
-        setStatus("success");
-        completeLogin(loginWithResult(data));
-      } catch (err) {
-        setStatus(["already_verified", "link_expired"].includes(err?.code) ? err.code : "link_invalid");
-      }
-    })();
+    attemptVerify();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleRetry = async () => {
+    setRetrying(true);
+    await attemptVerify();
+    setRetrying(false);
+  };
 
   const screen = SCREENS[status];
 
@@ -157,7 +180,7 @@ const VerifyEmail = () => {
                   role={status === "verifying" || status === "success" ? "status" : undefined}
                   className='text-gray-500 dark:text-night-400'
                 >
-                  {screen.body}
+                  {status === "rate_limited" ? retryMessage : screen.body}
                 </p>
               </div>
             </div>
@@ -166,6 +189,20 @@ const VerifyEmail = () => {
               <AuthButtonLink to='/login' icon={LogIn}>
                 Iniciar sesión
               </AuthButtonLink>
+            )}
+
+            {status === "rate_limited" && (
+              <Button
+                type='button'
+                variant='outline'
+                size='xl'
+                className='w-full'
+                loading={retrying}
+                loadingText='Reintentando...'
+                onClick={handleRetry}
+              >
+                Reintentar
+              </Button>
             )}
 
             {(status === "link_expired" || status === "link_invalid") && <ResendForm />}

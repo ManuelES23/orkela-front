@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { consumePendingRedirect } from "../utils/pendingRedirect";
 
 /**
  * Encapsula qué pasa después de tener un `userData` ya autenticado (login
@@ -28,13 +29,12 @@ export const usePostLoginRedirect = () => {
       return;
     }
 
-    const socialReturnTo = localStorage.getItem("socialReturnTo");
+    const pendingRedirect = consumePendingRedirect(userData.email);
 
     if (returnTo) {
       navigate(returnTo);
-    } else if (socialReturnTo) {
-      localStorage.removeItem("socialReturnTo");
-      navigate(socialReturnTo);
+    } else if (pendingRedirect) {
+      navigate(pendingRedirect);
     } else if (userData.isSystemAdmin) {
       navigate("/admin/users");
     } else {

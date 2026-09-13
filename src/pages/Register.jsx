@@ -10,6 +10,12 @@ import { motionTokens, shakeVariants } from "../components/animations/variants";
 import PasswordChecklist from "../components/auth/PasswordChecklist";
 import { isPasswordValid } from "../utils/passwordRules";
 import { getRetryMessage, getPasswordError } from "../utils/authErrors";
+import { setPendingRedirect } from "../utils/pendingRedirect";
+
+// Mismo plazo que el enlace de verificación (EmailVerificationLink::TTL_HOURS
+// en el backend): si nadie confirma el correo en ese tiempo, el destino
+// guardado deja de aplicarse.
+const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -78,9 +84,10 @@ const Register = () => {
 
       // La sesión empieza después de confirmar el correo (en otra pestaña,
       // sin location.state): guardar el destino donde usePostLoginRedirect
-      // ya lo busca. pendingTeamInvitation se conserva en localStorage.
+      // ya lo busca, atado a este email y con el mismo plazo que el enlace
+      // de verificación. pendingTeamInvitation se conserva en localStorage.
       if (returnTo) {
-        localStorage.setItem("socialReturnTo", returnTo);
+        setPendingRedirect(returnTo, { email: formData.email, ttlMs: VERIFICATION_TTL_MS });
       }
 
       navigate("/check-email", { state: { email: formData.email } });

@@ -74,4 +74,19 @@ describe("VerifyEmail", () => {
     expect(screen.getByText("Enlace no válido")).toBeInTheDocument();
     expect(authAPI.verifyEmail).not.toHaveBeenCalled();
   });
+
+  it("ante demasiados intentos muestra el tiempo de espera y permite reintentar", async () => {
+    authAPI.verifyEmail
+      .mockRejectedValueOnce(new APIError("Too Many Attempts.", 429, { retryAfter: 30 }))
+      .mockResolvedValueOnce({ user: { id: 7 }, token: "t" });
+    renderPage();
+
+    expect(await screen.findByText("Demasiados intentos")).toBeInTheDocument();
+    expect(screen.getByText(/Espera 30 segundos/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    await vi.waitFor(() => expect(completeLogin).toHaveBeenCalledWith({ id: 7 }));
+    expect(authAPI.verifyEmail).toHaveBeenCalledTimes(2);
+  });
 });

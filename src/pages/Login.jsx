@@ -11,6 +11,7 @@ import ContextSelectionModal from "../components/modals/ContextSelectionModal";
 import { usePostLoginRedirect } from "../hooks/usePostLoginRedirect";
 import { authAPI, socialAuthAPI } from "../utils/api";
 import { getRetryMessage } from "../utils/authErrors";
+import { setPendingRedirect } from "../utils/pendingRedirect";
 
 const SOCIAL_ERROR_MESSAGES = {
   unverified_email:
@@ -148,7 +149,7 @@ const Login = () => {
 
   const handleSocialLogin = (provider) => {
     if (location.state?.returnTo) {
-      localStorage.setItem("socialReturnTo", location.state.returnTo);
+      setPendingRedirect(location.state.returnTo);
     }
     window.location.href = socialAuthAPI.redirectUrl(provider);
   };

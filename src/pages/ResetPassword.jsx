@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Lock, KeyRound, Link2Off, RotateCw } from "lucide-react";
 import AuthStepperShell from "../components/auth/AuthStepperShell";
 import AuthInput from "../components/auth/AuthInput";
@@ -23,6 +23,7 @@ const fade = {
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
   const email = searchParams.get("email") || "";
@@ -34,6 +35,13 @@ const ResetPassword = () => {
   const [linkInvalid, setLinkInvalid] = useState(!token || !email);
   const [loading, setLoading] = useState(false);
   const focusHeading = useHasChanged(linkInvalid);
+
+  // Limpia el error del campo en cuanto el usuario lo corrige
+  const clearFieldError = (name) => {
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +80,7 @@ const ResetPassword = () => {
     >
       <AnimatePresence mode='wait' initial={false}>
         {linkInvalid ? (
-          <motion.div key='invalid' {...fade}>
+          <motion.div key='invalid' {...(prefersReducedMotion ? {} : fade)}>
             <div className='flex items-start gap-4 mb-[22px]'>
               <AuthPanelTile icon={Link2Off} tone='error' />
               <div>
@@ -91,7 +99,7 @@ const ResetPassword = () => {
             </p>
           </motion.div>
         ) : (
-          <motion.div key='form' {...fade}>
+          <motion.div key='form' {...(prefersReducedMotion ? {} : fade)}>
             <AuthPanelHeading focusOnMount={focusHeading}>Crea una nueva contraseña</AuthPanelHeading>
             {email && (
               <p className='text-gray-500 dark:text-night-400 mb-4'>
@@ -108,7 +116,10 @@ const ResetPassword = () => {
                   icon={Lock}
                   type='password'
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearFieldError("password");
+                  }}
                   placeholder='••••••••'
                   autoComplete='new-password'
                   error={fieldErrors.password}
@@ -122,7 +133,10 @@ const ResetPassword = () => {
                 icon={Lock}
                 type='password'
                 value={confirmation}
-                onChange={(e) => setConfirmation(e.target.value)}
+                onChange={(e) => {
+                  setConfirmation(e.target.value);
+                  clearFieldError("confirmation");
+                }}
                 placeholder='Repite la contraseña'
                 autoComplete='new-password'
                 error={fieldErrors.confirmation}

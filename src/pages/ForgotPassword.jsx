@@ -82,7 +82,11 @@ const ForgotPassword = () => {
     setSent(false);
   };
 
-  const custom = { dir, offset: prefersReducedMotion ? 0 : 24 };
+  const custom = { dir, offset: 24 };
+  // Con movimiento reducido no hay slide ni fade: el panel cambia sin animación.
+  const slide = prefersReducedMotion
+    ? {}
+    : { custom, variants: panelVariants, initial: "enter", animate: "center", exit: "exit" };
 
   return (
     <AuthStepperShell
@@ -93,7 +97,7 @@ const ForgotPassword = () => {
     >
       <AnimatePresence mode='wait' initial={false} custom={custom}>
         {sent ? (
-          <motion.div key='sent' custom={custom} variants={panelVariants} initial='enter' animate='center' exit='exit'>
+          <motion.div key='sent' {...slide}>
             <div className='flex items-start gap-4 mb-1.5'>
               <AuthPanelTile icon={MailCheck} />
               <div>
@@ -120,7 +124,7 @@ const ForgotPassword = () => {
             </button>
           </motion.div>
         ) : (
-          <motion.div key='form' custom={custom} variants={panelVariants} initial='enter' animate='center' exit='exit'>
+          <motion.div key='form' {...slide}>
             <AuthPanelHeading focusOnMount={focusHeading}>Recupera tu contraseña</AuthPanelHeading>
             <p className={bodyClass}>Ingresa el correo de tu cuenta y te enviaremos un enlace seguro.</p>
 

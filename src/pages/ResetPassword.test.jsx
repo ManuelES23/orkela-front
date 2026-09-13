@@ -68,6 +68,21 @@ describe("ResetPassword", () => {
     expect(screen.getByText("Las contraseñas no coinciden")).toBeInTheDocument();
   });
 
+  it("limpia el error de confirmación en cuanto el usuario la corrige", async () => {
+    renderPage();
+
+    fillPasswords("NuevaClave123", "OtraClave123");
+    fireEvent.click(screen.getByRole("button", { name: /guardar contraseña/i }));
+    expect(screen.getByText("Las contraseñas no coinciden")).toBeInTheDocument();
+
+    const confirmationInput = screen.getByLabelText("Confirmar contraseña");
+    fireEvent.change(confirmationInput, { target: { value: "NuevaClave123" } });
+
+    expect(confirmationInput).toHaveAttribute("aria-invalid", "false");
+    // AuthInput anima la salida del mensaje: se espera a que termine.
+    await vi.waitFor(() => expect(screen.queryByText("Las contraseñas no coinciden")).not.toBeInTheDocument());
+  });
+
   it("ofrece pedir un nuevo enlace cuando el token es inválido", async () => {
     authAPI.resetPassword.mockRejectedValue(new APIError("inválido", 400, { code: "link_invalid" }));
     renderPage();

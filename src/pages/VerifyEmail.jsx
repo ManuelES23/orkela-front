@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Loader2, CheckCircle2, MailCheck, Clock, Link2Off, Mail, Send, LogIn } from "lucide-react";
 import AuthStepperShell from "../components/auth/AuthStepperShell";
 import AuthInput from "../components/auth/AuthInput";
@@ -117,6 +117,7 @@ const VerifyEmail = () => {
   const [status, setStatus] = useState(hasAllParams ? "verifying" : "link_invalid");
   const hasRequestedRef = useRef(false);
   const focusHeading = useHasChanged(status);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     // El POST consume el enlace: evitar el doble efecto de StrictMode.
@@ -147,7 +148,7 @@ const VerifyEmail = () => {
         backLink={{ to: "/login", label: "Volver a iniciar sesión" }}
       >
         <AnimatePresence mode='wait' initial={false}>
-          <motion.div key={status} {...fade}>
+          <motion.div key={status} {...(prefersReducedMotion ? {} : fade)}>
             <div className='flex items-start gap-4 mb-[22px]'>
               <AuthPanelTile {...screen.tile} />
               <div>

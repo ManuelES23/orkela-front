@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Select from "react-select";
 import Layout from "../components/layout/Layout";
+import LoadingSwap from "../components/ui/LoadingSwap";
+import { SkeletonRows } from "../components/ui/Skeleton";
 import { ticketsAPI, teamsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
 import { selectStyles } from "../utils/reactSelectStyles";
@@ -101,57 +104,69 @@ const ClientTicketsInbox = () => {
           </label>
         </div>
 
-        {!loading && loadError ? (
-          <div className='py-12 text-center text-gray-400 dark:text-night-500'>
-            <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
-            <p className='text-sm'>No se pudieron cargar los tickets.</p>
-          </div>
-        ) : !loading && visibleTickets.length === 0 ? (
-          <div className='py-12 text-center text-gray-400 dark:text-night-500'>
-            <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
-            <p className='text-sm'>No hay tickets de clientes {onlyUnassigned ? "sin asignar" : "todavía"}.</p>
-          </div>
-        ) : (
-          <div className='divide-y divide-gray-100 dark:divide-night-800'>
-            {visibleTickets.map((ticket) => (
-              <div key={ticket.id} className='py-3 flex items-center justify-between gap-4'>
-                <div className='min-w-0 flex-1'>
-                  <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
-                    {[ticket.client?.name, ticket.contact?.name, ticket.title].filter(Boolean).join(" · ")}
-                  </p>
-                  <div className='flex items-center gap-2 mt-1'>
-                    <span
-                      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadgeColor[ticket.status]}`}
-                    >
-                      {statusLabels[ticket.status] || ticket.status}
-                    </span>
-                    {ticket.team && (
-                      <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>
+        <LoadingSwap loading={loading} skeleton={<SkeletonRows count={6} />}>
+          {loadError ? (
+            <div className='py-12 text-center text-gray-400 dark:text-night-500'>
+              <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
+              <p className='text-sm'>No se pudieron cargar los tickets.</p>
+            </div>
+          ) : visibleTickets.length === 0 ? (
+            <div className='py-12 text-center text-gray-400 dark:text-night-500'>
+              <Inbox className='w-8 h-8 mx-auto mb-2' aria-hidden='true' />
+              <p className='text-sm'>No hay tickets de clientes {onlyUnassigned ? "sin asignar" : "todavía"}.</p>
+            </div>
+          ) : (
+            <div className='divide-y divide-gray-100 dark:divide-night-800'>
+              <AnimatePresence mode='popLayout'>
+                {visibleTickets.map((ticket) => (
+                  <motion.div
+                    key={ticket.id}
+                    layout
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className='py-3 flex items-center justify-between gap-4'
+                  >
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
+                        {[ticket.client?.name, ticket.contact?.name, ticket.title].filter(Boolean).join(" · ")}
+                      </p>
+                      <div className='flex items-center gap-2 mt-1'>
+                        <span
+                          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadgeColor[ticket.status]}`}
+                        >
+                          {statusLabels[ticket.status] || ticket.status}
+                        </span>
+                        {ticket.team && (
+                          <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>
+                        )}
+                        {ticket.contact?.is_admin === false && (
+                          <span className='text-xs text-brand-600 dark:text-brand-400 font-medium'>
+                            También visible para el admin del cliente
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {!ticket.team_id && (
+                      <div className='w-52 shrink-0'>
+                        <Select
+                          options={teamOptions}
+                          isLoading={assigningId === ticket.id}
+                          isDisabled={assigningId === ticket.id}
+                          placeholder='Asignar a equipo...'
+                          onChange={(selected) => selected && handleAssign(ticket.id, selected.value)}
+                          classNamePrefix='react-select'
+                          styles={selectStyles}
+                        />
+                      </div>
                     )}
-                    {ticket.contact?.is_admin === false && (
-                      <span className='text-xs text-brand-600 dark:text-brand-400 font-medium'>
-                        También visible para el admin del cliente
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {!ticket.team_id && (
-                  <div className='w-52 shrink-0'>
-                    <Select
-                      options={teamOptions}
-                      isLoading={assigningId === ticket.id}
-                      isDisabled={assigningId === ticket.id}
-                      placeholder='Asignar a equipo...'
-                      onChange={(selected) => selected && handleAssign(ticket.id, selected.value)}
-                      classNamePrefix='react-select'
-                      styles={selectStyles}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </LoadingSwap>
       </div>
     </Layout>
   );

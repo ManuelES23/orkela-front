@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Layout from "../components/layout/Layout";
 import ClientModal from "../components/modals/ClientModal";
 import ContactModal from "../components/modals/ContactModal";
+import LoadingSwap from "../components/ui/LoadingSwap";
+import DetailPanel from "../components/ui/DetailPanel";
+import { ClientListSkeleton, ClientDetailSkeleton } from "../components/clients/ClientsSkeleton";
 import { clientsAPI, contactsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
 import { Plus, Search, Send, Archive, ArchiveRestore, Star, UserPlus, Building2, User } from "lucide-react";
@@ -37,6 +41,7 @@ const ClientsManagement = () => {
 
   const [clients, setClients] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [selectedLoading, setSelectedLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [search, setSearch] = useState("");
@@ -87,9 +92,11 @@ const ClientsManagement = () => {
   useEffect(() => {
     if (!id) {
       setSelected(null);
+      setSelectedLoading(false);
       return;
     }
     let cancelled = false;
+    setSelectedLoading(true);
     clientsAPI
       .getById(id)
       .then((client) => {
@@ -97,6 +104,9 @@ const ClientsManagement = () => {
       })
       .catch(() => {
         if (!cancelled) setSelected(null);
+      })
+      .finally(() => {
+        if (!cancelled) setSelectedLoading(false);
       });
     return () => {
       cancelled = true;
@@ -214,53 +224,63 @@ const ClientsManagement = () => {
             </div>
           </div>
           <div className='flex-1 overflow-y-auto'>
-            {!loading && loadError ? (
-              <div className='p-6 text-center text-gray-500 dark:text-night-400 text-sm'>
-                No se pudieron cargar los clientes.
-              </div>
-            ) : !loading && filteredClients.length === 0 ? (
-              <div className='p-6 text-center text-gray-500 dark:text-night-400 text-sm'>
-                {clients.length === 0
-                  ? "Aún no hay clientes. Da de alta el primero con el botón +."
-                  : "Ningún cliente coincide con la búsqueda."}
-              </div>
-            ) : (
-              filteredClients.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => navigate(`/clients/${c.id}`)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-night-800 transition-colors ${
-                    Number(id) === c.id ? "bg-brand-50 dark:bg-brand-900/20" : "hover:bg-gray-50 dark:hover:bg-night-800"
-                  } ${c.status === "archived" ? "opacity-60" : ""}`}
-                >
-                  <p
-                    className={`text-sm font-medium truncate flex items-center gap-1.5 ${
-                      Number(id) === c.id ? "text-brand-700 dark:text-brand-300" : "text-gray-900 dark:text-night-50"
-                    }`}
-                  >
-                    {c.type === "company" ? (
-                      <Building2 className='w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-night-500' aria-hidden='true' />
-                    ) : (
-                      <User className='w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-night-500' aria-hidden='true' />
-                    )}
-                    <span className='truncate'>{c.name}</span>
-                  </p>
-                  <p className='text-xs text-gray-500 dark:text-night-400 truncate'>
-                    {c.status === "archived" ? "Archivado" : `${c.tickets_count ?? 0} tickets`}
-                  </p>
-                </button>
-              ))
-            )}
+            <LoadingSwap loading={loading} skeleton={<ClientListSkeleton />}>
+              {loadError ? (
+                <div className='p-6 text-center text-gray-500 dark:text-night-400 text-sm'>
+                  No se pudieron cargar los clientes.
+                </div>
+              ) : filteredClients.length === 0 ? (
+                <div className='p-6 text-center text-gray-500 dark:text-night-400 text-sm'>
+                  {clients.length === 0
+                    ? "Aún no hay clientes. Da de alta el primero con el botón +."
+                    : "Ningún cliente coincide con la búsqueda."}
+                </div>
+              ) : (
+                <AnimatePresence mode='popLayout'>
+                  {filteredClients.map((c) => (
+                    <motion.button
+                      key={c.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={() => navigate(`/clients/${c.id}`)}
+                      className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-night-800 transition-colors ${
+                        Number(id) === c.id ? "bg-brand-50 dark:bg-brand-900/20" : "hover:bg-gray-50 dark:hover:bg-night-800"
+                      } ${c.status === "archived" ? "opacity-60" : ""}`}
+                    >
+                      <p
+                        className={`text-sm font-medium truncate flex items-center gap-1.5 ${
+                          Number(id) === c.id ? "text-brand-700 dark:text-brand-300" : "text-gray-900 dark:text-night-50"
+                        }`}
+                      >
+                        {c.type === "company" ? (
+                          <Building2 className='w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-night-500' aria-hidden='true' />
+                        ) : (
+                          <User className='w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-night-500' aria-hidden='true' />
+                        )}
+                        <span className='truncate'>{c.name}</span>
+                      </p>
+                      <p className='text-xs text-gray-500 dark:text-night-400 truncate'>
+                        {c.status === "archived" ? "Archivado" : `${c.tickets_count ?? 0} tickets`}
+                      </p>
+                    </motion.button>
+                  ))}
+                </AnimatePresence>
+              )}
+            </LoadingSwap>
           </div>
         </div>
 
         <div className='flex-1 min-w-0 p-6 overflow-y-auto'>
+          <LoadingSwap loading={selectedLoading} skeleton={<ClientDetailSkeleton />}>
           {!selected ? (
             <div className='h-full flex items-center justify-center text-gray-400 dark:text-night-500 text-sm'>
               Selecciona un cliente para ver su detalle
             </div>
           ) : (
-            <div>
+            <DetailPanel panelKey={selected.id}>
               <div className='flex items-start justify-between mb-6'>
                 <div>
                   <h2 className='text-xl font-bold text-gray-900 dark:text-night-50'>{selected.name}</h2>
@@ -406,8 +426,9 @@ const ClientsManagement = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </DetailPanel>
           )}
+          </LoadingSwap>
         </div>
       </div>
 

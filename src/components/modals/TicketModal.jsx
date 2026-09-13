@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import Select from "react-select";
 import { selectStyles } from "../../utils/reactSelectStyles";
+import LoadingSwap from "../ui/LoadingSwap";
+import DetailPanel from "../ui/DetailPanel";
+import { TicketFormSkeleton } from "./TicketSkeletons";
 import {
   Ticket,
   MessageSquare,
@@ -193,13 +196,8 @@ const TicketModal = ({
       title={ticket ? "Editar Ticket" : "Nuevo Ticket"}
       size='md'
     >
-      {initializing ? (
-        <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
-          <p className='text-gray-600 dark:text-night-300 font-medium'>Cargando datos...</p>
-          <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>Preparando el formulario</p>
-        </div>
-      ) : (
+      <LoadingSwap loading={initializing} skeleton={<TicketFormSkeleton />}>
+        <DetailPanel panelKey={ticket?.id ?? "new"}>
         <form onSubmit={handleSubmit} className='space-y-5'>
           {/* Título */}
           <div>
@@ -389,7 +387,8 @@ const TicketModal = ({
             </button>
           </div>
         </form>
-      )}
+        </DetailPanel>
+      </LoadingSwap>
     </Modal>
   );
 };

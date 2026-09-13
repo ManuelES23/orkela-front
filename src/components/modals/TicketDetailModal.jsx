@@ -3,6 +3,9 @@ import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import Select from "react-select";
 import { selectStyles } from "../../utils/reactSelectStyles";
+import LoadingSwap from "../ui/LoadingSwap";
+import DetailPanel from "../ui/DetailPanel";
+import { TicketDetailSkeleton } from "./TicketSkeletons";
 import { useNotification } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
 import { useRealtime } from "../../context/RealtimeContext";
@@ -268,15 +271,9 @@ const TicketDetailModal = ({
       title={`Ticket #${initialTicket?.id || ""}`}
       size='lg'
     >
-      {initializing ? (
-        <div className='flex flex-col items-center justify-center py-12'>
-          <Loader2 className='w-10 h-10 text-brand-600 animate-spin mb-4' />
-          <p className='text-gray-600 dark:text-night-300 font-medium'>Cargando ticket...</p>
-          <p className='text-gray-400 dark:text-night-500 text-sm mt-1'>
-            Preparando detalles del ticket
-          </p>
-        </div>
-      ) : ticket ? (
+      <LoadingSwap loading={initializing} skeleton={<TicketDetailSkeleton />}>
+      {ticket ? (
+        <DetailPanel panelKey={ticket.id}>
         <div className='space-y-6'>
           {/* Header del ticket */}
           <div className='flex flex-col md:flex-row md:items-start gap-4'>
@@ -709,11 +706,13 @@ const TicketDetailModal = ({
             )}
           </div>
         </div>
+        </DetailPanel>
       ) : (
         <div className='text-center py-12 text-gray-500 dark:text-night-400'>
           No se pudo cargar el ticket
         </div>
       )}
+      </LoadingSwap>
     </Modal>
   );
 };

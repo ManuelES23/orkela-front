@@ -7,6 +7,7 @@ import PortalInbox from "../../components/portal/PortalInbox";
 import PortalThread from "../../components/portal/PortalThread";
 import PortalNewTicketModal from "../../components/portal/PortalNewTicketModal";
 import PortalTicketDetailsPanel from "../../components/portal/PortalTicketDetailsPanel";
+import LoadingScreen from "../../components/ui/LoadingScreen";
 import { portalAPI, getPortalToken } from "../../utils/portalApi";
 import { getPortalEcho, disconnectPortalEcho } from "../../utils/echo";
 import { applyTicketNotification } from "../../utils/portalTicketNotifications";
@@ -200,9 +201,7 @@ const PortalInboxScreen = () => {
   if (loading) {
     return (
       <PortalLayout organization={organization}>
-        <div className='flex-1 flex items-center justify-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600'></div>
-        </div>
+        <LoadingScreen message='Cargando tus tickets...' fullScreen={false} className='flex-1' />
       </PortalLayout>
     );
   }

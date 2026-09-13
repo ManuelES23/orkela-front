@@ -3,6 +3,9 @@ import { containerVariants, itemVariants } from "../animations/variants";
 import { formatDateTime } from "../../utils/dateUtils";
 import { TYPE_LABELS, PRIORITY_LABELS } from "./ticketVocabulary";
 import Avatar from "./PortalAvatar";
+import LoadingSwap from "../ui/LoadingSwap";
+import DetailPanel from "../ui/DetailPanel";
+import { PortalPanelSkeleton } from "./PortalSkeletons";
 
 // Construye la línea de tiempo solo con los pasos que realmente ocurrieron —
 // un ticket recién creado no debe mostrar "Resuelto" ni "Cerrado" vacíos.
@@ -32,8 +35,14 @@ const buildTimeline = (ticket) => {
 };
 
 const PortalTicketDetailsPanel = ({ ticket }) => {
-  if (!ticket) return null;
+  return (
+    <LoadingSwap loading={!ticket} skeleton={<PortalPanelSkeleton />}>
+      {ticket && <DetailPanel panelKey={ticket.id}>{renderDetails(ticket)}</DetailPanel>}
+    </LoadingSwap>
+  );
+};
 
+const renderDetails = (ticket) => {
   const timeline = buildTimeline(ticket);
 
   return (

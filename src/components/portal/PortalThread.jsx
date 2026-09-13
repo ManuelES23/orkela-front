@@ -3,6 +3,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Info, Send } from "lucide-react";
 import { motionTokens } from "../animations/variants";
 import { STATUS_LABELS, STATUS_BADGE_COLOR } from "./ticketVocabulary";
+import LoadingSwap from "../ui/LoadingSwap";
+import { Skeleton } from "../ui/Skeleton";
+import { PortalThreadSkeleton } from "./PortalSkeletons";
 
 const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 
@@ -59,25 +62,6 @@ const PortalThread = ({
     );
   }
 
-  if (!ticket) {
-    return (
-      <div className='flex flex-1 flex-col min-w-0 h-full'>
-        <div className='p-4 border-b border-gray-200 flex items-center gap-3 shrink-0'>
-          <button
-            onClick={onBack}
-            aria-label='Volver a mis tickets'
-            className='md:hidden text-gray-500'
-          >
-            <ArrowLeft className='w-5 h-5' />
-          </button>
-        </div>
-        <div className='flex-1 flex items-center justify-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600'></div>
-        </div>
-      </div>
-    );
-  }
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!draft.trim()) return;
@@ -100,19 +84,21 @@ const PortalThread = ({
         >
           <ArrowLeft className='w-5 h-5' />
         </button>
-        <div className='min-w-0 flex-1'>
-          <p className='font-semibold text-gray-900 truncate'>{ticket.title}</p>
-        </div>
-        <motion.span
-          key={ticket.status}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: motionTokens.duration.fast }}
-          className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${STATUS_BADGE_COLOR[ticket.status]}`}
-        >
-          {STATUS_LABELS[ticket.status] || ticket.status}
-        </motion.span>
-        {onShowDetails && (
+        <LoadingSwap loading={!ticket} className='min-w-0 flex-1' skeleton={<Skeleton className='h-4 w-1/2' />}>
+          {ticket && <p className='font-semibold text-gray-900 truncate'>{ticket.title}</p>}
+        </LoadingSwap>
+        {ticket && (
+          <motion.span
+            key={ticket.status}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: motionTokens.duration.fast }}
+            className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${STATUS_BADGE_COLOR[ticket.status]}`}
+          >
+            {STATUS_LABELS[ticket.status] || ticket.status}
+          </motion.span>
+        )}
+        {onShowDetails && ticket && (
           <button
             onClick={onShowDetails}
             aria-label='Ver detalles del ticket'
@@ -123,53 +109,59 @@ const PortalThread = ({
         )}
       </div>
 
-      <div className='flex-1 overflow-y-auto p-4 space-y-3'>
-        <div className='max-w-[80%] bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-gray-700'>
-          {ticket.description}
-        </div>
-        {(ticket.comments || []).map((comment) => {
-          const isClient = Boolean(comment.contact_id);
-          return (
-            <div key={comment.id} className={`max-w-[80%] ${isClient ? "ml-auto" : ""}`}>
-              <div
-                className={`rounded-2xl px-4 py-2.5 text-sm ${
-                  isClient
-                    ? "bg-brand-600 text-white rounded-tr-sm"
-                    : "bg-gray-100 text-gray-700 rounded-tl-sm"
-                }`}
-              >
-                {comment.content}
+      <LoadingSwap loading={!ticket} className='flex-1 flex flex-col min-w-0' skeleton={<PortalThreadSkeleton />}>
+        {ticket && (
+          <>
+            <div className='flex-1 overflow-y-auto p-4 space-y-3'>
+              <div className='max-w-[80%] bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-gray-700'>
+                {ticket.description}
               </div>
-              {!isClient && comment.user?.name && (
-                <p className='text-xs text-gray-400 mt-1 px-1'>{comment.user.name}</p>
-              )}
+              {(ticket.comments || []).map((comment) => {
+                const isClient = Boolean(comment.contact_id);
+                return (
+                  <div key={comment.id} className={`max-w-[80%] ${isClient ? "ml-auto" : ""}`}>
+                    <div
+                      className={`rounded-2xl px-4 py-2.5 text-sm ${
+                        isClient
+                          ? "bg-brand-600 text-white rounded-tr-sm"
+                          : "bg-gray-100 text-gray-700 rounded-tl-sm"
+                      }`}
+                    >
+                      {comment.content}
+                    </div>
+                    {!isClient && comment.user?.name && (
+                      <p className='text-xs text-gray-400 mt-1 px-1'>{comment.user.name}</p>
+                    )}
+                  </div>
+                );
+              })}
+              <div ref={bottomRef} />
             </div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
 
-      <form onSubmit={handleSend} className='p-4 border-t border-gray-200 shrink-0'>
-        {sendError && <p className='text-xs text-red-600 mb-2'>{sendError}</p>}
-        <div className='flex items-center gap-2'>
-          <input
-            type='text'
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder='Escribe una respuesta...'
-            disabled={sending}
-            className='flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-60'
-          />
-          <button
-            type='submit'
-            disabled={sending || !draft.trim()}
-            aria-label='Enviar'
-            className='w-10 h-10 rounded-lg bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 disabled:opacity-50 transition-colors'
-          >
-            <Send className='w-4.5 h-4.5' />
-          </button>
-        </div>
-      </form>
+            <form onSubmit={handleSend} className='p-4 border-t border-gray-200 shrink-0'>
+              {sendError && <p className='text-xs text-red-600 mb-2'>{sendError}</p>}
+              <div className='flex items-center gap-2'>
+                <input
+                  type='text'
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder='Escribe una respuesta...'
+                  disabled={sending}
+                  className='flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-60'
+                />
+                <button
+                  type='submit'
+                  disabled={sending || !draft.trim()}
+                  aria-label='Enviar'
+                  className='w-10 h-10 rounded-lg bg-brand-600 text-white flex items-center justify-center hover:bg-brand-700 disabled:opacity-50 transition-colors'
+                >
+                  <Send className='w-4.5 h-4.5' />
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+      </LoadingSwap>
     </div>
   );
 };

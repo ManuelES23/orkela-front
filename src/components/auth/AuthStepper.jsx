@@ -53,7 +53,9 @@ const DotContent = ({ state, step }) => {
 const AuthStepper = ({ flow, current, status = "active" }) => {
   const prefersReducedMotion = useReducedMotion();
   const labels = LABELS[flow] ?? LABELS.recovery;
-  const fill = (Math.min(Math.max(current, 1), labels.length) - 1) / (labels.length - 1);
+  // Relleno hasta el último paso completo: el actual cuenta si su estado es done.
+  const lastDone = status === "done" ? current : current - 1;
+  const fill = Math.min(Math.max(lastDone, 0), labels.length - 1) / (labels.length - 1);
 
   return (
     <div className='relative mb-[26px]'>
@@ -64,6 +66,7 @@ const AuthStepper = ({ flow, current, status = "active" }) => {
       >
         <motion.div
           className='absolute inset-0 rounded-full origin-left bg-linear-to-r from-brand-600 to-accent-600'
+          data-fill={fill}
           initial={false}
           animate={{ scaleX: fill }}
           transition={

@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, KeyRound, AlertCircle, Link2Off, RotateCw } from "lucide-react";
+import { Lock, KeyRound, Link2Off, RotateCw } from "lucide-react";
 import AuthStepperShell from "../components/auth/AuthStepperShell";
 import AuthInput from "../components/auth/AuthInput";
 import PasswordChecklist from "../components/auth/PasswordChecklist";
+import { AuthPanelHeading, AuthPanelTile, AuthAlert, AuthButtonLink } from "../components/auth/AuthPanel";
 import Button from "../components/ui/Button";
 import { motionTokens } from "../components/animations/variants";
+import { useHasChanged } from "../hooks/useHasChanged";
 import { authAPI } from "../utils/api";
 import { isPasswordValid } from "../utils/passwordRules";
 import { getRetryMessage, getPasswordError } from "../utils/authErrors";
-
-const headingClass =
-  "text-[22px] sm:text-[26px] leading-tight font-extrabold tracking-tight text-gray-900 dark:text-night-50 mb-2";
 
 // Cambio de estado sin avance de paso: solo fade.
 const fade = {
@@ -34,6 +33,7 @@ const ResetPassword = () => {
   const [error, setError] = useState("");
   const [linkInvalid, setLinkInvalid] = useState(!token || !email);
   const [loading, setLoading] = useState(false);
+  const focusHeading = useHasChanged(linkInvalid);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,32 +74,25 @@ const ResetPassword = () => {
         {linkInvalid ? (
           <motion.div key='invalid' {...fade}>
             <div className='flex items-start gap-4 mb-[22px]'>
-              <div className='grid place-items-center shrink-0 w-[52px] h-[52px] rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400'>
-                <Link2Off className='w-[26px] h-[26px]' aria-hidden='true' />
-              </div>
+              <AuthPanelTile icon={Link2Off} tone='error' />
               <div>
-                <h1 className={headingClass}>Este enlace ya no es válido</h1>
+                <AuthPanelHeading focusOnMount={focusHeading}>Este enlace ya no es válido</AuthPanelHeading>
                 <p role='alert' className='text-gray-500 dark:text-night-400'>
                   Los enlaces para restablecer la contraseña vencen en 60 minutos y solo pueden usarse una vez.
                 </p>
               </div>
             </div>
 
-            <Link
-              to='/forgot-password'
-              state={{ email }}
-              className='w-full inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-lg font-semibold text-white bg-linear-to-r from-brand-600 to-accent-600 shadow-lg shadow-brand-600/25 hover:brightness-105 hover:shadow-xl hover:shadow-brand-600/30 transition-all duration-200'
-            >
-              <RotateCw className='w-5 h-5' aria-hidden='true' />
+            <AuthButtonLink to='/forgot-password' state={{ email }} icon={RotateCw}>
               Pedir un nuevo enlace
-            </Link>
+            </AuthButtonLink>
             <p className='mt-3.5 text-center text-sm text-gray-500 dark:text-night-400'>
               Te llevamos al paso 1 con tu correo ya escrito.
             </p>
           </motion.div>
         ) : (
           <motion.div key='form' {...fade}>
-            <h1 className={headingClass}>Crea una nueva contraseña</h1>
+            <AuthPanelHeading focusOnMount={focusHeading}>Crea una nueva contraseña</AuthPanelHeading>
             {email && (
               <p className='text-gray-500 dark:text-night-400 mb-4'>
                 Para <strong className='text-gray-900 dark:text-night-50'>{email}</strong>
@@ -107,15 +100,7 @@ const ResetPassword = () => {
             )}
 
             <form onSubmit={handleSubmit} className='space-y-5' noValidate>
-              {error && (
-                <div
-                  role='alert'
-                  className='p-3 bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-lg text-red-700 dark:text-red-300 text-sm flex items-start gap-2'
-                >
-                  <AlertCircle className='w-4 h-4 shrink-0 mt-0.5' aria-hidden='true' />
-                  {error}
-                </div>
-              )}
+              {error && <AuthAlert tone='error'>{error}</AuthAlert>}
 
               <div>
                 <AuthInput

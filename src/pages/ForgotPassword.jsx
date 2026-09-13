@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Mail, Send, AlertCircle, MailCheck, ArrowLeft, RotateCw } from "lucide-react";
+import { Mail, Send, MailCheck, ArrowLeft } from "lucide-react";
 import AuthStepperShell from "../components/auth/AuthStepperShell";
 import AuthInput from "../components/auth/AuthInput";
+import { AuthPanelHeading, AuthPanelTile, AuthAlert, AuthResendButton } from "../components/auth/AuthPanel";
 import Button from "../components/ui/Button";
 import { motionTokens } from "../components/animations/variants";
+import { useHasChanged } from "../hooks/useHasChanged";
 import { authAPI } from "../utils/api";
 import { getRetryMessage } from "../utils/authErrors";
 
@@ -22,19 +24,7 @@ const panelVariants = {
   }),
 };
 
-const headingClass =
-  "text-[22px] sm:text-[26px] leading-tight font-extrabold tracking-tight text-gray-900 dark:text-night-50 mb-2";
 const bodyClass = "text-gray-500 dark:text-night-400 mb-[22px]";
-
-const ErrorAlert = ({ children }) => (
-  <div
-    role='alert'
-    className='p-3 bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-lg text-red-700 dark:text-red-300 text-sm flex items-start gap-2'
-  >
-    <AlertCircle className='w-4 h-4 shrink-0 mt-0.5' aria-hidden='true' />
-    {children}
-  </div>
-);
 
 const ForgotPassword = () => {
   const location = useLocation();
@@ -46,6 +36,7 @@ const ForgotPassword = () => {
   const [dir, setDir] = useState(1);
   const [cooldown, setCooldown] = useState(0);
   const [resending, setResending] = useState(false);
+  const focusHeading = useHasChanged(sent);
 
   useEffect(() => {
     if (!sent || cooldown <= 0) return undefined;
@@ -104,11 +95,9 @@ const ForgotPassword = () => {
         {sent ? (
           <motion.div key='sent' custom={custom} variants={panelVariants} initial='enter' animate='center' exit='exit'>
             <div className='flex items-start gap-4 mb-1.5'>
-              <div className='grid place-items-center shrink-0 w-[52px] h-[52px] rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-300'>
-                <MailCheck className='w-[26px] h-[26px]' aria-hidden='true' />
-              </div>
+              <AuthPanelTile icon={MailCheck} />
               <div>
-                <h1 className={headingClass}>Revisa tu bandeja</h1>
+                <AuthPanelHeading focusOnMount={focusHeading}>Revisa tu bandeja</AuthPanelHeading>
                 <p role='status' className={bodyClass}>
                   Si existe una cuenta con <strong className='text-gray-900 dark:text-night-50'>{email}</strong>, te
                   enviamos un enlace para restablecer tu contraseña. El enlace vence en 60 minutos.
@@ -117,24 +106,8 @@ const ForgotPassword = () => {
             </div>
 
             <div className='space-y-4'>
-              {error && <ErrorAlert>{error}</ErrorAlert>}
-
-              <button
-                type='button'
-                onClick={handleResend}
-                disabled={cooldown > 0 || resending}
-                aria-busy={resending}
-                className='w-full inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 px-6 py-3.5 text-base font-semibold text-gray-700 dark:text-night-200 transition-colors enabled:hover:border-brand-300 enabled:hover:text-brand-700 dark:enabled:hover:border-brand-700 dark:enabled:hover:text-brand-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer'
-              >
-                <RotateCw className={`w-[18px] h-[18px] ${resending ? "animate-spin" : ""}`} aria-hidden='true' />
-                {cooldown > 0 ? (
-                  <span>
-                    Reenviar correo en <span className='tabular-nums font-bold'>{cooldown}</span>s
-                  </span>
-                ) : (
-                  <span>Reenviar correo</span>
-                )}
-              </button>
+              {error && <AuthAlert tone='error'>{error}</AuthAlert>}
+              <AuthResendButton cooldown={cooldown} sending={resending} onClick={handleResend} />
             </div>
 
             <button
@@ -148,11 +121,11 @@ const ForgotPassword = () => {
           </motion.div>
         ) : (
           <motion.div key='form' custom={custom} variants={panelVariants} initial='enter' animate='center' exit='exit'>
-            <h1 className={headingClass}>Recupera tu contraseña</h1>
+            <AuthPanelHeading focusOnMount={focusHeading}>Recupera tu contraseña</AuthPanelHeading>
             <p className={bodyClass}>Ingresa el correo de tu cuenta y te enviaremos un enlace seguro.</p>
 
             <form onSubmit={handleSubmit} className='space-y-5' noValidate>
-              {error && <ErrorAlert>{error}</ErrorAlert>}
+              {error && <AuthAlert tone='error'>{error}</AuthAlert>}
 
               <AuthInput
                 label='Correo electrónico'

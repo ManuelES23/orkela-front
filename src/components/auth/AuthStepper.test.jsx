@@ -43,4 +43,18 @@ describe("AuthStepper", () => {
     expect(states()).toEqual(["done", "done", "done"]);
     steps().forEach((li) => expect(li).not.toHaveAttribute("aria-current"));
   });
+
+  it("la barra cuenta el paso actual como completo cuando su estado es done", () => {
+    const fillOf = (props) => {
+      const { container, unmount } = render(<AuthStepper flow='signup' {...props} />);
+      const fill = container.querySelector("[data-fill]").getAttribute("data-fill");
+      unmount();
+      return Number(fill);
+    };
+
+    expect(fillOf({ current: 1, status: "active" })).toBe(0);
+    expect(fillOf({ current: 2, status: "active" })).toBe(0.5);
+    expect(fillOf({ current: 2, status: "done" })).toBe(1);
+    expect(fillOf({ current: 3, status: "done" })).toBe(1);
+  });
 });

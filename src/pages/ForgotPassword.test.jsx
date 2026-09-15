@@ -35,6 +35,19 @@ describe("ForgotPassword", () => {
     expect(screen.getByRole("link", { name: /volver a iniciar sesión/i })).toHaveAttribute("href", "/login");
   });
 
+  it("avisa que el correo no tiene cuenta y ofrece registrarse con ese correo", async () => {
+    authAPI.forgotPassword.mockRejectedValue(
+      new APIError("Este correo no tiene una cuenta en Orkela.", 404, { code: "account_not_found" })
+    );
+    renderPage();
+
+    submitEmail("nadie@example.com");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("nadie@example.com no tiene una cuenta en Orkela");
+    expect(screen.getByRole("link", { name: /crear una cuenta/i })).toHaveAttribute("href", "/register");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("muestra el tiempo de espera cuando hay demasiados intentos", async () => {
     authAPI.forgotPassword.mockRejectedValue(new APIError("Too Many Attempts.", 429, { retryAfter: 30 }));
     renderPage();

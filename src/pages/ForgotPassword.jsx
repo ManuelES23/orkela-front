@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Mail, Send, MailCheck, ArrowLeft } from "lucide-react";
+import { Mail, Send, MailCheck, ArrowLeft, ArrowRight } from "lucide-react";
 import AuthStepperShell from "../components/auth/AuthStepperShell";
 import AuthInput from "../components/auth/AuthInput";
 import { AuthPanelHeading, AuthPanelTile, AuthAlert, AuthResendButton } from "../components/auth/AuthPanel";
@@ -33,6 +33,9 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  // El backend responde account_not_found cuando el correo no tiene cuenta:
+  // en vez de un error genérico se ofrece ir a registrarse con ese correo.
+  const [notFound, setNotFound] = useState(false);
   const [dir, setDir] = useState(1);
   const [cooldown, setCooldown] = useState(0);
   const [resending, setResending] = useState(false);
@@ -47,6 +50,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setNotFound(false);
     setLoading(true);
 
     try {
@@ -55,7 +59,11 @@ const ForgotPassword = () => {
       setCooldown(RESEND_COOLDOWN);
       setSent(true);
     } catch (err) {
-      setError(getRetryMessage(err) || "No pudimos procesar la solicitud. Inténtalo de nuevo.");
+      if (err?.code === "account_not_found") {
+        setNotFound(true);
+      } else {
+        setError(getRetryMessage(err) || "No pudimos procesar la solicitud. Inténtalo de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
@@ -103,8 +111,8 @@ const ForgotPassword = () => {
               <div>
                 <AuthPanelHeading focusOnMount={focusHeading}>Revisa tu bandeja</AuthPanelHeading>
                 <p role='status' className={bodyClass}>
-                  Si existe una cuenta con <strong className='text-gray-900 dark:text-night-50'>{email}</strong>, te
-                  enviamos un enlace para restablecer tu contraseña. El enlace vence en 60 minutos.
+                  Te enviamos un enlace a <strong className='text-gray-900 dark:text-night-50'>{email}</strong> para
+                  restablecer tu contraseña. El enlace vence en 60 minutos.
                 </p>
               </div>
             </div>
@@ -131,12 +139,40 @@ const ForgotPassword = () => {
             <form onSubmit={handleSubmit} className='space-y-5' noValidate>
               {error && <AuthAlert tone='error'>{error}</AuthAlert>}
 
+              <AnimatePresence initial={false}>
+                {notFound && (
+                  <motion.div
+                    key='not-found'
+                    initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={prefersReducedMotion ? undefined : { opacity: 0, height: 0 }}
+                    transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease }}
+                    className='overflow-hidden'
+                  >
+                    <AuthAlert tone='warning'>
+                      <strong className='font-semibold'>{email}</strong> no tiene una cuenta en Orkela.{" "}
+                      <Link
+                        to='/register'
+                        state={{ email }}
+                        className='inline-flex items-center gap-1 font-semibold underline underline-offset-2 hover:no-underline'
+                      >
+                        Crear una cuenta
+                        <ArrowRight className='w-3.5 h-3.5' aria-hidden='true' />
+                      </Link>
+                    </AuthAlert>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <AuthInput
                 label='Correo electrónico'
                 icon={Mail}
                 type='email'
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setNotFound(false);
+                }}
                 placeholder='tu@empresa.com'
                 autoComplete='email'
                 required

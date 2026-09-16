@@ -390,41 +390,6 @@ export const projectTagsAPI = {
   },
 };
 
-// Team Members API
-export const teamMembersAPI = {
-  getAll: async (filters = {}) => {
-    const params = new URLSearchParams();
-    if (filters.status) params.append("status", filters.status);
-
-    const query = params.toString();
-    return await request(`/team-members${query ? `?${query}` : ""}`);
-  },
-
-  getById: async (id) => {
-    return await request(`/team-members/${id}`);
-  },
-
-  create: async (memberData) => {
-    return await request("/team-members", {
-      method: "POST",
-      body: JSON.stringify(memberData),
-    });
-  },
-
-  update: async (id, memberData) => {
-    return await request(`/team-members/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(memberData),
-    });
-  },
-
-  delete: async (id) => {
-    return await request(`/team-members/${id}`, {
-      method: "DELETE",
-    });
-  },
-};
-
 // My Collaborators API (usuarios reales que han colaborado conmigo)
 export const myCollaboratorsAPI = {
   getAll: async () => {

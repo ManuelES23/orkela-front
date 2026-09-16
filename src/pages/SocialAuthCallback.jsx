@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2, AlertCircle, UserPlus } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -7,9 +7,10 @@ import { socialAuthAPI } from "../utils/api";
 import AuthShell from "../components/auth/AuthShell";
 import Button from "../components/ui/Button";
 import ContextSelectionModal from "../components/modals/ContextSelectionModal";
+import SocialLinkPrompt from "../components/auth/SocialLinkPrompt";
 import { usePostLoginRedirect } from "../hooks/usePostLoginRedirect";
-
-const PROVIDER_LABEL = { google: "Google", microsoft: "Microsoft" };
+import { getSocialLinkErrorMessage } from "../utils/socialLinkErrors";
+import { PROVIDER_LABEL } from "../components/auth/ProviderIcons";
 
 // Solo confiamos en err.message cuando parece un error de API real (no un
 // SyntaxError/TypeError crudo de un response.json() sobre HTML/red caída).
@@ -34,12 +35,15 @@ const SocialAuthCallback = () => {
     handleContextSelect,
   } = usePostLoginRedirect();
 
-  const [status, setStatus] = useState("loading"); // loading | pending | error
+  const [status, setStatus] = useState("loading"); // loading | pending | link | error
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
   const [confirming, setConfirming] = useState(false);
 
   const ticket = searchParams.get("ticket");
+  const mode = searchParams.get("mode");
+  const navigate = useNavigate();
+  const [linkInfo, setLinkInfo] = useState(null);
   const hasExchangedRef = useRef(false);
 
   useEffect(() => {
@@ -53,8 +57,29 @@ const SocialAuthCallback = () => {
     hasExchangedRef.current = true;
 
     (async () => {
+      // Vinculación iniciada desde Configuración: se confirma con la sesión
+      // actual y se vuelve a Configuración con el resultado.
+      if (mode === "link") {
+        try {
+          const data = await socialAuthAPI.link(ticket);
+          navigate("/settings", { replace: true, state: { socialLinked: data.provider } });
+        } catch (err) {
+          navigate("/settings", {
+            replace: true,
+            state: { socialLinkError: getSocialLinkErrorMessage(err, "No pudimos conectar la cuenta. Inténtalo de nuevo.") },
+          });
+        }
+        return;
+      }
+
       try {
         const data = await socialAuthAPI.exchange(ticket);
+
+        if (data.link_required) {
+          setLinkInfo(data);
+          setStatus("link");
+          return;
+        }
 
         if (data.pending) {
           setProfile(data.profile);
@@ -104,8 +129,16 @@ const SocialAuthCallback = () => {
       {status === "loading" && (
         <div className='flex flex-col items-center gap-4 py-10 text-gray-500 dark:text-night-400'>
           <div className='w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin' />
-          <p>Confirmando tu acceso...</p>
+          <p>{mode === "link" ? "Conectando tu cuenta..." : "Confirmando tu acceso..."}</p>
         </div>
+      )}
+
+      {status === "link" && linkInfo && (
+        <SocialLinkPrompt
+          info={linkInfo}
+          ticket={ticket}
+          onLinked={(data) => completeLogin(loginWithSocialResult(data))}
+        />
       )}
 
       {status === "pending" && profile && (

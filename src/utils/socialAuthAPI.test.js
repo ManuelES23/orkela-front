@@ -59,12 +59,56 @@ describe("socialAuthAPI nonce", () => {
     expect(sessionStorage.getItem("orkela_social_nonce")).toBeNull();
   });
 
+  it("un 410 al vincular no cierra la sesión y borra el nonce", async () => {
+    localStorage.setItem("token", "sesion");
+    sessionStorage.setItem("orkela_social_nonce", "n1");
+    fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 410,
+      headers: new Headers(),
+      json: async () => ({ code: "link_expired", message: "venció" }),
+    });
+
+    await expect(socialAuthAPI.link("t1")).rejects.toMatchObject({ status: 410, code: "link_expired" });
+
+    expect(localStorage.getItem("token")).toBe("sesion");
+    expect(sessionStorage.getItem("orkela_social_nonce")).toBeNull();
+  });
+
+  it("borra el nonce al vincular con éxito", async () => {
+    localStorage.setItem("token", "sesion");
+    sessionStorage.setItem("orkela_social_nonce", "n1");
+    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ provider: "google" }) });
+
+    await socialAuthAPI.link("t1");
+
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ ticket: "t1", nonce: "n1" });
+    expect(sessionStorage.getItem("orkela_social_nonce")).toBeNull();
+  });
+
+  it("conserva el nonce si la contraseña es incorrecta para poder reintentar", async () => {
+    sessionStorage.setItem("orkela_social_nonce", "n1");
+    fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      headers: new Headers(),
+      json: async () => ({ code: "invalid_password", message: "La contraseña no es correcta." }),
+    });
+
+    await expect(socialAuthAPI.linkWithPassword("t1", "mala")).rejects.toMatchObject({ code: "invalid_password" });
+
+    expect(sessionStorage.getItem("orkela_social_nonce")).toBe("n1");
+  });
+
   it("traduce los códigos de error de vinculación", async () => {
     const { getSocialLinkErrorMessage } = await import("./socialLinkErrors");
     const { APIError } = await import("./api");
 
     expect(getSocialLinkErrorMessage(new APIError("x", 409, { code: "last_login_method" }), "fallback"))
       .toMatch(/única forma de entrar/);
+    expect(getSocialLinkErrorMessage(new APIError("x", 410, { code: "link_expired" }), "fallback")).toBe(
+      "El enlace para conectar la cuenta venció. Vuelve a intentarlo desde Configuración."
+    );
     expect(getSocialLinkErrorMessage(new APIError("x", 500, {}), "fallback")).toBe("fallback");
   });
 });

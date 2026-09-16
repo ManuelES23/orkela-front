@@ -10,6 +10,7 @@ const MESSAGES = {
     "Esta cuenta no tiene contraseña. Entra con la cuenta con la que la creaste y conecta esta desde Configuración.",
   email_unverified: "Confirma tu correo de Orkela antes de conectar esta cuenta. Revisa tu bandeja de entrada.",
   password_exists: "Tu cuenta ya tiene contraseña.",
+  link_expired: "El enlace para conectar la cuenta venció. Vuelve a intentarlo desde Configuración.",
 };
 
 // Mensaje para un error de vinculación: primero el `code` del backend, luego

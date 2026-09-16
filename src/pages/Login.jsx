@@ -18,11 +18,9 @@ import { GoogleIcon, MicrosoftIcon } from "../components/auth/ProviderIcons";
 const SOCIAL_ERROR_MESSAGES = {
   unverified_email:
     "Tu cuenta de Google/Microsoft no tiene el email verificado. No podemos usarla para iniciar sesión.",
-  admin_account:
-    "Ese email pertenece a una cuenta de administrador. Iniciá sesión con tu usuario y contraseña de administrador.",
-  link_required:
-    "Ya existe una cuenta con ese email. Iniciá sesión con tu contraseña para seguir usándola.",
-  default: "No pudimos completar el inicio de sesión. Volvé a intentarlo.",
+  admin_account: "Inicia sesión con tu usuario y contraseña de administrador.",
+  too_many_attempts: "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+  default: "No pudimos completar el inicio de sesión. Vuelve a intentarlo.",
 };
 
 const getSocialErrorMessage = (key) =>

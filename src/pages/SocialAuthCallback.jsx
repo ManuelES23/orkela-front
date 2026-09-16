@@ -49,17 +49,29 @@ const SocialAuthCallback = () => {
   useEffect(() => {
     if (!ticket) {
       setStatus("error");
-      setError("Falta el ticket de acceso. Volvé a intentarlo desde el login.");
+      setError("Falta el ticket de acceso. Vuelve a intentarlo desde el login.");
       return;
     }
 
+    // StrictMode ejecuta el efecto dos veces: el ticket se canjea una sola.
     if (hasExchangedRef.current) return;
     hasExchangedRef.current = true;
+
+    // Quita el ticket de la barra de direcciones (historial y Referer). Se
+    // conserva history.state del router; el ticket sigue en searchParams.
+    window.history.replaceState(window.history.state, "", window.location.pathname);
 
     (async () => {
       // Vinculación iniciada desde Configuración: se confirma con la sesión
       // actual y se vuelve a Configuración con el resultado.
       if (mode === "link") {
+        // Sin sesión, link() respondería 401: se explica aquí mismo.
+        if (!localStorage.getItem("token")) {
+          setStatus("error");
+          setError("Inicia sesión y vuelve a conectar la cuenta desde Configuración.");
+          return;
+        }
+
         try {
           const data = await socialAuthAPI.link(ticket);
           navigate("/settings", { replace: true, state: { socialLinked: data.provider } });
@@ -113,7 +125,7 @@ const SocialAuthCallback = () => {
       setError(
         getFriendlyErrorMessage(
           err,
-          "El enlace de acceso expiró. Volvé a intentarlo desde el login."
+          "El enlace de acceso expiró. Vuelve a intentarlo desde el login."
         )
       );
       setConfirming(false);

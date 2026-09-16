@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Lock, AlertTriangle } from "lucide-react";
@@ -38,36 +38,57 @@ const AccessSecuritySection = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [access, setAccess] = useState(null); // { has_password, identities }
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busyProvider, setBusyProvider] = useState(null);
   const [confirmProvider, setConfirmProvider] = useState(null);
   const [passwordMode, setPasswordMode] = useState(null); // "create" | "change" | null
 
+  const consumedRef = useRef({ stateKey: null, linkError: null });
+
   const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
     try {
       setAccess(await socialAuthAPI.identities());
     } catch {
-      showError("No se pudieron cargar tus formas de acceso");
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, []);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  // Resultado al volver de conectar (SocialAuthCallback) y cancelaciones
-  // del proveedor (?social_link_error=google). Se muestra una sola vez.
+  // Al volver con Atrás desde Google/Microsoft (bfcache) la página se
+  // restaura tal cual: el botón no debe quedar en "Abriendo...".
   useEffect(() => {
+    const handlePageShow = (event) => {
+      if (event.persisted) setBusyProvider(null);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+
+  // Resultado al volver de conectar (SocialAuthCallback) y cancelaciones
+  // del proveedor (?social_link_error=google). Se muestra una sola vez: el
+  // ref evita repetir el aviso cuando StrictMode ejecuta el efecto dos veces.
+  useEffect(() => {
+    const consumed = consumedRef.current;
     const { socialLinked, socialLinkError } = location.state || {};
-    if (socialLinked) success(`${PROVIDER_LABEL[socialLinked] || socialLinked} conectada`);
-    if (socialLinkError) showError(socialLinkError);
-    if (socialLinked || socialLinkError) {
+    if ((socialLinked || socialLinkError) && consumed.stateKey !== location.key) {
+      consumed.stateKey = location.key;
+      if (socialLinked) success(`${PROVIDER_LABEL[socialLinked] || socialLinked} conectada`);
+      if (socialLinkError) showError(socialLinkError);
       navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
     }
 
     const cancelled = searchParams.get("social_link_error");
-    if (cancelled) {
+    if (!cancelled) {
+      consumed.linkError = null;
+    } else if (consumed.linkError !== cancelled) {
+      consumed.linkError = cancelled;
       showError(`No se completó la conexión con ${PROVIDER_LABEL[cancelled] || cancelled}.`);
       const next = new URLSearchParams(searchParams);
       next.delete("social_link_error");
@@ -116,9 +137,23 @@ const AccessSecuritySection = () => {
 
   return (
     <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-100 dark:border-night-700 shadow-sm p-6'>
-      <AccessMeter active={activeCount} total={TOTAL_METHODS} />
+      <AccessMeter active={access ? activeCount : null} total={TOTAL_METHODS} />
 
       <LoadingSwap loading={loading} skeleton={<TilesSkeleton />}>
+        {!access && loadFailed && (
+          <div
+            role='alert'
+            className='flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300'
+          >
+            <span className='flex items-center gap-2'>
+              <AlertTriangle className='h-4 w-4 shrink-0' aria-hidden='true' />
+              No pudimos cargar tus formas de entrar.
+            </span>
+            <Button type='button' variant='secondary' onClick={load}>
+              Reintentar
+            </Button>
+          </div>
+        )}
         {access && (
           <motion.div
             variants={containerVariants}

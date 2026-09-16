@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
@@ -30,18 +31,44 @@ const SettingsProbe = () => {
 
 const renderAt = (url) =>
   render(
-    <MemoryRouter initialEntries={[url]}>
-      <Routes>
-        <Route path='/auth/callback' element={<SocialAuthCallback />} />
-        <Route path='/settings' element={<SettingsProbe />} />
-      </Routes>
-    </MemoryRouter>
+    <StrictMode>
+      <MemoryRouter initialEntries={[url]}>
+        <Routes>
+          <Route path='/auth/callback' element={<SocialAuthCallback />} />
+          <Route path='/settings' element={<SettingsProbe />} />
+        </Routes>
+      </MemoryRouter>
+    </StrictMode>
   );
 
 const LINK_REQUIRED = { link_required: true, provider: "microsoft", email: "ana@grupoesplendido.com", has_password: true };
 
 describe("SocialAuthCallback", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("canjea el ticket una sola vez y lo quita de la barra de direcciones", async () => {
+    window.history.replaceState(null, "", "/auth/callback?ticket=t1");
+    socialAuthAPI.exchange.mockResolvedValue({ user: { id: 3 }, token: "t" });
+    renderAt("/auth/callback?ticket=t1");
+
+    await vi.waitFor(() => expect(completeLogin).toHaveBeenCalledWith({ id: 3 }));
+    expect(socialAuthAPI.exchange).toHaveBeenCalledTimes(1);
+    expect(window.location.pathname).toBe("/auth/callback");
+    expect(window.location.search).toBe("");
+  });
+
+  it("en modo vincular sin sesión no llama a link y pide iniciar sesión", async () => {
+    renderAt("/auth/callback?ticket=t9&mode=link");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Inicia sesión y vuelve a conectar la cuenta desde Configuración."
+    );
+    expect(screen.getByRole("link", { name: /login|iniciar sesión/i })).toHaveAttribute("href", "/login");
+    expect(socialAuthAPI.link).not.toHaveBeenCalled();
+  });
 
   it("pide la contraseña para unir cuentas e inicia sesión al confirmarla", async () => {
     socialAuthAPI.exchange.mockResolvedValue(LINK_REQUIRED);
@@ -56,6 +83,15 @@ describe("SocialAuthCallback", () => {
 
     await vi.waitFor(() => expect(completeLogin).toHaveBeenCalledWith({ id: 7 }));
     expect(socialAuthAPI.linkWithPassword).toHaveBeenCalledWith("t1", "Clave123");
+  });
+
+  it("lleva el foco al título de la propuesta de unir cuentas", async () => {
+    socialAuthAPI.exchange.mockResolvedValue(LINK_REQUIRED);
+    renderAt("/auth/callback?ticket=t1");
+
+    const heading = await screen.findByRole("heading", { name: "¿Unimos estas cuentas?" });
+    expect(heading).toHaveAttribute("tabindex", "-1");
+    expect(heading).toHaveFocus();
   });
 
   it("muestra el error si la contraseña no es correcta", async () => {
@@ -79,15 +115,18 @@ describe("SocialAuthCallback", () => {
   });
 
   it("en modo vincular termina la conexión y vuelve a Configuración", async () => {
+    localStorage.setItem("token", "sesion");
     socialAuthAPI.link.mockResolvedValue({ provider: "google" });
     renderAt("/auth/callback?ticket=t9&mode=link");
 
     expect(await screen.findByText('settings:{"socialLinked":"google"}')).toBeInTheDocument();
+    expect(socialAuthAPI.link).toHaveBeenCalledTimes(1);
     expect(socialAuthAPI.link).toHaveBeenCalledWith("t9");
     expect(socialAuthAPI.exchange).not.toHaveBeenCalled();
   });
 
   it("en modo vincular lleva el error a Configuración", async () => {
+    localStorage.setItem("token", "sesion");
     socialAuthAPI.link.mockRejectedValue(new APIError("x", 409, { code: "already_linked" }));
     renderAt("/auth/callback?ticket=t9&mode=link");
 

@@ -943,25 +943,29 @@ export const socialAuthAPI = {
     return data.redirect_url;
   },
 
+  // El backend quema el ticket en cualquier intento: el nonce tampoco sirve después.
   link: async (ticket) => {
-    const data = await request("/auth/social/link", {
-      method: "POST",
-      body: JSON.stringify({ ticket, nonce: getSocialNonce() }),
-    });
-    sessionStorage.removeItem(SOCIAL_NONCE_KEY);
-    return data;
+    try {
+      return await request("/auth/social/link", {
+        method: "POST",
+        body: JSON.stringify({ ticket, nonce: getSocialNonce() }),
+      });
+    } finally {
+      sessionStorage.removeItem(SOCIAL_NONCE_KEY);
+    }
   },
 
   // Desde el login: el correo ya tiene cuenta y se confirma con su contraseña.
   linkWithPassword: async (ticket, password) => {
+    // Si la contraseña es incorrecta el nonce se conserva para reintentar.
     const data = await request("/auth/social/link-with-password", {
       method: "POST",
       body: JSON.stringify({ ticket, nonce: getSocialNonce(), password }),
     });
+    sessionStorage.removeItem(SOCIAL_NONCE_KEY);
 
     if (data.token) {
       localStorage.setItem("token", data.token);
-      sessionStorage.removeItem(SOCIAL_NONCE_KEY);
     }
 
     return data;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link2, Lock, Info } from "lucide-react";
@@ -21,6 +21,7 @@ const SocialLinkPrompt = ({ info, ticket, onLinked }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const headingRef = useRef(null);
   const label = PROVIDER_LABEL[info.provider] || info.provider;
 
   // Ícono del proveedor: se resuelve en una función auxiliar (no un
@@ -39,6 +40,12 @@ const SocialLinkPrompt = ({ info, ticket, onLinked }) => {
           transition: { duration: motionTokens.duration.base, ease: motionTokens.ease, delay },
         };
 
+  // El panel reemplaza al "Confirmando tu acceso...": el foco va al título,
+  // como en AuthPanelHeading (focusOnMount).
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -56,7 +63,13 @@ const SocialLinkPrompt = ({ info, ticket, onLinked }) => {
   return (
     <div className='space-y-6'>
       <div>
-        <h2 className='text-2xl font-extrabold text-gray-900 dark:text-night-50 text-balance'>¿Unimos estas cuentas?</h2>
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className='text-2xl font-extrabold text-gray-900 dark:text-night-50 text-balance rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 dark:focus-visible:ring-brand-400/30'
+        >
+          ¿Unimos estas cuentas?
+        </h2>
         <p className='mt-1 text-gray-500 dark:text-night-400'>
           Encontramos una cuenta de Orkela con el mismo correo que tu cuenta de {label}.
         </p>

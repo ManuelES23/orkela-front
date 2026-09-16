@@ -81,8 +81,14 @@ describe("Login", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Espera 55 segundos");
   });
 
-  it("explica link_required del login social", () => {
-    renderPage("/login?social_error=google&reason=link_required");
-    expect(screen.getByRole("alert")).toHaveTextContent("Ya existe una cuenta con ese email");
+  it.each([
+    ["/login?social_error=too_many_attempts", "Demasiados intentos. Espera unos minutos y vuelve a intentarlo."],
+    ["/login?social_error=admin_account", "Inicia sesión con tu usuario y contraseña de administrador."],
+    ["/login?social_error=google", "No pudimos completar el inicio de sesión. Vuelve a intentarlo."],
+    // link_required ya no existe: cae en el mensaje genérico.
+    ["/login?social_error=google&reason=link_required", "No pudimos completar el inicio de sesión. Vuelve a intentarlo."],
+  ])("explica el error de login social de %s", (entry, message) => {
+    renderPage(entry);
+    expect(screen.getByRole("alert")).toHaveTextContent(message);
   });
 });

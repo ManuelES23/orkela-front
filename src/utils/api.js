@@ -222,6 +222,16 @@ export const profileAPI = {
       }),
     });
   },
+
+  createPassword: async (password, passwordConfirmation) => {
+    return await request("/profile/password/create", {
+      method: "POST",
+      body: JSON.stringify({
+        password,
+        password_confirmation: passwordConfirmation,
+      }),
+    });
+  },
 };
 
 // Projects API
@@ -920,4 +930,45 @@ export const socialAuthAPI = {
 
     return data;
   },
+
+  // Vincular desde Configuración: la URL de inicio incluye una intención de
+  // un solo uso atada a esta sesión y al nonce de la pestaña.
+  linkIntent: async (provider) => {
+    const nonce = newSocialNonce();
+    sessionStorage.setItem(SOCIAL_NONCE_KEY, nonce);
+    const data = await request(`/auth/social/link-intent/${provider}`, {
+      method: "POST",
+      body: JSON.stringify({ nonce }),
+    });
+    return data.redirect_url;
+  },
+
+  link: async (ticket) => {
+    const data = await request("/auth/social/link", {
+      method: "POST",
+      body: JSON.stringify({ ticket, nonce: getSocialNonce() }),
+    });
+    sessionStorage.removeItem(SOCIAL_NONCE_KEY);
+    return data;
+  },
+
+  // Desde el login: el correo ya tiene cuenta y se confirma con su contraseña.
+  linkWithPassword: async (ticket, password) => {
+    const data = await request("/auth/social/link-with-password", {
+      method: "POST",
+      body: JSON.stringify({ ticket, nonce: getSocialNonce(), password }),
+    });
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      sessionStorage.removeItem(SOCIAL_NONCE_KEY);
+    }
+
+    return data;
+  },
+
+  identities: () => request("/auth/social/identities"),
+
+  unlink: (provider) =>
+    request(`/auth/social/identities/${provider}`, { method: "DELETE" }),
 };

@@ -34,4 +34,37 @@ describe("socialAuthAPI nonce", () => {
 
     expect(a).not.toBe(b);
   });
+
+  it("pide la intención de vincular con un nonce nuevo y devuelve la URL", async () => {
+    localStorage.setItem("token", "sesion");
+    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ redirect_url: "https://api/redirect" }) });
+
+    const url = await socialAuthAPI.linkIntent("microsoft");
+
+    const [endpoint, options] = fetch.mock.calls[0];
+    const body = JSON.parse(options.body);
+    expect(url).toBe("https://api/redirect");
+    expect(endpoint).toMatch(/\/auth\/social\/link-intent\/microsoft$/);
+    expect(options.headers.Authorization).toBe("Bearer sesion");
+    expect(body.nonce).toBe(sessionStorage.getItem("orkela_social_nonce"));
+  });
+
+  it("vincula con contraseña enviando ticket, nonce y contraseña, y guarda la sesión", async () => {
+    sessionStorage.setItem("orkela_social_nonce", "n1");
+
+    await socialAuthAPI.linkWithPassword("t1", "Clave123");
+
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({ ticket: "t1", nonce: "n1", password: "Clave123" });
+    expect(localStorage.getItem("token")).toBe("tok");
+    expect(sessionStorage.getItem("orkela_social_nonce")).toBeNull();
+  });
+
+  it("traduce los códigos de error de vinculación", async () => {
+    const { getSocialLinkErrorMessage } = await import("./socialLinkErrors");
+    const { APIError } = await import("./api");
+
+    expect(getSocialLinkErrorMessage(new APIError("x", 409, { code: "last_login_method" }), "fallback"))
+      .toMatch(/única forma de entrar/);
+    expect(getSocialLinkErrorMessage(new APIError("x", 500, {}), "fallback")).toBe("fallback");
+  });
 });

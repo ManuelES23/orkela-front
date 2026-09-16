@@ -24,6 +24,9 @@ const Button = ({
     // Variante de marca (gradiente violeta -> fucsia) para los flujos de auth
     brand:
       "text-white bg-linear-to-r from-brand-600 to-accent-600 shadow-lg shadow-brand-600/25 hover:brightness-105 hover:shadow-xl hover:shadow-brand-600/30",
+    // Acción destructiva secundaria, sin fondo (ej. "Desconectar" en fichas)
+    dangerGhost:
+      "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30",
   };
 
   const sizes = {

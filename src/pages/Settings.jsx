@@ -11,6 +11,7 @@ import { getAssetUrl } from "../utils/assetUrl";
 import { useNotification } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
 import MyPlanSection from "../components/settings/MyPlanSection";
+import AccessSecuritySection from "../components/settings/AccessSecuritySection";
 import CalendarIntegrationsSection from "../components/settings/CalendarIntegrationsSection";
 import { SkeletonSettings } from "../components/ui/Skeleton";
 
@@ -225,6 +226,10 @@ const Settings = () => {
 
           <StaggerItem>
             <MyPlanSection />
+          </StaggerItem>
+
+          <StaggerItem>
+            <AccessSecuritySection />
           </StaggerItem>
 
           <StaggerItem>

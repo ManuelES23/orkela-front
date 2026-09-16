@@ -67,6 +67,18 @@ export const portalAPI = {
     });
   },
 
+  // Canjea el enlace mágico (un solo uso) por una sesión del portal.
+  exchangeAccess: async (linkToken) => {
+    return await portalRequest("/portal/access/exchange", {
+      method: "POST",
+      body: JSON.stringify({ token: linkToken }),
+    });
+  },
+
+  logout: async () => {
+    return await portalRequest("/portal/logout", { method: "POST" });
+  },
+
   me: async () => {
     return await portalRequest("/portal/me");
   },

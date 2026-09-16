@@ -22,6 +22,11 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Sin 'unsafe-inline' en scripts: si se cuela un XSS no puede ejecutar
+    # código propio ni leer el token de localStorage. connect-src/img-src
+    # quedan abiertos a https/wss porque la URL de la API y de Reverb vienen
+    # de variables de entorno de Netlify.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
 # Cache para assets estáticos
 [[headers]]

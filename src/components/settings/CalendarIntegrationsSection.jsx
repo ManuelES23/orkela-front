@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, Loader2, AlertTriangle } from "lucide-react";
 import { calendarAPI } from "../../utils/calendarAPI";
@@ -56,6 +57,10 @@ const CalendarIntegrationsSection = () => {
   // Provider sobre el que hay una acción (conectar/reconectar/desconectar) en curso.
   const [actioningProvider, setActioningProvider] = useState(null);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pendingConnection = searchParams.get("calendar_pending");
+  const confirmedRef = useRef(null);
+
   const loadConnections = useCallback(async () => {
     try {
       setLoading(true);
@@ -69,9 +74,33 @@ const CalendarIntegrationsSection = () => {
     }
   }, [showError]);
 
+  // Al volver del flujo OAuth (?calendar_pending=…) primero se confirma la
+  // conexión y después se carga la lista, para que ya aparezca conectada.
   useEffect(() => {
-    loadConnections();
-  }, [loadConnections]);
+    if (!pendingConnection) {
+      loadConnections();
+      return;
+    }
+    // El pendiente es de un solo uso: StrictMode corre el efecto dos veces.
+    if (confirmedRef.current === pendingConnection) return;
+    confirmedRef.current = pendingConnection;
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("calendar_pending");
+    setSearchParams(next, { replace: true });
+
+    calendarAPI
+      .confirmConnection(pendingConnection)
+      .then(({ provider }) => {
+        success(`${provider === "microsoft" ? "Microsoft Calendar" : "Google Calendar"} conectado`);
+      })
+      .catch((err) => {
+        showError(err.message || "No se pudo conectar el calendario");
+      })
+      .finally(loadConnections);
+    // Solo reacciona a la llegada del parámetro; searchParams cambia al limpiarlo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingConnection, loadConnections]);
 
   // Usado tanto para "Conectar" (not_connected) como para "Reconectar"
   // (needs_reauth): en ambos casos se pide un ticket nuevo y se navega de

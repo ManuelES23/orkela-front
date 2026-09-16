@@ -15,6 +15,14 @@ export const calendarAPI = {
     return data.redirect_url;
   },
 
+  // Al volver de OAuth la conexión queda pendiente: se guarda solo si la
+  // confirma la misma cuenta que inició el flujo.
+  confirmConnection: (pending) =>
+    request("/calendar/connections/confirm", {
+      method: "POST",
+      body: JSON.stringify({ pending }),
+    }),
+
   disconnect: (provider) =>
     request(`/calendar/connections/${provider}`, { method: "DELETE" }),
 };

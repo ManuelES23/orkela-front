@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import {
   getPortalToken,
   clearPortalToken,
   getPortalOrgSlug,
+  portalAPI,
 } from "../../utils/portalApi";
 
 /**
@@ -42,6 +44,18 @@ const PortalLayout = ({ children, organization }) => {
       window.removeEventListener("portal:unauthorized", handleUnauthorized);
   }, [navigate]);
 
+  // Revoca la sesión en el servidor; aunque falle (red, token ya vencido),
+  // se borra localmente para no dejar la sesión abierta en este navegador.
+  const handleLogout = async () => {
+    try {
+      await portalAPI.logout();
+    } catch {
+      // se cierra igual en el navegador
+    }
+    clearPortalToken();
+    setHasToken(false);
+  };
+
   if (!hasToken) {
     const orgSlug = getPortalOrgSlug();
     if (orgSlug) {
@@ -75,6 +89,14 @@ const PortalLayout = ({ children, organization }) => {
         <span className='font-bold text-gray-900'>
           {organization?.name || "Portal de soporte"}
         </span>
+        <button
+          type='button'
+          onClick={handleLogout}
+          className='ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-brand-600 transition-colors cursor-pointer'
+        >
+          <LogOut className='w-4 h-4' aria-hidden='true' />
+          Salir
+        </button>
       </header>
       <main className='flex-1 flex flex-col min-h-0'>{children}</main>
     </div>

@@ -872,18 +872,36 @@ export const contactsAPI = {
   },
 };
 
+// Nonce de la pestaña que inicia el login social. El backend lo guarda junto
+// al ticket y exige el mismo valor al canjearlo: un ticket ajeno (alguien que
+// manda su propio /auth/callback?ticket=…) no trae el nonce de esta pestaña.
+const SOCIAL_NONCE_KEY = "orkela_social_nonce";
+
+const newSocialNonce = () => {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+};
+
+const getSocialNonce = () => sessionStorage.getItem(SOCIAL_NONCE_KEY);
+
 // Social Auth API (login con Google/Microsoft)
 export const socialAuthAPI = {
-  redirectUrl: (provider) => `${API_URL}/auth/social/${provider}/redirect`,
+  redirectUrl: (provider) => {
+    const nonce = newSocialNonce();
+    sessionStorage.setItem(SOCIAL_NONCE_KEY, nonce);
+    return `${API_URL}/auth/social/${provider}/redirect?nonce=${nonce}`;
+  },
 
   exchange: async (ticket) => {
     const data = await publicRequest("/auth/social/exchange", {
       method: "POST",
-      body: JSON.stringify({ ticket }),
+      body: JSON.stringify({ ticket, nonce: getSocialNonce() }),
     });
 
     if (data.token) {
       localStorage.setItem("token", data.token);
+      sessionStorage.removeItem(SOCIAL_NONCE_KEY);
     }
 
     return data;
@@ -892,11 +910,12 @@ export const socialAuthAPI = {
   confirm: async (ticket) => {
     const data = await publicRequest("/auth/social/confirm", {
       method: "POST",
-      body: JSON.stringify({ ticket }),
+      body: JSON.stringify({ ticket, nonce: getSocialNonce() }),
     });
 
     if (data.token) {
       localStorage.setItem("token", data.token);
+      sessionStorage.removeItem(SOCIAL_NONCE_KEY);
     }
 
     return data;

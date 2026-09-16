@@ -25,3 +25,8 @@ dist-ssr
 
 # Git worktrees (local isolation, not part of the repo)
 .worktrees/
+
+# Variables de entorno locales (en Netlify se configuran en el panel)
+.env
+.env.*
+!.env.example

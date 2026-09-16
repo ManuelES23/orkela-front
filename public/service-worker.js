@@ -1,15 +1,25 @@
-const CACHE_NAME = "orkela-v1";
-const RUNTIME_CACHE = "orkela-runtime";
+// Se sube la versión para descartar la caché anterior, que guardaba cualquier
+// página visitada (incluidas las URLs /portal/access/{token}).
+const CACHE_NAME = "orkela-v2";
+const RUNTIME_CACHE = "orkela-runtime-v2";
 
-// Archivos esenciales para cachear durante la instalación
-const PRECACHE_URLS = ["/", "/index.html", "/src/main.jsx", "/src/index.css"];
+// Único documento que se guarda: el shell de la SPA para el modo sin conexión.
+const APP_SHELL = "/index.html";
+
+// Solo se guardan archivos estáticos propios. Nunca páginas por su URL: una
+// URL puede llevar un token (enlaces del portal, callbacks de login).
+const isCacheableAsset = (url) =>
+  url.origin === self.location.origin &&
+  (url.pathname.startsWith("/assets/") ||
+    url.pathname.startsWith("/img/") ||
+    /^\/[^/]+\.(js|css|png|svg|ico|json|woff2?)$/.test(url.pathname));
 
 // Instalación del Service Worker
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => cache.add(APP_SHELL))
       .then(() => self.skipWaiting())
   );
 });
@@ -20,62 +30,54 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((cacheNames) => {
-        return cacheNames.filter(
-          (cacheName) => !currentCaches.includes(cacheName)
-        );
-      })
-      .then((cachesToDelete) => {
-        return Promise.all(
-          cachesToDelete.map((cacheToDelete) => {
-            return caches.delete(cacheToDelete);
-          })
-        );
-      })
+      .then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((cacheName) => !currentCaches.includes(cacheName))
+            .map((cacheName) => caches.delete(cacheName))
+        )
+      )
       .then(() => self.clients.claim())
   );
 });
 
-// Estrategia de fetch: Network First con fallback a Cache
 self.addEventListener("fetch", (event) => {
-  // Solo cachear peticiones GET
-  if (event.request.method !== "GET") return;
+  const { request } = event;
+  if (request.method !== "GET") return;
 
-  // Ignorar peticiones a la API (dejarlas pasar sin interceptar)
-  if (
-    event.request.url.includes("/api/") ||
-    event.request.url.includes("orkela.localhost")
-  ) {
-    return; // No interceptar, dejar que el navegador las maneje
+  const url = new URL(request.url);
+
+  // Navegación: siempre a la red; sin conexión, el shell guardado.
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request).catch(() =>
+        caches.match(APP_SHELL, { cacheName: CACHE_NAME }).then(
+          (cached) => cached || new Response("Offline", { status: 503, statusText: "Sin conexión" })
+        )
+      )
+    );
+    return;
   }
 
+  // API, otros orígenes, etc.: sin interceptar.
+  if (!isCacheableAsset(url)) return;
+
+  // Estáticos: red primero, con respaldo en caché.
   event.respondWith(
-    caches.open(RUNTIME_CACHE).then((cache) => {
-      return fetch(event.request)
+    caches.open(RUNTIME_CACHE).then((cache) =>
+      fetch(request)
         .then((response) => {
-          // Si la respuesta es válida, clonarla y guardarla en caché
           if (response && response.status === 200) {
-            cache.put(event.request, response.clone());
+            cache.put(request, response.clone());
           }
           return response;
         })
-        .catch(() => {
-          // Si falla la red, intentar obtener de caché
-          return cache.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // Si no está en caché, devolver página offline personalizada
-            if (event.request.mode === "navigate") {
-              return cache.match("/index.html");
-            }
-            return new Response("Offline", {
-              status: 503,
-              statusText: "Sin conexión",
-            });
-          });
-        });
-    })
+        .catch(() =>
+          cache.match(request).then(
+            (cached) => cached || new Response("Offline", { status: 503, statusText: "Sin conexión" })
+          )
+        )
+    )
   );
 });
 

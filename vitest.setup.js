@@ -1,6 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 import { afterEach } from "vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
+
+// findBy*/waitFor esperan 1 s por defecto: con la suite completa en paralelo
+// (lazy imports, transiciones de framer-motion) a veces no alcanza y los
+// tests fallan sin que nada esté roto.
+configure({ asyncUtilTimeout: 4000 });
 
 // Con `globals: false` Testing Library no registra su cleanup automático:
 // sin esto los renders se acumulan entre tests del mismo archivo.

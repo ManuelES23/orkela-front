@@ -10,5 +10,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.js"],
     globals: false,
+    // Margen para tests con muchos ciclos de act/temporizadores falsos
+    // cuando corren en paralelo con el resto de la suite.
+    testTimeout: 20000,
   },
 });

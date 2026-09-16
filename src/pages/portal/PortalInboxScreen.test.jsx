@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import PortalInboxScreen from "./PortalInboxScreen";
 import { portalAPI } from "../../utils/portalApi";
@@ -95,6 +95,9 @@ describe("PortalInboxScreen realtime echo handler", () => {
     renderScreen();
 
     await screen.findByText("Ticket en la lista");
+    // La suscripción se hace en un efecto posterior al render de la lista:
+    // bajo carga, el texto puede aparecer antes de que el listener exista.
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
     portalAPI.getTicket.mockClear();
 
     act(() => {

@@ -12,6 +12,7 @@ import { getEcho, updateEchoAuth, disconnectEcho } from "../utils/echo";
 import { notificationsAPI } from "../utils/api";
 import {
   normalizeNotification,
+  notificationTarget,
   refreshKeysFor,
   toastKindFor,
   organizationSyncKeysFor,
@@ -126,6 +127,16 @@ export const RealtimeProvider = ({ children }) => {
   // Ids locales para broadcasts sin id persistido (no debería pasar salvo
   // en señales silenciosas, que no se agregan)
   const localIdRef = useRef(0);
+
+  // Abre una notificación (marcar leída + navegar). La registra
+  // NotificationOpener desde dentro del Router: este provider está fuera.
+  const notificationOpenerRef = useRef(null);
+  const registerNotificationOpener = useCallback((open) => {
+    notificationOpenerRef.current = open;
+    return () => {
+      if (notificationOpenerRef.current === open) notificationOpenerRef.current = null;
+    };
+  }, []);
 
   // Registrar callback de refresco. Devuelve la función para darlo de baja.
   const unregisterRefresh = useCallback((type, callback) => {
@@ -362,8 +373,21 @@ export const RealtimeProvider = ({ children }) => {
             reason: removedReason,
           });
         } else {
+          // Clic en el toast: mismo destino que en la campana (y la marca leída)
           const toast = { success, warning, info }[toastKindFor(data.type)];
-          toast(data.message);
+          const opensSomething = Boolean(notificationTarget(notification));
+          toast(
+            data.message,
+            undefined,
+            opensSomething
+              ? {
+                  onClick: () =>
+                    notificationOpenerRef.current?.(
+                      notificationsRef.current.find((n) => n.id === notification.id) ?? notification
+                    ),
+                }
+              : {}
+          );
         }
 
         // Mi rol o mi plan cambiaron: menús y permisos al día sin recargar
@@ -550,6 +574,8 @@ export const RealtimeProvider = ({ children }) => {
     // Canales de recurso (project/team/organization .sync)
     subscribeChannel,
     channelEpoch,
+    // Abrir una notificación desde el toast en vivo
+    registerNotificationOpener,
     // Modal de removido de organización
     removedFromOrgModal,
     closeRemovedFromOrgModal,

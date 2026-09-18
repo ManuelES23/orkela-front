@@ -12,6 +12,7 @@ import { RealtimeProvider, useRealtime } from "./context/RealtimeContext";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import OrganizationRoute from "./components/OrganizationRoute";
+import NotificationOpener from "./components/notifications/NotificationOpener";
 import RemovedFromOrgModal from "./components/ui/RemovedFromOrgModal";
 import LoadingScreen from "./components/ui/LoadingScreen";
 
@@ -87,6 +88,7 @@ function App() {
           <RealtimeProvider>
             <Router>
               <GlobalModals />
+              <NotificationOpener />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Rutas públicas */}

@@ -29,9 +29,10 @@ export const NotificationProvider = ({ children }) => {
   const [invitationLinks, setInvitationLinks] = useState([]);
 
   const addNotification = useCallback(
-    ({ type = "info", message, title, duration = 5000 }) => {
+    ({ type = "info", message, title, duration = 5000, onClick }) => {
       const id = ++nextIdRef.current;
-      const notification = { id, type, message, title };
+      // onClick: el toast es clicable (p.ej. lleva al recurso de una notificación)
+      const notification = { id, type, message, title, onClick };
 
       setNotifications((prev) => [...prev, notification]);
 
@@ -51,48 +52,52 @@ export const NotificationProvider = ({ children }) => {
   }, []);
 
   const success = useCallback(
-    (message, duration) => {
+    (message, duration, options = {}) => {
       return addNotification({
         type: "success",
         title: "¡Éxito!",
         message,
         duration,
+        onClick: options.onClick,
       });
     },
     [addNotification]
   );
 
   const error = useCallback(
-    (message, duration) => {
+    (message, duration, options = {}) => {
       return addNotification({
         type: "error",
         title: "Error",
         message,
         duration: duration || 7000,
+        onClick: options.onClick,
       });
     },
     [addNotification]
   );
 
   const warning = useCallback(
-    (message, duration) => {
+    (message, duration, options = {}) => {
       return addNotification({
         type: "warning",
         title: "Atención",
         message,
         duration: duration || 6000,
+        onClick: options.onClick,
       });
     },
     [addNotification]
   );
 
   const info = useCallback(
-    (message, duration) => {
+    (message, duration, options = {}) => {
       return addNotification({
         type: "info",
         title: "Información",
         message,
         duration,
+        onClick: options.onClick,
       });
     },
     [addNotification]
@@ -150,7 +155,11 @@ const NotificationContainer = ({ notifications, onRemove }) => {
 };
 
 const Notification = ({ notification, onClose }) => {
-  const { type, message, title } = notification;
+  const { type, message, title, onClick } = notification;
+  const handleActivate = () => {
+    onClick();
+    onClose();
+  };
 
   const config = {
     success: {
@@ -243,8 +252,22 @@ const Notification = ({ notification, onClose }) => {
           <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${iconColor}`} />
         </motion.div>
 
-        {/* Contenido */}
-        <div className='flex-1 min-w-0'>
+        {/* Contenido (clicable si el toast lleva a algún sitio) */}
+        <div
+          className={`flex-1 min-w-0${onClick ? " cursor-pointer" : ""}`}
+          {...(onClick && {
+            role: "button",
+            tabIndex: 0,
+            "aria-label": `${title}: ${message}. Abrir`,
+            onClick: handleActivate,
+            onKeyDown: (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleActivate();
+              }
+            },
+          })}
+        >
           <motion.p
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}

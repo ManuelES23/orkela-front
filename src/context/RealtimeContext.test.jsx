@@ -157,6 +157,41 @@ describe("RealtimeProvider", () => {
     expect(toasts.info).toHaveBeenCalledTimes(1);
   });
 
+  it("el toast en vivo es clicable: abre la notificación con el opener registrado", async () => {
+    const opener = vi.fn();
+    const Register = () => {
+      const { registerNotificationOpener } = useRealtime();
+      useEffect(() => registerNotificationOpener(opener), [registerNotificationOpener]);
+      return null;
+    };
+    render(
+      <RealtimeProvider>
+        <Register />
+        <Probe />
+      </RealtimeProvider>
+    );
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+
+    emit(serverItem(5, { type: "task_assigned", data: { task_id: 9, project_id: 2, organization_id: 4 } }));
+
+    const [, , options] = toasts.info.mock.calls.at(-1);
+    expect(options.onClick).toEqual(expect.any(Function));
+    act(() => options.onClick());
+    expect(opener).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 5, type: "task_assigned", data: expect.objectContaining({ task_id: 9 }) })
+    );
+  });
+
+  it("el toast de una notificación sin destino no es clicable", async () => {
+    renderProvider();
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+
+    emit(serverItem(6, { type: "algo_desconocido" }));
+
+    const [, , options] = toasts.info.mock.calls.at(-1);
+    expect(options.onClick).toBeUndefined();
+  });
+
   it("una señal silenciosa refresca sin aviso ni historial", async () => {
     const projects = vi.fn();
     const tasks = vi.fn();

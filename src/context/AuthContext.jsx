@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { authAPI, AUTH_EXPIRED_EVENT } from "../utils/api";
+import AuthRetryScreen from "../components/auth/AuthRetryScreen";
 
 const AuthContext = createContext(null);
 
@@ -8,30 +9,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [switchingContext, setSwitchingContext] = useState(false);
 
-  useEffect(() => {
-    // Verificar si hay un token y usuario guardado
-    const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user");
+  // true cuando no se pudo verificar la sesión por un error de red/servidor
+  // (no por credenciales inválidas): se conserva el token y se ofrece reintentar.
+  const [authCheckFailed, setAuthCheckFailed] = useState(false);
 
-      if (token && savedUser) {
-        try {
-          // Verificar que el token sigue siendo válido
-          const userData = await authAPI.getUser();
-          setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
-        } catch (error) {
-          // Token inválido, limpiar
+  // Verificar si hay un token y usuario guardado
+  const checkAuth = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+
+    setLoading(true);
+    setAuthCheckFailed(false);
+
+    if (token && savedUser) {
+      try {
+        // Verificar que el token sigue siendo válido
+        const userData = await authAPI.getUser();
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+      } catch (error) {
+        if (error?.status === 401 || error?.status === 419) {
+          // Token inválido o vencido, limpiar
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setUser(null);
+        } else {
+          // API caída, sin conexión o 5xx: no cerrar la sesión.
+          setAuthCheckFailed(true);
         }
       }
-      setLoading(false);
-    };
-
-    checkAuth();
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   // La API emite este evento ante un 401 (token vencido o revocado tras
   // restablecer/cambiar la contraseña): reflejarlo en el estado.
@@ -160,6 +173,22 @@ export const AuthProvider = ({ children }) => {
     getActiveContext,
     refreshUser,
   };
+
+  // Sesión guardada pero no verificable (red/servidor): pantalla de reintento
+  // en lugar de mandar al login con el token borrado.
+  if (authCheckFailed) {
+    return (
+      <AuthRetryScreen
+        onRetry={checkAuth}
+        onLogout={() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+          setAuthCheckFailed(false);
+        }}
+      />
+    );
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

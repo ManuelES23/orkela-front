@@ -18,6 +18,10 @@ import { useRealtime } from "../../context/RealtimeContext";
 import { useAuth } from "../../context/AuthContext";
 import { formatDistanceToNow } from "../../utils/dateUtils";
 
+// Las invitaciones de proyecto, equipo y organización vienen de tablas
+// distintas: el id solo es único junto con el tipo.
+const invitationKey = (invitation) => `${invitation.type}-${invitation.id}`;
+
 const InvitationsPanel = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -73,7 +77,7 @@ const InvitationsPanel = () => {
 
   // Aceptar invitación
   const handleAccept = async (invitation) => {
-    setProcessingId(invitation.id);
+    setProcessingId(invitationKey(invitation));
     try {
       const response = await myInvitationsAPI.accept(
         invitation.type,
@@ -81,7 +85,9 @@ const InvitationsPanel = () => {
       );
 
       // Remover de la lista
-      setInvitations((prev) => prev.filter((i) => i.id !== invitation.id));
+      setInvitations((prev) =>
+        prev.filter((i) => invitationKey(i) !== invitationKey(invitation))
+      );
 
       // Refrescar la lista correspondiente según el tipo de invitación
       if (invitation.type === "team") {
@@ -122,12 +128,14 @@ const InvitationsPanel = () => {
 
   // Rechazar invitación
   const handleDecline = async (invitation) => {
-    setProcessingId(invitation.id);
+    setProcessingId(invitationKey(invitation));
     try {
       await myInvitationsAPI.decline(invitation.type, invitation.token);
       success("Invitación rechazada");
       // Remover de la lista
-      setInvitations((prev) => prev.filter((i) => i.id !== invitation.id));
+      setInvitations((prev) =>
+        prev.filter((i) => invitationKey(i) !== invitationKey(invitation))
+      );
     } catch (err) {
       showError(err.message || "Error al rechazar la invitación");
     } finally {
@@ -237,7 +245,7 @@ const InvitationsPanel = () => {
                   <AnimatePresence>
                     {invitations.map((invitation) => (
                       <motion.div
-                        key={`${invitation.type}-${invitation.id}`}
+                        key={invitationKey(invitation)}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
@@ -286,10 +294,10 @@ const InvitationsPanel = () => {
                             <div className='flex items-center gap-2 mt-3'>
                               <button
                                 onClick={() => handleAccept(invitation)}
-                                disabled={processingId === invitation.id}
+                                disabled={processingId === invitationKey(invitation)}
                                 className='flex items-center gap-1 px-3 py-1.5 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
                               >
-                                {processingId === invitation.id ? (
+                                {processingId === invitationKey(invitation) ? (
                                   <Loader2 className='w-4 h-4 animate-spin' />
                                 ) : (
                                   <Check className='w-4 h-4' />
@@ -298,7 +306,7 @@ const InvitationsPanel = () => {
                               </button>
                               <button
                                 onClick={() => handleDecline(invitation)}
-                                disabled={processingId === invitation.id}
+                                disabled={processingId === invitationKey(invitation)}
                                 className='flex items-center gap-1 px-3 py-1.5 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-night-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
                               >
                                 <X className='w-4 h-4' />
@@ -367,7 +375,15 @@ const InvitationsPanel = () => {
                 <div className='p-6 space-y-3'>
                   {/* Opción: Modo Organización */}
                   <button
-                    onClick={() => handleOrgContextSelection("organization")}
+                    onClick={() =>
+                      // Cambiar a la organización RECIÉN aceptada: el legacy
+                      // "organization" resuelve la organización previa.
+                      handleOrgContextSelection(
+                        showOrgContextModal.id
+                          ? String(showOrgContextModal.id)
+                          : "organization"
+                      )
+                    }
                     className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 rounded-xl hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all group text-left'
                   >
                     <div className='flex items-center gap-3'>

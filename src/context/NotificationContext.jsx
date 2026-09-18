@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
@@ -22,10 +22,12 @@ export const useNotification = () => {
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
+  // Contador para ids únicos: dos toasts en el mismo ms compartían id con Date.now()
+  const nextIdRef = useRef(0);
 
   const addNotification = useCallback(
     ({ type = "info", message, title, duration = 5000 }) => {
-      const id = Date.now();
+      const id = ++nextIdRef.current;
       const notification = { id, type, message, title };
 
       setNotifications((prev) => [...prev, notification]);

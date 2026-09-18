@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { parseLocalDate } from "../utils/dateUtils";
@@ -65,31 +65,41 @@ const Dashboard = () => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadDashboardData = useCallback(async () => {
+  // Id de la última petición: descarta respuestas viejas si se solapan
+  // (ej. refresco en tiempo real + cambio de contexto).
+  const requestIdRef = useRef(0);
+
+  const loadDashboardData = useCallback(async ({ silent = false } = {}) => {
+    const requestId = ++requestIdRef.current;
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [projectsData, tasksData, teamsData] = await Promise.all([
         projectsAPI.getAll(),
         tasksAPI.getAll(),
         teamsAPI.getAll().catch(() => []),
       ]);
 
+      if (requestId !== requestIdRef.current) return;
       setProjects(projectsData);
       setTasks(tasksData);
       setTeams(teamsData);
     } catch (err) {
       console.error("Error al cargar datos del dashboard:", err);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, []);
 
+  // Recargar también al cambiar de contexto (InvitationsPanel o
+  // RemovedFromOrgModal cambian el contexto sin recargar la página).
+  const activeContext = user?.active_context;
   useEffect(() => {
     loadDashboardData();
-  }, [loadDashboardData]);
+  }, [loadDashboardData, activeContext]);
 
   useEffect(() => {
-    registerRefresh("dashboard", loadDashboardData);
+    // Refresco en tiempo real sin volver a mostrar el skeleton
+    registerRefresh("dashboard", () => loadDashboardData({ silent: true }));
     return () => unregisterRefresh("dashboard");
   }, [registerRefresh, unregisterRefresh, loadDashboardData]);
 

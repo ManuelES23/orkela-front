@@ -5,6 +5,7 @@ import {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useNotification } from "./NotificationContext";
@@ -25,7 +26,13 @@ export const RealtimeProvider = ({ children }) => {
   const { success, info, warning } = useNotification();
   const [notifications, setNotifications] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Derivado del historial: así nunca se desfasa (ej. al marcar como leída
+  // una notificación que ya lo estaba).
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications]
+  );
 
   // Estado para el modal de "removido de organización"
   const [removedFromOrgModal, setRemovedFromOrgModal] = useState({
@@ -40,6 +47,9 @@ export const RealtimeProvider = ({ children }) => {
 
   // Ref para mantener la función de notificación actualizada sin causar re-suscripciones
   const handleNotificationRef = useRef(null);
+
+  // Contador para ids únicos (Date.now() colisiona si llegan dos eventos en el mismo ms)
+  const notificationIdRef = useRef(0);
 
   // Registrar callback de refresco
   const registerRefresh = useCallback((type, callback) => {
@@ -63,12 +73,11 @@ export const RealtimeProvider = ({ children }) => {
   const addRealtimeNotification = useCallback((notification) => {
     const newNotification = {
       ...notification,
-      id: Date.now(),
+      id: `${Date.now()}-${++notificationIdRef.current}`,
       read: false,
       createdAt: new Date(),
     };
     setNotifications((prev) => [newNotification, ...prev].slice(0, 50)); // Máximo 50 notificaciones
-    setUnreadCount((prev) => prev + 1);
   }, []);
 
   // Marcar notificación como leída
@@ -76,25 +85,21 @@ export const RealtimeProvider = ({ children }) => {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
-    setUnreadCount((prev) => Math.max(0, prev - 1));
   }, []);
 
   // Marcar todas como leídas
   const markAllAsRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
   }, []);
 
   // Limpiar notificaciones
   const clearNotifications = useCallback(() => {
     setNotifications([]);
-    setUnreadCount(0);
   }, []);
 
   // Disparar refresh manualmente desde cualquier componente
   const triggerRefresh = useCallback(
     (type) => {
-      console.log(`🔄 Triggering refresh for: ${type}`);
       const callback = refreshCallbacks.get(type);
       if (callback) {
         callback();
@@ -108,7 +113,6 @@ export const RealtimeProvider = ({ children }) => {
     (pattern) => {
       refreshCallbacks.forEach((callback, key) => {
         if (key.startsWith(pattern)) {
-          console.log(`🔄 Triggering refresh for: ${key}`);
           callback();
         }
       });
@@ -130,8 +134,6 @@ export const RealtimeProvider = ({ children }) => {
   // Procesar notificación recibida
   const handleNotification = useCallback(
     (data) => {
-      console.log("📩 Notification received:", data.type, data);
-
       // Agregar al historial
       addRealtimeNotification({
         type: data.type,
@@ -335,6 +337,17 @@ export const RealtimeProvider = ({ children }) => {
         default:
           info(data.message);
       }
+
+      // El Dashboard resume tareas, proyectos y equipos: refrescarlo ante
+      // cualquier cambio de esas entidades.
+      if (/^(task|checklist|project|team)_/.test(data.type || "")) {
+        refresh("dashboard");
+      }
+
+      // Modal de detalle de tarea abierto (TaskDetailModal)
+      if (data.data?.task_id) {
+        refresh(`task-detail-${data.data.task_id}`);
+      }
     },
     [addRealtimeNotification, info, success, warning, refresh]
   );
@@ -347,6 +360,15 @@ export const RealtimeProvider = ({ children }) => {
   // Conectar y suscribirse al canal del usuario
   // IMPORTANTE: Solo depende de user?.id para evitar re-suscripciones innecesarias
   useEffect(() => {
+    // Al cerrar sesión o cambiar de usuario, el historial del anterior no
+    // debe quedar visible (el provider sigue montado tras un navigate()).
+    setNotifications([]);
+    setRemovedFromOrgModal({
+      isOpen: false,
+      organizationName: "",
+      removerName: "",
+    });
+
     if (!user?.id) {
       disconnectEcho();
       setIsConnected(false);
@@ -372,7 +394,6 @@ export const RealtimeProvider = ({ children }) => {
 
       channel
         .listen(".notification", (data) => {
-          console.log("Notificación recibida:", data);
           // Usar la ref para siempre tener la versión más actualizada
           handleNotificationRef.current?.(data);
         })

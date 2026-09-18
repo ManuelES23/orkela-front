@@ -69,6 +69,21 @@ import {
   ProjectGanttPdf,
 } from "../components/exports/PdfDocuments";
 
+// GET /tasks está acotado al contexto activo (personal/empresa), pero
+// GET /projects/{id} no: si el proyecto es de otro contexto, /tasks no trae
+// sus tareas. Se toma project.tasks como fuente de verdad y se completa con
+// la versión de /tasks (que además trae checklist_items) cuando existe.
+const mergeProjectTasks = (projectTasks = [], scopedTasks = [], projectId) => {
+  const ownScoped = scopedTasks.filter(
+    (task) => task.project_id === parseInt(projectId)
+  );
+  const scopedIds = new Set(ownScoped.map((task) => task.id));
+  return [
+    ...ownScoped,
+    ...projectTasks.filter((task) => !scopedIds.has(task.id)),
+  ];
+};
+
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -185,44 +200,60 @@ const ProjectDetail = () => {
     }
   };
 
+  // Id de la última carga: al pasar de /projects/1 a /projects/2 se
+  // descartan las respuestas del proyecto anterior que lleguen tarde.
+  const requestIdRef = useRef(0);
+
+  // Proyecto + tareas (solo las de este proyecto, no todas las del usuario)
+  const fetchProjectWithTasks = useCallback(async () => {
+    const [projectData, tasksData] = await Promise.all([
+      projectsAPI.getById(id),
+      tasksAPI.getAll({ project_id: id }).catch(() => []),
+    ]);
+    return {
+      projectData,
+      projectTasks: mergeProjectTasks(projectData.tasks, tasksData, id),
+    };
+  }, [id]);
+
   // Función para cargar datos con indicador de carga (carga inicial)
   const loadProjectData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     try {
       setLoading(true);
       setError(null);
 
-      // Cargar proyecto y sus tareas
-      const [projectData, tasksData] = await Promise.all([
-        projectsAPI.getById(id),
-        tasksAPI.getAll(),
-      ]);
+      const { projectData, projectTasks } = await fetchProjectWithTasks();
+      if (requestId !== requestIdRef.current) return;
 
       setProject(projectData);
-      // Filtrar tareas del proyecto
-      setTasks(tasksData.filter((task) => task.project_id === parseInt(id)));
+      setTasks(projectTasks);
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       setError(err.message || "Error al cargar el proyecto");
       console.error("Error loading project:", err);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
-  }, [id]);
+  }, [fetchProjectWithTasks]);
 
   // Función para actualizar datos silenciosamente (sin spinner, para tiempo real)
   const refreshDataSilently = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     try {
-      const [projectData, tasksData] = await Promise.all([
-        projectsAPI.getById(id),
-        tasksAPI.getAll(),
-      ]);
+      const { projectData, projectTasks } = await fetchProjectWithTasks();
+      if (requestId !== requestIdRef.current) return;
 
       setProject(projectData);
-      setTasks(tasksData.filter((task) => task.project_id === parseInt(id)));
+      setTasks(projectTasks);
     } catch (err) {
       console.error("Error refreshing data:", err);
       // No mostrar error en actualización silenciosa
+    } finally {
+      // Si esta recarga reemplazó a una carga inicial en curso, quitar el skeleton
+      if (requestId === requestIdRef.current) setLoading(false);
     }
-  }, [id]);
+  }, [fetchProjectWithTasks]);
 
   useEffect(() => {
     loadProjectData();

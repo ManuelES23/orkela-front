@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import TicketDetailModal from "./TicketDetailModal";
 import { ticketsAPI } from "../../utils/api";
 
@@ -119,6 +119,16 @@ describe("TicketDetailModal", () => {
 
     await act(async () => teamSync()({ team_id: 3, entity: "ticket", action: "deleted", ticket_id: 10 }));
     expect(onClose).toHaveBeenCalled();
-    expect(notification.info).toHaveBeenCalledWith("Este ticket ya no está disponible");
+    expect(notification.info).toHaveBeenCalledWith("Este ticket ya no existe o no tienes acceso a él");
+  });
+
+  it("abierto desde una notificación: si el ticket ya no existe avisa y se cierra", async () => {
+    ticketsAPI.getById.mockRejectedValue(Object.assign(new Error("No encontrado"), { status: 404 }));
+    ticketsAPI.getComments.mockResolvedValue([]);
+    const onClose = vi.fn();
+    render(<TicketDetailModal isOpen onClose={onClose} ticket={{ id: 77 }} />);
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(notification.info).toHaveBeenCalledWith("Este ticket ya no existe o no tienes acceso a él");
   });
 });

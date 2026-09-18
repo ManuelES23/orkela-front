@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +43,16 @@ const TaskDetailModal = ({
   const [addingItem, setAddingItem] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // La tarea no existe, el usuario perdió el acceso o no se pudo cargar
+  const closeUnavailableRef = useRef(null);
+  useEffect(() => {
+    closeUnavailableRef.current = (status) => {
+      if ([403, 404].includes(status)) info("Esta tarea ya no existe o no tienes acceso a ella");
+      else showError("No se pudo cargar la tarea");
+      onClose?.();
+    };
+  }, [info, showError, onClose]);
+
   // Cargar tarea completa cuando se abre el modal
   useEffect(() => {
     const initializeModal = async () => {
@@ -58,6 +68,13 @@ const TaskDetailModal = ({
         setChecklistItems(updatedTask.checklist_items || []);
       } catch (err) {
         console.error("Error loading task:", err);
+        // Abierta desde un enlace (solo trae el id) o ya no accesible: no
+        // hay nada que mostrar, se cierra con un aviso claro
+        if ([403, 404].includes(err?.status) || !task.title) {
+          setCurrentTask(null);
+          closeUnavailableRef.current?.(err?.status);
+          return;
+        }
         setCurrentTask(task);
         setChecklistItems(task.checklist_items || []);
       } finally {

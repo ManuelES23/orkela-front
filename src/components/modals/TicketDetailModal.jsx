@@ -93,8 +93,9 @@ const TicketDetailModal = ({
     } catch (err) {
       if (isStale()) return;
       console.error("Error loading ticket:", err);
-      // En tiempo real: el ticket se borró o salió del alcance del usuario
-      if (silent && [403, 404].includes(err?.status)) {
+      // Se borró o salió del alcance del usuario (en tiempo real o al abrirlo
+      // desde una notificación): se cierra con un aviso
+      if ([403, 404].includes(err?.status)) {
         closeGoneRef.current?.();
         return;
       }
@@ -130,7 +131,7 @@ const TicketDetailModal = ({
   const closeGoneRef = useRef(null);
   useEffect(() => {
     closeGoneRef.current = () => {
-      info("Este ticket ya no está disponible");
+      info("Este ticket ya no existe o no tienes acceso a él");
       onClose?.();
     };
   }, [info, onClose]);

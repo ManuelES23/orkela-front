@@ -102,9 +102,7 @@ const TagSelector = ({
 
       setLoading(true);
       try {
-        console.log("TagSelector: Loading tags for project:", projectId);
         const data = await projectTagsAPI.getAll(projectId);
-        console.log("TagSelector: Tags loaded:", data);
         setTags(data);
       } catch (err) {
         console.error("Error loading project tags:", err);

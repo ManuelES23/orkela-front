@@ -150,14 +150,12 @@ const TagManager = ({ projectId, onClose }) => {
 
   // Crear un nuevo tag con un color
   const handleCreateTag = async (color, defaultName) => {
-    console.log("Creating tag:", { projectId, color, defaultName });
     setSaving(true);
     try {
       const newTag = await projectTagsAPI.create(projectId, {
         color,
         name: defaultName,
       });
-      console.log("Tag created:", newTag);
       setTags((prev) => [...prev, newTag]);
       success("Etiqueta creada");
     } catch (err) {

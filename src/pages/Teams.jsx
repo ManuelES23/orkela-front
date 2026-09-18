@@ -97,9 +97,7 @@ const Teams = () => {
   // Función para actualizar equipos silenciosamente (sin spinner, para tiempo real)
   const refreshTeamsSilently = useCallback(async () => {
     try {
-      console.log("🔄 Refreshing teams...");
       const data = await teamsAPI.getAll();
-      console.log("✅ Teams received:", data);
       setTeams(data);
     } catch (err) {
       console.error("Error refreshing teams:", err);

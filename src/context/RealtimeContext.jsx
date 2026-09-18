@@ -389,7 +389,6 @@ export const RealtimeProvider = ({ children }) => {
 
     // Suscribirse al canal privado del usuario
     try {
-      console.log(`Intentando conectar al canal user.${user.id}...`);
       const channel = echo.private(`user.${user.id}`);
 
       channel
@@ -398,7 +397,6 @@ export const RealtimeProvider = ({ children }) => {
           handleNotificationRef.current?.(data);
         })
         .subscribed(() => {
-          console.log(`✅ Conectado al canal user.${user.id}`);
           setIsConnected(true);
         })
         .error((error) => {
@@ -408,12 +406,10 @@ export const RealtimeProvider = ({ children }) => {
 
       // Escuchar evento de conexión general
       echo.connector.pusher.connection.bind("connected", () => {
-        console.log("✅ WebSocket conectado");
         setIsConnected(true);
       });
 
       echo.connector.pusher.connection.bind("disconnected", () => {
-        console.log("❌ WebSocket desconectado");
         setIsConnected(false);
       });
 

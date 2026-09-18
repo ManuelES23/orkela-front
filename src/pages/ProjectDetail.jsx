@@ -15,6 +15,7 @@ import ProjectGantt from "../components/tasks/ProjectGantt";
 import ProjectCalendar from "../components/tasks/ProjectCalendar";
 import TagManager from "../components/tasks/TagManager";
 import { useNotification } from "../context/NotificationContext";
+import { useMailResult } from "../hooks/useMailResult";
 import { useRealtime } from "../context/RealtimeContext";
 import { useAuth } from "../context/AuthContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
@@ -88,6 +89,7 @@ const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { success, error: showError } = useNotification();
+  const { notifyInvitation } = useMailResult();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const { user } = useAuth();
 
@@ -509,8 +511,8 @@ const ProjectDetail = () => {
 
       setSendingInvite(true);
       try {
-        await invitationsAPI.sendInvitation(id, selectedOrgMember.email);
-        success(`Invitación enviada a ${selectedOrgMember.name}`);
+        const result = await invitationsAPI.sendInvitation(id, selectedOrgMember.email);
+        notifyInvitation(result, `Invitación enviada a ${selectedOrgMember.name}`, selectedOrgMember.email);
         setSelectedOrgMember(null);
         setShowInviteForm(false);
       } catch (err) {
@@ -527,8 +529,8 @@ const ProjectDetail = () => {
 
     setSendingInvite(true);
     try {
-      await invitationsAPI.sendInvitation(id, emailToInvite);
-      success(`Invitación enviada a ${emailToInvite}`);
+      const result = await invitationsAPI.sendInvitation(id, emailToInvite);
+      notifyInvitation(result, `Invitación enviada a ${emailToInvite}`, emailToInvite);
       setInviteEmail("");
       setSelectedOrgMember(null);
       setShowInviteForm(false);

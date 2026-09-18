@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 import { motionTokens } from "../animations/variants";
 import { contactsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
+import { useMailResult } from "../../hooks/useMailResult";
 
 const emptyForm = { name: "", email: "", phone: "", notes: "" };
 
@@ -73,7 +74,8 @@ const Field = ({ icon: Icon, label, id, error, helper, textarea, ...props }) => 
 };
 
 const ContactModal = ({ isOpen, client, contact, onClose, onSaved }) => {
-  const { success, error: showError } = useNotification();
+  const { error: showError } = useNotification();
+  const { notifyClientMail } = useMailResult();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [fieldError, setFieldError] = useState(null);
@@ -132,7 +134,8 @@ const ContactModal = ({ isOpen, client, contact, onClose, onSaved }) => {
             phone: form.phone.trim(),
             notes: form.notes.trim(),
           });
-      success(contact ? "Contacto actualizado" : "Contacto agregado");
+      // Al agregar se envía el acceso al portal: avisar si el correo no salió
+      notifyClientMail(saved, contact ? "Contacto actualizado" : "Contacto agregado");
       onSaved(saved);
     } catch (err) {
       if (err.status === 422) {

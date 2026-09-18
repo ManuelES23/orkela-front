@@ -11,6 +11,7 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import { SkeletonDetail } from "../components/ui/Skeleton";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
+import { useMailResult } from "../hooks/useMailResult";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
@@ -90,6 +91,7 @@ const TeamDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { success, error: showError, info } = useNotification();
+  const { notifyInvitation } = useMailResult();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const { isOrganizationContext, organizationId } = useUserContext();
 
@@ -462,8 +464,8 @@ const TeamDetail = () => {
 
       setSendingInvite(true);
       try {
-        await teamInvitationsAPI.sendInvitation(id, selectedOrgMember.email);
-        success(`Invitación enviada a ${selectedOrgMember.name}`);
+        const result = await teamInvitationsAPI.sendInvitation(id, selectedOrgMember.email);
+        notifyInvitation(result, `Invitación enviada a ${selectedOrgMember.name}`, selectedOrgMember.email);
         setSelectedOrgMember(null);
         loadMembers();
         loadOrgMembers(); // Recargar lista de miembros disponibles
@@ -481,8 +483,8 @@ const TeamDetail = () => {
 
     setSendingInvite(true);
     try {
-      await teamInvitationsAPI.sendInvitation(id, emailToInvite);
-      success(`Invitación enviada a ${emailToInvite}`);
+      const result = await teamInvitationsAPI.sendInvitation(id, emailToInvite);
+      notifyInvitation(result, `Invitación enviada a ${emailToInvite}`, emailToInvite);
       setInviteEmail("");
       setSelectedOrgMember(null);
       loadMembers();

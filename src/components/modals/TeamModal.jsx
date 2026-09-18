@@ -17,9 +17,11 @@ import {
 } from "lucide-react";
 import { teamsAPI, teamInvitationsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
+import { useMailResult, mailFailed } from "../../hooks/useMailResult";
 
 const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
   const { success, error: showError, info } = useNotification();
+  const { showInvitationLinks } = useMailResult();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -175,6 +177,15 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
 
       // Enviar invitaciones a usuarios seleccionados (por ID)
       let userInviteCount = 0;
+      // Invitaciones creadas cuyo correo no salió: se muestran con su enlace
+      const mailFailedInvites = [];
+      const collect = (results) => {
+        const created = results.filter((r) => r.success);
+        created
+          .filter((r) => mailFailed(r.res))
+          .forEach((r) => mailFailedInvites.push({ email: r.email, link: r.res.invitation_link }));
+        return created.filter((r) => !mailFailed(r.res)).length;
+      };
       if (selectedUserIds.length > 0) {
         // Obtener emails de los usuarios seleccionados
         const selectedUsers = availableMembers.filter((m) =>
@@ -184,7 +195,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
         const userInvitePromises = selectedUsers.map((user) =>
           teamInvitationsAPI
             .sendInvitation(teamId, user.email)
-            .then(() => ({ success: true, email: user.email }))
+            .then((res) => ({ success: true, email: user.email, res }))
             .catch((err) => {
               console.error(`Error invitando a ${user.email}:`, err);
               return { success: false, email: user.email };
@@ -192,7 +203,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
         );
 
         const userResults = await Promise.all(userInvitePromises);
-        userInviteCount = userResults.filter((r) => r.success).length;
+        userInviteCount = collect(userResults);
       }
 
       // Enviar invitaciones por email (usuarios externos)
@@ -202,7 +213,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
         const emailInvitePromises = validEmails.map((email) =>
           teamInvitationsAPI
             .sendInvitation(teamId, email.trim())
-            .then(() => ({ success: true, email }))
+            .then((res) => ({ success: true, email: email.trim(), res }))
             .catch((err) => {
               console.error(`Error invitando a ${email}:`, err);
               return { success: false, email };
@@ -210,12 +221,13 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
         );
 
         const emailResults = await Promise.all(emailInvitePromises);
-        emailInviteCount = emailResults.filter((r) => r.success).length;
+        emailInviteCount = collect(emailResults);
       }
 
       // Mostrar mensaje de éxito con resumen de invitaciones
       const totalInvites = userInviteCount + emailInviteCount;
       const totalAttempts = selectedUserIds.length + validEmails.length;
+      if (mailFailedInvites.length > 0) showInvitationLinks(mailFailedInvites);
 
       if (!team) {
         if (totalInvites > 0) {
@@ -224,6 +236,9 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
               totalInvites > 1 ? "es" : ""
             } enviada${totalInvites > 1 ? "s" : ""}`
           );
+        } else if (mailFailedInvites.length > 0) {
+          // El aviso con los enlaces ya explica que el correo no salió
+          success("Equipo creado");
         } else if (totalAttempts > 0) {
           showError(
             "Equipo creado, pero hubo errores al enviar las invitaciones"

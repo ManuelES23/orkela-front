@@ -7,6 +7,7 @@ import LoadingSwap from "../ui/LoadingSwap";
 import DetailPanel from "../ui/DetailPanel";
 import { TicketDetailSkeleton } from "./TicketSkeletons";
 import { useNotification } from "../../context/NotificationContext";
+import { useMailResult } from "../../hooks/useMailResult";
 import { useAuth } from "../../context/AuthContext";
 import { useRealtime } from "../../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -46,6 +47,7 @@ const TicketDetailModal = ({
   onUpdate,
 }) => {
   const { success, error: showError } = useNotification();
+  const { notifyClientMail } = useMailResult();
   const { user } = useAuth();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const [ticket, setTicket] = useState(null);
@@ -185,6 +187,8 @@ const TicketDetailModal = ({
       setComments((prev) => [...prev, comment]);
       setNewComment("");
       setIsInternal(false);
+      // Comentario público en ticket del portal: avisar si el correo al cliente no salió
+      notifyClientMail(comment);
     } catch (err) {
       console.error("Error sending comment:", err);
       showError(err.message || "No se pudo enviar el comentario");
@@ -196,11 +200,11 @@ const TicketDetailModal = ({
   const handleStatusChange = async (newStatus) => {
     setUpdatingStatus(true);
     try {
-      await ticketsAPI.update(ticket.id, {
+      const result = await ticketsAPI.update(ticket.id, {
         status: newStatus,
       });
       await loadTicketDetails({ silent: true });
-      success(`Estado actualizado a "${statusConfig[newStatus]?.label}"`);
+      notifyClientMail(result, `Estado actualizado a "${statusConfig[newStatus]?.label}"`);
       onUpdate?.();
     } catch (err) {
       console.error("Error updating status:", err);

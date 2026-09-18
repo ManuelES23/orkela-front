@@ -4,6 +4,7 @@ import Layout from "../components/layout/Layout";
 import TeamModal from "../components/modals/TeamModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { useNotification } from "../context/NotificationContext";
+import { useMailResult } from "../hooks/useMailResult";
 import { useRealtime } from "../context/RealtimeContext";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -58,6 +59,7 @@ const Teams = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { success, error: showError } = useNotification();
+  const { notifyInvitation } = useMailResult();
   const { registerRefresh, unregisterRefresh } = useRealtime();
 
   // Permisos de organización
@@ -177,8 +179,8 @@ const Teams = () => {
     }
 
     try {
-      await teamInvitationsAPI.sendInvitation(teamId, inviteEmail);
-      success("Invitación enviada exitosamente");
+      const result = await teamInvitationsAPI.sendInvitation(teamId, inviteEmail);
+      notifyInvitation(result, "Invitación enviada exitosamente", inviteEmail);
       setInviteEmail("");
       setInvitingTeamId(null);
     } catch (err) {

@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 import { motionTokens } from "../animations/variants";
 import { clientsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
+import { useMailResult } from "../../hooks/useMailResult";
 
 const emptyForm = {
   name: "",
@@ -106,7 +107,8 @@ const TypeToggle = ({ value, onChange }) => (
 );
 
 const ClientModal = ({ isOpen, client, onClose, onSaved }) => {
-  const { success, error: showError } = useNotification();
+  const { error: showError } = useNotification();
+  const { notifyClientMail } = useMailResult();
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
   const [fieldError, setFieldError] = useState(null);
@@ -176,7 +178,8 @@ const ClientModal = ({ isOpen, client, onClose, onSaved }) => {
               phone: form.contactPhone.trim(),
             },
           });
-      success(client ? "Cliente actualizado" : "Cliente creado");
+      // Al crear se envía el acceso al portal: avisar si el correo no salió
+      notifyClientMail(saved, client ? "Cliente actualizado" : "Cliente creado");
       onSaved(saved);
     } catch (err) {
       if (err.status === 422) {

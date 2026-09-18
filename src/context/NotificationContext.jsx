@@ -9,6 +9,7 @@ import {
   Bell,
   Sparkles,
 } from "lucide-react";
+import InvitationLinkModal from "../components/ui/InvitationLinkNotice";
 
 const NotificationContext = createContext();
 
@@ -24,6 +25,8 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   // Contador para ids únicos: dos toasts en el mismo ms compartían id con Date.now()
   const nextIdRef = useRef(0);
+  // Enlaces de invitaciones cuyo correo no salió (ver showInvitationLinks)
+  const [invitationLinks, setInvitationLinks] = useState([]);
 
   const addNotification = useCallback(
     ({ type = "info", message, title, duration = 5000 }) => {
@@ -95,11 +98,33 @@ export const NotificationProvider = ({ children }) => {
     [addNotification]
   );
 
+  // Mostrar el aviso con los enlaces para compartir a mano. Se acumulan por si
+  // varias invitaciones fallan a la vez (p.ej. al crear un equipo).
+  const showInvitationLinks = useCallback((items) => {
+    const valid = (items || []).filter((item) => item?.link);
+    if (valid.length === 0) return;
+    setInvitationLinks((prev) => [
+      ...prev,
+      ...valid.filter((item) => !prev.some((p) => p.link === item.link)),
+    ]);
+  }, []);
+
   return (
     <NotificationContext.Provider
-      value={{ success, error, warning, info, removeNotification }}
+      value={{
+        success,
+        error,
+        warning,
+        info,
+        removeNotification,
+        showInvitationLinks,
+      }}
     >
       {children}
+      <InvitationLinkModal
+        items={invitationLinks}
+        onClose={() => setInvitationLinks([])}
+      />
       <NotificationContainer
         notifications={notifications}
         onRemove={removeNotification}

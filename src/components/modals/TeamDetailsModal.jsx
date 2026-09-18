@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import { useNotification } from "../../context/NotificationContext";
+import { useMailResult } from "../../hooks/useMailResult";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -19,7 +20,8 @@ import { teamsAPI, teamInvitationsAPI } from "../../utils/api";
 import { parseLocalDate } from "../../utils/dateUtils";
 
 const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
-  const { success, error: showError } = useNotification();
+  const { error: showError } = useNotification();
+  const { notifyInvitation } = useMailResult();
   const [teamDetails, setTeamDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -50,8 +52,8 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
 
     setSendingInvite(true);
     try {
-      await teamInvitationsAPI.sendInvitation(team.id, inviteEmail.trim());
-      success(`Invitación enviada a ${inviteEmail}`);
+      const result = await teamInvitationsAPI.sendInvitation(team.id, inviteEmail.trim());
+      notifyInvitation(result, `Invitación enviada a ${inviteEmail}`, inviteEmail.trim());
       setInviteEmail("");
       await loadTeamDetails();
     } catch (err) {

@@ -9,6 +9,7 @@ import DetailPanel from "../components/ui/DetailPanel";
 import { ClientListSkeleton, ClientDetailSkeleton } from "../components/clients/ClientsSkeleton";
 import { clientsAPI, contactsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
+import { useMailResult } from "../hooks/useMailResult";
 import { Plus, Search, Send, Archive, ArchiveRestore, Star, UserPlus, Building2, User } from "lucide-react";
 
 const statusBadgeColor = {
@@ -38,6 +39,7 @@ const ClientsManagement = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { success, error: showError } = useNotification();
+  const { notifyClientMail } = useMailResult();
 
   const [clients, setClients] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -154,8 +156,8 @@ const ClientsManagement = () => {
   const handleResendAccess = async (contactId) => {
     setActioningContactId(contactId);
     try {
-      await contactsAPI.resendAccess(contactId);
-      success("Enlace de acceso reenviado");
+      const result = await contactsAPI.resendAccess(contactId);
+      notifyClientMail(result, "Enlace de acceso reenviado");
     } catch {
       showError("No se pudo reenviar el acceso");
     } finally {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import { useNotification } from "../../context/NotificationContext";
+import { useMailResult } from "../../hooks/useMailResult";
 import {
   FolderKanban,
   Calendar,
@@ -21,7 +22,8 @@ const ProjectModal = ({
   teamId = null,
   onSuccess,
 }) => {
-  const { success, error: showError } = useNotification();
+  const { error: showError } = useNotification();
+  const { notifyInvitation } = useMailResult();
   const [formData, setFormData] = useState({
     name: project?.name || "",
     description: project?.description || "",
@@ -90,7 +92,7 @@ const ProjectModal = ({
         project.id,
         inviteEmail
       );
-      success(`Invitación enviada a ${inviteEmail}`);
+      notifyInvitation(result, `Invitación enviada a ${inviteEmail}`, inviteEmail);
       setInviteEmail("");
     } catch (err) {
       // request() lanza APIError: el mensaje del backend viene en err.message

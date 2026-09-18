@@ -9,6 +9,7 @@ import { SkeletonDetail } from "../components/ui/Skeleton";
 import UserAvatar from "../components/ui/UserAvatar";
 import PlanUsageBars from "../components/ui/PlanUsageBars";
 import { useNotification } from "../context/NotificationContext";
+import { useMailResult } from "../hooks/useMailResult";
 import { useRealtime } from "../context/RealtimeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
@@ -79,6 +80,7 @@ const OrganizationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { success, error: showError, info } = useNotification();
+  const { notifyInvitation } = useMailResult();
   const { registerRefresh, unregisterRefresh } = useRealtime();
 
   const [organization, setOrganization] = useState(null);
@@ -298,8 +300,9 @@ const OrganizationDetail = () => {
 
     setSendingInvite(true);
     try {
-      await organizationsAPI.sendInvitation(id, inviteForm);
-      success(`Invitación enviada a ${inviteForm.email}`);
+      const result = await organizationsAPI.sendInvitation(id, inviteForm);
+      // Si el correo no salió, aviso con el enlace para compartir a mano
+      notifyInvitation(result, `Invitación enviada a ${inviteForm.email}`, inviteForm.email);
       setInviteForm({
         email: "",
         role: "member",

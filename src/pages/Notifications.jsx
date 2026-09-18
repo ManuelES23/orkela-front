@@ -296,7 +296,7 @@ const Notifications = () => {
         </FadeIn>
 
         {/* Contenido */}
-        {loading ? (
+        {loading && items.length === 0 ? (
           <SkeletonRows count={6} />
         ) : error ? (
           <div className='flex flex-col items-center gap-3 py-12 text-center'>
@@ -317,7 +317,10 @@ const Notifications = () => {
             </div>
           </FadeIn>
         ) : (
-          <div className='space-y-6'>
+          <div
+            aria-busy={loading}
+            className={`space-y-6 transition-opacity duration-200 ${loading ? "opacity-60" : "opacity-100"}`}
+          >
             {groups.map((group) => (
               <section key={group.key} aria-label={group.label}>
                 <h2 className='flex items-center gap-2 mb-2 px-1 text-xs font-semibold text-gray-500 dark:text-night-400'>

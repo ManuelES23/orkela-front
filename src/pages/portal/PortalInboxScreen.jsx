@@ -9,7 +9,7 @@ import PortalNewTicketModal from "../../components/portal/PortalNewTicketModal";
 import PortalTicketDetailsPanel from "../../components/portal/PortalTicketDetailsPanel";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import { portalAPI, getPortalToken } from "../../utils/portalApi";
-import { getPortalEcho, disconnectPortalEcho } from "../../utils/echo";
+import { getPortalEcho, disconnectPortalEcho, updatePortalEchoAuth } from "../../utils/echo";
 import { applyTicketNotification } from "../../utils/portalTicketNotifications";
 import { modalBackdropVariants, slideVariants } from "../../components/animations/variants";
 
@@ -24,6 +24,8 @@ const PortalInboxScreen = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [contactId, setContactId] = useState(null);
+  const [isClientAdmin, setIsClientAdmin] = useState(false);
+  const [clientId, setClientId] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const detailsCloseButtonRef = useRef(null);
   const detailsTriggerRef = useRef(null);
@@ -89,6 +91,8 @@ const PortalInboxScreen = () => {
       .me()
       .then((data) => {
         setContactId(data.contact.id);
+        setIsClientAdmin(Boolean(data.contact.is_admin));
+        setClientId(data.contact.client?.id ?? null);
         setTickets(data.tickets);
         setOrganization(data.organization);
         setLoading(false);
@@ -133,11 +137,25 @@ const PortalInboxScreen = () => {
     };
   }, [selectedId]);
 
-  useEffect(() => {
-    if (!contactId) return;
+  // Canal en vivo: el admin del Cliente escucha el canal del Cliente (ve
+  // los tickets de sus colegas, B3); el resto, el propio. El evento llega a
+  // ambos canales, así que se escucha uno solo para no duplicar.
+  const channelName = contactId
+    ? isClientAdmin && clientId
+      ? `client-portal-client.${clientId}`
+      : `client-portal.${contactId}`
+    : null;
 
-    const echo = getPortalEcho(getPortalToken());
-    const channel = echo.private(`client-portal.${contactId}`);
+  // Solo depende del canal (B10): antes se abandonaba y volvía a suscribir
+  // en cada clic de ticket, perdiendo eventos en el intervalo.
+  useEffect(() => {
+    if (!channelName) return;
+
+    const token = getPortalToken();
+    const echo = getPortalEcho(token);
+    // El token pudo renovarse desde que se creó la instancia (B11)
+    updatePortalEchoAuth(token);
+    const channel = echo.private(channelName);
 
     channel.listen(".client-notification", (payload) => {
       const ticketId = payload.data?.ticket_id;
@@ -164,9 +182,9 @@ const PortalInboxScreen = () => {
     });
 
     return () => {
-      echo.leave(`client-portal.${contactId}`);
+      echo.leave(channelName);
     };
-  }, [contactId, selectedId]);
+  }, [channelName]);
 
   useEffect(() => {
     return () => disconnectPortalEcho();

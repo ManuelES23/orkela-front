@@ -18,6 +18,7 @@ vi.mock("../../utils/portalApi", () => ({
 vi.mock("../../utils/echo", () => ({
   getPortalEcho: vi.fn(),
   disconnectPortalEcho: vi.fn(),
+  updatePortalEchoAuth: vi.fn(),
 }));
 
 const ticket1 = {
@@ -51,6 +52,7 @@ const ticket1Detail = {
 // para poder simular, desde el test, un evento entrante del websocket sin
 // levantar una conexión Reverb real.
 let clientNotificationListener;
+let echoMock;
 
 const setUpEchoMock = () => {
   clientNotificationListener = null;
@@ -62,10 +64,11 @@ const setUpEchoMock = () => {
       return channel;
     }),
   };
-  getPortalEcho.mockReturnValue({
+  echoMock = {
     private: vi.fn(() => channel),
     leave: vi.fn(),
-  });
+  };
+  getPortalEcho.mockReturnValue(echoMock);
 };
 
 describe("PortalInboxScreen realtime echo handler", () => {
@@ -115,5 +118,40 @@ describe("PortalInboxScreen realtime echo handler", () => {
     // El ticket afectado no es el seleccionado — la fila se actualiza con el
     // dato que ya trae el evento, sin necesidad de un refetch.
     expect(portalAPI.getTicket).not.toHaveBeenCalledWith(ticket2.id);
+  });
+
+  it("no vuelve a suscribirse al cambiar de ticket (B10)", async () => {
+    const view = render(
+      <MemoryRouter initialEntries={["/portal/tickets/1"]}>
+        <Routes>
+          <Route path="/portal/tickets/:id" element={<PortalInboxScreen />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await waitFor(() => expect(echoMock.private).toHaveBeenCalledTimes(1));
+
+    act(() => screen.getByText("Ticket en la lista").click());
+    await waitFor(() => expect(portalAPI.getTicket).toHaveBeenCalledWith(2));
+
+    expect(echoMock.private).toHaveBeenCalledTimes(1);
+    expect(echoMock.leave).not.toHaveBeenCalled();
+    view.unmount();
+  });
+
+  it("el admin del Cliente escucha el canal del Cliente para ver los tickets de sus colegas (B3)", async () => {
+    portalAPI.me.mockResolvedValue({
+      contact: { id: 55, is_admin: true, client: { id: 8 } },
+      organization: { name: "Acme" },
+      tickets: [ticket1, ticket2],
+    });
+    renderScreen();
+
+    await waitFor(() => expect(echoMock.private).toHaveBeenCalledWith("client-portal-client.8"));
+    expect(echoMock.private).not.toHaveBeenCalledWith("client-portal.55");
+  });
+
+  it("un contacto normal escucha su propio canal", async () => {
+    renderScreen();
+    await waitFor(() => expect(echoMock.private).toHaveBeenCalledWith("client-portal.55"));
   });
 });

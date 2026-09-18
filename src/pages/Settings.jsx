@@ -166,6 +166,11 @@ const Settings = () => {
       await profileAPI.deleteAvatar();
       setProfile((prev) => ({ ...prev, avatar: null }));
       success("Avatar eliminado correctamente");
+      // Refrescar el usuario del contexto (Sidebar/Header siguen mostrando
+      // el avatar anterior si no)
+      if (refreshUser) {
+        await refreshUser();
+      }
     } catch (err) {
       showError(err.message || "No se pudo eliminar el avatar");
     } finally {

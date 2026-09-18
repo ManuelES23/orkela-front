@@ -33,7 +33,7 @@ const TaskModal = ({
     priority: "medium",
     start_date: "",
     due_date: "",
-    status: "pending",
+    status: "todo",
     is_urgent: false,
     assigned_user_ids: [],
     tag_ids: [],
@@ -60,7 +60,7 @@ const TaskModal = ({
           priority: "medium",
           start_date: "",
           due_date: "",
-          status: "pending",
+          status: "todo",
           is_urgent: false,
           assigned_user_ids: [],
           tag_ids: [],
@@ -101,7 +101,7 @@ const TaskModal = ({
           priority: task?.priority || "medium",
           start_date: task?.start_date ? task.start_date.split("T")[0] : "",
           due_date: task?.due_date ? task.due_date.split("T")[0] : "",
-          status: task?.status || "pending",
+          status: task?.status || "todo",
           is_urgent: task?.is_urgent || false,
           assigned_user_ids: task?.assigned_users?.map((u) => u.id) || [],
           tag_ids: task?.tags?.map((t) => t.id) || [],
@@ -386,9 +386,10 @@ const TaskModal = ({
                 onChange={handleChange}
                 className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
               >
-                <option value='pending'>Pendiente</option>
-                <option value='in_progress'>En progreso</option>
-                <option value='completed'>Completada</option>
+                {/* Valores de TaskController (in:todo,in-progress,done,cancelled) */}
+                <option value='todo'>Por hacer</option>
+                <option value='in-progress'>En progreso</option>
+                <option value='done'>Completada</option>
                 <option value='cancelled'>Cancelada</option>
               </select>
             </div>

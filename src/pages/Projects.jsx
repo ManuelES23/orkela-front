@@ -9,8 +9,8 @@ import ProgressRing from "../components/ui/ProgressRing";
 import AnimatedNumber from "../components/ui/AnimatedNumber";
 import { SkeletonCardGrid } from "../components/ui/Skeleton";
 import { useNotification } from "../context/NotificationContext";
-import { useRealtime } from "../context/RealtimeContext";
-import useResourceSync from "../hooks/useResourceSync";
+import { PROJECT_LIST_KEY } from "../context/RealtimeContext";
+import useDebouncedRefresh from "../hooks/useDebouncedRefresh";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import { motionTokens } from "../components/animations/variants";
@@ -54,7 +54,6 @@ import {
 const Projects = () => {
   const navigate = useNavigate();
   const { success, error: showError } = useNotification();
-  const { registerRefresh, unregisterRefresh } = useRealtime();
   const [view, setView] = useState("grid"); // 'grid' o 'gantt'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -147,18 +146,10 @@ const Projects = () => {
     loadProjects();
   }, [loadProjects]);
 
-  // Registrar callback para refrescar datos en tiempo real (silencioso)
-  useEffect(() => {
-    return registerRefresh("projects", refreshProjectsSilently);
-  }, [registerRefresh, unregisterRefresh, refreshProjectsSilently]);
-
-  // project.sync: progreso, conteo de tareas y datos de cada proyecto listado
-  useResourceSync(
-    "project",
-    projects.map((project) => project.id),
-    refreshProjectsSilently,
-    { debounce: 300 }
-  );
+  // Tiempo real (silencioso): avisos de proyectos/tareas y la señal gruesa
+  // projects.sync (un solo canal, no uno por proyecto). Las ráfagas se
+  // agrupan en una recarga de la lista.
+  useDebouncedRefresh(["projects", PROJECT_LIST_KEY], refreshProjectsSilently, 500);
 
   const openDeleteConfirm = (projectId) => {
     setConfirmModal({ isOpen: true, projectId });

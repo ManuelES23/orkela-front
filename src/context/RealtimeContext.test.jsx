@@ -11,6 +11,10 @@ const privateSpy = vi.fn();
 const leaveSpy = vi.fn();
 const unbindSpy = vi.fn();
 const refreshUser = vi.fn(() => Promise.resolve());
+// Callbacks de .subscribed() por canal; por defecto se confirman al instante
+const subscribedCallbacks = {};
+let autoSubscribe = true;
+const resubscribe = (name) => act(() => subscribedCallbacks[name]?.());
 const toasts = { success: vi.fn(), info: vi.fn(), warning: vi.fn() };
 
 vi.mock("./AuthContext", () => ({ useAuth: () => ({ user: mockUser, refreshUser }) }));
@@ -21,11 +25,15 @@ vi.mock("../utils/echo", () => {
   const channelFor = (name) => {
     const channel = {
       listen: (event, cb) => {
-        if (name.startsWith("user.")) listener = cb;
+        if (name.startsWith("user.") && event === ".notification") listener = cb;
         channelListeners[name] = { ...(channelListeners[name] || {}), [event]: cb };
         return channel;
       },
-      subscribed: () => channel,
+      subscribed: (cb) => {
+        subscribedCallbacks[name] = cb;
+        if (autoSubscribe) cb();
+        return channel;
+      },
       error: () => channel,
     };
     return channel;
@@ -49,6 +57,7 @@ const api = vi.hoisted(() => ({
   markAsRead: vi.fn(),
   markAllAsRead: vi.fn(),
   remove: vi.fn(),
+  unreadCount: vi.fn(),
 }));
 vi.mock("../utils/api", () => ({ notificationsAPI: api }));
 
@@ -114,6 +123,9 @@ describe("RealtimeProvider", () => {
     api.markAsRead.mockReset().mockResolvedValue({ unread_count: 0 });
     api.markAllAsRead.mockReset().mockResolvedValue({ unread_count: 0 });
     api.remove.mockReset().mockResolvedValue({ unread_count: 0 });
+    api.unreadCount.mockReset().mockResolvedValue({ unread_count: 0 });
+    autoSubscribe = true;
+    Object.keys(subscribedCallbacks).forEach((k) => delete subscribedCallbacks[k]);
     localStorage.setItem("token", "tok");
   });
 
@@ -373,6 +385,125 @@ describe("RealtimeProvider", () => {
 
     expect(invitations).toHaveBeenCalled();
     expect(screen.getByText("total:0")).toBeInTheDocument();
+    expect(toasts.info).not.toHaveBeenCalled();
+  });
+
+
+  it("carga el historial cuando el canal confirma la suscripción, sin refrescar pantallas la primera vez", async () => {
+    autoSubscribe = false;
+    const projects = vi.fn();
+    renderProvider({ onRefresh: { projects } });
+    expect(api.list).not.toHaveBeenCalled();
+
+    resubscribe("user.1");
+
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(1));
+    expect(projects).not.toHaveBeenCalled();
+  });
+
+  it("si el canal no confirma a tiempo, el historial se carga igual", async () => {
+    autoSubscribe = false;
+    vi.useFakeTimers();
+    try {
+      renderProvider();
+      expect(api.list).not.toHaveBeenCalled();
+      await act(async () => vi.advanceTimersByTime(4000));
+      expect(api.list).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("al reconectar recarga la campana y refresca una vez todas las pantallas", async () => {
+    const projects = vi.fn();
+    const tasks = vi.fn();
+    api.list.mockResolvedValue({ data: [], next_cursor: null, unread_count: 0, retention_days: 30 });
+    renderProvider({ onRefresh: { projects, tasks } });
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(1));
+
+    api.list.mockResolvedValue({ data: [serverItem(8)], next_cursor: null, unread_count: 3, retention_days: 30 });
+    resubscribe("user.1");
+
+    expect(await screen.findByText("no-leidas:3")).toBeInTheDocument();
+    expect(api.list).toHaveBeenCalledTimes(2);
+    expect(projects).toHaveBeenCalledTimes(1);
+    expect(tasks).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignora el historial de un usuario anterior que llega tarde", async () => {
+    let resolveFirst;
+    api.list.mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }));
+    const { rerender } = renderProvider();
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(1));
+
+    mockUser = { id: 2 };
+    rerender(
+      <RealtimeProvider>
+        <Probe />
+      </RealtimeProvider>
+    );
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(2));
+
+    await act(async () => resolveFirst({ data: [serverItem(1)], next_cursor: null, unread_count: 5, retention_days: 30 }));
+
+    expect(screen.getByText("no-leidas:0")).toBeInTheDocument();
+    expect(screen.getByText("total:0")).toBeInTheDocument();
+  });
+
+  it("si falla el borrado, la campana vuelve a cargar el historial", async () => {
+    let api_;
+    const Grab = () => {
+      api_ = useRealtime();
+      return null;
+    };
+    render(
+      <RealtimeProvider>
+        <Grab />
+      </RealtimeProvider>
+    );
+    await waitFor(() => expect(api.list).toHaveBeenCalledTimes(1));
+    api.remove.mockRejectedValue(new Error("500"));
+
+    await act(async () => {
+      await expect(api_.removeNotification(3)).rejects.toThrow("500");
+    });
+
+    expect(api.list).toHaveBeenCalledTimes(2);
+  });
+
+  it("reconcilia el contador con el servidor si llega una en vivo justo después de marcar como leída", async () => {
+    api.list.mockResolvedValue({
+      data: [serverItem(2, { title: "B" }), serverItem(1, { title: "A" })],
+      next_cursor: null,
+      unread_count: 2,
+      retention_days: 30,
+    });
+    // La respuesta ya cuenta la notificación 9, cuyo broadcast llega después
+    api.markAsRead.mockResolvedValue({ unread_count: 2 });
+    api.unreadCount.mockResolvedValue({ unread_count: 2 });
+    renderProvider();
+    await screen.findByText("no-leidas:2");
+
+    await act(async () => fireEvent.click(screen.getByText("leer A")));
+    await waitFor(() => expect(api.markAsRead).toHaveBeenCalled());
+    emit(serverItem(9, { title: "Tardía" }));
+
+    await waitFor(() => expect(api.unreadCount).toHaveBeenCalled());
+    expect(await screen.findByText("no-leidas:2")).toBeInTheDocument();
+  });
+
+  it("projects.sync (usuario u organización) refresca solo las listas", async () => {
+    mockUser = { id: 1, organization_id: 4, active_context: "4" };
+    const projectList = vi.fn();
+    const projects = vi.fn();
+    renderProvider({ onRefresh: { projectList, projects } });
+    await waitFor(() => expect(privateSpy).toHaveBeenCalledWith("organization.4"));
+
+    act(() => channelListeners["user.1"][".projects.sync"]({ project_id: 3, entity: "task", action: "updated" }));
+    act(() => channelListeners["organization.4"][".projects.sync"]({ project_id: 5, entity: "task", action: "created" }));
+
+    expect(projectList).toHaveBeenCalledTimes(2);
+    expect(projects).not.toHaveBeenCalled();
     expect(toasts.info).not.toHaveBeenCalled();
   });
 

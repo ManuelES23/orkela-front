@@ -32,6 +32,18 @@ export const useRealtime = () => {
 // en /notificaciones).
 export const DROPDOWN_LIMIT = 10;
 
+// Clave de registerRefresh de las pantallas de lista (Proyectos, Tareas)
+// para la señal gruesa projects.sync.
+export const PROJECT_LIST_KEY = "projectList";
+
+// Espera máxima a que el canal confirme la suscripción antes de cargar el
+// historial igualmente.
+const HISTORY_FALLBACK_MS = 4000;
+
+// Tras una operación del historial, una notificación en vivo que llega en
+// este margen puede venir ya contada en la respuesta.
+const RECONCILE_WINDOW_MS = 3000;
+
 const CLOSED_REMOVED_MODAL = {
   isOpen: false,
   organizationName: "",
@@ -189,12 +201,55 @@ export const RealtimeProvider = ({ children }) => {
     };
   }, []);
 
+  // Operaciones sobre el historial en curso y fin de la última: una
+  // notificación en vivo que llega durante o justo después puede estar ya
+  // contada en el unread_count de la respuesta (se persiste antes de
+  // emitirse), así que el contador se reconcilia con el servidor.
+  const pendingOpsRef = useRef(0);
+  const lastOpEndRef = useRef(0);
+  const needsReconcileRef = useRef(false);
+
+  const reconcileUnreadCount = useCallback(async () => {
+    needsReconcileRef.current = false;
+    const requestUserId = userRef.current?.id;
+    try {
+      const response = await notificationsAPI.unreadCount();
+      if (userRef.current?.id !== requestUserId || pendingOpsRef.current > 0) return;
+      if (typeof response?.unread_count === "number") setUnreadCount(response.unread_count);
+    } catch {
+      // Se corrige en la próxima carga
+    }
+  }, []);
+
+  const trackOp = useCallback(
+    async (operation) => {
+      pendingOpsRef.current += 1;
+      try {
+        return await operation();
+      } finally {
+        pendingOpsRef.current -= 1;
+        lastOpEndRef.current = Date.now();
+        if (pendingOpsRef.current === 0 && needsReconcileRef.current) reconcileUnreadCount();
+      }
+    },
+    [reconcileUnreadCount]
+  );
+
+  // Carga en curso: una respuesta de un usuario anterior (o de una carga
+  // reemplazada por otra) se descarta.
+  const loadSeqRef = useRef(0);
+
   // Cargar (o recargar) las últimas notificaciones desde la API
   const reloadNotifications = useCallback(async () => {
+    const seq = ++loadSeqRef.current;
+    const requestUserId = userRef.current?.id;
+    const isCurrent = () => seq === loadSeqRef.current && userRef.current?.id === requestUserId;
+
     liveDuringLoadRef.current = new Set();
     setLoadingNotifications(true);
     try {
-      const response = await notificationsAPI.list({ limit: DROPDOWN_LIMIT });
+      const response = await trackOp(() => notificationsAPI.list({ limit: DROPDOWN_LIMIT }));
+      if (!isCurrent()) return;
       const fetched = (response?.data || []).map(normalizeNotification);
       const fetchedIds = new Set(fetched.map((n) => n.id));
       // Las que llegaron en vivo durante la carga y la respuesta no trae
@@ -208,12 +263,14 @@ export const RealtimeProvider = ({ children }) => {
       setRetentionDays(response?.retention_days ?? null);
     } catch (err) {
       // Sin historial no se rompe nada: siguen llegando en vivo
-      console.error("No se pudo cargar el historial de notificaciones:", err);
+      if (isCurrent()) console.error("No se pudo cargar el historial de notificaciones:", err);
     } finally {
-      liveDuringLoadRef.current = null;
-      setLoadingNotifications(false);
+      if (isCurrent()) {
+        liveDuringLoadRef.current = null;
+        setLoadingNotifications(false);
+      }
     }
-  }, [setList]);
+  }, [setList, trackOp]);
 
   // Marcar notificación como leída
   const markAsRead = useCallback(
@@ -228,13 +285,13 @@ export const RealtimeProvider = ({ children }) => {
       publish({ kind: "read", id });
 
       try {
-        const response = await notificationsAPI.markAsRead(id);
+        const response = await trackOp(() => notificationsAPI.markAsRead(id));
         if (typeof response?.unread_count === "number") setUnreadCount(response.unread_count);
       } catch (err) {
         console.error("No se pudo marcar la notificación como leída:", err);
       }
     },
-    [publish, setList]
+    [publish, setList, trackOp]
   );
 
   // Marcar todas como leídas
@@ -244,14 +301,15 @@ export const RealtimeProvider = ({ children }) => {
     publish({ kind: "read-all" });
 
     try {
-      await notificationsAPI.markAllAsRead();
+      await trackOp(() => notificationsAPI.markAllAsRead());
     } catch (err) {
       console.error("No se pudieron marcar las notificaciones como leídas:", err);
       reloadNotifications();
     }
-  }, [publish, reloadNotifications, setList]);
+  }, [publish, reloadNotifications, setList, trackOp]);
 
-  // Eliminar una notificación del historial
+  // Eliminar una notificación del historial. Si falla, la campana vuelve
+  // al estado del servidor (la página restaura su propia copia).
   const removeNotification = useCallback(
     async (id) => {
       const known = notificationsRef.current.find((n) => n.id === id);
@@ -259,10 +317,15 @@ export const RealtimeProvider = ({ children }) => {
       if (known && !known.read) setUnreadCount((count) => Math.max(0, count - 1));
       publish({ kind: "removed", id });
 
-      const response = await notificationsAPI.remove(id);
-      if (typeof response?.unread_count === "number") setUnreadCount(response.unread_count);
+      try {
+        const response = await trackOp(() => notificationsAPI.remove(id));
+        if (typeof response?.unread_count === "number") setUnreadCount(response.unread_count);
+      } catch (err) {
+        reloadNotifications();
+        throw err;
+      }
     },
-    [publish, setList]
+    [publish, reloadNotifications, setList, trackOp]
   );
 
   // Procesar notificación recibida por WebSocket
@@ -282,6 +345,11 @@ export const RealtimeProvider = ({ children }) => {
         liveDuringLoadRef.current?.add(notification.id);
         setList((prev) => [notification, ...prev].slice(0, DROPDOWN_LIMIT));
         setUnreadCount((count) => count + 1);
+
+        // Llegó durante (o justo después de) una carga o un marcado: el
+        // servidor pudo haberla contado ya; se reconcilia el contador.
+        if (pendingOpsRef.current > 0) needsReconcileRef.current = true;
+        else if (Date.now() - lastOpEndRef.current < RECONCILE_WINDOW_MS) reconcileUnreadCount();
         publish({ kind: "created", notification });
 
         const removedReason = REMOVED_TYPES[data.type];
@@ -306,8 +374,23 @@ export const RealtimeProvider = ({ children }) => {
 
       refreshKeysFor(data).forEach(triggerRefresh);
     },
-    [info, success, warning, publish, setList, triggerRefresh]
+    [info, success, warning, publish, setList, triggerRefresh, reconcileUnreadCount]
   );
+
+  // Todas las pantallas registradas, una vez cada callback (una misma
+  // pantalla puede estar bajo varias claves)
+  const refreshAll = useCallback(() => {
+    const callbacks = new Set();
+    refreshCallbacksRef.current.forEach((set) => set.forEach((cb) => callbacks.add(cb)));
+    callbacks.forEach((cb) => cb());
+  }, []);
+
+  const reloadNotificationsRef = useRef(reloadNotifications);
+  const refreshAllRef = useRef(refreshAll);
+  useEffect(() => {
+    reloadNotificationsRef.current = reloadNotifications;
+    refreshAllRef.current = refreshAll;
+  });
 
   // Mantener la ref actualizada con la última versión de handleNotification
   useEffect(() => {
@@ -341,12 +424,23 @@ export const RealtimeProvider = ({ children }) => {
       return;
     }
 
-    reloadNotifications();
+    // Cualquier carga de historial pendiente pertenece al usuario anterior
+    loadSeqRef.current += 1;
+    pendingOpsRef.current = 0;
+    needsReconcileRef.current = false;
 
     // Obtener instancia de Echo (se crea si no existe)
     const echo = getEcho();
     updateEchoAuth(token);
     setChannelEpoch((epoch) => epoch + 1);
+
+    // El historial se carga cuando el canal ya está suscrito: lo que se
+    // guarde antes llega en la carga y lo posterior, en vivo (sin hueco).
+    // Si el WebSocket no responde, se carga igual tras una espera.
+    let subscribedOnce = false;
+    const fallbackTimer = setTimeout(() => {
+      if (!subscribedOnce) reloadNotificationsRef.current();
+    }, HISTORY_FALLBACK_MS);
 
     // Suscribirse al canal privado del usuario
     try {
@@ -357,8 +451,18 @@ export const RealtimeProvider = ({ children }) => {
           // Usar la ref para siempre tener la versión más actualizada
           handleNotificationRef.current?.(data);
         })
+        // Señal gruesa de las listas para proyectos personales (M4)
+        .listen(".projects.sync", () => triggerRefresh(PROJECT_LIST_KEY))
         .subscribed(() => {
           setIsConnected(true);
+          const first = !subscribedOnce;
+          subscribedOnce = true;
+          clearTimeout(fallbackTimer);
+          reloadNotificationsRef.current();
+          // Re-suscripción tras una reconexión: lo emitido mientras no había
+          // conexión se perdió, así que cada pantalla vuelve a pedir sus datos.
+          // En la primera conexión las pantallas acaban de cargar.
+          if (!first) refreshAllRef.current();
         })
         .error((error) => {
           console.error("❌ Error en canal WebSocket:", error);
@@ -379,6 +483,7 @@ export const RealtimeProvider = ({ children }) => {
       connection.bind("error", onError);
 
       return () => {
+        clearTimeout(fallbackTimer);
         connection.unbind?.("connected", onConnected);
         connection.unbind?.("disconnected", onDisconnected);
         connection.unbind?.("error", onError);
@@ -390,6 +495,8 @@ export const RealtimeProvider = ({ children }) => {
     } catch (error) {
       console.error("Error al conectar WebSocket:", error);
       setIsConnected(false);
+      clearTimeout(fallbackTimer);
+      reloadNotificationsRef.current();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, user?.isSystemAdmin]); // Solo re-suscribirse cuando cambie el usuario
@@ -404,12 +511,19 @@ export const RealtimeProvider = ({ children }) => {
   useEffect(() => {
     if (!activeOrganizationId) return undefined;
 
-    return subscribeChannel(`organization.${activeOrganizationId}`, "organization.sync", (payload) => {
-      organizationSyncKeysFor(payload).forEach(triggerRefresh);
-      if (organizationSyncAffectsUser(payload, userRef.current)) {
-        refreshUserRef.current?.()?.catch?.(() => {});
-      }
-    });
+    const channel = `organization.${activeOrganizationId}`;
+    const offs = [
+      subscribeChannel(channel, "organization.sync", (payload) => {
+        organizationSyncKeysFor(payload).forEach(triggerRefresh);
+        if (organizationSyncAffectsUser(payload, userRef.current)) {
+          refreshUserRef.current?.()?.catch?.(() => {});
+        }
+      }),
+      // Cambio en cualquier proyecto de la organización: solo las listas
+      // (Proyectos, Tareas) con una sola suscripción (M4)
+      subscribeChannel(channel, "projects.sync", () => triggerRefresh(PROJECT_LIST_KEY)),
+    ];
+    return () => offs.forEach((off) => off());
   }, [activeOrganizationId, subscribeChannel, triggerRefresh, channelEpoch]);
 
   // Función para cerrar el modal de removido de organización

@@ -6,8 +6,8 @@ import TaskDetailModal from "../components/modals/TaskDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
-import { useRealtime } from "../context/RealtimeContext";
-import useResourceSync from "../hooks/useResourceSync";
+import { PROJECT_LIST_KEY } from "../context/RealtimeContext";
+import useDebouncedRefresh from "../hooks/useDebouncedRefresh";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
@@ -39,7 +39,6 @@ import { parseLocalDate } from "../utils/dateUtils";
 const Tasks = () => {
   const { user } = useAuth();
   const { success, error: showError } = useNotification();
-  const { registerRefresh, unregisterRefresh } = useRealtime();
   const [activeTab, setActiveTab] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -85,19 +84,11 @@ const Tasks = () => {
     loadTasks();
   }, [loadTasks]);
 
-  // Registrar callback para refrescar datos en tiempo real (silencioso)
-  useEffect(() => {
-    return registerRefresh("tasks", refreshTasksSilently);
-  }, [registerRefresh, unregisterRefresh, refreshTasksSilently]);
-
-  // project.sync de los proyectos listados: tareas borradas, checklist,
-  // etiquetas o asignados que cambió otro usuario (B5)
-  useResourceSync(
-    "project",
-    tasks.map((task) => task.project_id),
-    refreshTasksSilently,
-    { debounce: 300 }
-  );
+  // Tiempo real (silencioso): avisos de tareas y la señal gruesa
+  // projects.sync de cualquier proyecto (tareas borradas, checklist,
+  // etiquetas o asignados que cambió otro usuario) con un solo canal. Las
+  // ráfagas se agrupan en una recarga de la lista.
+  useDebouncedRefresh(["tasks", PROJECT_LIST_KEY], refreshTasksSilently, 500);
 
   const openDeleteConfirm = (taskId) => {
     setConfirmModal({ isOpen: true, taskId });

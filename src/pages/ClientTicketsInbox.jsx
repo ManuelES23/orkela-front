@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Select from "react-select";
@@ -43,18 +43,25 @@ const ClientTicketsInbox = () => {
   // asignación estaba en curso — ver handleAssign).
   const [reloadKey, setReloadKey] = useState(0);
 
+  // Id de la última petición: al alternar "Solo sin asignar" rápido se
+  // descarta la respuesta del filtro anterior que llegue tarde.
+  const requestIdRef = useRef(0);
+
   const loadTickets = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setLoadError(false);
     try {
       const data = await ticketsAPI.getClientInbox(
         onlyUnassigned ? { unassigned: true } : {}
       );
+      if (requestId !== requestIdRef.current) return;
       setTickets(data);
     } catch {
+      if (requestId !== requestIdRef.current) return;
       setLoadError(true);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [onlyUnassigned]);
 

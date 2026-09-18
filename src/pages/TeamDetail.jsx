@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import Select from "react-select";
@@ -201,13 +201,20 @@ const TeamDetail = () => {
     }
   }, [id]);
 
+  // Id de la última carga completa: al pasar de /teams/1 a /teams/2 se
+  // descartan las respuestas del equipo anterior que lleguen tarde.
+  const loadRequestIdRef = useRef(0);
+
   // Cargar TODOS los datos de una vez (equipo + tickets + proyectos + miembros + stats)
   const loadAllData = useCallback(async () => {
+    const requestId = ++loadRequestIdRef.current;
+    const isStale = () => requestId !== loadRequestIdRef.current;
     try {
       setLoading(true);
 
       // Primero cargar el equipo
       const teamData = await teamsAPI.getById(id);
+      if (isStale()) return;
       if (!teamData) {
         showError("No se pudo cargar el equipo");
         navigate("/teams");
@@ -227,6 +234,8 @@ const TeamDetail = () => {
           teamsAPI.getStats(id),
         ]);
 
+      if (isStale()) return;
+
       // Actualizar todo el estado de una vez
       setTeam(teamData);
       setTickets(ticketsData || []);
@@ -234,11 +243,12 @@ const TeamDetail = () => {
       setMembers(membersData || []);
       setStats(statsData || null);
     } catch (err) {
+      if (isStale()) return;
       console.error("Error al cargar datos del equipo:", err);
       showError("No se pudo cargar el equipo");
       navigate("/teams");
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   }, [id, ticketFilter, ticketStatusFilter, navigate, showError]);
 
@@ -308,19 +318,28 @@ const TeamDetail = () => {
   useEffect(() => {
     if (!team || loading) return;
 
+    // Si los filtros cambian antes de que responda, ignorar esta respuesta
+    let cancelled = false;
+
     const reloadTicketsWithFilters = async () => {
       try {
         const ticketsData = await teamsAPI.getTickets(id, {
           filter: ticketFilter,
           status: ticketStatusFilter !== "all" ? ticketStatusFilter : undefined,
         });
+        if (cancelled) return;
         setTickets(ticketsData || []);
       } catch (err) {
+        if (cancelled) return;
         console.error("Error al recargar tickets:", err);
       }
     };
 
     reloadTicketsWithFilters();
+
+    return () => {
+      cancelled = true;
+    };
   }, [ticketFilter, ticketStatusFilter, team, loading, id]);
 
   // Tomar ticket del buzón

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Layout from "../components/layout/Layout";
 import TicketModal from "../components/modals/TicketModal";
 import TicketDetailModal from "../components/modals/TicketDetailModal";
@@ -68,7 +68,6 @@ const Tickets = () => {
     const fetchTeams = async () => {
       try {
         const teamsData = await teamsAPI.getAll();
-        console.log("Equipos cargados:", teamsData);
         setUserTeams(teamsData);
       } catch (err) {
         console.error("Error al cargar equipos:", err);
@@ -77,8 +76,13 @@ const Tickets = () => {
     fetchTeams();
   }, []);
 
+  // Id de la última petición: si el usuario cambia de pestaña/filtro rápido,
+  // se descarta la respuesta de la petición anterior que llegue tarde.
+  const requestIdRef = useRef(0);
+
   // Función para cargar tickets con indicador de carga (carga inicial)
   const loadTickets = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     try {
       setLoading(true);
       setError(null);
@@ -100,18 +104,21 @@ const Tickets = () => {
         ticketsAPI.getStats(),
       ]);
 
+      if (requestId !== requestIdRef.current) return;
       setTickets(ticketsData);
       setStats(statsData);
     } catch (err) {
+      if (requestId !== requestIdRef.current) return;
       console.error("Error al cargar tickets:", err);
       setError("No se pudieron cargar los tickets");
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [activeTab, activeFilter, selectedTeamId]);
 
   // Función para refrescar tickets silenciosamente (sin spinner, para tiempo real)
   const refreshTicketsSilently = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     try {
       const filters = {};
       if (activeTab !== "all") {
@@ -129,11 +136,15 @@ const Tickets = () => {
         ticketsAPI.getStats(),
       ]);
 
+      if (requestId !== requestIdRef.current) return;
       setTickets(ticketsData);
       setStats(statsData);
     } catch (err) {
       console.error("Error refreshing tickets:", err);
       // No mostrar error en actualización silenciosa
+    } finally {
+      // Si reemplazó a una carga con skeleton en curso, quitarlo
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [activeTab, activeFilter, selectedTeamId]);
 

@@ -12,7 +12,7 @@ import {
   FolderOpen,
   ListChecks,
 } from "lucide-react";
-import { parseLocalDate } from "../../utils/dateUtils";
+import { parseLocalDate, formatTimestampDate } from "../../utils/dateUtils";
 
 const ProjectDetailsModal = ({
   isOpen,
@@ -70,6 +70,16 @@ const ProjectDetailsModal = ({
     if (!dateString) return "No definida";
     const date = parseLocalDate(dateString);
     return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // created_at/updated_at son timestamps UTC: no truncarlos con parseLocalDate
+  const formatTimestamp = (value) => {
+    if (!value) return "No definida";
+    return formatTimestampDate(value, {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -317,7 +327,7 @@ const ProjectDetailsModal = ({
                         <div className='flex justify-between'>
                           <span className='text-gray-600 dark:text-night-300'>Creado:</span>
                           <span className='font-medium text-gray-900 dark:text-night-50'>
-                            {formatDate(project.created_at)}
+                            {formatTimestamp(project.created_at)}
                           </span>
                         </div>
                       </div>
@@ -332,7 +342,7 @@ const ProjectDetailsModal = ({
                         <div className='flex justify-between'>
                           <span className='text-gray-600 dark:text-night-300'>Inicio:</span>
                           <span className='font-medium text-gray-900 dark:text-night-50'>
-                            {formatDate(project.created_at)}
+                            {formatTimestamp(project.created_at)}
                           </span>
                         </div>
                         <div className='flex justify-between'>
@@ -346,7 +356,7 @@ const ProjectDetailsModal = ({
                             Última actualización:
                           </span>
                           <span className='font-medium text-gray-900 dark:text-night-50'>
-                            {formatDate(project.updated_at)}
+                            {formatTimestamp(project.updated_at)}
                           </span>
                         </div>
                       </div>

@@ -38,7 +38,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { projectsAPI } from "../utils/api";
-import { parseLocalDate } from "../utils/dateUtils";
+import { parseLocalDate, isPast } from "../utils/dateUtils";
 import {
   exportProjectsToPdf,
   exportProjectsToExcel,
@@ -250,7 +250,7 @@ const Projects = () => {
     const overdue = tasks.filter((t) => {
       if (!t.due_date) return false;
       return (
-        parseLocalDate(t.due_date) < new Date() &&
+        isPast(t.due_date) && // una tarea que vence hoy aún no está vencida
         t.status !== "done" &&
         t.status !== "completed"
       );

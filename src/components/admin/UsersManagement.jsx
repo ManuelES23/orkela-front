@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { parseLocalDate } from "../../utils/dateUtils";
+import { formatTimestampDate } from "../../utils/dateUtils";
 import {
   Plus,
   Search,
@@ -127,8 +127,8 @@ const UsersManagement = ({ onStatsUpdate }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Nunca";
-    const date = parseLocalDate(dateString);
-    return date.toLocaleDateString("es-ES", {
+    // Timestamp UTC (created_at): conservar la hora para no correr el día
+    return formatTimestampDate(dateString, {
       day: "2-digit",
       month: "short",
       year: "numeric",

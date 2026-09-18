@@ -63,7 +63,7 @@ import {
   exportProjectDetailToExcel,
   exportProjectGanttToPdf,
 } from "../utils/exportService.jsx";
-import { parseLocalDate } from "../utils/dateUtils";
+import { parseLocalDate, isPast } from "../utils/dateUtils";
 import {
   ProjectDetailPdf,
   ProjectGanttPdf,
@@ -721,7 +721,8 @@ const ProjectDetail = () => {
   const pendingTasks = tasks.filter((t) => t.status === "todo").length;
   const overdueTasks = tasks.filter((t) => {
     if (!t.due_date || t.status === "done") return false;
-    return parseLocalDate(t.due_date) < new Date();
+    // Compara contra el inicio de hoy: lo que vence hoy aún no está vencido
+    return isPast(t.due_date);
   }).length;
 
   if (loading) {

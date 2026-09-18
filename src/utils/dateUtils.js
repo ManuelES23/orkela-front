@@ -33,13 +33,40 @@ export const parseLocalDate = (date) => {
 };
 
 /**
+ * Parsea un timestamp (created_at, updated_at...) conservando su hora real.
+ * parseLocalDate trunca a medianoche usando el día UTC, lo que corre la fecha
+ * un día en la tarde/noche para zonas horarias negativas. Solo las fechas sin
+ * hora ("YYYY-MM-DD") siguen pasando por parseLocalDate.
+ * @param {Date|string} date - La fecha a parsear
+ * @returns {Date}
+ */
+export const parseTimestamp = (date) => {
+  if (!date) return new Date();
+  if (date instanceof Date) return date;
+  if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return parseLocalDate(date);
+  }
+  return new Date(date);
+};
+
+/**
+ * Formatea solo el día de un timestamp (created_at, updated_at...) en local
+ * @param {Date|string} date - El timestamp a formatear
+ * @param {object} options - Opciones de toLocaleDateString
+ * @returns {string}
+ */
+export const formatTimestampDate = (date, options = {}) => {
+  return parseTimestamp(date).toLocaleDateString("es-ES", options);
+};
+
+/**
  * Formatea la distancia desde una fecha hasta ahora en español
  * @param {Date|string} date - La fecha a formatear
  * @returns {string} - La distancia formateada (ej: "hace 5 minutos")
  */
 export const formatDistanceToNow = (date) => {
   const now = new Date();
-  const past = parseLocalDate(date);
+  const past = parseTimestamp(date);
   const diffInSeconds = Math.floor((now - past) / 1000);
 
   if (diffInSeconds < 60) {

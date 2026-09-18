@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import Select from "react-select";
@@ -60,28 +60,39 @@ const TicketDetailModal = ({
   const [showAssignSelect, setShowAssignSelect] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
-  const loadTicketDetails = useCallback(async () => {
+  // Id de la última carga: al cambiar de ticket se descartan las respuestas
+  // de la carga anterior que lleguen tarde.
+  const requestIdRef = useRef(0);
+
+  // silent: recarga sin mostrar el skeleton (tras una acción o en tiempo real)
+  const loadTicketDetails = useCallback(async ({ silent = false } = {}) => {
     if (!initialTicket?.id) return;
 
+    const requestId = ++requestIdRef.current;
+    const isStale = () => requestId !== requestIdRef.current;
+
     try {
-      setInitializing(true);
+      if (!silent) setInitializing(true);
       const [ticketData, commentsData] = await Promise.all([
         ticketsAPI.getById(initialTicket.id),
         ticketsAPI.getComments(initialTicket.id),
       ]);
+      if (isStale()) return;
       setTicket(ticketData);
       setComments(commentsData);
 
       // Cargar miembros del equipo si es líder
       if (ticketData.is_team_leader && ticketData.team_id) {
         const members = await teamsAPI.getMembers(ticketData.team_id);
+        if (isStale()) return;
         setTeamMembers(members);
       }
     } catch (err) {
+      if (isStale()) return;
       console.error("Error loading ticket:", err);
       showError("No se pudo cargar el ticket");
     } finally {
-      setInitializing(false);
+      if (!isStale()) setInitializing(false);
     }
   }, [initialTicket?.id, showError]);
 
@@ -97,7 +108,7 @@ const TicketDetailModal = ({
   useEffect(() => {
     if (isOpen && initialTicket?.id) {
       const refreshKey = `ticketDetail-${initialTicket.id}`;
-      registerRefresh(refreshKey, loadTicketDetails);
+      registerRefresh(refreshKey, () => loadTicketDetails({ silent: true }));
       return () => unregisterRefresh(refreshKey);
     }
   }, [
@@ -112,8 +123,10 @@ const TicketDetailModal = ({
   const handleTakeTicket = async () => {
     setProcessingAction(true);
     try {
-      const updatedTicket = await ticketsAPI.takeTicket(ticket.id);
-      setTicket(updatedTicket);
+      await ticketsAPI.takeTicket(ticket.id);
+      // take/assign/return/update devuelven el modelo sin los permisos
+      // calculados (can_resolve, is_in_inbox...): recargar el detalle.
+      await loadTicketDetails({ silent: true });
       success("Has tomado este ticket");
       onUpdate?.();
     } catch (err) {
@@ -129,11 +142,8 @@ const TicketDetailModal = ({
 
     setProcessingAction(true);
     try {
-      const updatedTicket = await ticketsAPI.assignTicket(
-        ticket.id,
-        selectedMember.value
-      );
-      setTicket(updatedTicket);
+      await ticketsAPI.assignTicket(ticket.id, selectedMember.value);
+      await loadTicketDetails({ silent: true });
       success(`Ticket asignado a ${selectedMember.label}`);
       setShowAssignSelect(false);
       setSelectedMember(null);
@@ -149,8 +159,8 @@ const TicketDetailModal = ({
   const handleReturnToInbox = async () => {
     setProcessingAction(true);
     try {
-      const updatedTicket = await ticketsAPI.returnToInbox(ticket.id);
-      setTicket(updatedTicket);
+      await ticketsAPI.returnToInbox(ticket.id);
+      await loadTicketDetails({ silent: true });
       success("Ticket devuelto al buzón del equipo");
       onUpdate?.();
     } catch (err) {
@@ -186,10 +196,10 @@ const TicketDetailModal = ({
   const handleStatusChange = async (newStatus) => {
     setUpdatingStatus(true);
     try {
-      const updatedTicket = await ticketsAPI.update(ticket.id, {
+      await ticketsAPI.update(ticket.id, {
         status: newStatus,
       });
-      setTicket(updatedTicket);
+      await loadTicketDetails({ silent: true });
       success(`Estado actualizado a "${statusConfig[newStatus]?.label}"`);
       onUpdate?.();
     } catch (err) {

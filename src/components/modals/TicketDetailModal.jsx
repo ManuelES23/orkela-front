@@ -207,7 +207,7 @@ const TicketDetailModal = ({
       label: "Abierto",
     },
     in_progress: {
-      color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800",
+      color: "text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800",
       icon: PlayCircle,
       label: "En progreso",
     },
@@ -251,7 +251,7 @@ const TicketDetailModal = ({
       color: "text-blue-500 dark:text-blue-400",
     },
     bug: { icon: Bug, label: "Bug", color: "text-red-500 dark:text-red-400" },
-    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500" },
+    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500 dark:text-accent-400" },
     feature: {
       icon: Lightbulb,
       label: "Funcionalidad",
@@ -344,14 +344,14 @@ const TicketDetailModal = ({
               <div>
                 <p className='text-xs text-gray-500 dark:text-night-400'>Responsable</p>
                 {ticket.assigned_user ? (
-                  <p className='font-medium text-brand-600'>
+                  <p className='font-medium text-brand-600 dark:text-brand-400'>
                     {ticket.assigned_user?.name}
                     {ticket.assigned_user?.id === user?.id && (
                       <span className='ml-1 text-xs text-gray-400 dark:text-night-500'>(Tú)</span>
                     )}
                   </p>
                 ) : (
-                  <p className='text-accent-600 flex items-center gap-1'>
+                  <p className='text-accent-600 dark:text-accent-400 flex items-center gap-1'>
                     <Inbox className='w-4 h-4' />
                     En buzón del equipo
                   </p>
@@ -385,7 +385,7 @@ const TicketDetailModal = ({
           {/* Acciones de Tomar/Asignar/Devolver */}
           {ticket.team && !["closed", "resolved"].includes(ticket.status) && (
             <div className='p-4 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg'>
-              <h3 className='font-semibold text-accent-900 mb-3 flex items-center gap-2'>
+              <h3 className='font-semibold text-accent-900 dark:text-accent-100 mb-3 flex items-center gap-2'>
                 <Inbox className='w-5 h-5' />
                 Gestión del ticket
               </h3>
@@ -490,7 +490,7 @@ const TicketDetailModal = ({
                     <strong>{ticket.assigned_user?.name}</strong> está
                     trabajando en este ticket.
                     {ticket.taken_at && (
-                      <span className='block text-xs text-accent-600 mt-1'>
+                      <span className='block text-xs text-accent-600 dark:text-accent-400 mt-1'>
                         Tomado el{" "}
                         {new Date(ticket.taken_at).toLocaleString("es-ES")}
                       </span>
@@ -504,7 +504,7 @@ const TicketDetailModal = ({
                       whileTap={{ scale: 0.98 }}
                       onClick={handleReturnToInbox}
                       disabled={processingAction}
-                      className='px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition flex items-center gap-2 disabled:opacity-50'
+                      className='px-4 py-2 bg-gray-600 dark:bg-night-700 text-white rounded-lg font-medium hover:bg-gray-700 dark:hover:bg-night-600 transition flex items-center gap-2 disabled:opacity-50'
                     >
                       {processingAction ? (
                         <Loader2 className='w-4 h-4 animate-spin' />
@@ -645,7 +645,7 @@ const TicketDetailModal = ({
                               {comment.user?.name || comment.contact?.name}
                             </span>
                             {comment.is_internal && (
-                              <span className='ml-2 px-2 py-0.5 bg-amber-200 text-amber-700 dark:text-amber-300 rounded text-xs inline-flex items-center gap-1'>
+                              <span className='ml-2 px-2 py-0.5 bg-amber-200 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded text-xs inline-flex items-center gap-1'>
                                 <Lock className='w-3 h-3' />
                                 Interno
                               </span>
@@ -674,7 +674,7 @@ const TicketDetailModal = ({
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder='Escribe un comentario...'
                     rows='2'
-                    className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
+                    className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder:text-gray-400 dark:placeholder:text-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
                   />
                   <button
                     type='submit'

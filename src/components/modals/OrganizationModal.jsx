@@ -390,7 +390,7 @@ const OrganizationModal = ({
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all'
                 placeholder='Ej: Mi Empresa S.A.'
               />
             </div>
@@ -406,7 +406,7 @@ const OrganizationModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
               placeholder='Describe brevemente tu organización...'
             />
           </div>
@@ -424,7 +424,7 @@ const OrganizationModal = ({
                   name='website'
                   value={formData.website}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='https://...'
                 />
               </div>
@@ -441,7 +441,7 @@ const OrganizationModal = ({
                   name='email'
                   value={formData.email}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='contacto@empresa.com'
                 />
               </div>
@@ -461,7 +461,7 @@ const OrganizationModal = ({
                   name='phone'
                   value={formData.phone}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='+34 612 345 678'
                 />
               </div>
@@ -478,7 +478,7 @@ const OrganizationModal = ({
                   name='address'
                   value={formData.address}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                   placeholder='Calle Principal 123'
                 />
               </div>
@@ -496,7 +496,7 @@ const OrganizationModal = ({
                 name='city'
                 value={formData.city}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 placeholder='Madrid'
               />
             </div>
@@ -510,7 +510,7 @@ const OrganizationModal = ({
                 name='country'
                 value={formData.country}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 placeholder='España'
               />
             </div>

@@ -2,10 +2,10 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { motionTokens, statusIconVariants, shakeVariants } from "../animations/variants";
 
 const TONE_STYLES = {
-  loading: "bg-brand-100 text-brand-600",
-  info: "bg-brand-100 text-brand-600",
-  success: "bg-green-100 text-green-600",
-  error: "bg-red-100 text-red-600",
+  loading: "bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400",
+  info: "bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400",
+  success: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
+  error: "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400",
 };
 
 /**
@@ -17,7 +17,7 @@ export const AuthStatusCard = ({ statusKey, maxWidth = "max-w-md", children }) =
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(140%_100%_at_50%_0%,var(--color-brand-50)_0%,#f7f5fb_55%)]'>
+    <div className='min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(140%_100%_at_50%_0%,var(--color-brand-50)_0%,#f7f5fb_55%)] dark:bg-[radial-gradient(140%_100%_at_50%_0%,var(--color-night-800)_0%,var(--color-night-950)_55%)]'>
       <AnimatePresence mode='wait'>
         <motion.div
           key={statusKey}
@@ -25,7 +25,7 @@ export const AuthStatusCard = ({ statusKey, maxWidth = "max-w-md", children }) =
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={prefersReducedMotion ? undefined : { opacity: 0, y: -8 }}
           transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease }}
-          className={`w-full ${maxWidth} bg-white rounded-2xl shadow-xl p-8 text-center`}
+          className={`w-full ${maxWidth} bg-white dark:bg-night-900 rounded-2xl shadow-xl p-8 text-center`}
         >
           {children}
         </motion.div>
@@ -60,7 +60,7 @@ const AuthStatusScreen = ({
         {Icon && <Icon className={`w-8 h-8 ${spin ? "animate-spin" : ""}`} />}
       </motion.div>
 
-      <h2 className='text-xl font-bold text-gray-900 mb-2'>{title}</h2>
+      <h2 className='text-xl font-bold text-gray-900 dark:text-night-50 mb-2'>{title}</h2>
 
       {children}
     </AuthStatusCard>

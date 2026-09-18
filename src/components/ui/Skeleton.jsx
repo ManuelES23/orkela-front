@@ -85,7 +85,7 @@ export const SkeletonTableRow = ({ columns = 4 }) => (
   </motion.div>
 );
 
-export const SkeletonTableRows = ({ rows = 6, columns = 4, className = "divide-y divide-gray-100" }) => (
+export const SkeletonTableRows = ({ rows = 6, columns = 4, className = "divide-y divide-gray-100 dark:divide-night-700" }) => (
   <SkeletonGroup className={className}>
     {Array.from({ length: rows }).map((_, i) => (
       <SkeletonTableRow key={i} columns={columns} />

@@ -142,13 +142,13 @@ const Organizations = () => {
       <FadeIn delay={0.1}>
         <div className='flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6'>
           <div className='relative flex-1 w-full md:max-w-md'>
-            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400' />
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
             <input
               type='text'
               placeholder='Buscar organizaciones...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+              className='pl-10 pr-4 py-2.5 w-full border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
         </div>
@@ -160,14 +160,14 @@ const Organizations = () => {
       {/* Empty State */}
       {!loading && organizations.length === 0 && (
         <FadeIn>
-          <div className='text-center py-16 bg-white rounded-xl border border-gray-200'>
-            <div className='w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <Building2 className='w-10 h-10 text-brand-600' />
+          <div className='text-center py-16 bg-white dark:bg-night-900 rounded-xl border border-gray-200 dark:border-night-700'>
+            <div className='w-20 h-20 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <Building2 className='w-10 h-10 text-brand-600 dark:text-brand-400' />
             </div>
-            <h3 className='text-xl font-semibold text-gray-900 mb-2'>
+            <h3 className='text-xl font-semibold text-gray-900 dark:text-night-50 mb-2'>
               No perteneces a ninguna organización
             </h3>
-            <p className='text-gray-500 max-w-md mx-auto'>
+            <p className='text-gray-500 dark:text-night-400 max-w-md mx-auto'>
               Cuando seas invitado a una organización, aparecerá aquí. Contacta
               al administrador de tu empresa para solicitar acceso.
             </p>
@@ -250,7 +250,7 @@ const Organizations = () => {
       {/* Otras organizaciones */}
       {!loading && restOrganizations.length > 0 && (
         <FadeIn delay={0.2}>
-          <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 mb-3'>
+          <p className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-3'>
             Otras organizaciones
           </p>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
@@ -264,9 +264,9 @@ const Organizations = () => {
                   exit={{ opacity: 0, scale: 0.95 }}
                   whileHover={{ y: -2 }}
                   onClick={() => handleOrgClick(org.id)}
-                  className='flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-3 cursor-pointer hover:border-brand-300 hover:shadow-sm transition group'
+                  className='flex items-center gap-3 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 rounded-xl p-3 cursor-pointer hover:border-brand-300 dark:hover:border-brand-600 hover:shadow-sm transition group'
                 >
-                  <div className='w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden'>
+                  <div className='w-10 h-10 rounded-lg bg-gray-50 dark:bg-night-800 flex items-center justify-center shrink-0 overflow-hidden'>
                     {org.logo ? (
                       <img
                         src={getAssetUrl(org.logo)}
@@ -274,20 +274,20 @@ const Organizations = () => {
                         className='w-full h-full object-cover'
                       />
                     ) : (
-                      <Building2 className='w-5 h-5 text-brand-600' />
+                      <Building2 className='w-5 h-5 text-brand-600 dark:text-brand-400' />
                     )}
                   </div>
                   <div className='flex-1 min-w-0'>
-                    <p className='font-semibold text-gray-900 text-sm truncate'>
+                    <p className='font-semibold text-gray-900 dark:text-night-50 text-sm truncate'>
                       {org.name}
                     </p>
-                    <p className='text-xs text-gray-500 flex items-center gap-1'>
+                    <p className='text-xs text-gray-500 dark:text-night-400 flex items-center gap-1'>
                       <Users className='w-3 h-3' />
                       {org.active_members_count || 0} miembros ·{" "}
                       {org.plan?.name || "Sin plan"}
                     </p>
                   </div>
-                  <ArrowRight className='w-4 h-4 text-gray-300 group-hover:text-brand-500 shrink-0 transition-colors' />
+                  <ArrowRight className='w-4 h-4 text-gray-300 dark:text-night-600 group-hover:text-brand-500 dark:group-hover:text-brand-400 shrink-0 transition-colors' />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -301,8 +301,8 @@ const Organizations = () => {
         filteredOrganizations.length === 0 && (
           <FadeIn>
             <div className='text-center py-12'>
-              <Search className='w-12 h-12 text-gray-300 mx-auto mb-3' />
-              <p className='text-gray-500'>
+              <Search className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
+              <p className='text-gray-500 dark:text-night-400'>
                 No se encontraron organizaciones con "{searchTerm}"
               </p>
             </div>

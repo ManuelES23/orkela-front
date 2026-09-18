@@ -263,7 +263,7 @@ const Dashboard = () => {
           ctx.dataIndex === weeklyCompletion.length - 1 ? 5 : 0,
         pointHoverRadius: 5,
         pointBackgroundColor: "#7c3aed",
-        pointBorderColor: "#fff",
+        pointBorderColor: isDark ? "#1c1530" : "#fff",
         pointBorderWidth: 2,
       },
     ],

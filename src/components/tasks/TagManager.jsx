@@ -302,7 +302,7 @@ const TagManager = ({ projectId, onClose }) => {
                         if (e.key === "Enter") saveTagName(tag.id);
                         if (e.key === "Escape") cancelEditing();
                       }}
-                      className='flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-night-600 rounded focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                      className='flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                       autoFocus
                       disabled={saving}
                     />
@@ -347,7 +347,7 @@ const TagManager = ({ projectId, onClose }) => {
                           type='button'
                           onClick={() => startEditing(tag)}
                           disabled={saving}
-                          className='p-1.5 hover:bg-white/50 rounded-full transition-colors'
+                          className='p-1.5 hover:bg-white/50 dark:hover:bg-white/10 rounded-full transition-colors'
                           title='Editar nombre'
                         >
                           <Pencil className='w-4 h-4 text-gray-500 dark:text-night-400' />

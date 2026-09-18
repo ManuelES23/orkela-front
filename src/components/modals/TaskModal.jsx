@@ -319,7 +319,7 @@ const TaskModal = ({
                 name='title'
                 value={formData.title}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 placeholder='Ej: Diseñar mockups para landing'
                 required
               />
@@ -336,13 +336,13 @@ const TaskModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
               placeholder='Describe la tarea en detalle...'
             ></textarea>
           </div>
 
           {/* Lista de tareas (Checklist) - Opcional */}
-          <div className='border border-gray-200 dark:border-night-700 rounded-lg p-4 bg-gray-50/50'>
+          <div className='border border-gray-200 dark:border-night-700 rounded-lg p-4 bg-gray-50/50 dark:bg-night-800/50'>
             <TaskChecklist
               taskId={task?.id}
               items={checklistItems}
@@ -363,7 +363,7 @@ const TaskModal = ({
                   value={formData.project_id}
                   onChange={handleChange}
                   disabled={!!projectId}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 dark:bg-night-800 disabled:cursor-not-allowed'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none disabled:bg-gray-100 dark:bg-night-800 disabled:cursor-not-allowed'
                   required
                 >
                   <option value=''>Seleccionar proyecto</option>
@@ -384,7 +384,7 @@ const TaskModal = ({
                 name='status'
                 value={formData.status}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
               >
                 <option value='pending'>Pendiente</option>
                 <option value='in_progress'>En progreso</option>
@@ -453,7 +453,7 @@ const TaskModal = ({
                   name='priority'
                   value={formData.priority}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none appearance-none'
                 >
                   <option value='low'>Baja</option>
                   <option value='medium'>Media</option>
@@ -469,7 +469,7 @@ const TaskModal = ({
                 name='is_urgent'
                 checked={formData.is_urgent}
                 onChange={handleChange}
-                className='w-4 h-4 text-brand-600 border-gray-300 dark:border-night-600 rounded focus:ring-brand-500'
+                className='w-4 h-4 text-brand-600 border-gray-300 dark:border-night-600 dark:bg-night-800 rounded focus:ring-brand-500'
               />
               <label className='ml-2 text-sm font-medium text-gray-700 dark:text-night-300'>
                 Marcar como urgente
@@ -490,7 +490,7 @@ const TaskModal = ({
                   name='start_date'
                   value={formData.start_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 />
               </div>
             </div>
@@ -506,7 +506,7 @@ const TaskModal = ({
                   name='due_date'
                   value={formData.due_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 />
               </div>
             </div>

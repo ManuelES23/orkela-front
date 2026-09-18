@@ -169,7 +169,7 @@ const ProjectModal = ({
                 name='name'
                 value={formData.name}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 placeholder='Ej: Rediseño de Website'
                 required
               />
@@ -186,7 +186,7 @@ const ProjectModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='3'
-              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
               placeholder='Describe brevemente el proyecto...'
             ></textarea>
           </div>
@@ -204,7 +204,7 @@ const ProjectModal = ({
                   name='due_date'
                   value={formData.due_date}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 />
               </div>
             </div>
@@ -219,7 +219,7 @@ const ProjectModal = ({
                   name='priority'
                   value={formData.priority}
                   onChange={handleChange}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 >
                   <option value='low'>Baja</option>
                   <option value='medium'>Media</option>
@@ -244,7 +244,7 @@ const ProjectModal = ({
                   }
                   className={`w-8 h-8 rounded-lg ${color.value} ${
                     formData.color === color.value
-                      ? "ring-2 ring-offset-2 ring-brand-600 scale-110"
+                      ? "ring-2 ring-offset-2 ring-brand-600 dark:ring-offset-night-900 scale-110"
                       : "hover:scale-110 opacity-80 hover:opacity-100"
                   } transition-all duration-200`}
                   title={color.label}
@@ -255,7 +255,7 @@ const ProjectModal = ({
 
           {/* Equipo asignado */}
           {teams.length > 0 && (
-            <div className='border-2 border-brand-200 dark:border-brand-800 rounded-lg p-4 bg-brand-50/50'>
+            <div className='border-2 border-brand-200 dark:border-brand-800 rounded-lg p-4 bg-brand-50/50 dark:bg-brand-950/30'>
               <label className='block text-sm font-medium text-gray-900 dark:text-night-50 mb-2'>
                 <UsersIcon className='inline w-4 h-4 mr-1' />
                 Opción 1: Asignar Equipo Completo
@@ -264,7 +264,7 @@ const ProjectModal = ({
                 name='team_id'
                 value={formData.team_id}
                 onChange={handleChange}
-                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 bg-white dark:bg-night-900'
+                className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none appearance-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500 bg-white dark:bg-night-900 dark:text-night-50'
               >
                 <option value=''>Sin equipo asignado</option>
                 {teams.map((team) => (
@@ -277,7 +277,7 @@ const ProjectModal = ({
                 ✓ Todos los miembros del equipo tendrán acceso automáticamente
               </p>
               {formData.team_id && (
-                <p className='text-xs text-brand-600 mt-1 font-medium'>
+                <p className='text-xs text-brand-600 dark:text-brand-400 mt-1 font-medium'>
                   📌 Equipo seleccionado - Los usuarios individuales se
                   ignorarán
                 </p>
@@ -299,7 +299,7 @@ const ProjectModal = ({
             className={`${
               formData.team_id
                 ? "opacity-50 pointer-events-none"
-                : "border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50/50"
+                : "border-2 border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50/50 dark:bg-green-950/30"
             }`}
           >
             <label className='block text-sm font-medium text-gray-900 dark:text-night-50 mb-2'>
@@ -363,7 +363,7 @@ const ProjectModal = ({
                             }
                           }}
                           placeholder='email@ejemplo.com'
-                          className='w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                          className='w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         />
                       </div>
                       <button

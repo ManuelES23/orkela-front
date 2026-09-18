@@ -845,7 +845,7 @@ const OrganizationDetail = () => {
                                     e.target.value,
                                   )
                                 }
-                                className='text-sm border border-gray-300 dark:border-night-600 rounded-lg px-2 py-1'
+                                className='text-sm border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg px-2 py-1'
                               >
                                 <option value='admin'>Admin</option>
                                 <option value='manager'>Manager</option>
@@ -1244,7 +1244,7 @@ const OrganizationDetail = () => {
                         email: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500'
                     placeholder='email@ejemplo.com'
                   />
                 </div>
@@ -1260,7 +1260,7 @@ const OrganizationDetail = () => {
                         role: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg'
                   >
                     <option value='member'>Miembro</option>
                     <option value='manager'>Manager</option>
@@ -1280,7 +1280,7 @@ const OrganizationDetail = () => {
                         job_title: e.target.value,
                       }))
                     }
-                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg'
+                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg'
                     placeholder='Ej: Desarrollador Senior'
                   />
                 </div>
@@ -1442,7 +1442,7 @@ const OrganizationDetail = () => {
                     <div className='bg-blue-50 dark:bg-blue-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <FolderKanban className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-                        <h4 className='font-semibold text-blue-900'>
+                        <h4 className='font-semibold text-blue-900 dark:text-blue-300'>
                           Proyectos
                         </h4>
                       </div>
@@ -1473,7 +1473,7 @@ const OrganizationDetail = () => {
                     <div className='bg-green-50 dark:bg-green-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <CheckSquare className='w-5 h-5 text-green-600 dark:text-green-400' />
-                        <h4 className='font-semibold text-green-900'>Tareas</h4>
+                        <h4 className='font-semibold text-green-900 dark:text-green-300'>Tareas</h4>
                         {memberStatsModal.stats.tasks?.completion_rate > 0 && (
                           <span className='ml-auto text-sm font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-950/40 px-2 py-0.5 rounded-full'>
                             {memberStatsModal.stats.tasks.completion_rate}%
@@ -1513,7 +1513,7 @@ const OrganizationDetail = () => {
                     <div className='bg-orange-50 dark:bg-orange-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <Ticket className='w-5 h-5 text-orange-600 dark:text-orange-400' />
-                        <h4 className='font-semibold text-orange-900'>
+                        <h4 className='font-semibold text-orange-900 dark:text-orange-300'>
                           Tickets
                         </h4>
                         {memberStatsModal.stats.tickets?.resolution_rate >
@@ -1556,7 +1556,7 @@ const OrganizationDetail = () => {
                     <div className='bg-accent-50 dark:bg-accent-900/20 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <Users className='w-5 h-5 text-accent-600' />
-                        <h4 className='font-semibold text-accent-900'>
+                        <h4 className='font-semibold text-accent-900 dark:text-accent-300'>
                           Equipos
                         </h4>
                       </div>

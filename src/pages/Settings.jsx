@@ -14,9 +14,47 @@ import MyPlanSection from "../components/settings/MyPlanSection";
 import AccessSecuritySection from "../components/settings/AccessSecuritySection";
 import CalendarIntegrationsSection from "../components/settings/CalendarIntegrationsSection";
 import { SkeletonSettings } from "../components/ui/Skeleton";
+import PasswordForm from "../components/settings/access/PasswordForm";
+import Button from "../components/ui/Button";
+
+const AdminPasswordSection = () => {
+  const { success } = useNotification();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-100 dark:border-night-700 shadow-sm p-6'>
+      <div className='flex flex-wrap items-center justify-between gap-3'>
+        <div>
+          <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500'>
+            Contraseña
+          </h3>
+          <p className='mt-1 text-sm text-gray-500 dark:text-night-400'>
+            Cambia la contraseña con la que entras al panel de administración.
+          </p>
+        </div>
+        {!open && (
+          <Button type='button' variant='secondary' onClick={() => setOpen(true)}>
+            Cambiar contraseña
+          </Button>
+        )}
+      </div>
+      {open && (
+        <PasswordForm
+          mode='change'
+          onDone={() => {
+            setOpen(false);
+            success("Contraseña actualizada");
+          }}
+          onCancel={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
 
 const Settings = () => {
   const { user, refreshUser } = useAuth();
+  const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
   const { success, error: showError } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -224,17 +262,28 @@ const Settings = () => {
             </div>
           </StaggerItem>
 
-          <StaggerItem>
-            <MyPlanSection />
-          </StaggerItem>
+          {/* El superadmin no es un usuario de la app: no tiene plan personal,
+              cuentas de Google/Microsoft ni calendarios (el backend responde
+              403 a esas rutas). Solo puede cambiar su contraseña. */}
+          {isSuperAdmin ? (
+            <StaggerItem>
+              <AdminPasswordSection />
+            </StaggerItem>
+          ) : (
+            <>
+              <StaggerItem>
+                <MyPlanSection />
+              </StaggerItem>
 
-          <StaggerItem>
-            <AccessSecuritySection />
-          </StaggerItem>
+              <StaggerItem>
+                <AccessSecuritySection />
+              </StaggerItem>
 
-          <StaggerItem>
-            <CalendarIntegrationsSection />
-          </StaggerItem>
+              <StaggerItem>
+                <CalendarIntegrationsSection />
+              </StaggerItem>
+            </>
+          )}
 
           {/* Formulario editorial: secciones divididas por línea, sin doble card */}
           <StaggerItem>
@@ -255,7 +304,7 @@ const Settings = () => {
                         name='name'
                         value={profile.name}
                         onChange={handleChange}
-                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                       />
                     </div>
                     <div>
@@ -285,7 +334,7 @@ const Settings = () => {
                         value={profile.phone || ""}
                         onChange={handleChange}
                         placeholder='+51 999 999 999'
-                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                       />
                     </div>
                     <div>
@@ -298,7 +347,7 @@ const Settings = () => {
                         value={profile.job_title || ""}
                         onChange={handleChange}
                         placeholder='Ej: Project Manager'
-                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                        className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                       />
                     </div>
                   </div>
@@ -313,7 +362,7 @@ const Settings = () => {
                       onChange={handleChange}
                       rows='3'
                       maxLength={500}
-                      className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none'
+                      className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none'
                       placeholder='Cuéntanos sobre ti...'
                     />
                     <p className='text-xs text-gray-400 dark:text-night-500 mt-1 text-right'>
@@ -340,7 +389,7 @@ const Settings = () => {
                       name='language'
                       value={profile.language}
                       onChange={handleChange}
-                      className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      className='px-4 py-2 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                     >
                       <option value='es'>Español</option>
                       <option value='en'>English</option>
@@ -360,7 +409,7 @@ const Settings = () => {
                       name='timezone'
                       value={profile.timezone}
                       onChange={handleChange}
-                      className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                      className='px-4 py-2 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                     >
                       <option value='America/Lima'>GMT-5 (Lima)</option>
                       <option value='America/Mexico_City'>

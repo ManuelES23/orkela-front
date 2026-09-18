@@ -211,10 +211,10 @@ const PortalInboxScreen = () => {
       <PortalLayout organization={organization}>
         <div className='flex-1 flex items-center justify-center p-6'>
           <div className='text-center'>
-            <p className='text-gray-900 font-semibold mb-2'>
+            <p className='text-gray-900 dark:text-night-50 font-semibold mb-2'>
               No pudimos cargar tus tickets
             </p>
-            <p className='text-gray-500 text-sm max-w-sm mb-4'>
+            <p className='text-gray-500 dark:text-night-400 text-sm max-w-sm mb-4'>
               Ocurrió un problema al conectar con el servidor. Intenta de
               nuevo.
             </p>
@@ -234,7 +234,7 @@ const PortalInboxScreen = () => {
     <PortalLayout organization={organization}>
       <div className='flex-1 flex min-h-0'>
         <div
-          className={`w-full md:w-80 border-r border-gray-200 shrink-0 ${
+          className={`w-full md:w-80 border-r border-gray-200 dark:border-night-700 shrink-0 ${
             selectedId ? "hidden md:block" : "block"
           }`}
         >
@@ -257,7 +257,7 @@ const PortalInboxScreen = () => {
           />
         </div>
         {selectedId && (
-          <div className='hidden lg:block w-72 border-l border-gray-200 shrink-0 overflow-y-auto'>
+          <div className='hidden lg:block w-72 border-l border-gray-200 dark:border-night-700 shrink-0 overflow-y-auto'>
             <PortalTicketDetailsPanel
               ticket={selectedTicket?.id === selectedId ? selectedTicket : null}
             />
@@ -301,14 +301,14 @@ const PortalInboxScreen = () => {
               aria-modal='true'
               aria-label='Detalles del ticket'
               onClick={(event) => event.stopPropagation()}
-              className='absolute right-0 top-0 h-full w-full max-w-xs bg-white shadow-xl overflow-y-auto'
+              className='absolute right-0 top-0 h-full w-full max-w-xs bg-white dark:bg-night-900 shadow-xl overflow-y-auto'
             >
-              <div className='flex items-center justify-end p-3 border-b border-gray-100'>
+              <div className='flex items-center justify-end p-3 border-b border-gray-100 dark:border-night-700'>
                 <button
                   ref={detailsCloseButtonRef}
                   onClick={closeDetails}
                   aria-label='Cerrar detalles'
-                  className='text-gray-400 hover:text-gray-600 transition-colors'
+                  className='text-gray-400 hover:text-gray-600 dark:text-night-500 dark:hover:text-night-300 transition-colors'
                 >
                   <X className='w-5 h-5' />
                 </button>

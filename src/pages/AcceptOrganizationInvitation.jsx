@@ -148,7 +148,7 @@ const AcceptOrganizationInvitation = () => {
         spin
         title='Verificando invitación...'
       >
-        <p className='text-gray-500'>Por favor espera un momento</p>
+        <p className='text-gray-500 dark:text-night-400'>Por favor espera un momento</p>
       </AuthStatusScreen>
     );
   }
@@ -162,20 +162,20 @@ const AcceptOrganizationInvitation = () => {
         icon={Building2}
         title='Invitación a organización'
       >
-        <p className='text-gray-500 mb-2'>Has sido invitado a unirte a:</p>
-        <p className='font-semibold text-brand-600 text-lg mb-2'>
+        <p className='text-gray-500 dark:text-night-400 mb-2'>Has sido invitado a unirte a:</p>
+        <p className='font-semibold text-brand-600 dark:text-brand-400 text-lg mb-2'>
           {invitationInfo.organization?.name}
         </p>
         {invitationInfo.role && (
-          <p className='text-sm text-gray-500 mb-2'>
+          <p className='text-sm text-gray-500 dark:text-night-400 mb-2'>
             Rol: <span className='font-medium capitalize'>{invitationInfo.role}</span>
           </p>
         )}
-        <p className='text-gray-500 mb-4'>
+        <p className='text-gray-500 dark:text-night-400 mb-4'>
           por <span className='font-medium'>{invitationInfo.invited_by?.name}</span>
         </p>
 
-        <div className='flex items-center justify-center gap-2 text-brand-600 mb-4'>
+        <div className='flex items-center justify-center gap-2 text-brand-600 dark:text-brand-400 mb-4'>
           <Loader2 className='w-5 h-5 animate-spin' />
           <span>
             {invitationInfo.user_exists
@@ -184,8 +184,8 @@ const AcceptOrganizationInvitation = () => {
           </span>
         </div>
 
-        <div className='bg-gray-50 rounded-lg p-3'>
-          <p className='text-sm text-gray-600'>
+        <div className='bg-gray-50 dark:bg-night-800 rounded-lg p-3'>
+          <p className='text-sm text-gray-600 dark:text-night-400'>
             Email de la invitación: <span className='font-medium'>{invitationInfo.email}</span>
           </p>
         </div>
@@ -203,7 +203,7 @@ const AcceptOrganizationInvitation = () => {
         spin
         title='Procesando invitación...'
       >
-        <p className='text-gray-500'>
+        <p className='text-gray-500 dark:text-night-400'>
           Estamos agregándote a la organización, por favor espera un momento.
         </p>
       </AuthStatusScreen>
@@ -220,22 +220,22 @@ const AcceptOrganizationInvitation = () => {
             variants={statusIconVariants}
             initial='hidden'
             animate='visible'
-            className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4'
+            className='w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4'
           >
-            <Check className='w-8 h-8 text-green-600' />
+            <Check className='w-8 h-8 text-green-600 dark:text-green-400' />
           </motion.div>
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+          <h2 className='text-2xl font-bold text-gray-900 dark:text-night-50 mb-2'>
             ¡Bienvenido a {organizationName}!
           </h2>
-          <p className='text-gray-500'>{message}</p>
+          <p className='text-gray-500 dark:text-night-400'>{message}</p>
         </div>
 
         {/* Pregunta de contexto */}
         <div className='mb-6'>
-          <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+          <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-2'>
             ¿En qué modo deseas continuar?
           </h3>
-          <p className='text-sm text-gray-500'>
+          <p className='text-sm text-gray-500 dark:text-night-400'>
             Puedes cambiar entre modos en cualquier momento desde el menú
           </p>
         </div>
@@ -254,20 +254,20 @@ const AcceptOrganizationInvitation = () => {
               )
             }
             disabled={switchingContext}
-            className='w-full p-4 border-2 border-brand-200 rounded-xl hover:border-brand-500 hover:bg-brand-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+            className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 rounded-xl hover:border-brand-500 dark:hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
           >
             <div className='flex items-center gap-4'>
-              <div className='w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center group-hover:bg-brand-200 transition-colors'>
-                <Building2 className='w-6 h-6 text-brand-600' />
+              <div className='w-12 h-12 bg-brand-100 dark:bg-brand-900/30 rounded-xl flex items-center justify-center group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
+                <Building2 className='w-6 h-6 text-brand-600 dark:text-brand-400' />
               </div>
               <div className='flex-1'>
-                <h4 className='font-semibold text-gray-900 mb-1'>Modo organización</h4>
-                <p className='text-sm text-gray-500'>
+                <h4 className='font-semibold text-gray-900 dark:text-night-50 mb-1'>Modo organización</h4>
+                <p className='text-sm text-gray-500 dark:text-night-400'>
                   Accede a los equipos, proyectos y recursos de{" "}
-                  <span className='font-medium text-brand-600'>{organizationName}</span>
+                  <span className='font-medium text-brand-600 dark:text-brand-400'>{organizationName}</span>
                 </p>
               </div>
-              <ArrowRight className='w-5 h-5 text-gray-400 group-hover:text-brand-600 transition-colors' />
+              <ArrowRight className='w-5 h-5 text-gray-400 dark:text-night-500 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors' />
             </div>
           </motion.button>
 
@@ -277,19 +277,19 @@ const AcceptOrganizationInvitation = () => {
             whileTap={{ scale: 0.98 }}
             onClick={() => handleContextSelection("personal")}
             disabled={switchingContext}
-            className='w-full p-4 border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+            className='w-full p-4 border-2 border-gray-200 dark:border-night-700 rounded-xl hover:border-gray-400 dark:hover:border-night-500 hover:bg-gray-50 dark:hover:bg-night-800 transition-all group text-left disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
           >
             <div className='flex items-center gap-4'>
-              <div className='w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-200 transition-colors'>
-                <User className='w-6 h-6 text-gray-600' />
+              <div className='w-12 h-12 bg-gray-100 dark:bg-night-700 rounded-xl flex items-center justify-center group-hover:bg-gray-200 dark:group-hover:bg-night-600 transition-colors'>
+                <User className='w-6 h-6 text-gray-600 dark:text-night-300' />
               </div>
               <div className='flex-1'>
-                <h4 className='font-semibold text-gray-900 mb-1'>Modo personal</h4>
-                <p className='text-sm text-gray-500'>
+                <h4 className='font-semibold text-gray-900 dark:text-night-50 mb-1'>Modo personal</h4>
+                <p className='text-sm text-gray-500 dark:text-night-400'>
                   Continúa con tus proyectos y equipos personales
                 </p>
               </div>
-              <ArrowRight className='w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors' />
+              <ArrowRight className='w-5 h-5 text-gray-400 dark:text-night-500 group-hover:text-gray-600 dark:group-hover:text-night-300 transition-colors' />
             </div>
           </motion.button>
         </div>
@@ -314,7 +314,7 @@ const AcceptOrganizationInvitation = () => {
         icon={X}
         title='Error al procesar invitación'
       >
-        <p className='text-gray-500 mb-6'>{message}</p>
+        <p className='text-gray-500 dark:text-night-400 mb-6'>{message}</p>
         <button
           onClick={() => navigate("/organizations")}
           className='inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-lg font-semibold text-white bg-linear-to-r from-brand-600 to-accent-600 hover:brightness-105 transition cursor-pointer'

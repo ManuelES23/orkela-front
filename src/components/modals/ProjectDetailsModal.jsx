@@ -203,17 +203,17 @@ const ProjectDetailsModal = ({
                   {/* Stats Grid */}
                   <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                     {/* Progress */}
-                    <div className='bg-gradient-to-br from-brand-50 to-brand-100 rounded-xl p-4 border border-brand-200 dark:border-brand-800'>
+                    <div className='bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-900/30 dark:to-brand-900/20 rounded-xl p-4 border border-brand-200 dark:border-brand-800'>
                       <div className='flex items-center gap-2 mb-2'>
-                        <TrendingUp className='w-5 h-5 text-brand-600' />
-                        <span className='text-sm font-medium text-brand-900'>
+                        <TrendingUp className='w-5 h-5 text-brand-600 dark:text-brand-400' />
+                        <span className='text-sm font-medium text-brand-900 dark:text-brand-300'>
                           Progreso
                         </span>
                       </div>
-                      <div className='text-3xl font-bold text-brand-600'>
+                      <div className='text-3xl font-bold text-brand-600 dark:text-brand-400'>
                         {project.progress}%
                       </div>
-                      <div className='w-full bg-brand-200 rounded-full h-2 mt-2'>
+                      <div className='w-full bg-brand-200 dark:bg-brand-900/40 rounded-full h-2 mt-2'>
                         <div
                           className='bg-brand-600 h-2 rounded-full transition-all'
                           style={{ width: `${project.progress}%` }}
@@ -222,10 +222,10 @@ const ProjectDetailsModal = ({
                     </div>
 
                     {/* Team Size */}
-                    <div className='bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200 dark:border-blue-800'>
+                    <div className='bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800'>
                       <div className='flex items-center gap-2 mb-2'>
                         <Users className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-                        <span className='text-sm font-medium text-blue-900'>
+                        <span className='text-sm font-medium text-blue-900 dark:text-blue-300'>
                           Equipo
                         </span>
                       </div>
@@ -236,10 +236,10 @@ const ProjectDetailsModal = ({
                     </div>
 
                     {/* Tasks */}
-                    <div className='bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 dark:border-green-800'>
+                    <div className='bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800'>
                       <div className='flex items-center gap-2 mb-2'>
                         <ListChecks className='w-5 h-5 text-green-600 dark:text-green-400' />
-                        <span className='text-sm font-medium text-green-900'>
+                        <span className='text-sm font-medium text-green-900 dark:text-green-300'>
                           Tareas
                         </span>
                       </div>
@@ -253,8 +253,8 @@ const ProjectDetailsModal = ({
                     <div
                       className={`bg-gradient-to-br ${
                         daysRemaining && daysRemaining.color.includes("red")
-                          ? "from-red-50 to-red-100 border-red-200 dark:border-red-800"
-                          : "from-accent-50 to-accent-100 border-accent-200 dark:border-accent-800"
+                          ? "from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/20 border-red-200 dark:border-red-800"
+                          : "from-accent-50 to-accent-100 dark:from-accent-900/30 dark:to-accent-900/20 border-accent-200 dark:border-accent-800"
                       } rounded-xl p-4 border`}
                     >
                       <div className='flex items-center gap-2 mb-2'>
@@ -262,14 +262,14 @@ const ProjectDetailsModal = ({
                           className={`w-5 h-5 ${
                             daysRemaining && daysRemaining.color.includes("red")
                               ? "text-red-600 dark:text-red-400"
-                              : "text-accent-600"
+                              : "text-accent-600 dark:text-accent-400"
                           }`}
                         />
                         <span
                           className={`text-sm font-medium ${
                             daysRemaining && daysRemaining.color.includes("red")
-                              ? "text-red-900"
-                              : "text-accent-900"
+                              ? "text-red-900 dark:text-red-300"
+                              : "text-accent-900 dark:text-accent-300"
                           }`}
                         >
                           Vencimiento
@@ -279,7 +279,7 @@ const ProjectDetailsModal = ({
                         className={`text-sm font-semibold ${
                           daysRemaining
                             ? daysRemaining.color
-                            : "text-accent-600"
+                            : "text-accent-600 dark:text-accent-400"
                         }`}
                       >
                         {formatDate(project.due_date)}

@@ -104,7 +104,7 @@ const AcceptInvitation = () => {
         spin
         title='Verificando invitación...'
       >
-        <p className='text-gray-500'>Por favor espera un momento</p>
+        <p className='text-gray-500 dark:text-night-400'>Por favor espera un momento</p>
       </AuthStatusScreen>
     );
   }
@@ -113,15 +113,15 @@ const AcceptInvitation = () => {
   if (status === "redirecting" && invitationInfo) {
     return (
       <AuthStatusScreen statusKey='redirecting' tone='info' icon={Mail} title='Invitación a proyecto'>
-        <p className='text-gray-500 mb-2'>Has sido invitado a unirte al proyecto:</p>
-        <p className='font-semibold text-brand-600 text-lg mb-4'>
+        <p className='text-gray-500 dark:text-night-400 mb-2'>Has sido invitado a unirte al proyecto:</p>
+        <p className='font-semibold text-brand-600 dark:text-brand-400 text-lg mb-4'>
           {invitationInfo.project?.name}
         </p>
-        <p className='text-gray-500 mb-4'>
+        <p className='text-gray-500 dark:text-night-400 mb-4'>
           por <span className='font-medium'>{invitationInfo.invited_by?.name}</span>
         </p>
 
-        <div className='flex items-center justify-center gap-2 text-brand-600 mb-4'>
+        <div className='flex items-center justify-center gap-2 text-brand-600 dark:text-brand-400 mb-4'>
           <Loader2 className='w-5 h-5 animate-spin' />
           <span>
             {invitationInfo.user_exists
@@ -130,8 +130,8 @@ const AcceptInvitation = () => {
           </span>
         </div>
 
-        <div className='bg-gray-50 rounded-lg p-3'>
-          <p className='text-sm text-gray-600'>
+        <div className='bg-gray-50 dark:bg-night-800 rounded-lg p-3'>
+          <p className='text-sm text-gray-600 dark:text-night-400'>
             Email de la invitación: <span className='font-medium'>{invitationInfo.email}</span>
           </p>
         </div>
@@ -149,7 +149,7 @@ const AcceptInvitation = () => {
         spin
         title='Procesando invitación...'
       >
-        <p className='text-gray-500'>Uniéndote al proyecto</p>
+        <p className='text-gray-500 dark:text-night-400'>Uniéndote al proyecto</p>
       </AuthStatusScreen>
     );
   }
@@ -163,14 +163,14 @@ const AcceptInvitation = () => {
         icon={CheckCircle}
         title='¡Invitación aceptada!'
       >
-        <p className='text-gray-500 mb-6'>{message}</p>
+        <p className='text-gray-500 dark:text-night-400 mb-6'>{message}</p>
         {project && (
-          <div className='bg-gray-50 rounded-lg p-4 mb-4'>
-            <p className='text-sm text-gray-600'>Te uniste al proyecto:</p>
-            <p className='font-semibold text-gray-900 mt-1'>{project.name}</p>
+          <div className='bg-gray-50 dark:bg-night-800 rounded-lg p-4 mb-4'>
+            <p className='text-sm text-gray-600 dark:text-night-400'>Te uniste al proyecto:</p>
+            <p className='font-semibold text-gray-900 dark:text-night-50 mt-1'>{project.name}</p>
           </div>
         )}
-        <p className='text-sm text-gray-400'>Redirigiendo al proyecto en 3 segundos...</p>
+        <p className='text-sm text-gray-400 dark:text-night-500'>Redirigiendo al proyecto en 3 segundos...</p>
       </AuthStatusScreen>
     );
   }
@@ -179,7 +179,7 @@ const AcceptInvitation = () => {
   if (status === "error") {
     return (
       <AuthStatusScreen statusKey='error' tone='error' icon={XCircle} title='Error'>
-        <p className='text-gray-500 mb-6'>{message}</p>
+        <p className='text-gray-500 dark:text-night-400 mb-6'>{message}</p>
         <Button variant='brand' className='w-full' onClick={() => navigate("/dashboard")}>
           Ir al dashboard
         </Button>

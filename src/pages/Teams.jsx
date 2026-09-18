@@ -209,7 +209,7 @@ const Teams = () => {
               placeholder='Buscar equipos...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+              className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
 
@@ -294,7 +294,7 @@ const Teams = () => {
                       transition={motionTokens.springSoft}
                       onClick={() => handleViewTeam(team)}
                       style={{
-                        background: `linear-gradient(160deg, ${hex}14, #fff 55%)`,
+                        background: `linear-gradient(160deg, ${hex}14, var(--surface-card) 55%)`,
                         borderColor: `${hex}33`,
                       }}
                       className='rounded-2xl border cursor-pointer group transition-shadow hover:shadow-lg p-6 relative overflow-hidden'
@@ -400,7 +400,7 @@ const Teams = () => {
                               placeholder='Email...'
                               value={inviteEmail}
                               onChange={(e) => setInviteEmail(e.target.value)}
-                              className='flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-night-600 rounded-lg bg-white dark:bg-night-900 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                              className='flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-300 dark:border-night-600 rounded-lg bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                               onClick={(e) => e.stopPropagation()}
                             />
                             <button

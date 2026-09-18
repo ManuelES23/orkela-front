@@ -195,7 +195,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
     if (task.is_urgent) return "bg-red-400 border-red-500";
     if (task.priority === "high") return "bg-orange-400 border-orange-500";
     if (task.priority === "medium") return "bg-yellow-400 border-yellow-500";
-    return "bg-gray-300 dark:bg-night-600 border-gray-400";
+    return "bg-gray-300 dark:bg-night-600 border-gray-400 dark:border-night-500";
   };
 
   // Obtener color de texto para las barras
@@ -450,7 +450,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                               ${dayIndex === 6 ? "border-r" : ""}
                               ${
                                 !day.isCurrentMonth
-                                  ? "text-gray-300 dark:text-night-600 bg-gray-50/50"
+                                  ? "text-gray-300 dark:text-night-600 bg-gray-50/50 dark:bg-night-800/50"
                                   : "text-gray-700 dark:text-night-300 bg-white dark:bg-night-900"
                               }
                               ${
@@ -464,7 +464,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
                                   : ""
                               }
                             `}
-                            style={{ borderColor: "#e5e7eb" }}
+                            style={{ borderColor: "var(--grid-line)" }}
                           >
                             <span
                               className={`text-xs font-medium ${
@@ -482,10 +482,10 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
 
                     {/* Área de barras de tareas */}
                     <div
-                      className='relative border-b border-l border-r bg-gray-50/30'
+                      className='relative border-b border-l border-r bg-gray-50/30 dark:bg-night-800/30'
                       style={{
                         height: `${Math.max(rowHeight - 28, 28)}px`,
-                        borderColor: "#e5e7eb",
+                        borderColor: "var(--grid-line)",
                       }}
                     >
                       {/* Líneas de división de días */}

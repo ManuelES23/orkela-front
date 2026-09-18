@@ -63,12 +63,12 @@ const PortalLayout = ({ children, organization }) => {
     }
 
     return (
-      <div className='min-h-screen flex items-center justify-center bg-[#f7f5fb] p-6 text-center'>
+      <div className='min-h-screen flex items-center justify-center bg-[#f7f5fb] dark:bg-night-950 p-6 text-center'>
         <div>
-          <p className='text-gray-900 font-semibold mb-2'>
+          <p className='text-gray-900 dark:text-night-50 font-semibold mb-2'>
             No pudimos verificar tu acceso
           </p>
-          <p className='text-gray-500 text-sm max-w-sm'>
+          <p className='text-gray-500 dark:text-night-400 text-sm max-w-sm'>
             Revisa el correo con tu enlace de acceso al portal, o contacta al
             equipo de soporte para que te reenvíen uno nuevo.
           </p>
@@ -78,21 +78,21 @@ const PortalLayout = ({ children, organization }) => {
   }
 
   return (
-    <div className='min-h-screen bg-[#f7f5fb] flex flex-col'>
-      <header className='border-b border-gray-200 bg-white px-6 py-3.5 flex items-center gap-2.5 shrink-0'>
+    <div className='min-h-screen bg-[#f7f5fb] dark:bg-night-950 flex flex-col'>
+      <header className='border-b border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 px-6 py-3.5 flex items-center gap-2.5 shrink-0'>
         <img
           src={organization?.logo || "/img/isotipo_orkela.png"}
           alt=''
           className='w-8 h-8 object-contain'
           aria-hidden='true'
         />
-        <span className='font-bold text-gray-900'>
+        <span className='font-bold text-gray-900 dark:text-night-50'>
           {organization?.name || "Portal de soporte"}
         </span>
         <button
           type='button'
           onClick={handleLogout}
-          className='ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-brand-600 transition-colors cursor-pointer'
+          className='ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 dark:text-night-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors cursor-pointer'
         >
           <LogOut className='w-4 h-4' aria-hidden='true' />
           Salir

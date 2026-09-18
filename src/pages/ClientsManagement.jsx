@@ -377,7 +377,7 @@ const ClientsManagement = () => {
                         disabled={actioningContactId === contact.id || contact.status !== "active" || selected.status !== "active"}
                         aria-label='Reenviar acceso'
                         title={selected.status !== "active" ? "Reactiva el cliente para reenviar el acceso" : undefined}
-                        className='text-gray-400 hover:text-gray-600 dark:hover:text-night-200 disabled:opacity-40 disabled:cursor-not-allowed p-1'
+                        className='text-gray-400 dark:text-night-500 hover:text-gray-600 dark:hover:text-night-200 disabled:opacity-40 disabled:cursor-not-allowed p-1'
                       >
                         <Send className='w-3.5 h-3.5' />
                       </button>
@@ -385,7 +385,7 @@ const ClientsManagement = () => {
                         onClick={() => handleToggleArchiveContact(contact)}
                         disabled={actioningContactId === contact.id}
                         aria-label={contact.status === "active" ? "Archivar contacto" : "Reactivar contacto"}
-                        className='text-gray-400 hover:text-gray-600 dark:hover:text-night-200 disabled:opacity-40 p-1'
+                        className='text-gray-400 dark:text-night-500 hover:text-gray-600 dark:hover:text-night-200 disabled:opacity-40 p-1'
                       >
                         {contact.status === "active" ? (
                           <Archive className='w-3.5 h-3.5' />

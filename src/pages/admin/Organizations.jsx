@@ -316,7 +316,7 @@ const AdminOrganizations = () => {
     {
       key: "inactive",
       label: "Inactivas",
-      stripe: "border-l-gray-300",
+      stripe: "border-l-gray-300 dark:border-l-night-600",
       orgs: restOrgs.filter((o) => o.status === "inactive"),
     },
   ];

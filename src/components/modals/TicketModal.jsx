@@ -211,7 +211,7 @@ const TicketModal = ({
                 name='title'
                 value={formData.title}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 placeholder='Ej: Solicitud de acceso al sistema'
                 required
               />
@@ -228,7 +228,7 @@ const TicketModal = ({
               value={formData.description}
               onChange={handleChange}
               rows='4'
-              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+              className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
               placeholder='Describe detalladamente tu solicitud o problema...'
               required
             ></textarea>

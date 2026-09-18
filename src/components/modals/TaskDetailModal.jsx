@@ -584,7 +584,7 @@ const TaskDetailModal = ({
                   }}
                   placeholder='Agregar subtarea...'
                   disabled={addingItem}
-                  className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:bg-night-800 disabled:cursor-not-allowed'
+                  className='w-full pl-8 pr-3 py-2 text-sm border border-gray-200 dark:border-night-700 dark:bg-night-900 dark:text-night-50 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-900/30 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:disabled:bg-night-800 disabled:cursor-not-allowed'
                 />
               </div>
               <button

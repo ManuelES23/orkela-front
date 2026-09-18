@@ -53,6 +53,13 @@
 }
 
 :root {
+  /* color-scheme le dice al navegador qué paleta usar para el chrome nativo
+     que ninguna clase de Tailwind alcanza: la lista desplegable de <select>
+     (fondo/scrollbar del popup), <input type="date/time">, checkboxes y
+     radios sin estilo, el scrollbar por defecto, etc. Sin esto, ese chrome
+     se queda claro aunque el resto de la UI esté en modo oscuro. */
+  color-scheme: light;
+
   /* Tokens de formulario que sí cambian con el tema (a diferencia de la
      escala night-*, que son valores fijos) — para <select> nativo y para
      react-select, que ignora las clases de Tailwind por ser CSS-in-JS. */
@@ -64,8 +71,18 @@
   --select-menu-bg: #ffffff;
   --select-option-hover-bg: var(--color-brand-50);
   --select-option-selected-bg: var(--color-brand-100);
+
+  /* Para colores que se calculan en estilos inline (degradados con el color
+     de un equipo, rejillas del calendario), donde no llegan las clases dark:. */
+  --surface-card: #ffffff;
+  --grid-line: #e5e7eb;
 }
 [data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-card: var(--color-night-900);
+  --grid-line: var(--color-night-700);
+
   --select-bg: var(--color-night-800);
   --select-border: var(--color-night-600);
   --select-border-focus: var(--color-brand-400);

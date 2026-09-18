@@ -145,7 +145,7 @@ const InvitationsPanel = () => {
       case "organization":
         return <Building2 className='w-5 h-5 text-brand-500' />;
       default:
-        return <Mail className='w-5 h-5 text-gray-500' />;
+        return <Mail className='w-5 h-5 text-gray-500 dark:text-night-400' />;
     }
   };
 
@@ -250,7 +250,7 @@ const InvitationsPanel = () => {
                               invitation.resource_color?.replace(
                                 "bg-",
                                 "bg-"
-                              ) || "bg-gray-100"
+                              ) || "bg-gray-100 dark:bg-night-700"
                             } bg-opacity-20`}
                           >
                             {getIcon(invitation.type)}

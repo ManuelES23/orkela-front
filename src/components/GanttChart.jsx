@@ -747,7 +747,7 @@ const GanttChart = ({ projects }) => {
               placeholder='Buscar...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+              className='w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
             />
           </div>
 
@@ -755,7 +755,7 @@ const GanttChart = ({ projects }) => {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
+            className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
           >
             <option value='all'>Todas las prioridades</option>
             <option value='high'>Alta</option>
@@ -767,7 +767,7 @@ const GanttChart = ({ projects }) => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
+            className='px-3 py-1.5 text-sm border border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
           >
             <option value='all'>Todos los estados</option>
             <option value='active'>Activos</option>
@@ -778,7 +778,7 @@ const GanttChart = ({ projects }) => {
 
       {/* Franja de métricas por estado */}
       {!loading && items.length > 0 && (
-        <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-gray-200 dark:border-night-700 bg-gray-50/60'>
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 border-b border-gray-200 dark:border-night-700 bg-gray-50/60 dark:bg-night-800/60'>
           {["late", "progress", "upcoming", "done"].map((key) => {
             const meta = GROUP_META[key];
             const group = groupedSections.find((g) => g.key === key);

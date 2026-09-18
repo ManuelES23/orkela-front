@@ -379,7 +379,7 @@ const Tasks = () => {
                 placeholder='Buscar tareas...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
             <motion.button
@@ -417,7 +417,7 @@ const Tasks = () => {
             transition={motionTokens.springSnappy}
             className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               activeTab === "today"
-                ? "bg-orange-50 dark:bg-orange-950/40 border-orange-300 dark:border-orange-700 ring-1 ring-orange-300"
+                ? "bg-orange-50 dark:bg-orange-950/40 border-orange-300 dark:border-orange-700 ring-1 ring-orange-300 dark:ring-orange-700"
                 : "bg-white dark:bg-night-900 border-gray-200 dark:border-night-700 hover:border-orange-200 dark:hover:border-orange-800"
             }`}
           >
@@ -444,7 +444,7 @@ const Tasks = () => {
             transition={motionTokens.springSnappy}
             className={`text-left rounded-xl border p-4 flex items-center gap-3 transition-colors ${
               activeTab === "upcoming"
-                ? "bg-yellow-50 dark:bg-yellow-950/40 border-yellow-300 dark:border-yellow-700 ring-1 ring-yellow-300"
+                ? "bg-yellow-50 dark:bg-yellow-950/40 border-yellow-300 dark:border-yellow-700 ring-1 ring-yellow-300 dark:ring-yellow-700"
                 : "bg-white dark:bg-night-900 border-gray-200 dark:border-night-700 hover:border-yellow-200 dark:hover:border-yellow-800"
             }`}
           >
@@ -474,7 +474,7 @@ const Tasks = () => {
               taskCounts.overdue === 0
                 ? "bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800 cursor-default"
                 : activeTab === "overdue"
-                  ? "bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-700 ring-1 ring-red-300"
+                  ? "bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-700 ring-1 ring-red-300 dark:ring-red-700"
                   : "bg-white dark:bg-night-900 border-gray-200 dark:border-night-700 hover:border-red-200 dark:hover:border-red-800 animate-pulse"
             }`}
           >

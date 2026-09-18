@@ -1576,7 +1576,7 @@ const ProjectDetail = () => {
                                       setInviteEmail(e.target.value)
                                     }
                                     placeholder='Correo electrónico'
-                                    className='w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                                    className='w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                                     required
                                     autoFocus
                                   />
@@ -1631,7 +1631,7 @@ const ProjectDetail = () => {
                             className={
                               member.role === "team_owner" ||
                               member.role === "team_member"
-                                ? "ring-2 ring-purple-300"
+                                ? "ring-2 ring-purple-300 dark:ring-purple-700"
                                 : ""
                             }
                           />
@@ -1865,7 +1865,7 @@ const ProjectDetail = () => {
                     <div className='bg-green-50 dark:bg-green-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <CheckCircle className='w-5 h-5 text-green-600 dark:text-green-400' />
-                        <h4 className='font-semibold text-green-900'>Tareas</h4>
+                        <h4 className='font-semibold text-green-900 dark:text-green-300'>Tareas</h4>
                         {collaboratorStats.tasks?.completion_rate > 0 && (
                           <span className='ml-auto text-sm font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-950/40 px-2 py-0.5 rounded-full'>
                             {collaboratorStats.tasks.completion_rate}%
@@ -1905,7 +1905,7 @@ const ProjectDetail = () => {
                     <div className='bg-blue-50 dark:bg-blue-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <ListChecks className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-                        <h4 className='font-semibold text-blue-900'>
+                        <h4 className='font-semibold text-blue-900 dark:text-blue-300'>
                           Subtareas (Checklist)
                         </h4>
                         {collaboratorStats.checklist?.completion_rate > 0 && (

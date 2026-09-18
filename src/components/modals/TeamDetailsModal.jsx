@@ -124,7 +124,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
             </h3>
             <div className='space-y-2'>
               {/* Owner */}
-              <div className='flex items-center gap-3 p-3 bg-gradient-to-r from-brand-50 to-accent-50 rounded-lg border border-brand-100'>
+              <div className='flex items-center gap-3 p-3 bg-gradient-to-r from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20 rounded-lg border border-brand-100 dark:border-brand-800'>
                 <UserAvatar user={teamDetails.user} size='md' />
                 <div className='flex-1'>
                   <p className='font-semibold text-gray-900 dark:text-night-50'>
@@ -182,7 +182,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder='email@ejemplo.com'
                     disabled={sendingInvite}
-                    className='w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:bg-night-800'
+                    className='w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:bg-gray-100 dark:disabled:bg-night-800'
                   />
                 </div>
                 <button

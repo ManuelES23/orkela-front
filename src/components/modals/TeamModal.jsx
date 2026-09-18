@@ -279,7 +279,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
                 name='name'
                 value={formData.name}
                 onChange={handleChange}
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 placeholder='Ej: Equipo de Desarrollo'
                 required
               />
@@ -298,7 +298,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
                 value={formData.description}
                 onChange={handleChange}
                 rows='3'
-                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400'
+                className='w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
                 placeholder='Describe el propósito de este equipo...'
               ></textarea>
             </div>
@@ -324,7 +324,7 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
                     colorOption.value
                   } transition-all duration-200 ${
                     formData.color === colorOption.value
-                      ? "ring-2 ring-offset-2 ring-brand-500 scale-110"
+                      ? "ring-2 ring-offset-2 dark:ring-offset-night-900 ring-brand-500 scale-110"
                       : "hover:scale-110 opacity-80 hover:opacity-100"
                   }`}
                   title={colorOption.label}

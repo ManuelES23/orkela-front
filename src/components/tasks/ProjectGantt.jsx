@@ -258,7 +258,7 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
 
       {/* Franja de métricas por estado */}
       {sortedTasks.length > 0 && (
-        <div className='grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 border-b border-gray-200 dark:border-night-700 bg-gray-50/60'>
+        <div className='grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 border-b border-gray-200 dark:border-night-700 bg-gray-50/60 dark:bg-night-800/60'>
           {["late", "progress", "upcoming", "done"].map((key) => {
             const meta = GROUP_META[key];
             const group = groupedSections.find((g) => g.key === key);
@@ -267,12 +267,12 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                 key={key}
                 className={`bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-lg px-3 py-2 ${
                   key === "late"
-                    ? "border-l-red-500"
+                    ? "border-l-red-500 dark:border-l-red-500"
                     : key === "progress"
-                      ? "border-l-brand-600"
+                      ? "border-l-brand-600 dark:border-l-brand-500"
                       : key === "done"
-                        ? "border-l-green-500"
-                        : "border-l-gray-400"
+                        ? "border-l-green-500 dark:border-l-green-500"
+                        : "border-l-gray-400 dark:border-l-night-500"
                 }`}
               >
                 <AnimatedNumber
@@ -352,10 +352,17 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ delay: index * 0.03 }}
-                          className={`flex border-b border-gray-100 dark:border-night-700 hover:bg-gray-50 dark:hover:bg-night-800 transition border-l-4 ${group.stripe.replace(
-                            "bg-",
-                            "border-l-",
-                          )}`}
+                          className={`flex border-b border-gray-100 dark:border-night-700 hover:bg-gray-50 dark:hover:bg-night-800 transition border-l-4 ${
+                            // Reemplazo naive: en "bg-gray-400 dark:bg-night-500" un solo
+                            // .replace("bg-", "border-l-") solo convierte la primera
+                            // ocurrencia y deja "dark:bg-night-500" suelto, pintando el
+                            // fondo de toda la fila en modo oscuro. Se convierte cada
+                            // token bg-/dark:bg- por separado (mismo fix que GanttChart.jsx).
+                            group.stripe
+                              .split(" ")
+                              .map((cls) => cls.replace(/^(dark:)?bg-/, "$1border-l-"))
+                              .join(" ")
+                          }`}
                         >
                     {/* Nombre de la tarea */}
                     <div className='w-48 shrink-0 px-3 py-3 border-r border-gray-200 dark:border-night-700'>
@@ -386,8 +393,8 @@ const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
                           <div
                             key={i}
                             className={`flex-1 border-r border-gray-100 dark:border-night-700 ${
-                              isWeekend(day) ? "bg-gray-50/50" : ""
-                            } ${isToday(day) ? "bg-brand-50/50" : ""}`}
+                              isWeekend(day) ? "bg-gray-50/50 dark:bg-night-800/50" : ""
+                            } ${isToday(day) ? "bg-brand-50/50 dark:bg-brand-900/20" : ""}`}
                           />
                         ))}
                       </div>

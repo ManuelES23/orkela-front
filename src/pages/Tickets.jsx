@@ -399,7 +399,7 @@ const Tickets = () => {
                 placeholder='Buscar tickets...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-9 pr-3 py-2 w-full text-sm border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                className='pl-9 pr-3 py-2 w-full text-sm border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
               />
             </div>
 
@@ -572,7 +572,7 @@ const Tickets = () => {
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.2 }}
                             onClick={() => handleView(ticket)}
-                            className='group flex items-start gap-3 py-4 px-2 -mx-2 border-b border-gray-100 dark:border-night-700 last:border-b-0 rounded-lg cursor-pointer hover:bg-gray-50/70 transition-colors'
+                            className='group flex items-start gap-3 py-4 px-2 -mx-2 border-b border-gray-100 dark:border-night-700 last:border-b-0 rounded-lg cursor-pointer hover:bg-gray-50/70 dark:hover:bg-night-800/70 transition-colors'
                           >
                             {/* Punto de estado */}
                             <span

@@ -178,7 +178,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
               onChange={handleChange}
               className='sr-only peer'
             />
-            <div className="w-11 h-6 bg-gray-200 dark:bg-night-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white dark:border-night-900 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:bg-night-900 after:border-gray-300 dark:border-night-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+            <div className="w-11 h-6 bg-gray-200 dark:bg-night-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:after:bg-night-200 after:border-gray-300 dark:after:border-night-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
           </label>
         </div>
 
@@ -227,7 +227,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_host}
                 onChange={handleChange}
                 placeholder='smtp.tudominio.com'
-                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
@@ -242,7 +242,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_port}
                 onChange={handleChange}
                 placeholder='587'
-                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
@@ -258,7 +258,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_username}
                 onChange={handleChange}
                 placeholder='noreply@tudominio.com'
-                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
@@ -277,7 +277,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                   placeholder={
                     hasExistingPassword ? "••••••• (sin cambios)" : "Contraseña"
                   }
-                  className='w-full px-3 py-2 pr-10 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                  className='w-full px-3 py-2 pr-10 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                 />
                 <button
                   type='button'
@@ -308,7 +308,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 name='mail_encryption'
                 value={config.mail_encryption}
                 onChange={handleChange}
-                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               >
                 <option value='tls'>TLS</option>
                 <option value='ssl'>SSL</option>
@@ -335,7 +335,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_from_address}
                 onChange={handleChange}
                 placeholder='noreply@tudominio.com'
-                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
 
@@ -350,14 +350,14 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
                 value={config.mail_from_name}
                 onChange={handleChange}
                 placeholder='Mi Empresa'
-                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
               />
             </div>
           </div>
         </motion.div>
 
         {/* Save Button */}
-        <div className='flex items-center justify-end gap-3 pt-4 border-t'>
+        <div className='flex items-center justify-end gap-3 pt-4 border-t dark:border-night-700'>
           <button
             type='submit'
             disabled={saving}
@@ -380,7 +380,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
 
       {/* Test Email Section */}
       {config.mail_enabled && (
-        <div className='border-t pt-6'>
+        <div className='border-t dark:border-night-700 pt-6'>
           <h4 className='font-medium text-gray-900 dark:text-night-50 mb-3'>
             Probar configuración
           </h4>
@@ -390,7 +390,7 @@ const OrganizationMailConfig = ({ organizationId, isOwner }) => {
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
               placeholder='email@ejemplo.com'
-              className='flex-1 px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
+              className='flex-1 px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-800 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
             />
             <button
               type='button'

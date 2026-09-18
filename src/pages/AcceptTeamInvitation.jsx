@@ -108,7 +108,7 @@ const AcceptTeamInvitation = () => {
         spin
         title='Verificando invitación...'
       >
-        <p className='text-gray-500'>Por favor espera un momento</p>
+        <p className='text-gray-500 dark:text-night-400'>Por favor espera un momento</p>
       </AuthStatusScreen>
     );
   }
@@ -117,13 +117,13 @@ const AcceptTeamInvitation = () => {
   if (status === "redirecting" && invitationInfo) {
     return (
       <AuthStatusScreen statusKey='redirecting' tone='info' icon={Users} title='Invitación a equipo'>
-        <p className='text-gray-500 mb-2'>Has sido invitado a unirte al equipo:</p>
-        <p className='font-semibold text-brand-600 text-lg mb-4'>{invitationInfo.team?.name}</p>
-        <p className='text-gray-500 mb-4'>
+        <p className='text-gray-500 dark:text-night-400 mb-2'>Has sido invitado a unirte al equipo:</p>
+        <p className='font-semibold text-brand-600 dark:text-brand-400 text-lg mb-4'>{invitationInfo.team?.name}</p>
+        <p className='text-gray-500 dark:text-night-400 mb-4'>
           por <span className='font-medium'>{invitationInfo.invited_by?.name}</span>
         </p>
 
-        <div className='flex items-center justify-center gap-2 text-brand-600 mb-4'>
+        <div className='flex items-center justify-center gap-2 text-brand-600 dark:text-brand-400 mb-4'>
           <Loader2 className='w-5 h-5 animate-spin' />
           <span>
             {invitationInfo.user_exists
@@ -132,8 +132,8 @@ const AcceptTeamInvitation = () => {
           </span>
         </div>
 
-        <div className='bg-gray-50 rounded-lg p-3'>
-          <p className='text-sm text-gray-600'>
+        <div className='bg-gray-50 dark:bg-night-800 rounded-lg p-3'>
+          <p className='text-sm text-gray-600 dark:text-night-400'>
             Email de la invitación: <span className='font-medium'>{invitationInfo.email}</span>
           </p>
         </div>
@@ -151,7 +151,7 @@ const AcceptTeamInvitation = () => {
         spin
         title='Procesando invitación...'
       >
-        <p className='text-gray-500'>Estamos agregándote al equipo, por favor espera un momento.</p>
+        <p className='text-gray-500 dark:text-night-400'>Estamos agregándote al equipo, por favor espera un momento.</p>
       </AuthStatusScreen>
     );
   }
@@ -165,16 +165,16 @@ const AcceptTeamInvitation = () => {
         icon={CheckCircle2}
         title='¡Bienvenido al equipo!'
       >
-        <p className='text-gray-500 mb-4'>{message}</p>
+        <p className='text-gray-500 dark:text-night-400 mb-4'>{message}</p>
         {teamName && (
-          <div className='bg-brand-50 border border-brand-200 rounded-lg p-4 mb-4'>
-            <div className='flex items-center justify-center gap-2 text-brand-700'>
+          <div className='bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-800 rounded-lg p-4 mb-4'>
+            <div className='flex items-center justify-center gap-2 text-brand-700 dark:text-brand-300'>
               <Users className='w-5 h-5' />
               <span className='font-medium'>{teamName}</span>
             </div>
           </div>
         )}
-        <p className='text-sm text-gray-400 mb-4'>
+        <p className='text-sm text-gray-400 dark:text-night-500 mb-4'>
           Serás redirigido a la página de equipos en unos segundos...
         </p>
         <Button variant='brand' className='w-full' onClick={() => navigate("/teams")}>
@@ -193,7 +193,7 @@ const AcceptTeamInvitation = () => {
         icon={XCircle}
         title='No se pudo aceptar la invitación'
       >
-        <p className='text-gray-500 mb-6'>{message}</p>
+        <p className='text-gray-500 dark:text-night-400 mb-6'>{message}</p>
         <div className='flex gap-3 justify-center'>
           <Button variant='brand' onClick={() => navigate("/login")}>
             Iniciar sesión

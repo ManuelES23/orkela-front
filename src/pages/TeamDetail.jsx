@@ -693,13 +693,13 @@ const TeamDetail = () => {
                     placeholder='Buscar tickets...'
                     value={ticketSearchTerm}
                     onChange={(e) => setTicketSearchTerm(e.target.value)}
-                    className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                    className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                   />
                 </div>
                 <select
                   value={ticketFilter}
                   onChange={(e) => setTicketFilter(e.target.value)}
-                  className='px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
+                  className='px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
                 >
                   <option value='all'>Todos</option>
                   <option value='inbox'>Sin asignar</option>
@@ -708,7 +708,7 @@ const TeamDetail = () => {
                 <select
                   value={ticketStatusFilter}
                   onChange={(e) => setTicketStatusFilter(e.target.value)}
-                  className='px-3 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
+                  className='px-3 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none'
                 >
                   <option value='all'>Todo estado</option>
                   <option value='open'>Abierto</option>
@@ -903,7 +903,7 @@ const TeamDetail = () => {
                   placeholder='Buscar proyectos...'
                   value={projectSearchTerm}
                   onChange={(e) => setProjectSearchTerm(e.target.value)}
-                  className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                  className='pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                 />
               </div>
 
@@ -1151,7 +1151,7 @@ const TeamDetail = () => {
                           placeholder='Email del nuevo miembro...'
                           value={inviteEmail}
                           onChange={(e) => setInviteEmail(e.target.value)}
-                          className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
+                          className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none'
                           required
                         />
                       </div>
@@ -1556,7 +1556,7 @@ const TeamDetail = () => {
                     <div className='bg-blue-50 dark:bg-blue-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <FolderKanban className='w-5 h-5 text-blue-600 dark:text-blue-400' />
-                        <h4 className='font-semibold text-blue-900'>
+                        <h4 className='font-semibold text-blue-900 dark:text-blue-300'>
                           Proyectos del equipo
                         </h4>
                       </div>
@@ -1586,7 +1586,7 @@ const TeamDetail = () => {
                     <div className='bg-green-50 dark:bg-green-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <CheckSquare className='w-5 h-5 text-green-600 dark:text-green-400' />
-                        <h4 className='font-semibold text-green-900'>
+                        <h4 className='font-semibold text-green-900 dark:text-green-300'>
                           Tareas del equipo
                         </h4>
                         {memberStats.tasks?.completion_rate > 0 && (
@@ -1627,7 +1627,7 @@ const TeamDetail = () => {
                     <div className='bg-orange-50 dark:bg-orange-950/40 rounded-xl p-4'>
                       <div className='flex items-center gap-2 mb-3'>
                         <Ticket className='w-5 h-5 text-orange-600 dark:text-orange-400' />
-                        <h4 className='font-semibold text-orange-900'>
+                        <h4 className='font-semibold text-orange-900 dark:text-orange-300'>
                           Tickets del equipo
                         </h4>
                         {memberStats.tickets?.resolution_rate > 0 && (

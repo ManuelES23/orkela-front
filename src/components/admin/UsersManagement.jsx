@@ -146,7 +146,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       className={`flex items-center gap-3 bg-white dark:bg-night-900 border border-gray-200 dark:border-night-700 border-l-4 rounded-xl px-4 py-3 ${
-        user.status === "active" ? "border-l-green-500" : "border-l-gray-300"
+        user.status === "active" ? "border-l-green-500" : "border-l-gray-300 dark:border-l-night-600"
       }`}
     >
       <UserAvatar user={user} size='md' />

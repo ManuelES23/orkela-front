@@ -73,30 +73,30 @@ const AlertsPanel = ({ projects, tasks }) => {
   const getAlertColor = (days) => {
     if (days < 0)
       return {
-        bg: "bg-red-50",
-        border: "border-red-200",
-        text: "text-red-700",
-        icon: "text-red-500",
+        bg: "bg-red-50 dark:bg-red-950/30",
+        border: "border-red-200 dark:border-red-900",
+        text: "text-red-700 dark:text-red-400",
+        icon: "text-red-500 dark:text-red-400",
       };
     if (days === 0)
       return {
-        bg: "bg-orange-50",
-        border: "border-orange-200",
-        text: "text-orange-700",
-        icon: "text-orange-500",
+        bg: "bg-orange-50 dark:bg-orange-950/30",
+        border: "border-orange-200 dark:border-orange-900",
+        text: "text-orange-700 dark:text-orange-400",
+        icon: "text-orange-500 dark:text-orange-400",
       };
     if (days <= 3)
       return {
-        bg: "bg-yellow-50",
-        border: "border-yellow-200",
-        text: "text-yellow-700",
-        icon: "text-yellow-500",
+        bg: "bg-yellow-50 dark:bg-yellow-950/30",
+        border: "border-yellow-200 dark:border-yellow-900",
+        text: "text-yellow-700 dark:text-yellow-400",
+        icon: "text-yellow-500 dark:text-yellow-400",
       };
     return {
-      bg: "bg-blue-50",
-      border: "border-blue-200",
-      text: "text-blue-700",
-      icon: "text-blue-500",
+      bg: "bg-blue-50 dark:bg-blue-950/30",
+      border: "border-blue-200 dark:border-blue-900",
+      text: "text-blue-700 dark:text-blue-400",
+      icon: "text-blue-500 dark:text-blue-400",
     };
   };
 
@@ -108,22 +108,22 @@ const AlertsPanel = ({ projects, tasks }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
+        className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6'
       >
         <div className='flex items-center gap-3 mb-4'>
-          <div className='p-2 bg-green-100 rounded-lg'>
-            <Target className='w-5 h-5 text-green-600' />
+          <div className='p-2 bg-green-100 dark:bg-green-900/30 rounded-lg'>
+            <Target className='w-5 h-5 text-green-600 dark:text-green-400' />
           </div>
-          <h2 className='text-lg font-semibold text-gray-900'>
+          <h2 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
             Alertas y Notificaciones
           </h2>
         </div>
         <div className='text-center py-8'>
-          <div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3'>
-            <Target className='w-8 h-8 text-green-600' />
+          <div className='w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-3'>
+            <Target className='w-8 h-8 text-green-600 dark:text-green-400' />
           </div>
-          <p className='text-gray-600 font-medium'>¡Todo al día!</p>
-          <p className='text-sm text-gray-500 mt-1'>
+          <p className='text-gray-600 dark:text-night-300 font-medium'>¡Todo al día!</p>
+          <p className='text-sm text-gray-500 dark:text-night-400 mt-1'>
             No hay alertas pendientes
           </p>
         </div>
@@ -135,18 +135,18 @@ const AlertsPanel = ({ projects, tasks }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className='bg-white rounded-xl shadow-sm border border-gray-200 p-6'
+      className='bg-white dark:bg-night-900 rounded-xl shadow-sm border border-gray-200 dark:border-night-700 p-6'
     >
       <div className='flex items-center justify-between mb-4'>
         <div className='flex items-center gap-3'>
-          <div className='p-2 bg-red-100 rounded-lg'>
-            <AlertCircle className='w-5 h-5 text-red-600' />
+          <div className='p-2 bg-red-100 dark:bg-red-900/30 rounded-lg'>
+            <AlertCircle className='w-5 h-5 text-red-600 dark:text-red-400' />
           </div>
-          <h2 className='text-lg font-semibold text-gray-900'>
+          <h2 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
             Alertas y Notificaciones
           </h2>
         </div>
-        <span className='px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium'>
+        <span className='px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-sm font-medium'>
           {totalAlerts} {totalAlerts === 1 ? "alerta" : "alertas"}
         </span>
       </div>
@@ -155,7 +155,7 @@ const AlertsPanel = ({ projects, tasks }) => {
         {/* Proyectos Urgentes */}
         {urgentProjects.length > 0 && (
           <div>
-            <h3 className='text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-2'>
+            <h3 className='text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wide mb-2 flex items-center gap-2'>
               <Clock className='w-3 h-3' />
               Proyectos por Vencer
             </h3>
@@ -181,7 +181,7 @@ const AlertsPanel = ({ projects, tasks }) => {
                             {project.name}
                           </p>
                         </div>
-                        <p className='text-xs text-gray-600'>
+                        <p className='text-xs text-gray-600 dark:text-night-400'>
                           {days < 0
                             ? `Vencido hace ${Math.abs(days)} ${Math.abs(days) === 1 ? "día" : "días"}`
                             : days === 0
@@ -190,10 +190,10 @@ const AlertsPanel = ({ projects, tasks }) => {
                         </p>
                       </div>
                       <div className='flex items-center gap-2'>
-                        <span className='text-xs text-gray-500'>
+                        <span className='text-xs text-gray-500 dark:text-night-400'>
                           {formatDate(project.due_date)}
                         </span>
-                        <div className='text-xs text-gray-500'>
+                        <div className='text-xs text-gray-500 dark:text-night-400'>
                           {project.progress}%
                         </div>
                       </div>
@@ -208,7 +208,7 @@ const AlertsPanel = ({ projects, tasks }) => {
         {/* Tareas Urgentes */}
         {urgentTasks.length > 0 && (
           <div>
-            <h3 className='text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-2'>
+            <h3 className='text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wide mb-2 flex items-center gap-2'>
               <Zap className='w-3 h-3' />
               Tareas Urgentes
             </h3>
@@ -217,10 +217,10 @@ const AlertsPanel = ({ projects, tasks }) => {
                 const days = getDaysUntil(task.due_date);
                 const colors = task.is_urgent
                   ? {
-                      bg: "bg-red-50",
-                      border: "border-red-200",
-                      text: "text-red-700",
-                      icon: "text-red-500",
+                      bg: "bg-red-50 dark:bg-red-950/30",
+                      border: "border-red-200 dark:border-red-900",
+                      text: "text-red-700 dark:text-red-400",
+                      icon: "text-red-500 dark:text-red-400",
                     }
                   : getAlertColor(days);
 
@@ -239,7 +239,7 @@ const AlertsPanel = ({ projects, tasks }) => {
                           {task.is_urgent && <Zap className='w-3 h-3' />}
                           {task.title}
                         </p>
-                        <p className='text-xs text-gray-600 mt-1'>
+                        <p className='text-xs text-gray-600 dark:text-night-400 mt-1'>
                           {task.is_urgent && "Marcada como urgente"}
                           {!task.is_urgent &&
                             days !== null &&
@@ -252,17 +252,17 @@ const AlertsPanel = ({ projects, tasks }) => {
                       </div>
                       <div className='flex flex-col items-end gap-1'>
                         {task.due_date && (
-                          <span className='text-xs text-gray-500'>
+                          <span className='text-xs text-gray-500 dark:text-night-400'>
                             {formatDate(task.due_date)}
                           </span>
                         )}
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             task.priority === "high"
-                              ? "bg-red-100 text-red-700"
+                              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
                               : task.priority === "medium"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-green-100 text-green-700"
+                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                                : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           }`}
                         >
                           {task.priority === "high"
@@ -283,7 +283,7 @@ const AlertsPanel = ({ projects, tasks }) => {
         {/* Proyectos con Bajo Progreso */}
         {lowProgressProjects.length > 0 && (
           <div>
-            <h3 className='text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-2'>
+            <h3 className='text-xs font-semibold text-gray-500 dark:text-night-400 uppercase tracking-wide mb-2 flex items-center gap-2'>
               <TrendingDown className='w-3 h-3' />
               Proyectos Atrasados
             </h3>
@@ -296,7 +296,7 @@ const AlertsPanel = ({ projects, tasks }) => {
                     key={project.id}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => navigate(`/projects/${project.id}`)}
-                    className='bg-orange-50 border-l-4 border-orange-200 rounded-lg p-3 cursor-pointer transition-all hover:shadow-md'
+                    className='bg-orange-50 dark:bg-orange-950/30 border-l-4 border-orange-200 dark:border-orange-900 rounded-lg p-3 cursor-pointer transition-all hover:shadow-md'
                   >
                     <div className='flex items-start justify-between gap-2'>
                       <div className='flex-1'>
@@ -304,16 +304,16 @@ const AlertsPanel = ({ projects, tasks }) => {
                           <div
                             className={`${project.color} w-2 h-2 rounded-full`}
                           />
-                          <p className='font-medium text-orange-700 text-sm'>
+                          <p className='font-medium text-orange-700 dark:text-orange-400 text-sm'>
                             {project.name}
                           </p>
                         </div>
-                        <p className='text-xs text-gray-600'>
+                        <p className='text-xs text-gray-600 dark:text-night-400'>
                           Solo {project.progress}% completado - Vence en {days}{" "}
                           {days === 1 ? "día" : "días"}
                         </p>
                       </div>
-                      <div className='text-xs text-gray-500'>
+                      <div className='text-xs text-gray-500 dark:text-night-400'>
                         {formatDate(project.due_date)}
                       </div>
                     </div>

@@ -18,7 +18,8 @@ const getFriendlyErrorMessage = (err, fallback) => {
   const message = err?.message || "";
   const looksLikeParseError =
     message.includes("Unexpected token") || message.includes("JSON");
-  if (err?.name === "Error" && message && !looksLikeParseError) {
+  const isApiError = err?.name === "Error" || err?.name === "APIError";
+  if (isApiError && message && !looksLikeParseError) {
     return message;
   }
   return fallback;

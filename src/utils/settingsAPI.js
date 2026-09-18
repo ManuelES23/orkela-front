@@ -1,3 +1,6 @@
+import { APIError } from "./api";
+import { parseApiResponse } from "./httpResponse";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://orkela.localhost/api";
 
 // Función helper para hacer peticiones
@@ -16,10 +19,10 @@ const request = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
-    const data = await response.json();
+    const { ok, data, message } = await parseApiResponse(response);
 
-    if (!response.ok) {
-      throw new Error(data.message || "Error en la petición");
+    if (!ok) {
+      throw new APIError(message, response.status, data);
     }
 
     return data;

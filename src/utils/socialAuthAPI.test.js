@@ -7,7 +7,7 @@ describe("socialAuthAPI nonce", () => {
     localStorage.clear();
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({ ok: true, json: async () => ({ token: "tok", user: { id: 1 } }) }))
+      vi.fn(async () => ({ ok: true, text: async () => JSON.stringify({ token: "tok", user: { id: 1 } }) }))
     );
   });
 
@@ -37,7 +37,7 @@ describe("socialAuthAPI nonce", () => {
 
   it("pide la intención de vincular con un nonce nuevo y devuelve la URL", async () => {
     localStorage.setItem("token", "sesion");
-    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ redirect_url: "https://api/redirect" }) });
+    fetch.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify({ redirect_url: "https://api/redirect" }) });
 
     const url = await socialAuthAPI.linkIntent("microsoft");
 
@@ -66,7 +66,7 @@ describe("socialAuthAPI nonce", () => {
       ok: false,
       status: 410,
       headers: new Headers(),
-      json: async () => ({ code: "link_expired", message: "venció" }),
+      text: async () => JSON.stringify({ code: "link_expired", message: "venció" }),
     });
 
     await expect(socialAuthAPI.link("t1")).rejects.toMatchObject({ status: 410, code: "link_expired" });
@@ -78,7 +78,7 @@ describe("socialAuthAPI nonce", () => {
   it("borra el nonce al vincular con éxito", async () => {
     localStorage.setItem("token", "sesion");
     sessionStorage.setItem("orkela_social_nonce", "n1");
-    fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ provider: "google" }) });
+    fetch.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify({ provider: "google" }) });
 
     await socialAuthAPI.link("t1");
 
@@ -92,7 +92,7 @@ describe("socialAuthAPI nonce", () => {
       ok: false,
       status: 422,
       headers: new Headers(),
-      json: async () => ({ code: "invalid_password", message: "La contraseña no es correcta." }),
+      text: async () => JSON.stringify({ code: "invalid_password", message: "La contraseña no es correcta." }),
     });
 
     await expect(socialAuthAPI.linkWithPassword("t1", "mala")).rejects.toMatchObject({ code: "invalid_password" });

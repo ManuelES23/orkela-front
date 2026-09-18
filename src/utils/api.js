@@ -1,3 +1,5 @@
+import { parseApiResponse } from "./httpResponse";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://orkela.localhost/api";
 
 // Clase de error personalizada para errores de API con información adicional
@@ -34,9 +36,9 @@ export const request = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
-    const data = await response.json();
+    const { ok, data, message } = await parseApiResponse(response);
 
-    if (!response.ok) {
+    if (!ok) {
       const retryAfter = Number(response.headers.get("Retry-After")) || null;
 
       if (response.status === 401 && token) {
@@ -46,11 +48,7 @@ export const request = async (endpoint, options = {}) => {
       }
 
       // Crear error con información adicional
-      throw new APIError(
-        data.message || "Error en la petición",
-        response.status,
-        { ...data, retryAfter }
-      );
+      throw new APIError(message, response.status, { ...data, retryAfter });
     }
 
     return data;
@@ -77,10 +75,10 @@ const publicRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, config);
-    const data = await response.json();
+    const { ok, data, message } = await parseApiResponse(response);
 
-    if (!response.ok) {
-      throw new Error(data.message || "Error en la petición");
+    if (!ok) {
+      throw new APIError(message, response.status, data);
     }
 
     return data;
@@ -195,9 +193,12 @@ export const profileAPI = {
       body: formData,
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Error al subir el avatar");
+    const { ok, data, message } = await parseApiResponse(
+      response,
+      "Error al subir el avatar"
+    );
+    if (!ok) {
+      throw new APIError(message, response.status, data);
     }
     return data;
   },
@@ -764,9 +765,12 @@ export const organizationsAPI = {
       body: formData,
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Error al subir el logo");
+    const { ok, data, message } = await parseApiResponse(
+      response,
+      "Error al subir el logo"
+    );
+    if (!ok) {
+      throw new APIError(message, response.status, data);
     }
     return data;
   },

@@ -1,3 +1,5 @@
+import { parseApiResponse } from "./httpResponse";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://orkela.localhost/api";
 
 const PORTAL_TOKEN_KEY = "orkela_portal_token";
@@ -39,17 +41,13 @@ const portalRequest = async (endpoint, options = {}) => {
   };
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
-  const data = await response.json();
+  const { ok, data, message } = await parseApiResponse(response);
 
-  if (!response.ok) {
+  if (!ok) {
     if (response.status === 401) {
       window.dispatchEvent(new CustomEvent("portal:unauthorized"));
     }
-    throw new PortalAPIError(
-      data.message || "Error en la petición",
-      response.status,
-      data
-    );
+    throw new PortalAPIError(message, response.status, data);
   }
 
   return data;

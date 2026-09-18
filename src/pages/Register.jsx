@@ -221,12 +221,13 @@ const Register = () => {
             required
           />
           <span>
+            {/* En otra pestaña: así no se pierde lo que ya se escribió en el formulario. */}
             Acepto los{" "}
-            <a href='#' className='font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
+            <a href='/terminos' target='_blank' rel='noopener noreferrer' className='font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
               términos y condiciones
             </a>{" "}
             y la{" "}
-            <a href='#' className='font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
+            <a href='/privacidad' target='_blank' rel='noopener noreferrer' className='font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300'>
               política de privacidad
             </a>
           </span>

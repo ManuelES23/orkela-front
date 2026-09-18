@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { motionTokens } from "../animations/variants";
 
@@ -90,6 +91,15 @@ const AuthShell = ({ formHeader, heading, description, badge, children }) => {
 
           {formHeader}
           {children}
+
+          <nav className='mt-10 flex justify-center gap-5 text-sm text-gray-500 dark:text-night-400'>
+            <Link to='/privacidad' className='hover:text-brand-600 dark:hover:text-brand-300'>
+              Privacidad
+            </Link>
+            <Link to='/terminos' className='hover:text-brand-600 dark:hover:text-brand-300'>
+              Términos
+            </Link>
+          </nav>
         </motion.div>
       </div>
     </div>

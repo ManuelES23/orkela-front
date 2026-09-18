@@ -15,6 +15,11 @@ const PROVIDERS = [
     connectLabel: "Conectar Google",
     iconBg: "bg-blue-100 dark:bg-blue-900/30",
     iconColor: "text-blue-600 dark:text-blue-400",
+    // Pausado: el proyecto de Google solo tiene aprobados los permisos de
+    // login, así que conectar el calendario mostraría el aviso de app no
+    // verificada. Se sigue mostrando a quien ya lo tenga conectado, para que
+    // pueda desconectarlo.
+    hidden: true,
   },
   {
     key: "microsoft",
@@ -141,16 +146,18 @@ const CalendarIntegrationsSection = () => {
     );
   }
 
+  const visibleProviders = PROVIDERS.filter((p) => !p.hidden || connections[p.key]);
+
   return (
     <div className='bg-white dark:bg-night-900 rounded-2xl border border-gray-100 dark:border-night-700 shadow-sm p-6'>
       <h3 className='text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-night-500 mb-4'>
         Integraciones de calendario
       </h3>
       <div>
-        {PROVIDERS.map((provider, index) => {
+        {visibleProviders.map((provider, index) => {
           const conn = connections[provider.key];
           const status = toDisplayStatus(conn?.status);
-          const isLastRow = index === PROVIDERS.length - 1;
+          const isLastRow = index === visibleProviders.length - 1;
           const isActioning = actioningProvider === provider.key;
 
           return (

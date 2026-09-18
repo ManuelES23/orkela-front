@@ -26,6 +26,8 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const CheckEmail = lazy(() => import("./pages/CheckEmail"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Projects = lazy(() => import("./pages/Projects"));
 const ProjectDetail = lazy(() => import("./pages/ProjectDetail"));
@@ -93,6 +95,8 @@ function App() {
                 <Route path='/reset-password' element={<ResetPassword />} />
                 <Route path='/check-email' element={<CheckEmail />} />
                 <Route path='/verify-email' element={<VerifyEmail />} />
+                <Route path='/privacidad' element={<PrivacyPolicy />} />
+                <Route path='/terminos' element={<TermsOfService />} />
                 <Route
                   path='/accept-invitation/:token'
                   element={<AcceptInvitation />}

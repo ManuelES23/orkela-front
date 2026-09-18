@@ -55,7 +55,8 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
       setInviteEmail("");
       await loadTeamDetails();
     } catch (err) {
-      showError(err.response?.data?.message || "Error al enviar invitación");
+      // request() lanza APIError: el mensaje del backend viene en err.message
+      showError(err.message || "Error al enviar invitación");
     } finally {
       setSendingInvite(false);
     }

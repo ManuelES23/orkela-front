@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -51,6 +51,23 @@ const InvitationsPanel = () => {
   useEffect(() => {
     loadInvitations();
   }, [loadInvitations]);
+
+  // ?invitations=open (clic en una notificación de invitación sin enlace):
+  // abrir el panel y limpiar el parámetro
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openFromLink = searchParams.get("invitations") === "open";
+  useEffect(() => {
+    if (!openFromLink) return;
+    setIsOpen(true);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("invitations");
+        return next;
+      },
+      { replace: true }
+    );
+  }, [openFromLink, setSearchParams]);
 
   // Registrar para actualizaciones en tiempo real
   useEffect(() => {

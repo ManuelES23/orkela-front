@@ -4,7 +4,9 @@ import { useSearchParams } from "react-router-dom";
 /**
  * Abre un recurso indicado en la URL (?task=12, ?ticket=8) — así llegan los
  * clics de las notificaciones — y limpia el parámetro para que recargar la
- * página o cerrar el modal no lo vuelva a abrir.
+ * página o cerrar el modal no lo vuelva a abrir. También quita ?org=ID (la
+ * organización del enlace, ver useLinkWorkspace): ya se usó para cambiar de
+ * workspace antes de montar la página.
  */
 const useOpenFromQuery = (param, onOpen) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,6 +25,7 @@ const useOpenFromQuery = (param, onOpen) => {
       (prev) => {
         const next = new URLSearchParams(prev);
         next.delete(param);
+        next.delete("org");
         return next;
       },
       { replace: true }

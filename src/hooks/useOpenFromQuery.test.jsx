@@ -23,6 +23,18 @@ describe("useOpenFromQuery", () => {
     expect(screen.getByText("busqueda:[?x=1]")).toBeInTheDocument();
   });
 
+  it("también consume la organización del enlace", () => {
+    const onOpen = vi.fn();
+    render(
+      <MemoryRouter initialEntries={["/tasks?task=12&org=4"]}>
+        <Probe onOpen={onOpen} />
+      </MemoryRouter>
+    );
+
+    expect(onOpen).toHaveBeenCalledWith({ id: 12 });
+    expect(screen.getByText("busqueda:[]")).toBeInTheDocument();
+  });
+
   it("ignora valores inválidos", () => {
     const onOpen = vi.fn();
     render(

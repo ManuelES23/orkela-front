@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
+import useLinkWorkspace from "../hooks/useLinkWorkspace";
 import LoadingScreen from "./ui/LoadingScreen";
-import { workspaceToOpen } from "../utils/workspace";
 
 /**
  * OrganizationRoute - Componente de ruta protegida para funcionalidades
@@ -18,28 +17,9 @@ import { workspaceToOpen } from "../utils/workspace";
  *   de otra organización sin datos cargados) y el enlace no dice a cuál ir
  */
 const OrganizationRoute = ({ children }) => {
-  const { user, loading, switchContext } = useAuth();
-  const { isOrganizationContext, activeContextId } = useUserContext();
-  const [searchParams] = useSearchParams();
-  const [switchFailed, setSwitchFailed] = useState(false);
-
-  const target = user ? workspaceToOpen(user, searchParams, activeContextId) : null;
-
-  // Un solo intento por organización (switchContext cambia de identidad en
-  // cada render del AuthProvider)
-  const attemptedRef = useRef(null);
-  const switchRef = useRef(switchContext);
-  useEffect(() => {
-    switchRef.current = switchContext;
-  });
-
-  useEffect(() => {
-    if (!target || switchFailed || attemptedRef.current === target) return;
-    attemptedRef.current = target;
-    Promise.resolve()
-      .then(() => switchRef.current?.(target))
-      .catch(() => setSwitchFailed(true));
-  }, [target, switchFailed]);
+  const { user, loading } = useAuth();
+  const { isOrganizationContext } = useUserContext();
+  const { switching } = useLinkWorkspace();
 
   if (loading) {
     return <LoadingScreen />;
@@ -51,7 +31,7 @@ const OrganizationRoute = ({ children }) => {
   }
 
   // Cambiando al workspace del enlace
-  if (target && !switchFailed) {
+  if (switching) {
     return <LoadingScreen />;
   }
 

@@ -13,7 +13,7 @@ vi.mock("../components/layout/Layout", () => ({
     </div>
   ),
 }));
-const toast = { error: vi.fn(), success: vi.fn() };
+const toast = { error: vi.fn(), success: vi.fn(), warning: vi.fn() };
 vi.mock("../context/NotificationContext", () => ({ useNotification: () => toast }));
 
 let realtime;

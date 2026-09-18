@@ -7,6 +7,8 @@ let realtime;
 vi.mock("../../context/RealtimeContext", () => ({
   useRealtime: () => realtime,
 }));
+const toast = vi.hoisted(() => ({ warning: vi.fn() }));
+vi.mock("../../context/NotificationContext", () => ({ useNotification: () => toast }));
 
 const Where = () => {
   const location = useLocation();

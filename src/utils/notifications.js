@@ -49,39 +49,86 @@ const RESOURCE_LIST_PATHS = {
   organization: "/organizations",
 };
 
+// Tipos cuyo recurso ya no existe o dejó de ser accesible: llevan al
+// listado con un aviso (notificationNotice) en lugar de al detalle.
+const GONE_TYPES = new Set(["project_deleted", "project_access_revoked", "team_deleted"]);
+
+// Añade ?org=ID (o &org=ID): la ruta (PrivateRoute / OrganizationRoute)
+// cambia a ese workspace antes de abrir la página si el usuario está en modo
+// personal o en otra organización (ver utils/workspace.js).
+const withOrg = (path, organizationId) => {
+  if (!organizationId) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}org=${organizationId}`;
+};
+
+// Detalle de un proyecto/equipo/organización (o su listado si no hay id)
+const resourcePath = (resource, d) => {
+  switch (resource) {
+    case "project":
+      return withOrg(d.project_id ? `/projects/${d.project_id}` : "/projects", d.organization_id);
+    case "team":
+      return withOrg(d.team_id ? `/teams/${d.team_id}` : "/teams", d.organization_id);
+    case "organization":
+      return d.organization_id ? `/organizations/${d.organization_id}` : "/organizations";
+    default:
+      return null;
+  }
+};
+
 // Ruta a la que lleva el clic en una notificación (null: solo se marca leída).
 export const notificationTarget = ({ type = "", data = {} } = {}) => {
   const d = data || {};
 
   if (type.includes("_invitation_")) {
     const resource = type.split("_invitation_")[0];
-    if (type.endsWith("_received") && d.invitation_token) {
-      return `${INVITATION_ACCEPT_PATHS[resource]}/${d.invitation_token}`;
+    // Recibida: la página para aceptarla (o el panel de invitaciones)
+    if (type.endsWith("_received")) {
+      return d.invitation_token ? `${INVITATION_ACCEPT_PATHS[resource]}/${d.invitation_token}` : "/dashboard?invitations=open";
     }
-    return RESOURCE_LIST_PATHS[d.type || resource] || null;
+    // Cancelada: ya no hay nada que abrir
+    if (type.endsWith("_cancelled")) return null;
+    // Aceptada, rechazada o enviada: el recurso (o su listado en avisos viejos)
+    return resourcePath(d.type || resource, d) || RESOURCE_LIST_PATHS[resource] || null;
   }
 
   switch (categoryFor(type)) {
-    case "tasks":
-      if (d.task_id) return `/tasks?task=${d.task_id}`;
-      return d.project_id ? `/projects/${d.project_id}` : "/tasks";
+    case "tasks": {
+      if (d.task_id) return withOrg(`/tasks?task=${d.task_id}`, d.organization_id);
+      return d.project_id ? resourcePath("project", d) : "/tasks";
+    }
     case "projects":
-      if (type === "project_deleted" || type === "project_access_revoked") return "/projects";
-      return d.project_id ? `/projects/${d.project_id}` : "/projects";
+      if (GONE_TYPES.has(type)) return withOrg("/projects", d.organization_id);
+      return resourcePath("project", d);
     case "tickets": {
       // org: OrganizationRoute cambia a ese workspace si el usuario está en
       // modo personal o en otra organización
-      if (!d.ticket_id) return "/tickets";
-      const org = d.organization_id ? `&org=${d.organization_id}` : "";
-      return `/tickets?ticket=${d.ticket_id}${org}`;
+      if (!d.ticket_id) return withOrg("/tickets", d.organization_id);
+      return withOrg(`/tickets?ticket=${d.ticket_id}`, d.organization_id);
     }
     case "teams":
-      if (type === "team_deleted") return "/teams";
-      return d.team_id ? `/teams/${d.team_id}` : "/teams";
+      if (GONE_TYPES.has(type)) return withOrg("/teams", d.organization_id);
+      return resourcePath("team", d);
     case "organization":
-      // Quien fue removido ya no tiene acceso a la organización
+      // Quien fue removido o desactivado ya no tiene acceso a la organización
       if (d.action === "removed_from_organization") return null;
-      return d.organization_id ? `/organizations/${d.organization_id}` : "/organizations";
+      return resourcePath("organization", d);
+    default:
+      return null;
+  }
+};
+
+// Aviso que acompaña al clic cuando el recurso ya no existe o dejó de ser
+// accesible (se abre el listado en lugar del detalle).
+export const notificationNotice = ({ type = "", data = {} } = {}) => {
+  const d = data || {};
+  const named = (label, name) => (name ? `${label} "${name}"` : label);
+  switch (type) {
+    case "project_deleted":
+      return `${named("El proyecto", d.project_name)} ya no existe`;
+    case "team_deleted":
+      return `${named("El equipo", d.team_name)} ya no existe`;
+    case "project_access_revoked":
+      return `Ya no tienes acceso ${named("al proyecto", d.project_name)}`;
     default:
       return null;
   }

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Bell, BellOff, Check, CheckCheck, Clock, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import Layout from "../components/layout/Layout";
@@ -10,12 +9,12 @@ import { motionTokens } from "../components/animations/variants";
 import NotificationIcon from "../components/notifications/NotificationIcon";
 import { useRealtime } from "../context/RealtimeContext";
 import { useNotification } from "../context/NotificationContext";
+import useOpenNotification from "../hooks/useOpenNotification";
 import { notificationsAPI } from "../utils/api";
 import {
   NOTIFICATION_CATEGORIES,
   groupByDay,
   normalizeNotification,
-  notificationTarget,
   retentionLabel,
 } from "../utils/notifications";
 import { formatDistanceToNow } from "../utils/dateUtils";
@@ -33,7 +32,6 @@ const formatTime = (date) =>
   date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 
 const Notifications = () => {
-  const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const { error: showError } = useNotification();
   const {
@@ -155,10 +153,10 @@ const Notifications = () => {
     [subscribeToNotifications, category]
   );
 
+  const openNotification = useOpenNotification();
   const handleOpen = (notification) => {
-    if (!notification.read) markAsRead(notification.id);
-    const target = notificationTarget(notification);
-    if (target) navigate(target);
+    if (!notification.read) setItems((prev) => prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)));
+    openNotification(notification);
   };
 
   const handleMarkAsRead = (event, notification) => {

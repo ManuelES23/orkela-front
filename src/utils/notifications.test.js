@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeNotification,
   notificationTarget,
+  notificationNotice,
   refreshKeysFor,
   toastKindFor,
   groupByDay,
@@ -52,35 +53,89 @@ describe("categoryFor", () => {
 
 describe("notificationTarget", () => {
   const t = (type, data = {}) => notificationTarget({ type, data });
+  const task = { task_id: 3, project_id: 2, organization_id: 7 };
+  const ticket = { ticket_id: 8, organization_id: 7 };
 
-  it("lleva cada notificación a su recurso", () => {
-    expect(t("task_assigned", { task_id: 3, project_id: 2 })).toBe("/tasks?task=3");
-    expect(t("checklist_item_completed", { task_id: 3 })).toBe("/tasks?task=3");
-    expect(t("project_updated", { project_id: 2 })).toBe("/projects/2");
-    expect(t("project_deleted", { project_name: "x" })).toBe("/projects");
+  // Todos los tipos que el backend guarda (NotificationService), con el
+  // payload que envía hoy: [tipo, data, destino]
+  it.each([
+    // Tareas y subtareas: detalle de la tarea en el workspace de su proyecto
+    ["task_created", task, "/tasks?task=3&org=7"],
+    ["task_updated", task, "/tasks?task=3&org=7"],
+    ["task_status_changed", task, "/tasks?task=3&org=7"],
+    ["task_completed", task, "/tasks?task=3&org=7"],
+    ["task_assigned", task, "/tasks?task=3&org=7"],
+    ["task_due_soon", task, "/tasks?task=3&org=7"],
+    ["task_overdue", task, "/tasks?task=3&org=7"],
+    ["checklist_item_completed", { ...task, checklist_item_id: 5 }, "/tasks?task=3&org=7"],
+    ["checklist_item_updated", { ...task, checklist_item_id: 5 }, "/tasks?task=3&org=7"],
+    ["task_assigned", { task_id: 3, project_id: 2, organization_id: null }, "/tasks?task=3"],
+    // Proyectos
+    ["project_created", { project_id: 2, organization_id: 7 }, "/projects/2?org=7"],
+    ["project_updated", { project_id: 2, organization_id: 7 }, "/projects/2?org=7"],
+    ["project_collaborator_joined", { project_id: 2, organization_id: null }, "/projects/2"],
+    ["project_deleted", { project_id: 2, organization_id: 7, project_name: "x" }, "/projects?org=7"],
+    ["project_access_revoked", { project_id: 2, organization_id: null }, "/projects"],
+    // Equipos
+    ["team_member_joined", { team_id: 4, organization_id: 7 }, "/teams/4?org=7"],
+    ["team_deleted", { team_id: 4, organization_id: 7 }, "/teams?org=7"],
+    // Tickets: el modal del ticket en su organización
+    ["ticket_created", ticket, "/tickets?ticket=8&org=7"],
+    ["ticket_taken", ticket, "/tickets?ticket=8&org=7"],
+    ["ticket_assigned", ticket, "/tickets?ticket=8&org=7"],
+    ["ticket_status_changed", ticket, "/tickets?ticket=8&org=7"],
+    ["ticket_resolved", ticket, "/tickets?ticket=8&org=7"],
+    ["ticket_returned_to_inbox", ticket, "/tickets?ticket=8&org=7"],
+    ["ticket_comment_added", { ...ticket, comment_id: 1 }, "/tickets?ticket=8&org=7"],
+    // Organización
+    ["organization_member_left", { organization_id: 6 }, "/organizations/6"],
+    ["organization_role_updated", { organization_id: 6 }, "/organizations/6"],
+    ["organization_plan_downgraded", { organization_id: 6 }, "/organizations/6"],
+    ["organization_member_removed", { organization_id: 6, action: "removed_from_organization" }, null],
+    ["organization_member_deactivated", { organization_id: 6, action: "removed_from_organization" }, null],
+    // Invitaciones recibidas: la página para aceptarlas
+    ["project_invitation_received", { invitation_token: "a", project_id: 2 }, "/accept-invitation/a"],
+    ["team_invitation_received", { invitation_token: "b", team_id: 4 }, "/accept-team-invitation/b"],
+    ["organization_invitation_received", { invitation_token: "c" }, "/accept-organization-invitation/c"],
+    ["team_invitation_received", {}, "/dashboard?invitations=open"],
+    // Enviadas, aceptadas o rechazadas: el recurso
+    ["project_invitation_sent", { project_id: 2, organization_id: 7 }, "/projects/2?org=7"],
+    ["team_invitation_sent", { team_id: 4, organization_id: 7 }, "/teams/4?org=7"],
+    ["project_invitation_accepted", { type: "project", project_id: 2, organization_id: 7 }, "/projects/2?org=7"],
+    ["team_invitation_accepted", { type: "team", team_id: 4, organization_id: 7 }, "/teams/4?org=7"],
+    ["organization_invitation_accepted", { type: "organization", organization_id: 6 }, "/organizations/6"],
+    ["project_invitation_declined", { type: "project", project_id: 2, organization_id: null }, "/projects/2"],
+    ["team_invitation_declined", { type: "team", team_id: 4, organization_id: 7 }, "/teams/4?org=7"],
+    ["organization_invitation_declined", { type: "organization", organization_id: 6 }, "/organizations/6"],
+    // Señal silenciosa (no se guarda) y tipos desconocidos
+    ["organization_invitation_cancelled", { invitation_id: 1, organization_id: 6 }, null],
+    ["algo_desconocido", {}, null],
+  ])("%s → %s", (type, data, expected) => {
+    expect(t(type, data)).toBe(expected);
+  });
+
+  it("avisos guardados antes de llevar ids: el listado del recurso", () => {
+    expect(t("task_assigned", { project_id: 2 })).toBe("/projects/2");
+    expect(t("task_assigned", {})).toBe("/tasks");
+    expect(t("project_updated", {})).toBe("/projects");
     expect(t("ticket_comment_added", { ticket_id: 8 })).toBe("/tickets?ticket=8");
-    expect(t("team_member_joined", { team_id: 4 })).toBe("/teams/4");
-    expect(t("team_deleted", {})).toBe("/teams");
-    expect(t("organization_role_updated", { organization_id: 6 })).toBe("/organizations/6");
-  });
-
-  it("las invitaciones recibidas abren la página para aceptarlas", () => {
-    expect(t("project_invitation_received", { invitation_token: "a" })).toBe("/accept-invitation/a");
-    expect(t("team_invitation_received", { invitation_token: "b" })).toBe("/accept-team-invitation/b");
-    expect(t("organization_invitation_received", { invitation_token: "c" })).toBe(
-      "/accept-organization-invitation/c"
-    );
-  });
-
-  it("las invitaciones aceptadas o rechazadas llevan al listado", () => {
+    expect(t("team_member_joined", {})).toBe("/teams");
     expect(t("project_invitation_accepted", { type: "project" })).toBe("/projects");
     expect(t("team_invitation_declined", { type: "team" })).toBe("/teams");
     expect(t("organization_invitation_accepted", { type: "organization" })).toBe("/organizations");
   });
+});
 
-  it("sin destino cuando ya no hay acceso", () => {
-    expect(t("organization_member_removed", { organization_id: 6, action: "removed_from_organization" })).toBeNull();
-    expect(t("algo_desconocido")).toBeNull();
+describe("notificationNotice", () => {
+  it("avisa cuando el recurso ya no existe o se perdió el acceso", () => {
+    expect(notificationNotice({ type: "project_deleted", data: { project_name: "Web" } })).toBe(
+      'El proyecto "Web" ya no existe'
+    );
+    expect(notificationNotice({ type: "team_deleted", data: {} })).toBe("El equipo ya no existe");
+    expect(notificationNotice({ type: "project_access_revoked", data: { project_name: "Web" } })).toBe(
+      'Ya no tienes acceso al proyecto "Web"'
+    );
+    expect(notificationNotice({ type: "task_assigned", data: { task_id: 1 } })).toBeNull();
   });
 });
 

@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Bell, CheckCheck, X, ArrowRight } from "lucide-react";
 import { useRealtime } from "../../context/RealtimeContext";
 import { formatDistanceToNow } from "../../utils/dateUtils";
-import { notificationTarget } from "../../utils/notifications";
+import useOpenNotification from "../../hooks/useOpenNotification";
 import NotificationIcon from "../notifications/NotificationIcon";
 import { Skeleton } from "./Skeleton";
 import { motionTokens } from "../animations/variants";
@@ -28,14 +28,12 @@ const LoadingRows = () => (
 const NotificationsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef(null);
-  const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const {
     notifications,
     unreadCount,
     isConnected,
     loadingNotifications,
-    markAsRead,
     markAllAsRead,
   } = useRealtime();
 
@@ -60,13 +58,9 @@ const NotificationsPanel = () => {
     };
   }, [isOpen]);
 
+  const openNotification = useOpenNotification();
   const handleOpenNotification = (notification) => {
-    if (!notification.read) markAsRead(notification.id);
-    const target = notificationTarget(notification);
-    if (target) {
-      setIsOpen(false);
-      navigate(target);
-    }
+    if (openNotification(notification)) setIsOpen(false);
   };
 
   const badge = unreadCount > 9 ? "9+" : unreadCount;

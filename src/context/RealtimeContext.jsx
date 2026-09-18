@@ -369,7 +369,9 @@ export const RealtimeProvider = ({ children }) => {
       removerName: "",
     });
 
-    if (!user?.id) {
+    // El superadmin (SystemAdmin) tiene su propia secuencia de ids: nunca
+    // debe suscribirse a user.{id}, que es el canal de un usuario de la app.
+    if (!user?.id || user?.isSystemAdmin) {
       disconnectEcho();
       setIsConnected(false);
       return;
@@ -426,7 +428,7 @@ export const RealtimeProvider = ({ children }) => {
       console.error("Error al conectar WebSocket:", error);
       setIsConnected(false);
     }
-  }, [user?.id]); // Solo re-suscribirse cuando cambie el usuario
+  }, [user?.id, user?.isSystemAdmin]); // Solo re-suscribirse cuando cambie el usuario
 
   // Función para cerrar el modal de removido de organización
   const closeRemovedFromOrgModal = useCallback(() => {

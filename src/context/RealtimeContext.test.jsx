@@ -5,6 +5,7 @@ import { RealtimeProvider, useRealtime } from "./RealtimeContext";
 
 let mockUser = { id: 1 };
 let listener = null;
+const privateSpy = vi.fn();
 
 vi.mock("./AuthContext", () => ({ useAuth: () => ({ user: mockUser }) }));
 vi.mock("./NotificationContext", () => ({
@@ -21,7 +22,10 @@ vi.mock("../utils/echo", () => {
   };
   return {
     getEcho: () => ({
-      private: () => channel,
+      private: (name) => {
+        privateSpy(name);
+        return channel;
+      },
       leave: vi.fn(),
       connector: { pusher: { connection: { bind: vi.fn() } } },
     }),
@@ -59,6 +63,7 @@ describe("RealtimeProvider", () => {
   beforeEach(() => {
     mockUser = { id: 1 };
     listener = null;
+    privateSpy.mockClear();
     localStorage.setItem("token", "tok");
   });
 
@@ -153,5 +158,26 @@ describe("RealtimeProvider", () => {
     emit({ type: "team_created", title: "t", message: "m" });
 
     expect(dashboard).toHaveBeenCalledTimes(2);
+  });
+
+  it("no suscribe al superadmin al canal user.{id} (comparte ids con los usuarios)", () => {
+    mockUser = { id: 1, isSystemAdmin: true };
+    render(
+      <RealtimeProvider>
+        <Probe />
+      </RealtimeProvider>
+    );
+
+    expect(privateSpy).not.toHaveBeenCalled();
+  });
+
+  it("suscribe al usuario normal a su canal", () => {
+    render(
+      <RealtimeProvider>
+        <Probe />
+      </RealtimeProvider>
+    );
+
+    expect(privateSpy).toHaveBeenCalledWith("user.1");
   });
 });

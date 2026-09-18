@@ -9,12 +9,19 @@ import Button from "../components/ui/Button";
 const AcceptInvitation = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [status, setStatus] = useState("loading"); // loading, checking, redirecting, accepting, success, error
   const [message, setMessage] = useState("");
   const [project, setProject] = useState(null);
   const [invitationInfo, setInvitationInfo] = useState(null);
   const isProcessing = useRef(false);
+  // Timer de la redirección a login/register: se cancela si la sesión
+  // resulta estar iniciada o si se desmonta la página.
+  const redirectTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearTimeout(redirectTimerRef.current);
+  }, []);
 
   const acceptInvitation = async () => {
     setStatus("accepting");
@@ -38,6 +45,9 @@ const AcceptInvitation = () => {
   // Paso 1: Obtener info de la invitación (público, sin auth)
   useEffect(() => {
     const fetchInvitationInfo = async () => {
+      // Esperar a que AuthContext termine de verificar la sesión: antes de
+      // eso user es null aunque el usuario sí esté logueado.
+      if (authLoading) return;
       if (isProcessing.current) return;
       isProcessing.current = true;
 
@@ -55,7 +65,7 @@ const AcceptInvitation = () => {
 
           if (info.user_exists) {
             // Usuario existe -> Login con email pre-llenado
-            setTimeout(() => {
+            redirectTimerRef.current = setTimeout(() => {
               navigate("/login", {
                 state: {
                   returnTo: `/accept-invitation/${token}`,
@@ -66,7 +76,7 @@ const AcceptInvitation = () => {
             }, 1500);
           } else {
             // Usuario no existe -> Register con email pre-llenado
-            setTimeout(() => {
+            redirectTimerRef.current = setTimeout(() => {
               navigate("/register", {
                 state: {
                   returnTo: `/accept-invitation/${token}`,
@@ -85,11 +95,12 @@ const AcceptInvitation = () => {
     };
 
     fetchInvitationInfo();
-  }, [token]);
+  }, [token, authLoading, user]);
 
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
     if (user && invitationInfo && status === "redirecting") {
+      clearTimeout(redirectTimerRef.current);
       acceptInvitation();
     }
   }, [user, invitationInfo, status]);

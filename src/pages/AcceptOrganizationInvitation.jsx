@@ -10,7 +10,7 @@ import { statusIconVariants } from "../components/animations/variants";
 const AcceptOrganizationInvitation = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  const { user, refreshUser, switchContext } = useAuth();
+  const { user, loading: authLoading, refreshUser, switchContext } = useAuth();
 
   const [status, setStatus] = useState("loading"); // loading, checking, redirecting, accepting, choose_context, error
   const [message, setMessage] = useState("");
@@ -19,6 +19,13 @@ const AcceptOrganizationInvitation = () => {
   const [invitationInfo, setInvitationInfo] = useState(null);
   const [switchingContext, setSwitchingContext] = useState(false);
   const isProcessing = useRef(false);
+  // Timer de la redirección a login/register: se cancela si la sesión
+  // resulta estar iniciada o si se desmonta la página.
+  const redirectTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearTimeout(redirectTimerRef.current);
+  }, []);
   const hasAccepted = useRef(false);
 
   // Función para procesar la invitación
@@ -79,6 +86,9 @@ const AcceptOrganizationInvitation = () => {
   // Paso 1: Obtener info de la invitación (público, sin auth)
   useEffect(() => {
     const fetchInvitationInfo = async () => {
+      // Esperar a que AuthContext termine de verificar la sesión: antes de
+      // eso user es null aunque el usuario sí esté logueado.
+      if (authLoading) return;
       if (isProcessing.current) return;
       isProcessing.current = true;
 
@@ -97,7 +107,7 @@ const AcceptOrganizationInvitation = () => {
 
           if (info.user_exists) {
             // Usuario existe -> Login con email pre-llenado
-            setTimeout(() => {
+            redirectTimerRef.current = setTimeout(() => {
               navigate("/login", {
                 state: {
                   returnTo: `/accept-organization-invitation/${token}`,
@@ -108,7 +118,7 @@ const AcceptOrganizationInvitation = () => {
             }, 1500);
           } else {
             // Usuario no existe -> Register con email pre-llenado
-            setTimeout(() => {
+            redirectTimerRef.current = setTimeout(() => {
               navigate("/register", {
                 state: {
                   returnTo: `/accept-organization-invitation/${token}`,
@@ -129,11 +139,12 @@ const AcceptOrganizationInvitation = () => {
     if (token) {
       fetchInvitationInfo();
     }
-  }, [token]);
+  }, [token, authLoading, user]);
 
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
     if (user && invitationInfo && status === "redirecting") {
+      clearTimeout(redirectTimerRef.current);
       processInvitation(token);
     }
   }, [user, invitationInfo, status, token]);

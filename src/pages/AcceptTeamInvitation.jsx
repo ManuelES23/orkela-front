@@ -9,12 +9,19 @@ import Button from "../components/ui/Button";
 const AcceptTeamInvitation = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [status, setStatus] = useState("loading"); // loading, checking, redirecting, accepting, success, error
   const [message, setMessage] = useState("");
   const [teamName, setTeamName] = useState("");
   const [invitationInfo, setInvitationInfo] = useState(null);
   const isProcessing = useRef(false);
+  // Timer de la redirección a login/register: se cancela si la sesión
+  // resulta estar iniciada o si se desmonta la página.
+  const redirectTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => clearTimeout(redirectTimerRef.current);
+  }, []);
 
   const processInvitation = async () => {
     setStatus("accepting");
@@ -41,6 +48,9 @@ const AcceptTeamInvitation = () => {
   // Paso 1: Obtener info de la invitación (público, sin auth)
   useEffect(() => {
     const fetchInvitationInfo = async () => {
+      // Esperar a que AuthContext termine de verificar la sesión: antes de
+      // eso user es null aunque el usuario sí esté logueado.
+      if (authLoading) return;
       if (isProcessing.current) return;
       isProcessing.current = true;
 
@@ -59,7 +69,7 @@ const AcceptTeamInvitation = () => {
 
           if (info.user_exists) {
             // Usuario existe -> Login con email pre-llenado
-            setTimeout(() => {
+            redirectTimerRef.current = setTimeout(() => {
               navigate("/login", {
                 state: {
                   returnTo: `/accept-team-invitation/${token}`,
@@ -70,7 +80,7 @@ const AcceptTeamInvitation = () => {
             }, 1500);
           } else {
             // Usuario no existe -> Register con email pre-llenado
-            setTimeout(() => {
+            redirectTimerRef.current = setTimeout(() => {
               navigate("/register", {
                 state: {
                   returnTo: `/accept-team-invitation/${token}`,
@@ -89,11 +99,12 @@ const AcceptTeamInvitation = () => {
     };
 
     fetchInvitationInfo();
-  }, [token]);
+  }, [token, authLoading, user]);
 
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
     if (user && invitationInfo && status === "redirecting") {
+      clearTimeout(redirectTimerRef.current);
       processInvitation();
     }
   }, [user, invitationInfo, status]);

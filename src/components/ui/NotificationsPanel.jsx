@@ -1,237 +1,121 @@
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Bell,
-  Check,
-  CheckCheck,
-  Trash2,
-  FolderKanban,
-  CheckSquare,
-  Users,
-  Mail,
-  X,
-  Wifi,
-  WifiOff,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Building2,
-  MailPlus,
-  MailCheck,
-  MailX,
-  ListTodo,
-  Ticket,
-  MessageSquare,
-  Inbox,
-  UserCheck,
-  RotateCcw,
-} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Bell, CheckCheck, X, ArrowRight } from "lucide-react";
 import { useRealtime } from "../../context/RealtimeContext";
 import { formatDistanceToNow } from "../../utils/dateUtils";
+import { notificationTarget } from "../../utils/notifications";
+import NotificationIcon from "../notifications/NotificationIcon";
+import { Skeleton } from "./Skeleton";
+import { motionTokens } from "../animations/variants";
+
+// Fila de carga con la misma silueta que una notificación
+const LoadingRows = () => (
+  <div className='p-2 space-y-1' aria-label='Cargando notificaciones'>
+    {[0, 1, 2].map((i) => (
+      <div key={i} className='flex items-start gap-3 px-3 py-3'>
+        <Skeleton className='w-9 h-9 rounded-lg shrink-0' />
+        <div className='flex-1 space-y-2'>
+          <Skeleton className='h-3.5 w-2/5' />
+          <Skeleton className='h-3 w-4/5' />
+          <Skeleton className='h-2.5 w-16' />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const NotificationsPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef(null);
+  const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
   const {
     notifications,
     unreadCount,
     isConnected,
+    loadingNotifications,
     markAsRead,
     markAllAsRead,
-    clearNotifications,
   } = useRealtime();
 
-  // Cerrar al hacer clic fuera
+  // Cerrar al hacer clic fuera o con Escape
   useEffect(() => {
+    if (!isOpen) return undefined;
+
     const handleClickOutside = (event) => {
       if (panelRef.current && !panelRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
+    const handleKey = (event) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKey);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKey);
     };
   }, [isOpen]);
 
-  // Obtener ícono según tipo de notificación
-  const getIcon = (type) => {
-    switch (type) {
-      case "project_created":
-      case "project_updated":
-      case "project_deleted":
-      case "project_collaborator_joined":
-      case "project_invitation_sent":
-        return <FolderKanban className='w-4 h-4 text-blue-500' />;
-
-      case "task_created":
-      case "task_assigned":
-        return <CheckSquare className='w-4 h-4 text-green-500' />;
-
-      case "task_updated":
-      case "task_status_changed":
-        return <RefreshCw className='w-4 h-4 text-brand-500' />;
-
-      case "task_completed":
-        return <CheckCircle className='w-4 h-4 text-green-600' />;
-
-      case "checklist_item_completed":
-        return <ListTodo className='w-4 h-4 text-green-600' />;
-
-      case "checklist_item_updated":
-        return <ListTodo className='w-4 h-4 text-brand-500' />;
-
-      case "task_due_soon":
-        return <Clock className='w-4 h-4 text-yellow-500' />;
-
-      case "task_overdue":
-        return <AlertTriangle className='w-4 h-4 text-red-500' />;
-
-      case "team_member_joined":
-      case "team_invitation_sent":
-        return <Users className='w-4 h-4 text-purple-500' />;
-
-      // Invitaciones recibidas
-      case "project_invitation_received":
-        return <MailPlus className='w-4 h-4 text-blue-500' />;
-      case "team_invitation_received":
-        return <MailPlus className='w-4 h-4 text-purple-500' />;
-      case "organization_invitation_received":
-        return <Building2 className='w-4 h-4 text-brand-500' />;
-
-      // Invitaciones aceptadas
-      case "project_invitation_accepted":
-      case "team_invitation_accepted":
-      case "organization_invitation_accepted":
-        return <MailCheck className='w-4 h-4 text-green-500' />;
-
-      // Invitaciones rechazadas
-      case "project_invitation_declined":
-      case "team_invitation_declined":
-      case "organization_invitation_declined":
-        return <MailX className='w-4 h-4 text-red-500' />;
-
-      // Organizaciones
-      case "organization_member_removed":
-        return <Building2 className='w-4 h-4 text-red-500' />;
-      case "organization_member_left":
-        return <Building2 className='w-4 h-4 text-orange-500' />;
-      case "organization_role_updated":
-        return <Building2 className='w-4 h-4 text-brand-500' />;
-
-      // Tickets
-      case "ticket_created":
-        return <Ticket className='w-4 h-4 text-orange-500' />;
-      case "ticket_taken":
-        return <UserCheck className='w-4 h-4 text-blue-500' />;
-      case "ticket_assigned":
-        return <UserCheck className='w-4 h-4 text-brand-500' />;
-      case "ticket_status_changed":
-        return <RefreshCw className='w-4 h-4 text-blue-500' />;
-      case "ticket_resolved":
-        return <CheckCircle className='w-4 h-4 text-green-600' />;
-      case "ticket_returned_to_inbox":
-        return <Inbox className='w-4 h-4 text-yellow-500' />;
-      case "ticket_comment_added":
-        return <MessageSquare className='w-4 h-4 text-blue-500' />;
-
-      default:
-        return <Mail className='w-4 h-4 text-gray-500 dark:text-night-400' />;
+  const handleOpenNotification = (notification) => {
+    if (!notification.read) markAsRead(notification.id);
+    const target = notificationTarget(notification);
+    if (target) {
+      setIsOpen(false);
+      navigate(target);
     }
   };
 
-  // Obtener color de fondo según tipo
-  const getBgColor = (type, read) => {
-    if (read) return "bg-gray-50";
+  const badge = unreadCount > 9 ? "9+" : unreadCount;
+  const bellLabel =
+    unreadCount > 0 ? `Notificaciones, ${unreadCount} sin leer` : "Notificaciones";
 
-    switch (type) {
-      case "project_created":
-      case "project_updated":
-      case "project_collaborator_joined":
-      case "project_invitation_sent":
-        return "bg-blue-50";
-
-      case "project_deleted":
-      case "task_overdue":
-        return "bg-red-50";
-
-      case "task_created":
-      case "task_assigned":
-      case "task_completed":
-      case "checklist_item_completed":
-        return "bg-green-50";
-
-      case "task_updated":
-      case "task_status_changed":
-      case "checklist_item_updated":
-        return "bg-brand-50 dark:bg-brand-900/20";
-
-      case "task_due_soon":
-        return "bg-yellow-50";
-
-      case "team_member_joined":
-      case "team_invitation_sent":
-        return "bg-purple-50";
-
-      // Organizaciones
-      case "organization_member_removed":
-        return "bg-red-50";
-      case "organization_member_left":
-        return "bg-orange-50";
-      case "organization_role_updated":
-        return "bg-brand-50 dark:bg-brand-900/20";
-
-      // Tickets
-      case "ticket_created":
-        return "bg-orange-50";
-      case "ticket_taken":
-      case "ticket_assigned":
-        return "bg-blue-50";
-      case "ticket_status_changed":
-        return "bg-brand-50 dark:bg-brand-900/20";
-      case "ticket_resolved":
-        return "bg-green-50";
-      case "ticket_returned_to_inbox":
-        return "bg-yellow-50";
-      case "ticket_comment_added":
-        return "bg-blue-50";
-
-      default:
-        return "bg-gray-100";
-    }
-  };
+  const panelMotion = reduceMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        initial: { opacity: 0, y: 8, scale: 0.98 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: 8, scale: 0.98 },
+      };
 
   return (
     <div className='relative' ref={panelRef}>
       {/* Botón de campana */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className='relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-night-300 dark:hover:text-night-50 dark:hover:bg-night-800 rounded-lg transition-colors'
+        type='button'
+        onClick={() => setIsOpen((open) => !open)}
+        aria-label={bellLabel}
+        aria-expanded={isOpen}
+        aria-haspopup='dialog'
+        className='relative w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-night-300 dark:hover:text-night-50 dark:hover:bg-night-800 rounded-lg transition-colors cursor-pointer'
       >
         <Bell className='w-5 h-5' />
 
-        {/* Badge de no leídas */}
-        {unreadCount > 0 && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className='absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center'
-          >
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </motion.span>
-        )}
+        {/* Badge de no leídas (contador del servidor) */}
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <motion.span
+              key='badge'
+              initial={reduceMotion ? { opacity: 0 } : { scale: 0 }}
+              animate={reduceMotion ? { opacity: 1 } : { scale: 1 }}
+              exit={reduceMotion ? { opacity: 0 } : { scale: 0 }}
+              transition={motionTokens.springSnappy}
+              className='absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-night-900'
+            >
+              {badge}
+            </motion.span>
+          )}
+        </AnimatePresence>
 
         {/* Indicador de conexión */}
         <span
-          className={`absolute bottom-0 right-0 w-2 h-2 rounded-full ${
-            isConnected ? "bg-green-500" : "bg-red-500"
+          className={`absolute bottom-1.5 right-1.5 w-2 h-2 rounded-full ring-2 ring-white dark:ring-night-900 ${
+            isConnected ? "bg-emerald-500" : "bg-gray-300 dark:bg-night-600"
           }`}
-          title={isConnected ? "Conectado" : "Desconectado"}
+          title={isConnected ? "Conectado en tiempo real" : "Sin conexión en tiempo real"}
         />
       </button>
 
@@ -239,115 +123,124 @@ const NotificationsPanel = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 md:w-120 bg-white dark:bg-night-800 rounded-xl shadow-xl border border-gray-200 dark:border-night-700 overflow-hidden z-50'
+            role='dialog'
+            aria-label='Notificaciones'
+            {...panelMotion}
+            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease }}
+            className='fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-96 bg-white dark:bg-night-900 rounded-xl shadow-xl shadow-gray-900/10 dark:shadow-black/40 border border-gray-200 dark:border-night-700 overflow-hidden z-50'
           >
-            {/* Header */}
-            <div className='px-4 py-3 bg-linear-to-r from-brand-50 to-white dark:from-brand-900/20 dark:to-night-800 border-b border-gray-100 dark:border-night-700'>
-              <div className='flex items-center justify-between'>
-                <div className='flex items-center gap-2'>
-                  <h3 className='font-semibold text-gray-900 dark:text-night-50'>
-                    Notificaciones
-                  </h3>
-                  {isConnected ? (
-                    <Wifi className='w-4 h-4 text-green-500' />
-                  ) : (
-                    <WifiOff className='w-4 h-4 text-red-500' />
-                  )}
-                </div>
-                <div className='flex items-center gap-1'>
-                  {unreadCount > 0 && (
-                    <button
-                      onClick={markAllAsRead}
-                      className='p-1.5 text-gray-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-900/20 dark:text-night-400 dark:hover:text-brand-300 dark:hover:bg-brand-900/30 rounded-lg transition-colors'
-                      title='Marcar todas como leídas'
-                    >
-                      <CheckCheck className='w-4 h-4' />
-                    </button>
-                  )}
-                  {notifications.length > 0 && (
-                    <button
-                      onClick={clearNotifications}
-                      className='p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:text-night-400 dark:hover:text-red-400 dark:hover:bg-red-950/30 rounded-lg transition-colors'
-                      title='Limpiar todo'
-                    >
-                      <Trash2 className='w-4 h-4' />
-                    </button>
-                  )}
+            {/* Cabecera */}
+            <div className='flex items-center justify-between gap-2 px-4 py-3 border-b border-gray-100 dark:border-night-700'>
+              <div className='min-w-0'>
+                <h3 className='font-semibold text-gray-900 dark:text-night-50'>Notificaciones</h3>
+                <p className='text-xs text-gray-500 dark:text-night-400'>
+                  {unreadCount > 0
+                    ? `${unreadCount} sin leer`
+                    : "Estás al día"}
+                </p>
+              </div>
+              <div className='flex items-center gap-1'>
+                {unreadCount > 0 && (
                   <button
-                    onClick={() => setIsOpen(false)}
-                    className='p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-night-400 dark:hover:text-night-100 dark:hover:bg-night-700 rounded-lg transition-colors'
+                    type='button'
+                    onClick={markAllAsRead}
+                    className='flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-500/10 rounded-lg transition-colors cursor-pointer'
                   >
-                    <X className='w-4 h-4' />
+                    <CheckCheck className='w-4 h-4' />
+                    Marcar todas como leídas
                   </button>
-                </div>
+                )}
+                <button
+                  type='button'
+                  onClick={() => setIsOpen(false)}
+                  aria-label='Cerrar'
+                  className='p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:text-night-400 dark:hover:text-night-100 dark:hover:bg-night-800 rounded-lg transition-colors cursor-pointer'
+                >
+                  <X className='w-4 h-4' />
+                </button>
               </div>
             </div>
 
-            {/* Lista de notificaciones */}
-            <div className='max-h-125 overflow-y-auto'>
-              {notifications.length === 0 ? (
-                <div className='py-12 text-center'>
-                  <Bell className='w-12 h-12 text-gray-300 dark:text-night-600 mx-auto mb-3' />
-                  <p className='text-gray-500 dark:text-night-400 text-sm'>
+            {/* Lista */}
+            <div className='max-h-[min(28rem,65vh)] overflow-y-auto'>
+              {loadingNotifications && notifications.length === 0 ? (
+                <LoadingRows />
+              ) : notifications.length === 0 ? (
+                <div className='py-12 px-6 text-center'>
+                  <span className='w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-100 dark:bg-night-800 flex items-center justify-center'>
+                    <Bell className='w-6 h-6 text-gray-400 dark:text-night-500' />
+                  </span>
+                  <p className='text-sm font-medium text-gray-700 dark:text-night-200'>
                     No tienes notificaciones
                   </p>
-                  <p className='text-gray-400 dark:text-night-500 text-xs mt-1'>
-                    Las notificaciones en tiempo real aparecerán aquí
+                  <p className='text-xs text-gray-500 dark:text-night-400 mt-1'>
+                    Te avisaremos aquí cuando haya novedades
                   </p>
                 </div>
               ) : (
-                <div className='divide-y divide-gray-100 dark:divide-night-700'>
-                  <AnimatePresence>
+                <ul className='p-2 space-y-0.5'>
+                  <AnimatePresence initial={false}>
                     {notifications.map((notification) => (
-                      <motion.div
+                      <motion.li
                         key={notification.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className={`px-4 py-3 cursor-pointer transition-colors dark:bg-transparent ${getBgColor(
-                          notification.type,
-                          notification.read
-                        )} hover:bg-gray-100 dark:hover:bg-night-700`}
-                        onClick={() => markAsRead(notification.id)}
+                        layout={!reduceMotion}
+                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease }}
                       >
-                        <div className='flex items-start gap-3'>
-                          <div className='p-2 bg-white dark:bg-night-800 rounded-full shadow-sm'>
-                            {getIcon(notification.type)}
-                          </div>
-                          <div className='flex-1 min-w-0'>
-                            <p className='text-sm font-medium text-gray-900 dark:text-night-50'>
+                        <button
+                          type='button'
+                          onClick={() => handleOpenNotification(notification)}
+                          className={`w-full text-left flex items-start gap-3 px-3 py-3 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 ${
+                            notification.read
+                              ? "hover:bg-gray-50 dark:hover:bg-night-800"
+                              : "bg-brand-50/60 hover:bg-brand-50 dark:bg-brand-500/10 dark:hover:bg-brand-500/15"
+                          }`}
+                        >
+                          <NotificationIcon type={notification.type} />
+                          <span className='flex-1 min-w-0'>
+                            <span
+                              className={`block text-sm ${
+                                notification.read
+                                  ? "font-medium text-gray-700 dark:text-night-200"
+                                  : "font-semibold text-gray-900 dark:text-night-50"
+                              }`}
+                            >
                               {notification.title}
-                            </p>
-                            <p className='text-sm text-gray-600 dark:text-night-300 leading-relaxed'>
+                            </span>
+                            <span className='block text-sm text-gray-600 dark:text-night-300 leading-snug line-clamp-2'>
                               {notification.message}
-                            </p>
-                            <p className='text-xs text-gray-400 dark:text-night-500 mt-1'>
+                            </span>
+                            <span className='block text-xs text-gray-400 dark:text-night-500 mt-1'>
                               {formatDistanceToNow(notification.createdAt)}
-                            </p>
-                          </div>
+                            </span>
+                          </span>
                           {!notification.read && (
-                            <span className='w-2 h-2 bg-brand-500 rounded-full shrink-0 mt-2' />
+                            <span
+                              aria-label='Sin leer'
+                              className='w-2 h-2 bg-brand-500 rounded-full shrink-0 mt-2'
+                            />
                           )}
-                        </div>
-                      </motion.div>
+                        </button>
+                      </motion.li>
                     ))}
                   </AnimatePresence>
-                </div>
+                </ul>
               )}
             </div>
 
-            {/* Footer */}
-            {notifications.length > 0 && (
-              <div className='px-4 py-2 bg-gray-50 dark:bg-night-900 border-t border-gray-100 dark:border-night-700'>
-                <p className='text-xs text-gray-500 dark:text-night-400 text-center'>
-                  {unreadCount} sin leer de {notifications.length} totales
-                </p>
-              </div>
-            )}
+            {/* Pie: historial completo */}
+            <div className='border-t border-gray-100 dark:border-night-700 bg-gray-50/80 dark:bg-night-950/40'>
+              <Link
+                to='/notificaciones'
+                onClick={() => setIsOpen(false)}
+                className='group flex items-center justify-center gap-1.5 px-4 py-2.5 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200 transition-colors'
+              >
+                Ver todo el historial
+                <ArrowRight className='w-4 h-4 transition-transform group-hover:translate-x-0.5' />
+              </Link>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

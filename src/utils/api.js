@@ -803,6 +803,33 @@ export const myInvitationsAPI = {
   },
 };
 
+// Historial de notificaciones del usuario (solo las propias)
+export const notificationsAPI = {
+  // params: { cursor, limit, category, status: "unread" | "read", type }
+  list: async (params = {}) => {
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "" && v !== "all")
+    ).toString();
+    return await request(`/notifications${query ? `?${query}` : ""}`);
+  },
+
+  unreadCount: async () => {
+    return await request("/notifications/unread-count");
+  },
+
+  markAsRead: async (id) => {
+    return await request(`/notifications/${id}/read`, { method: "POST" });
+  },
+
+  markAllAsRead: async () => {
+    return await request("/notifications/read-all", { method: "POST" });
+  },
+
+  remove: async (id) => {
+    return await request(`/notifications/${id}`, { method: "DELETE" });
+  },
+};
+
 // Plans API (de cara al usuario — catálogo personal + selector self-service)
 export const plansAPI = {
   getPersonalCatalog: async () => {

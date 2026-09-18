@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Layout from "../components/layout/Layout";
 import TicketModal from "../components/modals/TicketModal";
+import useOpenFromQuery from "../hooks/useOpenFromQuery";
 import TicketDetailModal from "../components/modals/TicketDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { SkeletonRows } from "../components/ui/Skeleton";
@@ -220,6 +221,9 @@ const Tickets = () => {
     setSelectedTicket(ticket);
     setIsDetailModalOpen(true);
   };
+
+  // /tickets?ticket=ID (clic en una notificación): abrir el detalle de ese ticket
+  useOpenFromQuery("ticket", handleView);
 
   const handleNewTicket = () => {
     setSelectedTicket(null);

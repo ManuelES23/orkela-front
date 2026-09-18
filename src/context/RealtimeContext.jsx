@@ -5,11 +5,16 @@ import {
   useEffect,
   useCallback,
   useRef,
-  useMemo,
 } from "react";
 import { useAuth } from "./AuthContext";
 import { useNotification } from "./NotificationContext";
 import { getEcho, updateEchoAuth, disconnectEcho } from "../utils/echo";
+import { notificationsAPI } from "../utils/api";
+import {
+  normalizeNotification,
+  refreshKeysFor,
+  toastKindFor,
+} from "../utils/notifications";
 
 const RealtimeContext = createContext();
 
@@ -21,35 +26,66 @@ export const useRealtime = () => {
   return context;
 };
 
+// Cuántas notificaciones muestra el desplegable de la campana (el resto,
+// en /notificaciones).
+export const DROPDOWN_LIMIT = 10;
+
+const CLOSED_REMOVED_MODAL = {
+  isOpen: false,
+  organizationName: "",
+  removerName: "",
+};
+
 export const RealtimeProvider = ({ children }) => {
   const { user } = useAuth();
   const { success, info, warning } = useNotification();
+
+  // Últimas notificaciones persistidas (desplegable) y contador del servidor
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [retentionDays, setRetentionDays] = useState(null);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
-  // Derivado del historial: así nunca se desfasa (ej. al marcar como leída
-  // una notificación que ya lo estaba).
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.read).length,
-    [notifications]
-  );
+  // Espejo síncrono de la lista, para decidir sin esperar al re-render
+  // (ej. no volver a marcar como leída una que ya lo está).
+  const notificationsRef = useRef([]);
+  const setList = useCallback((updater) => {
+    setNotifications((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      notificationsRef.current = next;
+      return next;
+    });
+  }, []);
 
   // Estado para el modal de "removido de organización"
-  const [removedFromOrgModal, setRemovedFromOrgModal] = useState({
-    isOpen: false,
-    organizationName: "",
-    removerName: "",
-  });
+  const [removedFromOrgModal, setRemovedFromOrgModal] = useState(CLOSED_REMOVED_MODAL);
 
   // Callbacks para refrescar datos en componentes
-  // Cambiado a Map para soportar keys dinámicas (ej: "ticketDetail-123")
+  // Map para soportar keys dinámicas (ej: "ticketDetail-123")
   const [refreshCallbacks, setRefreshCallbacks] = useState(new Map());
+
+  // Suscriptores a cambios del historial (la página /notificaciones):
+  // { kind: "created" | "read" | "read-all" | "removed", notification?, id? }
+  const historyListenersRef = useRef(new Set());
+  const publish = useCallback((change) => {
+    historyListenersRef.current.forEach((listener) => listener(change));
+  }, []);
+
+  const subscribeToNotifications = useCallback((listener) => {
+    historyListenersRef.current.add(listener);
+    return () => historyListenersRef.current.delete(listener);
+  }, []);
 
   // Ref para mantener la función de notificación actualizada sin causar re-suscripciones
   const handleNotificationRef = useRef(null);
 
-  // Contador para ids únicos (Date.now() colisiona si llegan dos eventos en el mismo ms)
-  const notificationIdRef = useRef(0);
+  // Ids llegados en vivo mientras se cargaba el historial inicial
+  const liveDuringLoadRef = useRef(null);
+
+  // Ids locales para broadcasts sin id persistido (no debería pasar salvo
+  // en señales silenciosas, que no se agregan)
+  const localIdRef = useRef(0);
 
   // Registrar callback de refresco
   const registerRefresh = useCallback((type, callback) => {
@@ -69,35 +105,7 @@ export const RealtimeProvider = ({ children }) => {
     });
   }, []);
 
-  // Agregar notificación al historial
-  const addRealtimeNotification = useCallback((notification) => {
-    const newNotification = {
-      ...notification,
-      id: `${Date.now()}-${++notificationIdRef.current}`,
-      read: false,
-      createdAt: new Date(),
-    };
-    setNotifications((prev) => [newNotification, ...prev].slice(0, 50)); // Máximo 50 notificaciones
-  }, []);
-
-  // Marcar notificación como leída
-  const markAsRead = useCallback((id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  }, []);
-
-  // Marcar todas como leídas
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  }, []);
-
-  // Limpiar notificaciones
-  const clearNotifications = useCallback(() => {
-    setNotifications([]);
-  }, []);
-
-  // Disparar refresh manualmente desde cualquier componente
+  // Disparar el refresh de una clave (desde cualquier componente o evento)
   const triggerRefresh = useCallback(
     (type) => {
       const callback = refreshCallbacks.get(type);
@@ -108,248 +116,123 @@ export const RealtimeProvider = ({ children }) => {
     [refreshCallbacks]
   );
 
-  // Función auxiliar para disparar callbacks que coincidan con un patrón
-  const triggerMatchingRefresh = useCallback(
-    (pattern) => {
-      refreshCallbacks.forEach((callback, key) => {
-        if (key.startsWith(pattern)) {
-          callback();
-        }
-      });
-    },
-    [refreshCallbacks]
-  );
+  // Cargar (o recargar) las últimas notificaciones desde la API
+  const reloadNotifications = useCallback(async () => {
+    liveDuringLoadRef.current = new Set();
+    setLoadingNotifications(true);
+    try {
+      const response = await notificationsAPI.list({ limit: DROPDOWN_LIMIT });
+      const fetched = (response?.data || []).map(normalizeNotification);
+      const fetchedIds = new Set(fetched.map((n) => n.id));
+      // Las que llegaron en vivo durante la carga y la respuesta no trae
+      const lateLive = [...(liveDuringLoadRef.current || [])].filter((id) => !fetchedIds.has(id));
 
-  // Helper para disparar refresh de un tipo específico
-  const refresh = useCallback(
-    (type) => {
-      const callback = refreshCallbacks.get(type);
-      if (callback) {
-        callback();
+      setList((prev) => {
+        const live = prev.filter((n) => lateLive.includes(n.id));
+        return [...live, ...fetched].slice(0, DROPDOWN_LIMIT);
+      });
+      setUnreadCount((response?.unread_count ?? 0) + lateLive.length);
+      setRetentionDays(response?.retention_days ?? null);
+    } catch (err) {
+      // Sin historial no se rompe nada: siguen llegando en vivo
+      console.error("No se pudo cargar el historial de notificaciones:", err);
+    } finally {
+      liveDuringLoadRef.current = null;
+      setLoadingNotifications(false);
+    }
+  }, [setList]);
+
+  // Marcar notificación como leída
+  const markAsRead = useCallback(
+    async (id) => {
+      const known = notificationsRef.current.find((n) => n.id === id);
+      if (known?.read) return;
+
+      if (known) {
+        setList((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+        setUnreadCount((count) => Math.max(0, count - 1));
+      }
+      publish({ kind: "read", id });
+
+      try {
+        const response = await notificationsAPI.markAsRead(id);
+        if (typeof response?.unread_count === "number") setUnreadCount(response.unread_count);
+      } catch (err) {
+        console.error("No se pudo marcar la notificación como leída:", err);
       }
     },
-    [refreshCallbacks]
+    [publish, setList]
   );
 
-  // Procesar notificación recibida
+  // Marcar todas como leídas
+  const markAllAsRead = useCallback(async () => {
+    setList((prev) => prev.map((n) => ({ ...n, read: true })));
+    setUnreadCount(0);
+    publish({ kind: "read-all" });
+
+    try {
+      await notificationsAPI.markAllAsRead();
+    } catch (err) {
+      console.error("No se pudieron marcar las notificaciones como leídas:", err);
+      reloadNotifications();
+    }
+  }, [publish, reloadNotifications, setList]);
+
+  // Eliminar una notificación del historial
+  const removeNotification = useCallback(
+    async (id) => {
+      const known = notificationsRef.current.find((n) => n.id === id);
+      setList((prev) => prev.filter((n) => n.id !== id));
+      if (known && !known.read) setUnreadCount((count) => Math.max(0, count - 1));
+      publish({ kind: "removed", id });
+
+      const response = await notificationsAPI.remove(id);
+      if (typeof response?.unread_count === "number") setUnreadCount(response.unread_count);
+    },
+    [publish, setList]
+  );
+
+  // Procesar notificación recibida por WebSocket
   const handleNotification = useCallback(
     (data) => {
-      // Agregar al historial
-      addRealtimeNotification({
-        type: data.type,
-        title: data.title,
-        message: data.message,
-        data: data.data,
+      // Señal silenciosa: solo refrescar las vistas (sin toast ni historial)
+      if (!data.silent) {
+        const notification = normalizeNotification({
+          ...data,
+          id: data.id ?? `local-${++localIdRef.current}`,
+        });
+
+        // El broadcast trae el id persistido: si ya está (p.ej. llegó
+        // también en la carga inicial) no se duplica ni se vuelve a avisar.
+        if (notificationsRef.current.some((n) => n.id === notification.id)) return;
+
+        liveDuringLoadRef.current?.add(notification.id);
+        setList((prev) => [notification, ...prev].slice(0, DROPDOWN_LIMIT));
+        setUnreadCount((count) => count + 1);
+        publish({ kind: "created", notification });
+
+        if (
+          data.type === "organization_member_removed" &&
+          data.data?.action === "removed_from_organization"
+        ) {
+          // El usuario actual fue removido - mostrar modal especial
+          setRemovedFromOrgModal({
+            isOpen: true,
+            organizationName: data.data?.organization_name || "la organización",
+            removerName: data.data?.remover_name || "Un administrador",
+          });
+        } else {
+          const toast = { success, warning, info }[toastKindFor(data.type)];
+          toast(data.message);
+        }
+      }
+
+      refreshKeysFor(data).forEach((key) => {
+        const callback = refreshCallbacks.get(key);
+        if (callback) callback();
       });
-
-      // Mostrar toast según el tipo
-      switch (data.type) {
-        case "project_created":
-        case "project_collaborator_joined":
-          info(data.message);
-          refresh("projects");
-          break;
-
-        case "project_updated":
-          info(data.message);
-          refresh("projects");
-          break;
-
-        case "project_deleted":
-          warning(data.message);
-          refresh("projects");
-          break;
-
-        case "task_created":
-        case "task_assigned":
-          info(data.message);
-          refresh("tasks");
-          break;
-
-        case "task_updated":
-        case "task_status_changed":
-          info(data.message);
-          refresh("tasks");
-          refresh("projects"); // También actualizar proyectos
-          break;
-
-        case "task_completed":
-          success(data.message);
-          refresh("tasks");
-          refresh("projects"); // También actualizar proyectos (progreso)
-          break;
-
-        case "checklist_item_completed":
-          success(data.message);
-          refresh("tasks");
-          refresh("projects"); // Actualizar progreso del proyecto
-          break;
-
-        case "checklist_item_updated":
-          info(data.message);
-          refresh("tasks");
-          refresh("projects"); // Actualizar progreso del proyecto
-          break;
-
-        case "task_due_soon":
-          warning(data.message);
-          refresh("tasks");
-          break;
-
-        case "task_overdue":
-          warning(data.message);
-          refresh("tasks");
-          break;
-
-        case "team_invitation_sent":
-        case "project_invitation_sent":
-          success(data.message);
-          break;
-
-        case "team_created":
-          info(data.message);
-          refresh("teams");
-          refresh("organizations");
-          break;
-
-        case "team_updated":
-          info(data.message);
-          refresh("teams");
-          break;
-
-        case "team_member_joined":
-          info(data.message);
-          refresh("teams");
-          break;
-
-        case "team_deleted":
-          warning(data.message);
-          refresh("teams");
-          refresh("organizations");
-          break;
-
-        // Tickets
-        case "ticket_created":
-          info(data.message);
-          refresh("tickets");
-          break;
-
-        case "ticket_taken":
-        case "ticket_assigned":
-          info(data.message);
-          refresh("tickets");
-          // Refrescar modal de detalle si está abierto
-          if (data.data?.ticket_id) {
-            refresh(`ticketDetail-${data.data.ticket_id}`);
-          }
-          break;
-
-        case "ticket_status_changed":
-          info(data.message);
-          refresh("tickets");
-          // Refrescar modal de detalle si está abierto
-          if (data.data?.ticket_id) {
-            refresh(`ticketDetail-${data.data.ticket_id}`);
-          }
-          break;
-
-        case "ticket_resolved":
-          success(data.message);
-          refresh("tickets");
-          // Refrescar modal de detalle si está abierto
-          if (data.data?.ticket_id) {
-            refresh(`ticketDetail-${data.data.ticket_id}`);
-          }
-          break;
-
-        case "ticket_returned_to_inbox":
-          info(data.message);
-          refresh("tickets");
-          // Refrescar modal de detalle si está abierto
-          if (data.data?.ticket_id) {
-            refresh(`ticketDetail-${data.data.ticket_id}`);
-          }
-          break;
-
-        case "ticket_comment_added":
-          info(data.message);
-          refresh("tickets");
-          // También refrescar modal de detalle si está abierto
-          if (data.data?.ticket_id) {
-            const ticketDetailKey = `ticketDetail-${data.data.ticket_id}`;
-            refresh(ticketDetailKey);
-          }
-          break;
-
-        // Invitaciones recibidas
-        case "project_invitation_received":
-        case "team_invitation_received":
-        case "organization_invitation_received":
-          info(data.message);
-          refresh("invitations");
-          break;
-
-        // Invitaciones aceptadas/rechazadas (para quien invitó)
-        case "project_invitation_accepted":
-        case "team_invitation_accepted":
-        case "organization_invitation_accepted":
-          success(data.message);
-          refresh("projects");
-          refresh("teams");
-          refresh("organizations");
-          break;
-
-        case "project_invitation_declined":
-        case "team_invitation_declined":
-        case "organization_invitation_declined":
-          warning(data.message);
-          break;
-
-        // Organizaciones - miembros
-        case "organization_member_removed":
-          // Verificar si el usuario actual es el que fue removido
-          // La notificación para el usuario removido tiene action: 'removed_from_organization'
-          if (data.data?.action === "removed_from_organization") {
-            // El usuario actual fue removido - mostrar modal especial
-            setRemovedFromOrgModal({
-              isOpen: true,
-              organizationName:
-                data.data?.organization_name || "la organización",
-              removerName: data.data?.remover_name || "Un administrador",
-            });
-          } else {
-            // Otro miembro fue removido - solo notificar
-            warning(data.message);
-            refresh("organizations");
-          }
-          break;
-
-        case "organization_member_left":
-          info(data.message);
-          refresh("organizations");
-          break;
-
-        case "organization_role_updated":
-          info(data.message);
-          refresh("organizations");
-          break;
-
-        default:
-          info(data.message);
-      }
-
-      // El Dashboard resume tareas, proyectos y equipos: refrescarlo ante
-      // cualquier cambio de esas entidades.
-      if (/^(task|checklist|project|team)_/.test(data.type || "")) {
-        refresh("dashboard");
-      }
-
-      // Modal de detalle de tarea abierto (TaskDetailModal)
-      if (data.data?.task_id) {
-        refresh(`task-detail-${data.data.task_id}`);
-      }
     },
-    [addRealtimeNotification, info, success, warning, refresh]
+    [info, success, warning, refreshCallbacks, publish, setList]
   );
 
   // Mantener la ref actualizada con la última versión de handleNotification
@@ -357,17 +240,15 @@ export const RealtimeProvider = ({ children }) => {
     handleNotificationRef.current = handleNotification;
   }, [handleNotification]);
 
-  // Conectar y suscribirse al canal del usuario
-  // IMPORTANTE: Solo depende de user?.id para evitar re-suscripciones innecesarias
+  // Conectar, cargar el historial y suscribirse al canal del usuario
+  // IMPORTANTE: Solo depende del usuario para evitar re-suscripciones innecesarias
   useEffect(() => {
     // Al cerrar sesión o cambiar de usuario, el historial del anterior no
     // debe quedar visible (el provider sigue montado tras un navigate()).
-    setNotifications([]);
-    setRemovedFromOrgModal({
-      isOpen: false,
-      organizationName: "",
-      removerName: "",
-    });
+    setList([]);
+    setUnreadCount(0);
+    setRetentionDays(null);
+    setRemovedFromOrgModal(CLOSED_REMOVED_MODAL);
 
     // El superadmin (SystemAdmin) tiene su propia secuencia de ids: nunca
     // debe suscribirse a user.{id}, que es el canal de un usuario de la app.
@@ -384,6 +265,8 @@ export const RealtimeProvider = ({ children }) => {
       setIsConnected(false);
       return;
     }
+
+    reloadNotifications();
 
     // Obtener instancia de Echo (se crea si no existe)
     const echo = getEcho();
@@ -428,24 +311,27 @@ export const RealtimeProvider = ({ children }) => {
       console.error("Error al conectar WebSocket:", error);
       setIsConnected(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, user?.isSystemAdmin]); // Solo re-suscribirse cuando cambie el usuario
 
   // Función para cerrar el modal de removido de organización
   const closeRemovedFromOrgModal = useCallback(() => {
-    setRemovedFromOrgModal({
-      isOpen: false,
-      organizationName: "",
-      removerName: "",
-    });
+    setRemovedFromOrgModal(CLOSED_REMOVED_MODAL);
   }, []);
 
   const value = {
+    // Historial (desplegable de la campana)
     notifications,
     unreadCount,
+    retentionDays,
+    loadingNotifications,
     isConnected,
     markAsRead,
     markAllAsRead,
-    clearNotifications,
+    removeNotification,
+    reloadNotifications,
+    subscribeToNotifications,
+    // Refresco de vistas en tiempo real
     registerRefresh,
     unregisterRefresh,
     triggerRefresh,

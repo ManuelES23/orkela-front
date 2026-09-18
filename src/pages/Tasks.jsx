@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Layout from "../components/layout/Layout";
 import TaskModal from "../components/modals/TaskModal";
+import useOpenFromQuery from "../hooks/useOpenFromQuery";
 import TaskDetailModal from "../components/modals/TaskDetailModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import UserAvatar from "../components/ui/UserAvatar";
@@ -215,6 +216,9 @@ const Tasks = () => {
     setIsDetailModalOpen(false);
     setSelectedTask(null);
   };
+
+  // /tasks?task=ID (clic en una notificación): abrir el detalle de esa tarea
+  useOpenFromQuery("task", handleViewDetail);
 
   const handleToggleChecklistItem = async (taskId, itemId, event) => {
     event.stopPropagation();

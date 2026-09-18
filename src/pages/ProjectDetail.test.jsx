@@ -143,6 +143,38 @@ describe("ProjectDetail", () => {
     expect(notification.warning).toHaveBeenCalledWith("Este proyecto fue eliminado");
   });
 
+  it("si me quitan como colaborador pero sigo teniendo acceso (equipo), se queda y refresca", async () => {
+    projectsAPI.getById.mockResolvedValue(project(7, "P", [task(1, 7, "Vieja")]));
+    tasksAPI.getAll.mockResolvedValue([]);
+    renderAt("/projects/7");
+    await screen.findByText("Vieja");
+
+    projectsAPI.getById.mockResolvedValue(project(7, "P", [task(1, 7, "Nueva")]));
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    act(() => syncListener()({ project_id: 7, entity: "member", action: "removed", user_id: 1, access_lost: false }));
+    await act(async () => vi.advanceTimersByTime(200));
+    vi.useRealTimers();
+
+    expect(await screen.findByText("Nueva")).toBeInTheDocument();
+    expect(screen.queryByText("listado-proyectos")).not.toBeInTheDocument();
+    expect(notification.warning).not.toHaveBeenCalled();
+  });
+
+  it("si me quitan y pierdo el acceso, el refresco (403) me saca", async () => {
+    projectsAPI.getById.mockResolvedValue(project(7, "P", []));
+    tasksAPI.getAll.mockResolvedValue([]);
+    renderAt("/projects/7");
+    await screen.findByText("P");
+
+    projectsAPI.getById.mockRejectedValue(Object.assign(new Error("no"), { status: 403 }));
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    act(() => syncListener()({ project_id: 7, entity: "member", action: "removed", user_id: 1, access_lost: true }));
+    await act(async () => vi.advanceTimersByTime(200));
+    vi.useRealTimers();
+
+    expect(await screen.findByText("listado-proyectos")).toBeInTheDocument();
+  });
+
   it("sale al listado si al refrescar ya no tiene acceso", async () => {
     projectsAPI.getById.mockResolvedValue(project(7, "P", []));
     tasksAPI.getAll.mockResolvedValue([]);

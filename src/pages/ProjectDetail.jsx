@@ -290,10 +290,8 @@ const ProjectDetail = () => {
         leaveProjectRef.current?.("Este proyecto fue eliminado");
         return;
       }
-      if (payload.entity === "member" && payload.action === "removed" && Number(payload.user_id) === Number(user?.id)) {
-        leaveProjectRef.current?.();
-        return;
-      }
+      // Me quitaron como colaborador: puedo seguir teniendo acceso por el
+      // equipo, así que se refresca y el 403/404 decide si hay que salir.
       refreshDataSilently();
     },
     { debounce: 150 }

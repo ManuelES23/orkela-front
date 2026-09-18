@@ -13,6 +13,7 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import { SkeletonSettings } from "../../components/ui/Skeleton";
 import settingsAPI from "../../utils/settingsAPI";
+import NotificationRetentionCard from "../../components/admin/NotificationRetentionCard";
 import { useNotification } from "../../context/NotificationContext";
 
 // Proveedores SMTP comunes — al elegir un chip se precargan servidor/puerto/
@@ -458,6 +459,9 @@ export default function Settings() {
           </Card>
         </div>
       </div>
+
+      {/* Retención del historial de notificaciones */}
+      <NotificationRetentionCard />
     </Layout>
   );
 }

@@ -46,6 +46,18 @@ const settingsAPI = {
     });
   },
 
+  // Retención del historial de notificaciones (7, 30, 90 o 0 = siempre)
+  getNotificationSettings: async () => {
+    return await request("/admin/settings/notifications");
+  },
+
+  updateNotificationSettings: async (retentionDays) => {
+    return await request("/admin/settings/notifications", {
+      method: "PUT",
+      body: JSON.stringify({ retention_days: retentionDays }),
+    });
+  },
+
   // Enviar email de prueba
   sendTestEmail: async (email) => {
     return await request("/admin/settings/mail/test", {

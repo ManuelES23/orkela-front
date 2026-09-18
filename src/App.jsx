@@ -40,6 +40,7 @@ const ClientTicketsInbox = lazy(() => import("./pages/ClientTicketsInbox"));
 const Organizations = lazy(() => import("./pages/Organizations"));
 const OrganizationDetail = lazy(() => import("./pages/OrganizationDetail"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Notifications = lazy(() => import("./pages/Notifications"));
 const Admin = lazy(() => import("./pages/Admin"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
 const AcceptTeamInvitation = lazy(() => import("./pages/AcceptTeamInvitation"));
@@ -273,6 +274,14 @@ function App() {
                     <AdminRoute>
                       <AdminSettings />
                     </AdminRoute>
+                  }
+                />
+                <Route
+                  path='/notificaciones'
+                  element={
+                    <PrivateRoute>
+                      <Notifications />
+                    </PrivateRoute>
                   }
                 />
                 <Route

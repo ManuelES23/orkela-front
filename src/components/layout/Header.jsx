@@ -81,8 +81,8 @@ const Header = ({ title, subtitle }) => {
             {/* Invitaciones pendientes */}
             <InvitationsPanel />
 
-            {/* Notificaciones en tiempo real */}
-            <NotificationsPanel />
+            {/* Notificaciones en tiempo real (el superadmin no tiene historial) */}
+            {!user?.isSystemAdmin && <NotificationsPanel />}
           </div>
         </div>
       </div>

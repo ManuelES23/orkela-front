@@ -213,7 +213,9 @@ const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 // Agrupa (manteniendo el orden recibido) en Hoy, Ayer y fecha.
 export const groupByDay = (items, now = new Date()) => {
   const today = startOfDay(now).getTime();
-  const yesterday = today - 24 * 60 * 60 * 1000;
+  // Por calendario, no restando 24 h: los días del cambio de horario
+  // duran 23 o 25 horas.
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
   const groups = [];
   const byKey = new Map();
 

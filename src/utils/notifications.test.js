@@ -132,6 +132,18 @@ describe("groupByDay", () => {
     ]);
     expect(groups[2].items.map((i) => i.id)).toEqual([3, 4]);
   });
+
+  it("'Ayer' respeta el cambio de horario (domingo de 25 horas)", () => {
+    const previousTz = process.env.TZ;
+    process.env.TZ = "Europe/Madrid";
+    try {
+      const now = new Date(2026, 9, 26, 10, 0); // lunes tras el cambio de octubre
+      const groups = groupByDay([{ id: 1, createdAt: new Date(2026, 9, 25, 12, 0) }], now);
+      expect(groups[0].label).toBe("Ayer");
+    } finally {
+      process.env.TZ = previousTz;
+    }
+  });
 });
 
 describe("retentionLabel", () => {

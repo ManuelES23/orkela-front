@@ -7,6 +7,7 @@ import LoadingSwap from "../components/ui/LoadingSwap";
 import { SkeletonRows } from "../components/ui/Skeleton";
 import { ticketsAPI, teamsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
+import { useRealtime } from "../context/RealtimeContext";
 import { selectStyles } from "../utils/reactSelectStyles";
 import { Inbox } from "lucide-react";
 
@@ -47,9 +48,10 @@ const ClientTicketsInbox = () => {
   // descarta la respuesta del filtro anterior que llegue tarde.
   const requestIdRef = useRef(0);
 
-  const loadTickets = useCallback(async () => {
+  // silent: recarga en tiempo real, sin skeleton
+  const loadTickets = useCallback(async ({ silent = false } = {}) => {
     const requestId = ++requestIdRef.current;
-    setLoading(true);
+    if (!silent) setLoading(true);
     setLoadError(false);
     try {
       const data = await ticketsAPI.getClientInbox(
@@ -68,6 +70,14 @@ const ClientTicketsInbox = () => {
   useEffect(() => {
     loadTickets();
   }, [loadTickets, reloadKey]);
+
+  // organization.sync: ticket nuevo del portal, respuesta del cliente o
+  // ruteo a un equipo hecho por otro miembro
+  const { registerRefresh } = useRealtime();
+  useEffect(
+    () => registerRefresh("clientTickets", () => loadTickets({ silent: true })),
+    [registerRefresh, loadTickets]
+  );
 
   useEffect(() => {
     teamsAPI.getAll().then(setTeams).catch(() => {});

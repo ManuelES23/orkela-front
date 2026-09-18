@@ -1,4 +1,5 @@
 import { parseApiResponse } from "./httpResponse";
+import { currentSocketId } from "./echo";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://orkela.localhost/api";
 
@@ -23,6 +24,7 @@ export const AUTH_EXPIRED_EVENT = "orkela:auth-expired";
 // Función helper para hacer peticiones
 export const request = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");
+  const socketId = currentSocketId();
 
   const config = {
     ...options,
@@ -30,6 +32,8 @@ export const request = async (endpoint, options = {}) => {
       "Content-Type": "application/json",
       Accept: "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
+      // La API omite a esta pestaña al emitir las señales *.sync
+      ...(socketId && { "X-Socket-ID": socketId }),
       ...options.headers,
     },
   };

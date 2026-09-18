@@ -14,6 +14,8 @@ import {
   normalizeNotification,
   refreshKeysFor,
   toastKindFor,
+  organizationSyncKeysFor,
+  organizationSyncAffectsUser,
 } from "../utils/notifications";
 
 const RealtimeContext = createContext();
@@ -34,10 +36,21 @@ const CLOSED_REMOVED_MODAL = {
   isOpen: false,
   organizationName: "",
   removerName: "",
+  reason: "removed",
 };
 
+// Avisos que para el usuario actual significan "ya no estás en la
+// organización": expulsión o desactivación muestran el mismo modal.
+const REMOVED_TYPES = {
+  organization_member_removed: "removed",
+  organization_member_deactivated: "deactivated",
+};
+
+// Avisos que cambian mis permisos, rol o plan: hay que volver a pedir /user
+const USER_REFRESH_TYPES = new Set(["organization_role_updated", "organization_plan_downgraded"]);
+
 export const RealtimeProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { success, info, warning } = useNotification();
 
   // Últimas notificaciones persistidas (desplegable) y contador del servidor
@@ -46,6 +59,10 @@ export const RealtimeProvider = ({ children }) => {
   const [retentionDays, setRetentionDays] = useState(null);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+
+  // Cambia en cada (re)conexión: los suscriptores de canales de recurso
+  // (useResourceSync) vuelven a suscribirse con la nueva instancia de Echo.
+  const [channelEpoch, setChannelEpoch] = useState(0);
 
   // Espejo síncrono de la lista, para decidir sin esperar al re-render
   // (ej. no volver a marcar como leída una que ya lo está).
@@ -61,9 +78,20 @@ export const RealtimeProvider = ({ children }) => {
   // Estado para el modal de "removido de organización"
   const [removedFromOrgModal, setRemovedFromOrgModal] = useState(CLOSED_REMOVED_MODAL);
 
-  // Callbacks para refrescar datos en componentes
-  // Map para soportar keys dinámicas (ej: "ticketDetail-123")
-  const [refreshCallbacks, setRefreshCallbacks] = useState(new Map());
+  // Callbacks para refrescar datos en componentes: varias pantallas pueden
+  // registrar la misma clave (ej. "projects" en Projects y TeamDetail) y
+  // cada una se da de baja sola, sin borrar las de las demás.
+  const refreshCallbacksRef = useRef(new Map());
+
+  // Espejos para callbacks estables. Se actualizan antes del efecto de
+  // conexión, que al terminar hace que los suscriptores vuelvan a pedir sus
+  // canales (channelEpoch) ya con el usuario nuevo.
+  const userRef = useRef(user);
+  const refreshUserRef = useRef(refreshUser);
+  useEffect(() => {
+    userRef.current = user;
+    refreshUserRef.current = refreshUser;
+  });
 
   // Suscriptores a cambios del historial (la página /notificaciones):
   // { kind: "created" | "read" | "read-all" | "removed", notification?, id? }
@@ -87,34 +115,79 @@ export const RealtimeProvider = ({ children }) => {
   // en señales silenciosas, que no se agregan)
   const localIdRef = useRef(0);
 
-  // Registrar callback de refresco
-  const registerRefresh = useCallback((type, callback) => {
-    setRefreshCallbacks((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(type, callback);
-      return newMap;
-    });
+  // Registrar callback de refresco. Devuelve la función para darlo de baja.
+  const unregisterRefresh = useCallback((type, callback) => {
+    const callbacks = refreshCallbacksRef.current.get(type);
+    if (!callbacks) return;
+    if (callback) callbacks.delete(callback);
+    else callbacks.clear();
+    if (callbacks.size === 0) refreshCallbacksRef.current.delete(type);
   }, []);
 
-  // Desregistrar callback de refresco
-  const unregisterRefresh = useCallback((type) => {
-    setRefreshCallbacks((prev) => {
-      const newMap = new Map(prev);
-      newMap.delete(type);
-      return newMap;
-    });
-  }, []);
+  const registerRefresh = useCallback(
+    (type, callback) => {
+      const map = refreshCallbacksRef.current;
+      if (!map.has(type)) map.set(type, new Set());
+      map.get(type).add(callback);
+      return () => unregisterRefresh(type, callback);
+    },
+    [unregisterRefresh]
+  );
 
   // Disparar el refresh de una clave (desde cualquier componente o evento)
-  const triggerRefresh = useCallback(
-    (type) => {
-      const callback = refreshCallbacks.get(type);
-      if (callback) {
-        callback();
+  const triggerRefresh = useCallback((type) => {
+    const callbacks = refreshCallbacksRef.current.get(type);
+    if (!callbacks) return;
+    [...callbacks].forEach((callback) => callback());
+  }, []);
+
+  // Canales privados de recurso (project.{id}, team.{id}, organization.{id})
+  // compartidos entre pantallas: una sola suscripción por canal y evento,
+  // y se abandona cuando se va el último suscriptor.
+  const channelsRef = useRef(new Map());
+
+  const subscribeChannel = useCallback((name, event, listener) => {
+    const current = userRef.current;
+    if (!current?.id || current.isSystemAdmin || !localStorage.getItem("token")) {
+      return () => {};
+    }
+
+    let entry = channelsRef.current.get(name);
+    if (!entry) {
+      try {
+        entry = { channel: getEcho().private(name), events: new Map() };
+      } catch (error) {
+        console.error(`No se pudo suscribir a ${name}:`, error);
+        return () => {};
       }
-    },
-    [refreshCallbacks]
-  );
+      channelsRef.current.set(name, entry);
+    }
+
+    let listeners = entry.events.get(event);
+    if (!listeners) {
+      listeners = new Set();
+      entry.events.set(event, listeners);
+      const target = listeners;
+      entry.channel.listen(`.${event}`, (payload) => {
+        [...target].forEach((fn) => fn(payload));
+      });
+    }
+    listeners.add(listener);
+
+    return () => {
+      listeners.delete(listener);
+      if (channelsRef.current.get(name) !== entry) return;
+      const unused = [...entry.events.values()].every((set) => set.size === 0);
+      if (unused) {
+        channelsRef.current.delete(name);
+        try {
+          getEcho().leave(name);
+        } catch {
+          // Echo ya desconectado (cierre de sesión)
+        }
+      }
+    };
+  }, []);
 
   // Cargar (o recargar) las últimas notificaciones desde la API
   const reloadNotifications = useCallback(async () => {
@@ -211,28 +284,29 @@ export const RealtimeProvider = ({ children }) => {
         setUnreadCount((count) => count + 1);
         publish({ kind: "created", notification });
 
-        if (
-          data.type === "organization_member_removed" &&
-          data.data?.action === "removed_from_organization"
-        ) {
-          // El usuario actual fue removido - mostrar modal especial
+        const removedReason = REMOVED_TYPES[data.type];
+        if (removedReason && data.data?.action === "removed_from_organization") {
+          // El usuario actual fue removido o desactivado - modal especial
           setRemovedFromOrgModal({
             isOpen: true,
             organizationName: data.data?.organization_name || "la organización",
             removerName: data.data?.remover_name || "Un administrador",
+            reason: removedReason,
           });
         } else {
           const toast = { success, warning, info }[toastKindFor(data.type)];
           toast(data.message);
         }
+
+        // Mi rol o mi plan cambiaron: menús y permisos al día sin recargar
+        if (USER_REFRESH_TYPES.has(data.type)) {
+          refreshUserRef.current?.()?.catch?.(() => {});
+        }
       }
 
-      refreshKeysFor(data).forEach((key) => {
-        const callback = refreshCallbacks.get(key);
-        if (callback) callback();
-      });
+      refreshKeysFor(data).forEach(triggerRefresh);
     },
-    [info, success, warning, refreshCallbacks, publish, setList]
+    [info, success, warning, publish, setList, triggerRefresh]
   );
 
   // Mantener la ref actualizada con la última versión de handleNotification
@@ -253,6 +327,7 @@ export const RealtimeProvider = ({ children }) => {
     // El superadmin (SystemAdmin) tiene su propia secuencia de ids: nunca
     // debe suscribirse a user.{id}, que es el canal de un usuario de la app.
     if (!user?.id || user?.isSystemAdmin) {
+      channelsRef.current.clear();
       disconnectEcho();
       setIsConnected(false);
       return;
@@ -271,6 +346,7 @@ export const RealtimeProvider = ({ children }) => {
     // Obtener instancia de Echo (se crea si no existe)
     const echo = getEcho();
     updateEchoAuth(token);
+    setChannelEpoch((epoch) => epoch + 1);
 
     // Suscribirse al canal privado del usuario
     try {
@@ -289,22 +365,26 @@ export const RealtimeProvider = ({ children }) => {
           setIsConnected(false);
         });
 
-      // Escuchar evento de conexión general
-      echo.connector.pusher.connection.bind("connected", () => {
-        setIsConnected(true);
-      });
-
-      echo.connector.pusher.connection.bind("disconnected", () => {
-        setIsConnected(false);
-      });
-
-      echo.connector.pusher.connection.bind("error", (err) => {
+      // Estado de la conexión. Se desenlazan al salir (B9): si no, cada
+      // cambio de usuario sumaba otro juego de handlers.
+      const connection = echo.connector.pusher.connection;
+      const onConnected = () => setIsConnected(true);
+      const onDisconnected = () => setIsConnected(false);
+      const onError = (err) => {
         console.error("❌ Error de conexión WebSocket:", err);
         setIsConnected(false);
-      });
+      };
+      connection.bind("connected", onConnected);
+      connection.bind("disconnected", onDisconnected);
+      connection.bind("error", onError);
 
       return () => {
+        connection.unbind?.("connected", onConnected);
+        connection.unbind?.("disconnected", onDisconnected);
+        connection.unbind?.("error", onError);
         echo.leave(`user.${user.id}`);
+        channelsRef.current.forEach((_entry, name) => echo.leave(name));
+        channelsRef.current.clear();
         setIsConnected(false);
       };
     } catch (error) {
@@ -313,6 +393,24 @@ export const RealtimeProvider = ({ children }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, user?.isSystemAdmin]); // Solo re-suscribirse cuando cambie el usuario
+
+  // Canal de la organización activa: bandeja de clientes, miembros, roles,
+  // equipos, invitaciones y datos de la organización (sin toast).
+  const activeOrganizationId =
+    user?.organization_id && user?.active_context && user.active_context !== "personal"
+      ? user.organization_id
+      : null;
+
+  useEffect(() => {
+    if (!activeOrganizationId) return undefined;
+
+    return subscribeChannel(`organization.${activeOrganizationId}`, "organization.sync", (payload) => {
+      organizationSyncKeysFor(payload).forEach(triggerRefresh);
+      if (organizationSyncAffectsUser(payload, userRef.current)) {
+        refreshUserRef.current?.()?.catch?.(() => {});
+      }
+    });
+  }, [activeOrganizationId, subscribeChannel, triggerRefresh, channelEpoch]);
 
   // Función para cerrar el modal de removido de organización
   const closeRemovedFromOrgModal = useCallback(() => {
@@ -335,6 +433,9 @@ export const RealtimeProvider = ({ children }) => {
     registerRefresh,
     unregisterRefresh,
     triggerRefresh,
+    // Canales de recurso (project/team/organization .sync)
+    subscribeChannel,
+    channelEpoch,
     // Modal de removido de organización
     removedFromOrgModal,
     closeRemovedFromOrgModal,

@@ -7,6 +7,7 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import UserAvatar from "../components/ui/UserAvatar";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import useResourceSync from "../hooks/useResourceSync";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
@@ -86,9 +87,17 @@ const Tasks = () => {
 
   // Registrar callback para refrescar datos en tiempo real (silencioso)
   useEffect(() => {
-    registerRefresh("tasks", refreshTasksSilently);
-    return () => unregisterRefresh("tasks");
+    return registerRefresh("tasks", refreshTasksSilently);
   }, [registerRefresh, unregisterRefresh, refreshTasksSilently]);
+
+  // project.sync de los proyectos listados: tareas borradas, checklist,
+  // etiquetas o asignados que cambió otro usuario (B5)
+  useResourceSync(
+    "project",
+    tasks.map((task) => task.project_id),
+    refreshTasksSilently,
+    { debounce: 300 }
+  );
 
   const openDeleteConfirm = (taskId) => {
     setConfirmModal({ isOpen: true, taskId });

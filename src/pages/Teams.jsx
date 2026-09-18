@@ -113,8 +113,7 @@ const Teams = () => {
 
   // Registrar callback para refrescar datos en tiempo real (silencioso)
   useEffect(() => {
-    registerRefresh("teams", refreshTeamsSilently);
-    return () => unregisterRefresh("teams");
+    return registerRefresh("teams", refreshTeamsSilently);
   }, [registerRefresh, unregisterRefresh, refreshTeamsSilently]);
 
   const openDeleteConfirm = (teamId) => {

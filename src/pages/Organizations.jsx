@@ -71,8 +71,7 @@ const Organizations = () => {
 
   // Registrar callback para actualizaciones en tiempo real
   useEffect(() => {
-    registerRefresh("organizations", refreshOrganizationsSilently);
-    return () => unregisterRefresh("organizations");
+    return registerRefresh("organizations", refreshOrganizationsSilently);
   }, [registerRefresh, unregisterRefresh, refreshOrganizationsSilently]);
 
   const handleOrgClick = (orgId) => {

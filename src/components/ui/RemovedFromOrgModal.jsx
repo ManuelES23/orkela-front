@@ -7,8 +7,11 @@ const RemovedFromOrgModal = ({
   isOpen,
   organizationName,
   removerName,
+  reason = "removed",
   onClose,
 }) => {
+  // Desactivar a un miembro equivale a expulsarlo: mismo modal, otro texto
+  const deactivated = reason === "deactivated";
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
 
@@ -60,7 +63,7 @@ const RemovedFromOrgModal = ({
                   <Building2 className='w-10 h-10 text-white' />
                 </motion.div>
                 <h2 className='text-2xl font-bold text-white'>
-                  Has sido removido
+                  {deactivated ? "Tu acceso fue desactivado" : "Has sido removido"}
                 </h2>
               </div>
 
@@ -73,7 +76,9 @@ const RemovedFromOrgModal = ({
                       <span className='font-semibold'>
                         {removerName || "Un administrador"}
                       </span>{" "}
-                      te ha removido de la organización{" "}
+                      {deactivated
+                        ? "ha desactivado tu acceso a la organización"
+                        : "te ha removido de la organización"}{" "}
                       <span className='font-semibold text-orange-600 dark:text-orange-400'>
                         "{organizationName || "la organización"}"
                       </span>

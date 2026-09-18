@@ -5,30 +5,39 @@ import { RealtimeProvider, useRealtime } from "./RealtimeContext";
 
 let mockUser = { id: 1 };
 let listener = null;
+// Oyentes por canal y evento (canales de recurso *.sync)
+const channelListeners = {};
 const privateSpy = vi.fn();
+const leaveSpy = vi.fn();
+const unbindSpy = vi.fn();
+const refreshUser = vi.fn(() => Promise.resolve());
 const toasts = { success: vi.fn(), info: vi.fn(), warning: vi.fn() };
 
-vi.mock("./AuthContext", () => ({ useAuth: () => ({ user: mockUser }) }));
+vi.mock("./AuthContext", () => ({ useAuth: () => ({ user: mockUser, refreshUser }) }));
 vi.mock("./NotificationContext", () => ({
   useNotification: () => toasts,
 }));
 vi.mock("../utils/echo", () => {
-  const channel = {
-    listen: (_event, cb) => {
-      listener = cb;
-      return channel;
-    },
-    subscribed: () => channel,
-    error: () => channel,
+  const channelFor = (name) => {
+    const channel = {
+      listen: (event, cb) => {
+        if (name.startsWith("user.")) listener = cb;
+        channelListeners[name] = { ...(channelListeners[name] || {}), [event]: cb };
+        return channel;
+      },
+      subscribed: () => channel,
+      error: () => channel,
+    };
+    return channel;
   };
   return {
     getEcho: () => ({
       private: (name) => {
         privateSpy(name);
-        return channel;
+        return channelFor(name);
       },
-      leave: vi.fn(),
-      connector: { pusher: { connection: { bind: vi.fn() } } },
+      leave: leaveSpy,
+      connector: { pusher: { connection: { bind: vi.fn(), unbind: unbindSpy } } },
     }),
     updateEchoAuth: vi.fn(),
     disconnectEcho: vi.fn(),
@@ -98,6 +107,8 @@ describe("RealtimeProvider", () => {
     mockUser = { id: 1 };
     listener = null;
     privateSpy.mockClear();
+    leaveSpy.mockClear();
+    refreshUser.mockClear();
     Object.values(toasts).forEach((fn) => fn.mockClear());
     api.list.mockReset().mockResolvedValue({ data: [], next_cursor: null, unread_count: 0, retention_days: 30 });
     api.markAsRead.mockReset().mockResolvedValue({ unread_count: 0 });
@@ -247,5 +258,136 @@ describe("RealtimeProvider", () => {
 
     expect(privateSpy).toHaveBeenCalledWith("user.1");
     await waitFor(() => expect(api.list).toHaveBeenCalled());
+  });
+
+  it("varias pantallas pueden registrar la misma clave y darse de baja por separado", async () => {
+    let api_;
+    const Grab = () => {
+      api_ = useRealtime();
+      return null;
+    };
+    render(
+      <RealtimeProvider>
+        <Grab />
+      </RealtimeProvider>
+    );
+    const a = vi.fn();
+    const b = vi.fn();
+    const offA = api_.registerRefresh("projects", a);
+    api_.registerRefresh("projects", b);
+
+    act(() => api_.triggerRefresh("projects"));
+    expect(a).toHaveBeenCalledTimes(1);
+    expect(b).toHaveBeenCalledTimes(1);
+
+    offA();
+    act(() => api_.triggerRefresh("projects"));
+    expect(a).toHaveBeenCalledTimes(1);
+    expect(b).toHaveBeenCalledTimes(2);
+  });
+
+  it("comparte la suscripción a un canal de recurso y lo abandona con el último", async () => {
+    let api_;
+    const Grab = () => {
+      api_ = useRealtime();
+      return null;
+    };
+    render(
+      <RealtimeProvider>
+        <Grab />
+      </RealtimeProvider>
+    );
+    const one = vi.fn();
+    const two = vi.fn();
+    const offOne = api_.subscribeChannel("project.5", "project.sync", one);
+    const offTwo = api_.subscribeChannel("project.5", "project.sync", two);
+
+    expect(privateSpy.mock.calls.filter(([n]) => n === "project.5")).toHaveLength(1);
+    act(() => channelListeners["project.5"][".project.sync"]({ project_id: 5, entity: "task", action: "updated" }));
+    expect(one).toHaveBeenCalledTimes(1);
+    expect(two).toHaveBeenCalledTimes(1);
+    expect(toasts.info).not.toHaveBeenCalled();
+
+    offOne();
+    expect(leaveSpy).not.toHaveBeenCalledWith("project.5");
+    offTwo();
+    expect(leaveSpy).toHaveBeenCalledWith("project.5");
+  });
+
+  it("escucha organization.sync de la organización activa sin avisos y refresca mi usuario si me afecta", async () => {
+    mockUser = { id: 1, organization_id: 4, active_context: "4" };
+    const clientTickets = vi.fn();
+    const organizations = vi.fn();
+    renderProvider({ onRefresh: { clientTickets, organizations } });
+    await waitFor(() => expect(privateSpy).toHaveBeenCalledWith("organization.4"));
+    const sync = (payload) => act(() => channelListeners["organization.4"][".organization.sync"](payload));
+
+    sync({ organization_id: 4, entity: "client_ticket", action: "created", ticket_id: 9 });
+    expect(clientTickets).toHaveBeenCalled();
+    expect(refreshUser).not.toHaveBeenCalled();
+
+    sync({ organization_id: 4, entity: "member", action: "role_updated", member_id: 1 });
+    expect(organizations).toHaveBeenCalled();
+    expect(refreshUser).toHaveBeenCalled();
+    expect(screen.getByText("total:0")).toBeInTheDocument();
+    expect(toasts.info).not.toHaveBeenCalled();
+  });
+
+  it("en modo personal no se suscribe a ninguna organización", () => {
+    mockUser = { id: 1, organization_id: null, active_context: "personal" };
+    renderProvider();
+    expect(privateSpy.mock.calls.some(([n]) => n.startsWith("organization."))).toBe(false);
+  });
+
+  it("la desactivación muestra el mismo modal que la expulsión", async () => {
+    renderProvider();
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+
+    emit({
+      id: 3,
+      type: "organization_member_deactivated",
+      title: "t",
+      message: "m",
+      data: { action: "removed_from_organization", organization_name: "Acme" },
+    });
+
+    expect(screen.getByText("modal-removido:true")).toBeInTheDocument();
+  });
+
+  it("un cambio de mi rol refresca mi usuario", async () => {
+    refreshUser.mockClear();
+    renderProvider();
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+
+    emit(serverItem(4, { type: "organization_role_updated", data: { organization_id: 2, new_role: "admin" } }));
+
+    expect(refreshUser).toHaveBeenCalled();
+  });
+
+  it("una invitación cancelada desaparece en vivo sin aviso", async () => {
+    const invitations = vi.fn();
+    renderProvider({ onRefresh: { invitations } });
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+
+    emit({ id: null, type: "organization_invitation_cancelled", silent: true, title: "", message: "", data: {} });
+
+    expect(invitations).toHaveBeenCalled();
+    expect(screen.getByText("total:0")).toBeInTheDocument();
+    expect(toasts.info).not.toHaveBeenCalled();
+  });
+
+  it("desenlaza los handlers de conexión al cerrar sesión", async () => {
+    const { rerender } = renderProvider();
+    await waitFor(() => expect(api.list).toHaveBeenCalled());
+    unbindSpy.mockClear();
+
+    mockUser = null;
+    rerender(
+      <RealtimeProvider>
+        <Probe />
+      </RealtimeProvider>
+    );
+
+    expect(unbindSpy).toHaveBeenCalledWith("connected", expect.any(Function));
   });
 });

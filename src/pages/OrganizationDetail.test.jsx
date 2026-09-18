@@ -22,7 +22,7 @@ vi.mock("../components/layout/Layout", () => ({ default: ({ children }) => <div>
 vi.mock("../components/modals/OrganizationModal", () => ({ default: () => null }));
 vi.mock("../components/organizations/OrganizationMailConfig", () => ({ default: () => null }));
 vi.mock("../context/RealtimeContext", () => ({
-  useRealtime: () => ({ registerRefresh: vi.fn(), unregisterRefresh: vi.fn() }),
+  useRealtime: () => ({ registerRefresh: vi.fn(() => () => {}), unregisterRefresh: vi.fn(), subscribeChannel: vi.fn(() => () => {}), channelEpoch: 0 }),
 }));
 
 const LINK = "http://localhost:5173/accept-organization-invitation/tok-abc";

@@ -13,6 +13,8 @@ vi.mock("../utils/api", async (importOriginal) => ({
 }));
 vi.mock("../components/layout/Layout", () => ({ default: ({ children }) => <div>{children}</div> }));
 vi.mock("../context/NotificationContext", () => ({ useNotification: () => notification }));
+const realtime = { registerRefresh: vi.fn(() => () => {}) };
+vi.mock("../context/RealtimeContext", () => ({ useRealtime: () => realtime }));
 
 describe("ClientTicketsInbox", () => {
   beforeEach(() => {
@@ -43,5 +45,24 @@ describe("ClientTicketsInbox", () => {
 
     expect(screen.queryByText("Asignado")).not.toBeInTheDocument();
     expect(screen.getByText("Sin asignar")).toBeInTheDocument();
+  });
+
+  it("se recarga en vivo con organization.sync (clave clientTickets)", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue([{ id: 1, title: "Primero", status: "open", team_id: null }]);
+    render(
+      <MemoryRouter>
+        <ClientTicketsInbox />
+      </MemoryRouter>
+    );
+    await screen.findByText("Primero");
+
+    ticketsAPI.getClientInbox.mockResolvedValue([
+      { id: 2, title: "Nuevo del portal", status: "open", team_id: null },
+      { id: 1, title: "Primero", status: "open", team_id: null },
+    ]);
+    const refresh = realtime.registerRefresh.mock.calls.filter(([key]) => key === "clientTickets").at(-1)[1];
+    await act(async () => refresh());
+
+    expect(await screen.findByText("Nuevo del portal")).toBeInTheDocument();
   });
 });

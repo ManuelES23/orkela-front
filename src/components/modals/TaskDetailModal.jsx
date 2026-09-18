@@ -22,6 +22,7 @@ import { checklistAPI, tasksAPI } from "../../utils/api";
 import { parseLocalDate } from "../../utils/dateUtils";
 import { useNotification } from "../../context/NotificationContext";
 import { useRealtime } from "../../context/RealtimeContext";
+import useResourceSync from "../../hooks/useResourceSync";
 import { useAuth } from "../../context/AuthContext";
 
 const TaskDetailModal = ({
@@ -33,7 +34,7 @@ const TaskDetailModal = ({
   onUpdate,
 }) => {
   const { user } = useAuth();
-  const { success, error: showError } = useNotification();
+  const { success, error: showError, info } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const [checklistItems, setChecklistItems] = useState([]);
   const [currentTask, setCurrentTask] = useState(null);
@@ -83,10 +84,23 @@ const TaskDetailModal = ({
   // Registrar callback para actualizaciones en tiempo real
   useEffect(() => {
     if (isOpen && task?.id) {
-      registerRefresh(`task-detail-${task.id}`, reloadTask);
-      return () => unregisterRefresh(`task-detail-${task.id}`);
+      return registerRefresh(`task-detail-${task.id}`, reloadTask);
     }
   }, [isOpen, task?.id, registerRefresh, unregisterRefresh, reloadTask]);
+
+  // project.sync del proyecto de la tarea: si otro usuario la cambió (o su
+  // checklist) se recarga; si la borró o la movió, se cierra con un aviso
+  // (B5). Solo mientras el modal está abierto.
+  const taskId = task?.id;
+  useResourceSync(isOpen ? "project" : null, isOpen ? [currentTask?.project_id ?? task?.project_id] : [], (payload) => {
+    if (Number(payload.task_id) !== Number(taskId)) return;
+    if (payload.entity === "task" && payload.action === "deleted") {
+      info("Esta tarea fue eliminada o movida a otro proyecto");
+      onClose?.();
+      return;
+    }
+    reloadTask();
+  });
 
   if (!currentTask) return null;
 

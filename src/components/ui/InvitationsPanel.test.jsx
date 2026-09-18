@@ -19,7 +19,9 @@ vi.mock("../../context/NotificationContext", () => ({
 }));
 vi.mock("../../context/RealtimeContext", () => ({
   useRealtime: () => ({
-    registerRefresh: vi.fn(),
+    registerRefresh: vi.fn(() => () => {}),
+    subscribeChannel: vi.fn(() => () => {}),
+    channelEpoch: 0,
     unregisterRefresh: vi.fn(),
     triggerRefresh: vi.fn(),
   }),

@@ -14,6 +14,7 @@ import { useNotification } from "../context/NotificationContext";
 import { useMailResult } from "../hooks/useMailResult";
 import { useAuth } from "../context/AuthContext";
 import { useRealtime } from "../context/RealtimeContext";
+import useResourceSync from "../hooks/useResourceSync";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
@@ -259,6 +260,34 @@ const TeamDetail = () => {
     loadAllData();
   }, [id]); // Solo recargar cuando cambie el ID del equipo
 
+  // Últimas funciones de refresco (las define el efecto de abajo)
+  const refreshAllRef = useRef(null);
+  const refreshTeamRef = useRef(null);
+  const leftTeamRef = useRef(false);
+
+  useEffect(() => {
+    leftTeamRef.current = false;
+  }, [id]);
+
+  // team.sync: tickets, miembros o datos del equipo cambiados por otro
+  // usuario; si el equipo se borra, salir con un aviso
+  useResourceSync(
+    "team",
+    [id],
+    (payload) => {
+      if (payload.entity === "team" && payload.action === "deleted") {
+        if (leftTeamRef.current) return;
+        leftTeamRef.current = true;
+        info("Este equipo fue eliminado");
+        navigate("/teams", { replace: true });
+        return;
+      }
+      if (payload.entity === "team") refreshTeamRef.current?.();
+      refreshAllRef.current?.();
+    },
+    { debounce: 150 }
+  );
+
   // Registrar callbacks para tiempo real - recargar TODOS los datos
   useEffect(() => {
     // Función que refresca todos los datos del equipo (silenciosamente, sin loading)
@@ -298,15 +327,16 @@ const TeamDetail = () => {
       }
     };
 
-    registerRefresh("tickets", refreshAllDataSilently);
-    registerRefresh("projects", refreshAllDataSilently);
-    registerRefresh("teams", refreshTeamSilently);
+    refreshAllRef.current = refreshAllDataSilently;
+    refreshTeamRef.current = refreshTeamSilently;
 
-    return () => {
-      unregisterRefresh("tickets");
-      unregisterRefresh("projects");
-      unregisterRefresh("teams");
-    };
+    const offs = [
+      registerRefresh("tickets", refreshAllDataSilently),
+      registerRefresh("projects", refreshAllDataSilently),
+      registerRefresh("teams", refreshTeamSilently),
+    ];
+
+    return () => offs.forEach((off) => off());
   }, [
     registerRefresh,
     unregisterRefresh,

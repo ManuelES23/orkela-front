@@ -5,7 +5,7 @@ import Tickets from "./Tickets";
 import { ticketsAPI, teamsAPI } from "../utils/api";
 
 const notification = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
-const realtime = { registerRefresh: vi.fn(), unregisterRefresh: vi.fn() };
+const realtime = { registerRefresh: vi.fn(() => () => {}), unregisterRefresh: vi.fn(), subscribeChannel: vi.fn(() => () => {}), channelEpoch: 0 };
 
 vi.mock("../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),

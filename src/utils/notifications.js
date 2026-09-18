@@ -66,10 +66,15 @@ export const notificationTarget = ({ type = "", data = {} } = {}) => {
       if (d.task_id) return `/tasks?task=${d.task_id}`;
       return d.project_id ? `/projects/${d.project_id}` : "/tasks";
     case "projects":
-      if (type === "project_deleted") return "/projects";
+      if (type === "project_deleted" || type === "project_access_revoked") return "/projects";
       return d.project_id ? `/projects/${d.project_id}` : "/projects";
-    case "tickets":
-      return d.ticket_id ? `/tickets?ticket=${d.ticket_id}` : "/tickets";
+    case "tickets": {
+      // org: OrganizationRoute cambia a ese workspace si el usuario está en
+      // modo personal o en otra organización
+      if (!d.ticket_id) return "/tickets";
+      const org = d.organization_id ? `&org=${d.organization_id}` : "";
+      return `/tickets?ticket=${d.ticket_id}${org}`;
+    }
     case "teams":
       if (type === "team_deleted") return "/teams";
       return d.team_id ? `/teams/${d.team_id}` : "/teams";
@@ -83,13 +88,17 @@ export const notificationTarget = ({ type = "", data = {} } = {}) => {
 };
 
 // Claves de registerRefresh que deben recargarse al llegar una notificación
-// (o una señal silenciosa). Fase B puede reutilizarla para los eventos sync.
+// (o una señal silenciosa por user.{id}). Los *.sync de proyecto/equipo los
+// manejan las propias pantallas (useResourceSync).
 export const refreshKeysFor = ({ type = "", data = {} } = {}) => {
   const d = data || {};
   const keys = new Set();
 
   if (type.includes("_invitation_")) {
-    if (type.endsWith("_received")) keys.add("invitations");
+    // Recibida o cancelada: la lista del invitado cambia
+    if (type.endsWith("_received") || type.endsWith("_cancelled")) keys.add("invitations");
+    // Rechazada: las invitaciones pendientes de la organización cambian
+    if (type.endsWith("_declined")) keys.add("organizations");
     if (type.endsWith("_accepted")) ["projects", "teams", "organizations"].forEach((k) => keys.add(k));
   } else {
     switch (categoryFor(type)) {
@@ -100,7 +109,7 @@ export const refreshKeysFor = ({ type = "", data = {} } = {}) => {
         break;
       case "projects":
         keys.add("projects");
-        // Borrar tareas o tocar el checklist llega como señal del proyecto
+        // Perder acceso o un cambio del proyecto también afecta a Tareas
         keys.add("tasks");
         break;
       case "tickets":
@@ -129,6 +138,43 @@ export const refreshKeysFor = ({ type = "", data = {} } = {}) => {
   return [...keys];
 };
 
+// Claves de registerRefresh para un organization.sync (canal
+// organization.{id}): { entity, action, ...ids }.
+export const organizationSyncKeysFor = (payload = {}) => {
+  const keys = new Set();
+
+  switch (payload.entity) {
+    case "client_ticket":
+      // Bandeja de Clientes, y el buzón del equipo si ya tiene uno
+      keys.add("clientTickets");
+      keys.add("tickets");
+      break;
+    case "team":
+      ["teams", "organizations", "dashboard"].forEach((k) => keys.add(k));
+      break;
+    case "member":
+      ["organizations", "teams"].forEach((k) => keys.add(k));
+      break;
+    case "invitation":
+    case "organization":
+    default:
+      keys.add("organizations");
+      break;
+  }
+
+  if (payload.ticket_id) keys.add(`ticketDetail-${payload.ticket_id}`);
+
+  return [...keys];
+};
+
+// ¿Cambian mi usuario/permisos (rol, dueño, datos de la organización del
+// selector de contexto)? Entonces hay que volver a pedir /user.
+export const organizationSyncAffectsUser = (payload = {}, user) => {
+  if (payload.entity === "organization") return true;
+  if (payload.entity !== "member" || !user?.id) return false;
+  return [payload.member_id, payload.previous_owner_id].some((id) => Number(id) === Number(user.id));
+};
+
 const SUCCESS_TYPES = new Set([
   "task_completed",
   "checklist_item_completed",
@@ -150,6 +196,8 @@ const WARNING_TYPES = new Set([
   "organization_invitation_declined",
   "organization_member_removed",
   "organization_plan_downgraded",
+  "organization_member_deactivated",
+  "project_access_revoked",
 ]);
 
 export const toastKindFor = (type) => {

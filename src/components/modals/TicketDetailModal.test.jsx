@@ -18,8 +18,8 @@ vi.mock("../../utils/api", async (importOriginal) => ({
 }));
 vi.mock("../../context/AuthContext", () => ({ useAuth: () => ({ user: { id: 1 } }) }));
 // Referencias estables, como en los providers reales (useCallback)
-const notification = { success: vi.fn(), error: vi.fn() };
-const realtime = { registerRefresh: vi.fn(), unregisterRefresh: vi.fn() };
+const notification = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+const realtime = { registerRefresh: vi.fn(() => () => {}), unregisterRefresh: vi.fn(), subscribeChannel: vi.fn(() => () => {}), channelEpoch: 0 };
 vi.mock("../../context/NotificationContext", () => ({ useNotification: () => notification }));
 vi.mock("../../context/RealtimeContext", () => ({ useRealtime: () => realtime }));
 
@@ -88,5 +88,37 @@ describe("TicketDetailModal", () => {
 
     expect(screen.queryByText("Ticket viejo")).not.toBeInTheDocument();
     expect(screen.getByText("Ticket nuevo")).toBeInTheDocument();
+  });
+
+  const teamSync = () => realtime.subscribeChannel.mock.calls.filter(([name]) => name === "team.3").at(-1)[2];
+
+  it("muestra en vivo un comentario (también interno) que agrega otro miembro del equipo", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...baseTicket });
+    ticketsAPI.getComments.mockResolvedValue([]);
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 10, team_id: 3 }} />);
+    await screen.findByText("No carga el portal");
+
+    ticketsAPI.getComments.mockResolvedValue([
+      { id: 5, content: "Nota interna del equipo", is_internal: true, user: { id: 2, name: "Bea" }, created_at: new Date().toISOString() },
+    ]);
+    await act(async () => teamSync()({ team_id: 3, entity: "ticket", action: "comment_added", ticket_id: 10 }));
+
+    expect(await screen.findByText("Nota interna del equipo")).toBeInTheDocument();
+    expect(notification.success).not.toHaveBeenCalled();
+  });
+
+  it("ignora team.sync de otros tickets y se cierra si el suyo se borra", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...baseTicket });
+    const onClose = vi.fn();
+    render(<TicketDetailModal isOpen onClose={onClose} ticket={{ id: 10, team_id: 3 }} />);
+    await screen.findByText("No carga el portal");
+    const calls = ticketsAPI.getById.mock.calls.length;
+
+    await act(async () => teamSync()({ team_id: 3, entity: "ticket", action: "updated", ticket_id: 99 }));
+    expect(ticketsAPI.getById.mock.calls.length).toBe(calls);
+
+    await act(async () => teamSync()({ team_id: 3, entity: "ticket", action: "deleted", ticket_id: 10 }));
+    expect(onClose).toHaveBeenCalled();
+    expect(notification.info).toHaveBeenCalledWith("Este ticket ya no está disponible");
   });
 });

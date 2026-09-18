@@ -7,6 +7,8 @@ import {
   groupByDay,
   retentionLabel,
   categoryFor,
+  organizationSyncKeysFor,
+  organizationSyncAffectsUser,
 } from "./notifications";
 
 describe("normalizeNotification", () => {
@@ -136,5 +138,49 @@ describe("retentionLabel", () => {
   it("describe el plazo vigente", () => {
     expect(retentionLabel(30)).toBe("Se guardan 30 días");
     expect(retentionLabel(0)).toBe("Se guardan siempre");
+  });
+});
+
+describe("fase B: accesos perdidos, workspace y organización", () => {
+  const t = (type, data = {}) => notificationTarget({ type, data });
+
+  it("el enlace de un ticket lleva la organización para cambiar de workspace", () => {
+    expect(t("ticket_created", { ticket_id: 8, organization_id: 3 })).toBe("/tickets?ticket=8&org=3");
+  });
+
+  it("perder un proyecto o ser desactivado no abre el recurso", () => {
+    expect(t("project_access_revoked", { project_id: 2 })).toBe("/projects");
+    expect(
+      t("organization_member_deactivated", { organization_id: 6, action: "removed_from_organization" })
+    ).toBeNull();
+  });
+
+  it("una invitación cancelada refresca las invitaciones", () => {
+    expect(refreshKeysFor({ type: "organization_invitation_cancelled", silent: true, data: {} })).toContain(
+      "invitations"
+    );
+  });
+
+  it("organization.sync se traduce en claves de refresco", () => {
+    expect(organizationSyncKeysFor({ entity: "client_ticket", action: "created", ticket_id: 4 })).toEqual(
+      expect.arrayContaining(["clientTickets", "ticketDetail-4"])
+    );
+    expect(organizationSyncKeysFor({ entity: "team", action: "created", team_id: 1 })).toEqual(
+      expect.arrayContaining(["teams", "organizations", "dashboard"])
+    );
+    expect(organizationSyncKeysFor({ entity: "member", action: "role_updated", member_id: 2 })).toContain(
+      "organizations"
+    );
+    expect(organizationSyncKeysFor({ entity: "invitation", action: "cancelled" })).toContain("organizations");
+  });
+
+  it("organization.sync pide refrescar el usuario si me afecta o cambia la organización", () => {
+    const me = { id: 2 };
+    expect(organizationSyncAffectsUser({ entity: "member", action: "role_updated", member_id: 2 }, me)).toBe(true);
+    expect(organizationSyncAffectsUser({ entity: "member", action: "role_updated", member_id: 5 }, me)).toBe(false);
+    expect(
+      organizationSyncAffectsUser({ entity: "member", action: "owner_changed", member_id: 9, previous_owner_id: 2 }, me)
+    ).toBe(true);
+    expect(organizationSyncAffectsUser({ entity: "organization", action: "updated" }, me)).toBe(true);
   });
 });

@@ -10,6 +10,7 @@ import AnimatedNumber from "../components/ui/AnimatedNumber";
 import { SkeletonCardGrid } from "../components/ui/Skeleton";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import useResourceSync from "../hooks/useResourceSync";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import { motionTokens } from "../components/animations/variants";
@@ -148,9 +149,16 @@ const Projects = () => {
 
   // Registrar callback para refrescar datos en tiempo real (silencioso)
   useEffect(() => {
-    registerRefresh("projects", refreshProjectsSilently);
-    return () => unregisterRefresh("projects");
+    return registerRefresh("projects", refreshProjectsSilently);
   }, [registerRefresh, unregisterRefresh, refreshProjectsSilently]);
+
+  // project.sync: progreso, conteo de tareas y datos de cada proyecto listado
+  useResourceSync(
+    "project",
+    projects.map((project) => project.id),
+    refreshProjectsSilently,
+    { debounce: 300 }
+  );
 
   const openDeleteConfirm = (projectId) => {
     setConfirmModal({ isOpen: true, projectId });

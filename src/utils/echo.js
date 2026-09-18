@@ -41,6 +41,17 @@ export const updateEchoAuth = (token) => {
   }
 };
 
+// Id del socket de esta pestaña: la API lo recibe en X-Socket-ID y no le
+// reenvía las señales *.sync que provocó ella misma (su vista ya se
+// actualizó con la respuesta).
+export const currentSocketId = () => {
+  try {
+    return echoInstance?.socketId?.() || null;
+  } catch {
+    return null;
+  }
+};
+
 // Función para desconectar Echo
 export const disconnectEcho = () => {
   if (echoInstance) {
@@ -75,6 +86,13 @@ export const getPortalEcho = (token) => {
     });
   }
   return portalEchoInstance;
+};
+
+// El token del portal puede renovarse sin recargar la página (B11)
+export const updatePortalEchoAuth = (token) => {
+  if (portalEchoInstance) {
+    portalEchoInstance.connector.options.auth.headers.Authorization = `Bearer ${token}`;
+  }
 };
 
 export const disconnectPortalEcho = () => {

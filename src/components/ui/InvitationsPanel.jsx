@@ -54,8 +54,7 @@ const InvitationsPanel = () => {
 
   // Registrar para actualizaciones en tiempo real
   useEffect(() => {
-    registerRefresh("invitations", loadInvitations);
-    return () => unregisterRefresh("invitations");
+    return registerRefresh("invitations", loadInvitations);
   }, [registerRefresh, unregisterRefresh, loadInvitations]);
 
   // Cerrar al hacer clic fuera

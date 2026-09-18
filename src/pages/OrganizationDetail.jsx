@@ -290,8 +290,7 @@ const OrganizationDetail = () => {
 
   // Registrar callback para actualizaciones en tiempo real
   useEffect(() => {
-    registerRefresh("organizations", refreshAllSilently);
-    return () => unregisterRefresh("organizations");
+    return registerRefresh("organizations", refreshAllSilently);
   }, [registerRefresh, unregisterRefresh, refreshAllSilently]);
 
   const handleSendInvitation = async (e) => {

@@ -73,6 +73,7 @@ const GlobalModals = () => {
       isOpen={removedFromOrgModal.isOpen}
       organizationName={removedFromOrgModal.organizationName}
       removerName={removedFromOrgModal.removerName}
+      reason={removedFromOrgModal.reason}
       onClose={closeRemovedFromOrgModal}
     />
   );

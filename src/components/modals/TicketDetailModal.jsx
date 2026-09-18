@@ -10,6 +10,7 @@ import { useNotification } from "../../context/NotificationContext";
 import { useMailResult } from "../../hooks/useMailResult";
 import { useAuth } from "../../context/AuthContext";
 import { useRealtime } from "../../context/RealtimeContext";
+import useResourceSync from "../../hooks/useResourceSync";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Ticket,
@@ -46,7 +47,7 @@ const TicketDetailModal = ({
   ticket: initialTicket,
   onUpdate,
 }) => {
-  const { success, error: showError } = useNotification();
+  const { success, error: showError, info } = useNotification();
   const { notifyClientMail } = useMailResult();
   const { user } = useAuth();
   const { registerRefresh, unregisterRefresh } = useRealtime();
@@ -92,6 +93,11 @@ const TicketDetailModal = ({
     } catch (err) {
       if (isStale()) return;
       console.error("Error loading ticket:", err);
+      // En tiempo real: el ticket se borró o salió del alcance del usuario
+      if (silent && [403, 404].includes(err?.status)) {
+        closeGoneRef.current?.();
+        return;
+      }
       showError("No se pudo cargar el ticket");
     } finally {
       if (!isStale()) setInitializing(false);
@@ -110,8 +116,7 @@ const TicketDetailModal = ({
   useEffect(() => {
     if (isOpen && initialTicket?.id) {
       const refreshKey = `ticketDetail-${initialTicket.id}`;
-      registerRefresh(refreshKey, () => loadTicketDetails({ silent: true }));
-      return () => unregisterRefresh(refreshKey);
+      return registerRefresh(refreshKey, () => loadTicketDetails({ silent: true }));
     }
   }, [
     isOpen,
@@ -120,6 +125,29 @@ const TicketDetailModal = ({
     unregisterRefresh,
     loadTicketDetails,
   ]);
+
+  // Cerrar con un aviso cuando el ticket deja de existir para este usuario
+  const closeGoneRef = useRef(null);
+  useEffect(() => {
+    closeGoneRef.current = () => {
+      info("Este ticket ya no está disponible");
+      onClose?.();
+    };
+  }, [info, onClose]);
+
+  // team.sync del equipo del ticket: tomar/asignar/estado/comentarios
+  // (también internos) de otros usuarios aparecen en vivo. Los tickets de
+  // cliente sin equipo llegan por organization.sync (ticketDetail-{id}).
+  const openTicketId = initialTicket?.id;
+  const ticketTeamId = ticket?.team_id ?? initialTicket?.team_id;
+  useResourceSync(isOpen ? "team" : null, isOpen ? [ticketTeamId] : [], (payload) => {
+    if (Number(payload.ticket_id) !== Number(openTicketId)) return;
+    if (payload.action === "deleted") {
+      closeGoneRef.current?.();
+      return;
+    }
+    loadTicketDetails({ silent: true });
+  });
 
   // Handlers para tomar/asignar/devolver ticket
   const handleTakeTicket = async () => {

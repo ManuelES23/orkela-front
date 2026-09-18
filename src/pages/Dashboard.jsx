@@ -99,8 +99,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     // Refresco en tiempo real sin volver a mostrar el skeleton
-    registerRefresh("dashboard", () => loadDashboardData({ silent: true }));
-    return () => unregisterRefresh("dashboard");
+    return registerRefresh("dashboard", () => loadDashboardData({ silent: true }));
   }, [registerRefresh, unregisterRefresh, loadDashboardData]);
 
   const stats = useMemo(() => {

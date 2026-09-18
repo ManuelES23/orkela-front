@@ -4,8 +4,8 @@ import { MemoryRouter, Routes, Route, useNavigate } from "react-router-dom";
 import ProjectDetail from "./ProjectDetail";
 import { projectsAPI, tasksAPI } from "../utils/api";
 
-const notification = { success: vi.fn(), error: vi.fn() };
-const realtime = { registerRefresh: vi.fn(), unregisterRefresh: vi.fn() };
+const notification = { success: vi.fn(), error: vi.fn(), warning: vi.fn() };
+const realtime = { registerRefresh: vi.fn(() => () => {}), unregisterRefresh: vi.fn(), subscribeChannel: vi.fn(() => () => {}), channelEpoch: 0 };
 const auth = { user: { id: 1 } };
 
 vi.mock("../utils/api", async (importOriginal) => ({
@@ -64,6 +64,7 @@ const renderAt = (entry) =>
     <MemoryRouter initialEntries={[entry]}>
       <GoTo to='/projects/2' />
       <Routes>
+        <Route path="/projects" element={<p>listado-proyectos</p>} />
         <Route path='/projects/:id' element={<ProjectDetail />} />
       </Routes>
     </MemoryRouter>
@@ -107,5 +108,52 @@ describe("ProjectDetail", () => {
     });
 
     expect(screen.queryByText("Proyecto uno")).not.toBeInTheDocument();
+  });
+
+  const syncListener = () => {
+    const call = realtime.subscribeChannel.mock.calls.find(([name]) => name === "project.7");
+    return call[2];
+  };
+
+  it("se refresca con project.sync de su proyecto, sin avisos", async () => {
+    projectsAPI.getById.mockResolvedValue(project(7, "P", [task(1, 7, "Vieja")]));
+    tasksAPI.getAll.mockResolvedValue([]);
+    renderAt("/projects/7");
+    await screen.findByText("Vieja");
+
+    projectsAPI.getById.mockResolvedValue(project(7, "P", [task(1, 7, "Nueva")]));
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    act(() => syncListener()({ project_id: 7, entity: "task", action: "updated", task_id: 1 }));
+    await act(async () => vi.advanceTimersByTime(200));
+    vi.useRealTimers();
+
+    expect(await screen.findByText("Nueva")).toBeInTheDocument();
+    expect(notification.success).not.toHaveBeenCalled();
+  });
+
+  it("sale al listado con un aviso si el proyecto se borra", async () => {
+    projectsAPI.getById.mockResolvedValue(project(7, "P", []));
+    tasksAPI.getAll.mockResolvedValue([]);
+    renderAt("/projects/7");
+    await screen.findByText("P");
+
+    act(() => syncListener()({ project_id: 7, entity: "project", action: "deleted" }));
+
+    expect(await screen.findByText("listado-proyectos")).toBeInTheDocument();
+    expect(notification.warning).toHaveBeenCalledWith("Este proyecto fue eliminado");
+  });
+
+  it("sale al listado si al refrescar ya no tiene acceso", async () => {
+    projectsAPI.getById.mockResolvedValue(project(7, "P", []));
+    tasksAPI.getAll.mockResolvedValue([]);
+    renderAt("/projects/7");
+    await screen.findByText("P");
+
+    projectsAPI.getById.mockRejectedValue(Object.assign(new Error("no"), { status: 404 }));
+    const refresh = realtime.registerRefresh.mock.calls.find(([key]) => key === "projects")[1];
+    await act(async () => refresh());
+
+    expect(await screen.findByText("listado-proyectos")).toBeInTheDocument();
+    expect(notification.warning).toHaveBeenCalled();
   });
 });

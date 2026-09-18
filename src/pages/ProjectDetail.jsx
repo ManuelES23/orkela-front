@@ -17,6 +17,7 @@ import TagManager from "../components/tasks/TagManager";
 import { useNotification } from "../context/NotificationContext";
 import { useMailResult } from "../hooks/useMailResult";
 import { useRealtime } from "../context/RealtimeContext";
+import useResourceSync from "../hooks/useResourceSync";
 import { useAuth } from "../context/AuthContext";
 import { useUserContext } from "../hooks/useOrganizationPermissions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -88,7 +89,7 @@ const mergeProjectTasks = (projectTasks = [], scopedTasks = [], projectId) => {
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { success, error: showError } = useNotification();
+  const { success, error: showError, warning } = useNotification();
   const { notifyInvitation } = useMailResult();
   const { registerRefresh, unregisterRefresh } = useRealtime();
   const { user } = useAuth();
@@ -250,12 +251,53 @@ const ProjectDetail = () => {
       setTasks(projectTasks);
     } catch (err) {
       console.error("Error refreshing data:", err);
-      // No mostrar error en actualización silenciosa
+      // Sin aviso en la actualización silenciosa, salvo que el proyecto ya
+      // no exista o el usuario haya perdido el acceso: sacarlo de la vista
+      // en vez de dejar datos viejos (B12).
+      if (requestId === requestIdRef.current && [403, 404].includes(err?.status)) {
+        leaveProjectRef.current?.();
+      }
     } finally {
       // Si esta recarga reemplazó a una carga inicial en curso, quitar el skeleton
       if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [fetchProjectWithTasks]);
+
+  // Salir del proyecto cuando se borra o el usuario pierde el acceso (una
+  // sola vez aunque lleguen varias señales)
+  const leftProjectRef = useRef(false);
+  const leaveProjectRef = useRef(null);
+  useEffect(() => {
+    leaveProjectRef.current = (message = "Ya no tienes acceso a este proyecto") => {
+      if (leftProjectRef.current) return;
+      leftProjectRef.current = true;
+      warning(message);
+      navigate("/projects", { replace: true });
+    };
+  }, [warning, navigate]);
+
+  useEffect(() => {
+    leftProjectRef.current = false;
+  }, [id]);
+
+  // project.sync: otro usuario cambió tareas, checklist, etiquetas,
+  // asignados o el proyecto (tablero, lista, gantt y calendario)
+  useResourceSync(
+    "project",
+    [id],
+    (payload) => {
+      if (payload.entity === "project" && payload.action === "deleted") {
+        leaveProjectRef.current?.("Este proyecto fue eliminado");
+        return;
+      }
+      if (payload.entity === "member" && payload.action === "removed" && Number(payload.user_id) === Number(user?.id)) {
+        leaveProjectRef.current?.();
+        return;
+      }
+      refreshDataSilently();
+    },
+    { debounce: 150 }
+  );
 
   useEffect(() => {
     loadProjectData();
@@ -263,12 +305,11 @@ const ProjectDetail = () => {
 
   // Registrar callbacks para actualizaciones en tiempo real (silenciosas)
   useEffect(() => {
-    registerRefresh("projects", refreshDataSilently);
-    registerRefresh("tasks", refreshDataSilently);
-    return () => {
-      unregisterRefresh("projects");
-      unregisterRefresh("tasks");
-    };
+    const offs = [
+      registerRefresh("projects", refreshDataSilently),
+      registerRefresh("tasks", refreshDataSilently),
+    ];
+    return () => offs.forEach((off) => off());
   }, [registerRefresh, unregisterRefresh, refreshDataSilently]);
 
   const openDeleteConfirm = (type, itemId = null) => {

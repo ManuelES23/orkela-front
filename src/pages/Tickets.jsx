@@ -7,6 +7,7 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import { SkeletonRows } from "../components/ui/Skeleton";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import useResourceSync from "../hooks/useResourceSync";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/animations/MotionComponents";
 import { motionTokens } from "../components/animations/variants";
@@ -155,9 +156,17 @@ const Tickets = () => {
 
   // Registrar callback para tiempo real (silencioso)
   useEffect(() => {
-    registerRefresh("tickets", refreshTicketsSilently);
-    return () => unregisterRefresh("tickets");
+    return registerRefresh("tickets", refreshTicketsSilently);
   }, [registerRefresh, unregisterRefresh, refreshTicketsSilently]);
+
+  // team.sync de mis equipos: el buzón se actualiza cuando otro miembro toma,
+  // asigna, devuelve o cambia un ticket (evita tomar dos veces el mismo)
+  useResourceSync(
+    "team",
+    userTeams.map((team) => team.id),
+    refreshTicketsSilently,
+    { debounce: 300 }
+  );
 
   // Tomar un ticket del buzón
   const handleTakeTicket = async (e, ticketId) => {

@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Layout from "../components/layout/Layout";
 import ClientModal from "../components/modals/ClientModal";
 import ContactModal from "../components/modals/ContactModal";
+import TicketDetailModal from "../components/modals/TicketDetailModal";
+import { TICKET_STATUS } from "../constants/tickets";
 import LoadingSwap from "../components/ui/LoadingSwap";
 import DetailPanel from "../components/ui/DetailPanel";
 import { ClientListSkeleton, ClientDetailSkeleton } from "../components/clients/ClientsSkeleton";
@@ -11,22 +13,6 @@ import { clientsAPI, contactsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
 import { useMailResult } from "../hooks/useMailResult";
 import { Plus, Search, Send, Archive, ArchiveRestore, Star, UserPlus, Building2, User } from "lucide-react";
-
-const statusBadgeColor = {
-  open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-  in_progress: "bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-300",
-  pending: "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400",
-  resolved: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
-  closed: "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300",
-};
-
-const statusLabels = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  pending: "Pendiente",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
 
 const AdminBadge = () => (
   <span className='inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 rounded-full px-1.5 py-0.5 shrink-0'>
@@ -56,6 +42,8 @@ const ClientsManagement = () => {
   // archivar, promover) — deshabilita solo el botón de esa fila, no toda
   // la pantalla.
   const [actioningContactId, setActioningContactId] = useState(null);
+  // Ticket reciente abierto en el detalle
+  const [openTicket, setOpenTicket] = useState(null);
 
   const currentIdRef = useRef(id);
   useEffect(() => {
@@ -402,29 +390,31 @@ const ClientsManagement = () => {
 
               <div className='flex items-center justify-between mb-3'>
                 <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300'>Tickets recientes</h3>
-                <a
-                  href={`/client-tickets?client=${selected.id}`}
+                <Link
+                  to={`/client-tickets?client=${selected.id}`}
                   className='text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 font-medium'
                 >
                   Ver todos
-                </a>
+                </Link>
               </div>
               {(selected.tickets || []).length === 0 ? (
                 <p className='text-sm text-gray-400 dark:text-night-500'>Este cliente aún no tiene tickets.</p>
               ) : (
                 <div className='space-y-2'>
                   {selected.tickets.slice(0, 5).map((t) => (
-                    <div
+                    <button
                       key={t.id}
-                      className='flex items-center justify-between px-3 py-2 border border-gray-100 dark:border-night-800 rounded-lg'
+                      type='button'
+                      onClick={() => setOpenTicket(t)}
+                      className='w-full text-left flex items-center justify-between px-3 py-2 border border-gray-100 dark:border-night-800 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500'
                     >
                       <span className='text-sm text-gray-700 dark:text-night-300 truncate'>{t.title}</span>
                       <span
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${statusBadgeColor[t.status]}`}
+                        className={`text-xs font-semibold px-2 py-0.5 rounded-full border shrink-0 ml-2 ${TICKET_STATUS[t.status]?.badgeClass ?? ""}`}
                       >
-                        {statusLabels[t.status] || t.status}
+                        {TICKET_STATUS[t.status]?.label || t.status}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -446,6 +436,12 @@ const ClientsManagement = () => {
         contact={editingContact}
         onClose={() => setIsContactModalOpen(false)}
         onSaved={handleContactSaved}
+      />
+      <TicketDetailModal
+        isOpen={Boolean(openTicket)}
+        onClose={() => setOpenTicket(null)}
+        ticket={openTicket}
+        onUpdate={() => selected && refreshSelected(selected.id)}
       />
     </Layout>
   );

@@ -30,8 +30,9 @@ import {
   Inbox,
   Crown,
   Building2,
+  Mail,
 } from "lucide-react";
-import { ticketsAPI, teamsAPI } from "../../utils/api";
+import { ticketsAPI, teamsAPI, projectsAPI } from "../../utils/api";
 import { TICKET_STATUS, TICKET_PRIORITY, TICKET_TYPE } from "../../constants/tickets";
 
 // Select nativo con etiqueta: accesible por teclado y lector de pantalla
@@ -79,6 +80,8 @@ const TicketDetailModal = ({
   const [selectedMember, setSelectedMember] = useState(null);
   const [teams, setTeams] = useState([]);
   const [routing, setRouting] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [savingField, setSavingField] = useState(null);
 
   // Id de la última carga: al cambiar de ticket se descartan las respuestas
   // de la carga anterior que lleguen tarde.
@@ -201,13 +204,44 @@ const TicketDetailModal = ({
     }
   };
 
+  // Proyectos de la organización, solo para quien puede reclasificar
+  const canEditClassification = Boolean(ticket?.can_edit_classification);
+  useEffect(() => {
+    if (!isOpen || !canEditClassification) return undefined;
+    let cancelled = false;
+    projectsAPI
+      .getAll()
+      .then((data) => {
+        if (!cancelled) setProjects(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, canEditClassification]);
+
+  const handleClassificationChange = async (field, rawValue) => {
+    const value = field === "project_id" ? (rawValue === "" ? null : Number(rawValue)) : rawValue;
+    setSavingField(field);
+    try {
+      await ticketsAPI.update(ticket.id, { [field]: value });
+      await loadTicketDetails({ silent: true });
+      onUpdate?.();
+    } catch (err) {
+      console.error("Error updating classification:", err);
+      showError(err.message || "No se pudo guardar el cambio");
+    } finally {
+      setSavingField(null);
+    }
+  };
+
   // Handlers para tomar/asignar/devolver ticket
   const handleTakeTicket = async () => {
     setProcessingAction(true);
     try {
       await ticketsAPI.takeTicket(ticket.id);
       // take/assign/return/update devuelven el modelo sin los permisos
-      // calculados (can_resolve, is_in_inbox...): recargar el detalle.
+      // calculados (can_change_status, is_in_inbox...): recargar el detalle.
       await loadTicketDetails({ silent: true });
       success("Has tomado este ticket");
       onUpdate?.();
@@ -457,6 +491,42 @@ const TicketDetailModal = ({
             )}
           </div>
 
+          {/* Clasificación (prioridad, tipo, proyecto) */}
+          {ticket.can_edit_classification && (
+            <div className='flex flex-col sm:flex-row gap-3'>
+              <FieldSelect
+                id={`ticket-${ticket.id}-priority`}
+                label='Prioridad'
+                value={ticket.priority}
+                options={Object.entries(TICKET_PRIORITY).map(([value, config]) => ({ value, label: config.label }))}
+                onChange={(value) => handleClassificationChange("priority", value)}
+                disabled={savingField !== null}
+              />
+              <FieldSelect
+                id={`ticket-${ticket.id}-type`}
+                label='Tipo'
+                value={ticket.type}
+                options={Object.entries(TICKET_TYPE).map(([value, config]) => ({ value, label: config.label }))}
+                onChange={(value) => handleClassificationChange("type", value)}
+                disabled={savingField !== null}
+              />
+              <FieldSelect
+                id={`ticket-${ticket.id}-project`}
+                label='Proyecto'
+                value={ticket.project_id ?? ""}
+                options={[
+                  { value: "", label: "Sin proyecto" },
+                  ...(ticket.project && !projects.some((p) => p.id === ticket.project.id)
+                    ? [{ value: ticket.project.id, label: ticket.project.name }]
+                    : []),
+                  ...projects.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+                onChange={(value) => handleClassificationChange("project_id", value)}
+                disabled={savingField !== null}
+              />
+            </div>
+          )}
+
           {/* Acciones de Tomar/Asignar/Devolver */}
           {ticket.team && !["closed", "resolved"].includes(ticket.status) && (
             <div className='p-4 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg'>
@@ -573,7 +643,7 @@ const TicketDetailModal = ({
                   </p>
 
                   {/* Botón Devolver al buzón */}
-                  {(ticket.can_resolve || ticket.is_team_leader) && (
+                  {(ticket.assigned_to === user?.id || ticket.is_team_leader) && (
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -654,11 +724,11 @@ const TicketDetailModal = ({
             </div>
           </div>
 
-          {/* Cambiar estado (solo si puede resolver) */}
-          {ticket.can_resolve && !["closed"].includes(ticket.status) && (
+          {/* Cambiar estado (también reabrir un ticket cerrado) */}
+          {ticket.can_change_status && (
             <div>
               <h3 className='font-semibold text-gray-900 dark:text-night-50 mb-2'>
-                Cambiar Estado
+                {ticket.status === "closed" ? "Reabrir o cambiar estado" : "Cambiar estado"}
               </h3>
               <div className='flex flex-wrap gap-2'>
                 {Object.entries(TICKET_STATUS).map(([status, config]) => {
@@ -667,11 +737,12 @@ const TicketDetailModal = ({
                   return (
                     <button
                       key={status}
+                      type='button'
                       onClick={() => handleStatusChange(status)}
                       disabled={updatingStatus}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 border transition-all hover:scale-105 disabled:opacity-50 ${config.badgeClass}`}
                     >
-                      <Icon className='w-4 h-4' />
+                      <Icon className='w-4 h-4' aria-hidden='true' />
                       {config.label}
                     </button>
                   );
@@ -764,8 +835,8 @@ const TicketDetailModal = ({
                   </button>
                 </div>
 
-                {/* Opción de comentario interno (solo para asignados) */}
-                {ticket.can_resolve && (
+                {/* Nota interna: quien trabaja el ticket (asignado, equipo o triage) */}
+                {ticket.can_comment_internal && (
                   <label className='flex items-center gap-2 text-sm text-gray-600 dark:text-night-300 cursor-pointer'>
                     <input
                       type='checkbox'
@@ -773,9 +844,20 @@ const TicketDetailModal = ({
                       onChange={(e) => setIsInternal(e.target.checked)}
                       className='w-4 h-4 text-amber-600 dark:text-amber-400 border-gray-300 dark:border-night-600 rounded focus:ring-amber-500'
                     />
-                    <Lock className='w-4 h-4 text-amber-500 dark:text-amber-400' />
+                    <Lock className='w-4 h-4 text-amber-500 dark:text-amber-400' aria-hidden='true' />
                     Comentario interno (solo visible para el equipo)
                   </label>
+                )}
+
+                {/* Un comentario público en un ticket del portal le llega al cliente */}
+                {isClientTicket && !isInternal && (
+                  <p
+                    role='note'
+                    className='flex items-center gap-2 text-xs text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/20 rounded-lg px-3 py-2'
+                  >
+                    <Mail className='w-4 h-4 shrink-0' aria-hidden='true' />
+                    Este comentario se enviará al cliente por correo.
+                  </p>
                 )}
               </form>
             )}

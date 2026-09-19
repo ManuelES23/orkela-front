@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import TicketDetailModal from "./TicketDetailModal";
-import { ticketsAPI } from "../../utils/api";
+import { ticketsAPI, projectsAPI } from "../../utils/api";
 
 vi.mock("../../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -70,9 +70,9 @@ describe("TicketDetailModal", () => {
         status: "in_progress",
         assigned_to: 1,
         is_in_inbox: false,
-        can_resolve: true,
+        can_change_status: true,
       });
-    // take devuelve el modelo plano, sin can_resolve / is_in_inbox
+    // take devuelve el modelo plano, sin can_change_status / is_in_inbox
     ticketsAPI.takeTicket.mockResolvedValue({ ...baseTicket, status: "in_progress", assigned_to: 1 });
 
     render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 10 }} />);
@@ -187,5 +187,71 @@ describe("TicketDetailModal", () => {
     expect(screen.queryByLabelText("Asignar a equipo")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Cambiar equipo")).not.toBeInTheDocument();
     expect(ticketsAPI.getClientInboxTeams).not.toHaveBeenCalled();
+  });
+
+  it("con can_edit_classification cambia prioridad, tipo y proyecto", async () => {
+    projectsAPI.getAll.mockResolvedValue([{ id: 9, name: "Web" }]);
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, can_edit_classification: true, project_id: null });
+    ticketsAPI.update.mockResolvedValue({});
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    fireEvent.change(await screen.findByLabelText("Prioridad"), { target: { value: "urgent" } });
+    await waitFor(() => expect(ticketsAPI.update).toHaveBeenCalledWith(20, { priority: "urgent" }));
+
+    await waitFor(() => expect(screen.getByLabelText("Tipo")).toBeEnabled());
+    fireEvent.change(screen.getByLabelText("Tipo"), { target: { value: "bug" } });
+    await waitFor(() => expect(ticketsAPI.update).toHaveBeenCalledWith(20, { type: "bug" }));
+
+    await screen.findByRole("option", { name: "Web" });
+    await waitFor(() => expect(screen.getByLabelText("Proyecto")).toBeEnabled());
+    fireEvent.change(screen.getByLabelText("Proyecto"), { target: { value: "9" } });
+    await waitFor(() => expect(ticketsAPI.update).toHaveBeenCalledWith(20, { project_id: 9 }));
+  });
+
+  it("sin can_edit_classification no hay selectores de clasificación", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    await screen.findByText("Acme SA");
+    expect(screen.queryByLabelText("Prioridad")).not.toBeInTheDocument();
+    expect(projectsAPI.getAll).not.toHaveBeenCalled();
+  });
+
+  it("con can_change_status reabre un ticket cerrado", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, status: "closed", can_change_status: true });
+    ticketsAPI.update.mockResolvedValue({});
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByText("Reabrir o cambiar estado")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Abierto" }));
+
+    await waitFor(() => expect(ticketsAPI.update).toHaveBeenCalledWith(20, { status: "open" }));
+  });
+
+  it("sin can_change_status no hay botones de estado", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    await screen.findByText("Acme SA");
+    expect(screen.queryByText(/cambiar estado/i)).not.toBeInTheDocument();
+  });
+
+  it("nota interna según can_comment_internal y aviso de correo al cliente", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, can_comment_internal: true });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByRole("note")).toHaveTextContent("Este comentario se enviará al cliente por correo.");
+
+    fireEvent.click(screen.getByLabelText(/comentario interno/i));
+
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  });
+
+  it("sin can_comment_internal no hay nota interna, pero sí el aviso de correo", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByRole("note")).toBeInTheDocument();
+    expect(screen.queryByLabelText(/comentario interno/i)).not.toBeInTheDocument();
   });
 });

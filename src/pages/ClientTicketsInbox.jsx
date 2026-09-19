@@ -10,22 +10,7 @@ import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
 import { selectStyles } from "../utils/reactSelectStyles";
 import { Inbox } from "lucide-react";
-
-const statusBadgeColor = {
-  open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-  in_progress: "bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-300",
-  pending: "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400",
-  resolved: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
-  closed: "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300",
-};
-
-const statusLabels = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  pending: "Pendiente",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
+import { TICKET_STATUS } from "../constants/tickets";
 
 const ClientTicketsInbox = () => {
   const [searchParams] = useSearchParams();
@@ -151,9 +136,9 @@ const ClientTicketsInbox = () => {
                       </p>
                       <div className='flex items-center gap-2 mt-1'>
                         <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadgeColor[ticket.status]}`}
+                          className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${TICKET_STATUS[ticket.status]?.badgeClass ?? ""}`}
                         >
-                          {statusLabels[ticket.status] || ticket.status}
+                          {TICKET_STATUS[ticket.status]?.label || ticket.status}
                         </span>
                         {ticket.team && (
                           <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>

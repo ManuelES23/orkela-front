@@ -14,6 +14,7 @@ import { useAuth } from "../context/AuthContext";
  * - canCreateTeams: Owner, Admin y Manager pueden crear equipos
  * - canInviteMembers: Owner, Admin y Manager pueden invitar miembros
  * - canManageMembers: Owner y Admin pueden gestionar miembros
+ * - canTriageClients: Owner, Admin y Manager atienden Clientes y la Bandeja de Clientes
  *
  * Roles:
  * - owner: Dueño de la organización (todos los permisos)
@@ -21,7 +22,11 @@ import { useAuth } from "../context/AuthContext";
  * - manager: Manager (crear teams, proyectos, invitar)
  * - member: Miembro (crear proyectos solamente)
  */
-export const useOrganizationPermissions = (organization = null) => {
+// Quien atiende a los clientes: ve Clientes y la Bandeja de Clientes (el
+// backend aplica la misma regla con require.client-triage).
+const CLIENT_TRIAGE_ROLES = ["owner", "admin", "manager"];
+
+export const useOrganizationPermissions =(organization = null) => {
   const { user } = useAuth();
 
   return useMemo(() => {
@@ -34,6 +39,7 @@ export const useOrganizationPermissions = (organization = null) => {
         canCreateTeams: false,
         canInviteMembers: false,
         canManageMembers: false,
+        canTriageClients: false,
         isOwner: false,
         isAdmin: false,
         isManager: false,
@@ -54,6 +60,7 @@ export const useOrganizationPermissions = (organization = null) => {
           canCreateTeams: true, // En modo personal pueden crear equipos
           canInviteMembers: true, // En modo personal pueden invitar
           canManageMembers: false,
+          canTriageClients: false,
           isOwner: false,
           isAdmin: false,
           isManager: false,
@@ -71,6 +78,9 @@ export const useOrganizationPermissions = (organization = null) => {
         canCreateTeams: true, // Puede depender del rol
         canInviteMembers: true, // Puede depender del rol
         canManageMembers: user.is_organization_owner || false,
+        canTriageClients:
+          Boolean(user.is_organization_owner) ||
+          CLIENT_TRIAGE_ROLES.includes(user.organization_role),
         isOwner: user.is_organization_owner || false,
         isAdmin: false,
         isManager: false,
@@ -99,6 +109,7 @@ export const useOrganizationPermissions = (organization = null) => {
           ? organization.can_invite_members
           : true,
       canManageMembers: organization.can_manage_members || false,
+      canTriageClients: isOwner || CLIENT_TRIAGE_ROLES.includes(role),
 
       // Flags de rol
       isOwner: isOwner,

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { useUserContext } from "../../hooks/useOrganizationPermissions";
+import { useUserContext, useOrganizationPermissions } from "../../hooks/useOrganizationPermissions";
 import ContextSwitcher from "../ui/ContextSwitcher";
 import UserAvatar from "../ui/UserAvatar";
 import { motionTokens } from "../animations/variants";
@@ -75,6 +75,7 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
   // organización) - centralizado en useUserContext() para que el switch
   // entre varias empresas no rompa este cálculo en cada layout.
   const { isOrganizationContext: isInOrganizationMode } = useUserContext();
+  const { canTriageClients } = useOrganizationPermissions();
 
   const menuItems = isSuperAdmin
     ? [
@@ -105,11 +106,12 @@ const Sidebar = ({ isPinned = false, onTogglePin }) => {
         ...(isInOrganizationMode
           ? [{ icon: Ticket, label: "Tickets", path: "/tickets" }]
           : []),
-        ...(isInOrganizationMode
-          ? [{ icon: Contact, label: "Clientes", path: "/clients" }]
-          : []),
-        ...(isInOrganizationMode
-          ? [{ icon: Inbox, label: "Bandeja de Clientes", path: "/client-tickets" }]
+        // Clientes y Bandeja: solo quien atiende a los clientes (owner, admin, manager)
+        ...(isInOrganizationMode && canTriageClients
+          ? [
+              { icon: Contact, label: "Clientes", path: "/clients" },
+              { icon: Inbox, label: "Bandeja de Clientes", path: "/client-tickets" },
+            ]
           : []),
         // Mostrar "Mi Organización" si es owner o admin de la organización
         ...(isInOrganizationMode &&

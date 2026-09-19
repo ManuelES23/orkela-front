@@ -12,6 +12,7 @@ import { RealtimeProvider, useRealtime } from "./context/RealtimeContext";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminRoute from "./components/AdminRoute";
 import OrganizationRoute from "./components/OrganizationRoute";
+import ClientTriageRoute from "./components/ClientTriageRoute";
 import NotificationOpener from "./components/notifications/NotificationOpener";
 import RemovedFromOrgModal from "./components/ui/RemovedFromOrgModal";
 import LoadingScreen from "./components/ui/LoadingScreen";
@@ -179,7 +180,9 @@ function App() {
                   path='/clients'
                   element={
                     <OrganizationRoute>
-                      <ClientsManagement />
+                      <ClientTriageRoute>
+                        <ClientsManagement />
+                      </ClientTriageRoute>
                     </OrganizationRoute>
                   }
                 />
@@ -187,7 +190,9 @@ function App() {
                   path='/clients/:id'
                   element={
                     <OrganizationRoute>
-                      <ClientsManagement />
+                      <ClientTriageRoute>
+                        <ClientsManagement />
+                      </ClientTriageRoute>
                     </OrganizationRoute>
                   }
                 />
@@ -195,7 +200,9 @@ function App() {
                   path='/client-tickets'
                   element={
                     <OrganizationRoute>
-                      <ClientTicketsInbox />
+                      <ClientTriageRoute>
+                        <ClientTicketsInbox />
+                      </ClientTriageRoute>
                     </OrganizationRoute>
                   }
                 />

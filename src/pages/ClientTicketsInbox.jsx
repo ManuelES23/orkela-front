@@ -5,27 +5,18 @@ import Select from "react-select";
 import Layout from "../components/layout/Layout";
 import LoadingSwap from "../components/ui/LoadingSwap";
 import { SkeletonRows } from "../components/ui/Skeleton";
-import { ticketsAPI, teamsAPI } from "../utils/api";
+import TicketDetailModal from "../components/modals/TicketDetailModal";
+import { ticketsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
 import { useRealtime } from "../context/RealtimeContext";
+import useOpenFromQuery from "../hooks/useOpenFromQuery";
 import { selectStyles } from "../utils/reactSelectStyles";
+import { TICKET_STATUS } from "../constants/tickets";
 import { Inbox } from "lucide-react";
 
-const statusBadgeColor = {
-  open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
-  in_progress: "bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-300",
-  pending: "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400",
-  resolved: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
-  closed: "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300",
-};
-
-const statusLabels = {
-  open: "Abierto",
-  in_progress: "En progreso",
-  pending: "Pendiente",
-  resolved: "Resuelto",
-  closed: "Cerrado",
-};
+// El selector de equipo vive dentro de la fila clicable: sus clics y teclas
+// no deben abrir el detalle.
+const stopRowEvent = (event) => event.stopPropagation();
 
 const ClientTicketsInbox = () => {
   const [searchParams] = useSearchParams();
@@ -38,6 +29,7 @@ const ClientTicketsInbox = () => {
   const [loadError, setLoadError] = useState(false);
   const [onlyUnassigned, setOnlyUnassigned] = useState(false);
   const [assigningId, setAssigningId] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   // Bump para forzar un recarga tras asignar, sin depender del closure de
   // loadTickets capturado en el momento del click (que podría tener un
   // valor obsoleto de onlyUnassigned si el filtro cambió mientras la
@@ -79,9 +71,24 @@ const ClientTicketsInbox = () => {
     [registerRefresh, loadTickets]
   );
 
+  // Todos los equipos activos de la organización: quien hace triage enruta
+  // a cualquiera, aunque no sea miembro.
   useEffect(() => {
-    teamsAPI.getAll().then(setTeams).catch(() => {});
+    ticketsAPI.getClientInboxTeams().then(setTeams).catch(() => {});
   }, []);
+
+  const openTicket = useCallback((ticket) => setSelectedTicket(ticket), []);
+
+  // /client-tickets?ticket=ID (notificaciones y enlaces): abrir ese ticket
+  useOpenFromQuery("ticket", openTicket);
+
+  const handleRowKeyDown = (event, ticket) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openTicket(ticket);
+    }
+  };
 
   const visibleTickets = clientFilter
     ? tickets.filter((t) => String(t.client_id) === clientFilter)
@@ -135,56 +142,71 @@ const ClientTicketsInbox = () => {
           ) : (
             <div className='divide-y divide-gray-100 dark:divide-night-800'>
               <AnimatePresence mode='popLayout'>
-                {visibleTickets.map((ticket) => (
-                  <motion.div
-                    key={ticket.id}
-                    layout
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className='py-3 flex items-center justify-between gap-4'
-                  >
-                    <div className='min-w-0 flex-1'>
-                      <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
-                        {[ticket.client?.name, ticket.contact?.name, ticket.title].filter(Boolean).join(" · ")}
-                      </p>
-                      <div className='flex items-center gap-2 mt-1'>
-                        <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusBadgeColor[ticket.status]}`}
-                        >
-                          {statusLabels[ticket.status] || ticket.status}
-                        </span>
-                        {ticket.team && (
-                          <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>
-                        )}
-                        {ticket.contact?.is_admin === false && (
-                          <span className='text-xs text-brand-600 dark:text-brand-400 font-medium'>
-                            También visible para el admin del cliente
+                {visibleTickets.map((ticket) => {
+                  const status = TICKET_STATUS[ticket.status];
+                  return (
+                    <motion.div
+                      key={ticket.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.2 }}
+                      role='button'
+                      tabIndex={0}
+                      onClick={() => openTicket(ticket)}
+                      onKeyDown={(event) => handleRowKeyDown(event, ticket)}
+                      className='py-3 px-2 -mx-2 rounded-lg flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-night-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500'
+                    >
+                      <div className='min-w-0 flex-1'>
+                        <p className='text-sm font-medium text-gray-900 dark:text-night-50 truncate'>
+                          {[ticket.client?.name, ticket.contact?.name, ticket.title].filter(Boolean).join(" · ")}
+                        </p>
+                        <div className='flex items-center gap-2 mt-1'>
+                          <span
+                            className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${status?.badgeClass ?? ""}`}
+                          >
+                            {status?.label || ticket.status}
                           </span>
-                        )}
+                          {ticket.team && (
+                            <span className='text-xs text-gray-400 dark:text-night-500'>→ {ticket.team.name}</span>
+                          )}
+                          {ticket.contact?.is_admin === false && (
+                            <span className='text-xs text-brand-600 dark:text-brand-400 font-medium'>
+                              También visible para el admin del cliente
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    {!ticket.team_id && (
-                      <div className='w-52 shrink-0'>
-                        <Select
-                          options={teamOptions}
-                          isLoading={assigningId === ticket.id}
-                          isDisabled={assigningId === ticket.id}
-                          placeholder='Asignar a equipo...'
-                          onChange={(selected) => selected && handleAssign(ticket.id, selected.value)}
-                          classNamePrefix='react-select'
-                          styles={selectStyles}
-                        />
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
+                      {!ticket.team_id && (
+                        <div className='w-52 shrink-0' onClick={stopRowEvent} onKeyDown={stopRowEvent}>
+                          <Select
+                            options={teamOptions}
+                            isLoading={assigningId === ticket.id}
+                            isDisabled={assigningId === ticket.id}
+                            placeholder='Asignar a equipo...'
+                            aria-label={`Asignar a equipo el ticket ${ticket.title}`}
+                            onChange={(selected) => selected && handleAssign(ticket.id, selected.value)}
+                            classNamePrefix='react-select'
+                            styles={selectStyles}
+                          />
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           )}
         </LoadingSwap>
       </div>
+
+      <TicketDetailModal
+        isOpen={Boolean(selectedTicket)}
+        onClose={() => setSelectedTicket(null)}
+        ticket={selectedTicket}
+        onUpdate={() => loadTickets({ silent: true })}
+      />
     </Layout>
   );
 };

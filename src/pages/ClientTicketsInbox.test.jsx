@@ -2,24 +2,32 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ClientTicketsInbox from "./ClientTicketsInbox";
-import { ticketsAPI, teamsAPI } from "../utils/api";
+import { ticketsAPI } from "../utils/api";
 
 const notification = { success: vi.fn(), error: vi.fn() };
 
 vi.mock("../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),
-  ticketsAPI: { getClientInbox: vi.fn() },
-  teamsAPI: { getAll: vi.fn() },
+  ticketsAPI: { getClientInbox: vi.fn(), getClientInboxTeams: vi.fn(), assignToTeam: vi.fn() },
 }));
 vi.mock("../components/layout/Layout", () => ({ default: ({ children }) => <div>{children}</div> }));
 vi.mock("../context/NotificationContext", () => ({ useNotification: () => notification }));
 const realtime = { registerRefresh: vi.fn(() => () => {}) };
 vi.mock("../context/RealtimeContext", () => ({ useRealtime: () => realtime }));
+vi.mock("../components/modals/TicketDetailModal", () => ({
+  default: ({ isOpen, ticket, onClose }) =>
+    isOpen ? (
+      <div role='dialog' aria-label='Detalle del ticket'>
+        <p>Detalle {ticket?.id}</p>
+        <button onClick={onClose}>Cerrar detalle</button>
+      </div>
+    ) : null,
+}));
 
 describe("ClientTicketsInbox", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    teamsAPI.getAll.mockResolvedValue([]);
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([]);
   });
 
   it("ignora la respuesta vieja al marcar 'Solo sin asignar'", async () => {
@@ -64,5 +72,75 @@ describe("ClientTicketsInbox", () => {
     await act(async () => refresh());
 
     expect(await screen.findByText("Nuevo del portal")).toBeInTheDocument();
+  });
+
+  const portalTicket = {
+    id: 7,
+    title: "Sin luz en la oficina",
+    status: "open",
+    team_id: null,
+    client: { name: "Acme SA" },
+    contact: { name: "Ana", is_admin: true },
+  };
+
+  it("abre el detalle al hacer clic en la fila", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    render(
+      <MemoryRouter>
+        <ClientTicketsInbox />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: /sin luz en la oficina/i }));
+
+    expect(screen.getByText("Detalle 7")).toBeInTheDocument();
+  });
+
+  it("abre el detalle con Enter y con Espacio", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    render(
+      <MemoryRouter>
+        <ClientTicketsInbox />
+      </MemoryRouter>
+    );
+    const row = await screen.findByRole("button", { name: /sin luz en la oficina/i });
+
+    fireEvent.keyDown(row, { key: "Enter" });
+    expect(screen.getByText("Detalle 7")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.keyDown(row, { key: " " });
+    expect(screen.getByText("Detalle 7")).toBeInTheDocument();
+  });
+
+  it("abre el ticket del enlace ?ticket=ID", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    render(
+      <MemoryRouter initialEntries={["/client-tickets?ticket=7"]}>
+        <ClientTicketsInbox />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Detalle 7")).toBeInTheDocument();
+  });
+
+  it("el selector de equipo de la fila lista los equipos de la organización y no abre el detalle", async () => {
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 3, name: "Soporte" }]);
+    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    render(
+      <MemoryRouter>
+        <ClientTicketsInbox />
+      </MemoryRouter>
+    );
+
+    const placeholder = await screen.findByText("Asignar a equipo...");
+    fireEvent.mouseDown(placeholder);
+    fireEvent.click(placeholder);
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(ticketsAPI.getClientInboxTeams).toHaveBeenCalled();
   });
 });

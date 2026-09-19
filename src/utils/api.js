@@ -611,6 +611,12 @@ export const ticketsAPI = {
     return await request(`/client-tickets${query ? `?${query}` : ""}`);
   },
 
+  // Todos los equipos activos de la organización, para enrutar tickets de
+  // cliente (teamsAPI.getAll solo trae los equipos del usuario).
+  getClientInboxTeams: async () => {
+    return await request("/client-tickets/teams");
+  },
+
   assignToTeam: async (id, teamId) => {
     return await request(`/tickets/${id}/assign-team`, {
       method: "POST",

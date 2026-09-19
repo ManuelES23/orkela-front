@@ -127,11 +127,25 @@ const TicketDetailModal = ({
 
   useEffect(() => {
     if (isOpen && initialTicket?.id) {
+      // Al abrir o cambiar de ticket no debe quedar nada del anterior: los
+      // controles estarían vivos sobre el id equivocado. Las recargas
+      // silenciosas no pasan por aquí, así que no vacían la pantalla.
+      setTicket(null);
+      setComments([]);
+      setTeamMembers([]);
+      setNewComment("");
+      setIsInternal(false);
+      setRouting(false);
+      setSavingField(null);
+      setProcessingAction(false);
       loadTicketDetails();
       setShowAssignSelect(false);
       setSelectedMember(null);
     }
-  }, [isOpen, initialTicket?.id, loadTicketDetails]);
+    // loadTicketDetails cambia con showError; solo un cambio de ticket o de
+    // apertura debe reiniciar el estado
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialTicket?.id]);
 
   // Registrar callback para actualizaciones en tiempo real
   useEffect(() => {
@@ -181,10 +195,14 @@ const TicketDetailModal = ({
       .then((data) => {
         if (!cancelled) setTeams(data);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) showError("No se pudieron cargar los equipos");
+      });
     return () => {
       cancelled = true;
     };
+    // showError es estable en el provider; no debe relanzar la petición
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, canRoute]);
 
   const handleRouteToTeam = async (teamId) => {
@@ -214,10 +232,14 @@ const TicketDetailModal = ({
       .then((data) => {
         if (!cancelled) setProjects(data);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) showError("No se pudieron cargar los proyectos");
+      });
     return () => {
       cancelled = true;
     };
+    // showError es estable en el provider; no debe relanzar la petición
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, canEditClassification]);
 
   const handleClassificationChange = async (field, rawValue) => {
@@ -864,7 +886,7 @@ const TicketDetailModal = ({
           </div>
         </div>
         </DetailPanel>
-      ) : (
+      ) : initializing ? null : (
         <div className='text-center py-12 text-gray-500 dark:text-night-400'>
           No se pudo cargar el ticket
         </div>

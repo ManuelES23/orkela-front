@@ -60,6 +60,8 @@ describe("TicketDetailModal", () => {
     vi.clearAllMocks();
     ticketsAPI.getById.mockReset();
     ticketsAPI.getComments.mockResolvedValue([]);
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([]);
+    projectsAPI.getAll.mockResolvedValue([]);
   });
 
   it("conserva los permisos calculados después de tomar el ticket", async () => {
@@ -253,5 +255,67 @@ describe("TicketDetailModal", () => {
 
     expect(await screen.findByRole("note")).toBeInTheDocument();
     expect(screen.queryByLabelText(/comentario interno/i)).not.toBeInTheDocument();
+  });
+
+  it("al cambiar de ticket no pinta el contenido del anterior bajo el título nuevo", async () => {
+    const globex = deferred();
+    ticketsAPI.getById.mockImplementation((id) =>
+      id === 20 ? Promise.resolve({ ...portalTicket }) : globex.promise
+    );
+    ticketsAPI.getComments.mockImplementation((id) =>
+      Promise.resolve(
+        id === 20
+          ? [{ id: 1, content: "Comentario de Acme", is_internal: false, user: { id: 2, name: "Bea" }, created_at: new Date().toISOString() }]
+          : []
+      )
+    );
+    const { rerender } = render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    expect(await screen.findByText("Acme SA")).toBeInTheDocument();
+    expect(screen.getByText("Comentario de Acme")).toBeInTheDocument();
+
+    rerender(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 31 }} />);
+
+    expect(screen.getByText("Ticket #31")).toBeInTheDocument();
+    expect(screen.queryByText("Acme SA")).not.toBeInTheDocument();
+    expect(screen.queryByText("Comentario de Acme")).not.toBeInTheDocument();
+    expect(screen.queryByText("No se pudo cargar el ticket")).not.toBeInTheDocument();
+
+    await act(async () => {
+      globex.resolve({ ...portalTicket, id: 31, client: { id: 6, name: "Globex" } });
+    });
+    expect(await screen.findByText("Globex")).toBeInTheDocument();
+    expect(screen.queryByText("Acme SA")).not.toBeInTheDocument();
+  });
+
+  it("una recarga silenciosa del mismo ticket no lo vacía", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    await screen.findByText("Acme SA");
+    const refresh = realtime.registerRefresh.mock.calls.filter(([key]) => key === "ticketDetail-20").at(-1)[1];
+    const slow = deferred();
+    ticketsAPI.getById.mockReturnValue(slow.promise);
+
+    act(() => {
+      refresh();
+    });
+
+    expect(screen.getByText("Acme SA")).toBeInTheDocument();
+    await act(async () => slow.resolve({ ...portalTicket }));
+  });
+
+  it("si no se pueden cargar los equipos, avisa con un error", async () => {
+    ticketsAPI.getClientInboxTeams.mockRejectedValue(new Error("boom"));
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, can_route: true });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    await waitFor(() => expect(notification.error).toHaveBeenCalledWith("No se pudieron cargar los equipos"));
+  });
+
+  it("si no se pueden cargar los proyectos, avisa con un error", async () => {
+    projectsAPI.getAll.mockRejectedValue(new Error("boom"));
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, can_edit_classification: true });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    await waitFor(() => expect(notification.error).toHaveBeenCalledWith("No se pudieron cargar los proyectos"));
   });
 });

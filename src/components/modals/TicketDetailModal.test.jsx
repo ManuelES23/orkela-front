@@ -11,10 +11,13 @@ vi.mock("../../utils/api", async (importOriginal) => ({
     takeTicket: vi.fn(),
     returnToInbox: vi.fn(),
     assignTicket: vi.fn(),
+    assignToTeam: vi.fn(),
+    getClientInboxTeams: vi.fn().mockResolvedValue([]),
     update: vi.fn(),
     addComment: vi.fn(),
   },
-  teamsAPI: { getMembers: vi.fn().mockResolvedValue([]) },
+  teamsAPI: { getMembers: vi.fn().mockResolvedValue([]), getAll: vi.fn().mockResolvedValue([]) },
+  projectsAPI: { getAll: vi.fn().mockResolvedValue([]) },
 }));
 vi.mock("../../context/AuthContext", () => ({ useAuth: () => ({ user: { id: 1 } }) }));
 // Referencias estables, como en los providers reales (useCallback)
@@ -39,6 +42,17 @@ const deferred = () => {
   let resolve;
   const promise = new Promise((r) => (resolve = r));
   return { promise, resolve };
+};
+
+const portalTicket = {
+  ...baseTicket,
+  id: 20,
+  source: "client_portal",
+  team_id: null,
+  team: null,
+  user: null,
+  client: { id: 5, name: "Acme SA" },
+  contact: { id: 8, name: "Ana Ruiz", email: "ana@acme.com", is_admin: true },
 };
 
 describe("TicketDetailModal", () => {
@@ -130,5 +144,48 @@ describe("TicketDetailModal", () => {
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(notification.info).toHaveBeenCalledWith("Este ticket ya no existe o no tienes acceso a él");
+  });
+
+  it("ticket del portal: muestra cliente y contacto y que está pendiente de enrutar", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByText("Acme SA")).toBeInTheDocument();
+    expect(screen.getByText("Cliente / Contacto")).toBeInTheDocument();
+    expect(screen.getByText(/Ana Ruiz/)).toBeInTheDocument();
+    expect(screen.getByText(/ana@acme\.com/)).toBeInTheDocument();
+    expect(screen.queryByText("Creado por")).not.toBeInTheDocument();
+    expect(screen.getByText("Sin equipo — pendiente de enrutar")).toBeInTheDocument();
+  });
+
+  it("con can_route asigna el ticket a un equipo", async () => {
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([
+      { id: 3, name: "Soporte" },
+      { id: 4, name: "Facturación" },
+    ]);
+    ticketsAPI.getById
+      .mockResolvedValueOnce({ ...portalTicket, can_route: true })
+      .mockResolvedValueOnce({ ...portalTicket, can_route: true, team_id: 4, team: { id: 4, name: "Facturación" } });
+    ticketsAPI.assignToTeam.mockResolvedValue({});
+    const onUpdate = vi.fn();
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} onUpdate={onUpdate} />);
+
+    const select = await screen.findByLabelText("Asignar a equipo");
+    await screen.findByRole("option", { name: "Facturación" });
+    fireEvent.change(select, { target: { value: "4" } });
+
+    await waitFor(() => expect(ticketsAPI.assignToTeam).toHaveBeenCalledWith(20, 4));
+    expect(await screen.findByLabelText("Cambiar equipo")).toHaveValue("4");
+    expect(onUpdate).toHaveBeenCalled();
+  });
+
+  it("sin can_route no muestra el control de equipo", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, team_id: 3, team: { id: 3, name: "Soporte" } });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByText("Soporte")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Asignar a equipo")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Cambiar equipo")).not.toBeInTheDocument();
+    expect(ticketsAPI.getClientInboxTeams).not.toHaveBeenCalled();
   });
 });

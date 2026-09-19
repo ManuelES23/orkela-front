@@ -22,24 +22,39 @@ import {
   Send,
   Loader2,
   CheckCircle2,
-  AlertCircle,
   XCircle,
-  PauseCircle,
-  PlayCircle,
-  Bug,
-  HelpCircle,
-  Lightbulb,
-  Headphones,
-  MoreHorizontal,
   Lock,
-  Eye,
   Hand,
   UserPlus,
   ArrowLeft,
   Inbox,
   Crown,
+  Building2,
 } from "lucide-react";
 import { ticketsAPI, teamsAPI } from "../../utils/api";
+import { TICKET_STATUS, TICKET_PRIORITY, TICKET_TYPE } from "../../constants/tickets";
+
+// Select nativo con etiqueta: accesible por teclado y lector de pantalla
+const FieldSelect = ({ id, label, value, options, onChange, disabled = false }) => (
+  <div className='flex-1 min-w-0'>
+    <label htmlFor={id} className='block text-xs text-gray-500 dark:text-night-400 mb-1'>
+      {label}
+    </label>
+    <select
+      id={id}
+      value={value ?? ""}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className='w-full px-3 py-2 text-sm border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none disabled:opacity-50'
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 const TicketDetailModal = ({
   isOpen,
@@ -62,6 +77,8 @@ const TicketDetailModal = ({
   const [teamMembers, setTeamMembers] = useState([]);
   const [showAssignSelect, setShowAssignSelect] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [teams, setTeams] = useState([]);
+  const [routing, setRouting] = useState(false);
 
   // Id de la última carga: al cambiar de ticket se descartan las respuestas
   // de la carga anterior que lleguen tarde.
@@ -150,6 +167,40 @@ const TicketDetailModal = ({
     loadTicketDetails({ silent: true });
   });
 
+  // Todos los equipos activos de la organización (GET client-tickets/teams),
+  // solo para quien puede enrutar: teamsAPI.getAll solo trae los del usuario.
+  const canRoute = Boolean(ticket?.can_route);
+  useEffect(() => {
+    if (!isOpen || !canRoute) return undefined;
+    let cancelled = false;
+    ticketsAPI
+      .getClientInboxTeams()
+      .then((data) => {
+        if (!cancelled) setTeams(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, canRoute]);
+
+  const handleRouteToTeam = async (teamId) => {
+    if (!teamId || Number(teamId) === ticket.team_id) return;
+    const hadTeam = Boolean(ticket.team_id);
+    setRouting(true);
+    try {
+      await ticketsAPI.assignToTeam(ticket.id, Number(teamId));
+      await loadTicketDetails({ silent: true });
+      success(hadTeam ? "Ticket movido de equipo" : "Ticket asignado al equipo");
+      onUpdate?.();
+    } catch (err) {
+      console.error("Error routing ticket:", err);
+      showError(err.message || "No se pudo asignar el equipo");
+    } finally {
+      setRouting(false);
+    }
+  };
+
   // Handlers para tomar/asignar/devolver ticket
   const handleTakeTicket = async () => {
     setProcessingAction(true);
@@ -233,7 +284,7 @@ const TicketDetailModal = ({
         status: newStatus,
       });
       await loadTicketDetails({ silent: true });
-      notifyClientMail(result, `Estado actualizado a "${statusConfig[newStatus]?.label}"`);
+      notifyClientMail(result, `Estado actualizado a "${TICKET_STATUS[newStatus]?.label}"`);
       onUpdate?.();
     } catch (err) {
       console.error("Error updating status:", err);
@@ -243,69 +294,16 @@ const TicketDetailModal = ({
     }
   };
 
-  const statusConfig = {
-    open: {
-      color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",
-      icon: AlertCircle,
-      label: "Abierto",
-    },
-    in_progress: {
-      color: "text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800",
-      icon: PlayCircle,
-      label: "En progreso",
-    },
-    pending: {
-      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
-      icon: PauseCircle,
-      label: "Pendiente",
-    },
-    resolved: {
-      color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800",
-      icon: CheckCircle2,
-      label: "Resuelto",
-    },
-    closed: {
-      color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700",
-      icon: XCircle,
-      label: "Cerrado",
-    },
-  };
-
-  const priorityConfig = {
-    urgent: {
-      color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
-      label: "Urgente",
-    },
-    high: {
-      color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800",
-      label: "Alta",
-    },
-    medium: {
-      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
-      label: "Media",
-    },
-    low: { color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700", label: "Baja" },
-  };
-
-  const typeConfig = {
-    request: {
-      icon: MessageSquare,
-      label: "Solicitud",
-      color: "text-blue-500 dark:text-blue-400",
-    },
-    bug: { icon: Bug, label: "Bug", color: "text-red-500 dark:text-red-400" },
-    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500 dark:text-accent-400" },
-    feature: {
-      icon: Lightbulb,
-      label: "Funcionalidad",
-      color: "text-yellow-500 dark:text-yellow-400",
-    },
-    support: { icon: Headphones, label: "Soporte", color: "text-green-500 dark:text-green-400" },
-    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500 dark:text-night-400" },
-  };
-
-  const StatusIcon = ticket ? statusConfig[ticket.status]?.icon : AlertCircle;
-  const TypeIcon = ticket ? typeConfig[ticket.type]?.icon : MessageSquare;
+  const StatusIcon = TICKET_STATUS[ticket?.status]?.icon ?? TICKET_STATUS.open.icon;
+  const TypeIcon = TICKET_TYPE[ticket?.type]?.icon ?? MessageSquare;
+  const isClientTicket = ticket?.source === "client_portal";
+  const teamOptions = [
+    ...(ticket?.team_id ? [] : [{ value: "", label: "Selecciona un equipo…" }]),
+    ...(ticket?.team && !teams.some((t) => t.id === ticket.team.id)
+      ? [{ value: ticket.team.id, label: ticket.team.name }]
+      : []),
+    ...teams.map((t) => ({ value: t.id, label: t.name })),
+  ];
 
   return (
     <Modal
@@ -322,7 +320,7 @@ const TicketDetailModal = ({
           <div className='flex flex-col md:flex-row md:items-start gap-4'>
             <div
               className={`p-3 rounded-lg bg-gray-50 dark:bg-night-800 ${
-                typeConfig[ticket.type]?.color
+                TICKET_TYPE[ticket.type]?.iconClass
               }`}
             >
               <TypeIcon className='w-6 h-6' />
@@ -335,24 +333,24 @@ const TicketDetailModal = ({
                 {/* Estado */}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 border ${
-                    statusConfig[ticket.status]?.color
+                    TICKET_STATUS[ticket.status]?.badgeClass
                   }`}
                 >
                   <StatusIcon className='w-4 h-4' />
-                  {statusConfig[ticket.status]?.label}
+                  {TICKET_STATUS[ticket.status]?.label}
                 </span>
                 {/* Prioridad */}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                    priorityConfig[ticket.priority]?.color
+                    TICKET_PRIORITY[ticket.priority]?.badgeClass
                   }`}
                 >
                   <Flag className='w-3 h-3 inline mr-1' />
-                  {priorityConfig[ticket.priority]?.label}
+                  {TICKET_PRIORITY[ticket.priority]?.label}
                 </span>
                 {/* Tipo */}
                 <span className='px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300'>
-                  {typeConfig[ticket.type]?.label}
+                  {TICKET_TYPE[ticket.type]?.label}
                 </span>
               </div>
             </div>
@@ -360,27 +358,56 @@ const TicketDetailModal = ({
 
           {/* Información */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-night-800 rounded-lg'>
-            <div className='flex items-center gap-3'>
-              <User className='w-5 h-5 text-gray-400 dark:text-night-500' />
-              <div>
-                <p className='text-xs text-gray-500 dark:text-night-400'>Creado por</p>
-                <p className='font-medium text-gray-900 dark:text-night-50'>{ticket.user?.name}</p>
-              </div>
-            </div>
-            <div className='flex items-center gap-3'>
-              <Users className='w-5 h-5 text-gray-400 dark:text-night-500' />
-              <div>
-                <p className='text-xs text-gray-500 dark:text-night-400'>Equipo asignado</p>
-                <p className='font-medium text-gray-900 dark:text-night-50 flex items-center gap-1'>
-                  {ticket.team?.name || "Sin equipo"}
-                  {ticket.is_team_leader && (
-                    <Crown
-                      className='w-4 h-4 text-yellow-500 dark:text-yellow-400'
-                      title='Eres líder de este equipo'
-                    />
+            {isClientTicket ? (
+              <div className='flex items-center gap-3'>
+                <Building2 className='w-5 h-5 text-gray-400 dark:text-night-500' aria-hidden='true' />
+                <div className='min-w-0'>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>Cliente / Contacto</p>
+                  <p className='font-medium text-gray-900 dark:text-night-50 truncate'>{ticket.client?.name || "Cliente"}</p>
+                  {ticket.contact && (
+                    <p className='text-sm text-gray-600 dark:text-night-300 truncate'>
+                      {ticket.contact.name}
+                      {ticket.contact.email && (
+                        <span className='text-gray-400 dark:text-night-500'> · {ticket.contact.email}</span>
+                      )}
+                    </p>
                   )}
-                </p>
+                </div>
               </div>
+            ) : (
+              <div className='flex items-center gap-3'>
+                <User className='w-5 h-5 text-gray-400 dark:text-night-500' />
+                <div>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>Creado por</p>
+                  <p className='font-medium text-gray-900 dark:text-night-50'>{ticket.user?.name}</p>
+                </div>
+              </div>
+            )}
+            <div className='flex items-center gap-3'>
+              <Users className='w-5 h-5 text-gray-400 dark:text-night-500' aria-hidden='true' />
+              {ticket.can_route ? (
+                <FieldSelect
+                  id={`ticket-${ticket.id}-team`}
+                  label={ticket.team_id ? "Cambiar equipo" : "Asignar a equipo"}
+                  value={ticket.team_id ?? ""}
+                  options={teamOptions}
+                  onChange={handleRouteToTeam}
+                  disabled={routing}
+                />
+              ) : (
+                <div>
+                  <p className='text-xs text-gray-500 dark:text-night-400'>Equipo asignado</p>
+                  <p className='font-medium text-gray-900 dark:text-night-50 flex items-center gap-1'>
+                    {ticket.team?.name || "Sin equipo"}
+                    {ticket.is_team_leader && (
+                      <Crown
+                        className='w-4 h-4 text-yellow-500 dark:text-yellow-400'
+                        title='Eres líder de este equipo'
+                      />
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
             <div className='flex items-center gap-3'>
               <User className='w-5 h-5 text-gray-400 dark:text-night-500' />
@@ -392,6 +419,11 @@ const TicketDetailModal = ({
                     {ticket.assigned_user?.id === user?.id && (
                       <span className='ml-1 text-xs text-gray-400 dark:text-night-500'>(Tú)</span>
                     )}
+                  </p>
+                ) : !ticket.team_id ? (
+                  <p className='text-amber-600 dark:text-amber-400 flex items-center gap-1'>
+                    <Inbox className='w-4 h-4' aria-hidden='true' />
+                    Sin equipo — pendiente de enrutar
                   </p>
                 ) : (
                   <p className='text-accent-600 dark:text-accent-400 flex items-center gap-1'>
@@ -629,7 +661,7 @@ const TicketDetailModal = ({
                 Cambiar Estado
               </h3>
               <div className='flex flex-wrap gap-2'>
-                {Object.entries(statusConfig).map(([status, config]) => {
+                {Object.entries(TICKET_STATUS).map(([status, config]) => {
                   if (status === ticket.status) return null;
                   const Icon = config.icon;
                   return (
@@ -637,7 +669,7 @@ const TicketDetailModal = ({
                       key={status}
                       onClick={() => handleStatusChange(status)}
                       disabled={updatingStatus}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 border transition-all hover:scale-105 disabled:opacity-50 ${config.color}`}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 border transition-all hover:scale-105 disabled:opacity-50 ${config.badgeClass}`}
                     >
                       <Icon className='w-4 h-4' />
                       {config.label}

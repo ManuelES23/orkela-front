@@ -1,11 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ClientTicketsInbox from "./ClientTicketsInbox";
 import { ticketsAPI } from "../utils/api";
 
 const notification = { success: vi.fn(), error: vi.fn() };
-
 vi.mock("../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),
   ticketsAPI: { getClientInbox: vi.fn(), getClientInboxTeams: vi.fn(), assignToTeam: vi.fn() },
@@ -28,6 +27,7 @@ describe("ClientTicketsInbox", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     ticketsAPI.getClientInboxTeams.mockResolvedValue([]);
+    ticketsAPI.assignToTeam.mockResolvedValue({});
   });
 
   it("ignora la respuesta vieja al marcar 'Solo sin asignar'", async () => {
@@ -137,10 +137,29 @@ describe("ClientTicketsInbox", () => {
 
     const placeholder = await screen.findByText("Asignar a equipo...");
     fireEvent.mouseDown(placeholder);
-    fireEvent.click(placeholder);
-    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
+    fireEvent.click(await screen.findByText("Soporte"));
 
+    await waitFor(() => expect(ticketsAPI.assignToTeam).toHaveBeenCalledWith(7, 3));
+    expect(notification.success).toHaveBeenCalledWith("Ticket asignado al equipo");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(ticketsAPI.getClientInboxTeams).toHaveBeenCalled();
+  });
+
+  it("si asignar al equipo falla, avisa con un error y no recarga la lista", async () => {
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 3, name: "Soporte" }]);
+    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    ticketsAPI.assignToTeam.mockRejectedValue(new Error("boom"));
+    render(
+      <MemoryRouter>
+        <ClientTicketsInbox />
+      </MemoryRouter>
+    );
+
+    fireEvent.mouseDown(await screen.findByText("Asignar a equipo..."));
+    fireEvent.click(await screen.findByText("Soporte"));
+
+    await waitFor(() => expect(notification.error).toHaveBeenCalledWith("No se pudo asignar el ticket"));
+    expect(notification.success).not.toHaveBeenCalled();
+    expect(ticketsAPI.getClientInbox).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

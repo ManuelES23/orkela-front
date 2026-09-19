@@ -50,8 +50,11 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
     const handleKeyDown = (event) => {
       if (openModals[openModals.length - 1] !== token) return;
       // Teclas de otro overlay que no usa esta pila (ConfirmModal,
-      // RemovedFromOrgModal) no son de este diálogo
-      if (!dialog || !dialog.contains(event.target)) return;
+      // RemovedFromOrgModal) no son de este diálogo. Con el foco perdido
+      // (target document/body) sí se atiende: Escape cierra y Tab lo recupera.
+      const target = event.target;
+      const focusLost = target === document || target === document.body || target === document.documentElement;
+      if (!dialog || (!focusLost && !dialog.contains(target))) return;
 
       if (event.key === "Escape") {
         // Un control interno (p. ej. el menú de react-select) ya la usó

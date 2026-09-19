@@ -114,6 +114,33 @@ describe("Modal", () => {
     expect(outside).toHaveFocus();
   });
 
+  it("con el foco perdido en body, Escape sigue cerrando", () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title='Simple'>
+        <button>Dentro</button>
+      </Modal>,
+    );
+    document.activeElement.blur();
+
+    fireEvent.keyDown(document.body, { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("con el foco perdido en body, Tab lo devuelve al primer enfocable del diálogo", () => {
+    render(
+      <Modal isOpen onClose={vi.fn()} title='Simple'>
+        <button>Dentro</button>
+      </Modal>,
+    );
+    document.activeElement.blur();
+
+    fireEvent.keyDown(document.body, { key: "Tab" });
+
+    expect(screen.getByRole("button", { name: "Cerrar" })).toHaveFocus();
+  });
+
   it("con dos modales abiertos, Escape solo cierra el de arriba", async () => {
     const Stacked = () => {
       const [outer, setOuter] = useState(true);

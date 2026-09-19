@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { useState } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Modal from "./Modal";
@@ -58,6 +58,37 @@ describe("Modal", () => {
 
     fireEvent.keyDown(close, { key: "Tab", shiftKey: true });
     expect(last).toHaveFocus();
+  });
+
+  it("Escape sin manejar llama a onClose", () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title='Simple'>
+        <input aria-label='campo' />
+      </Modal>,
+    );
+
+    fireEvent.keyDown(screen.getByLabelText("campo"), { key: "Escape" });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignora un Escape que un control interno ya manejó (preventDefault)", () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title='Simple'>
+        <input
+          aria-label='campo'
+          onKeyDown={(e) => {
+            if (e.key === "Escape") e.preventDefault();
+          }}
+        />
+      </Modal>,
+    );
+
+    fireEvent.keyDown(screen.getByLabelText("campo"), { key: "Escape" });
+
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("con dos modales abiertos, Escape solo cierra el de arriba", async () => {

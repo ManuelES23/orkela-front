@@ -298,7 +298,10 @@ const TagManager = ({ projectId, onClose }) => {
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") saveTagName(tag.id);
-                        if (e.key === "Escape") cancelEditing();
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          cancelEditing();
+                        }
                       }}
                       className='flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none'
                       autoFocus

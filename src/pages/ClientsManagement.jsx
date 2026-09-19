@@ -11,7 +11,22 @@ import { clientsAPI, contactsAPI } from "../utils/api";
 import { useNotification } from "../context/NotificationContext";
 import { useMailResult } from "../hooks/useMailResult";
 import { Plus, Search, Send, Archive, ArchiveRestore, Star, UserPlus, Building2, User } from "lucide-react";
-import { TICKET_STATUS } from "../constants/tickets";
+
+const statusBadgeColor = {
+  open: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+  in_progress: "bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-300",
+  pending: "bg-yellow-50 dark:bg-yellow-950/40 text-yellow-600 dark:text-yellow-400",
+  resolved: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
+  closed: "bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300",
+};
+
+const statusLabels = {
+  open: "Abierto",
+  in_progress: "En progreso",
+  pending: "Pendiente",
+  resolved: "Resuelto",
+  closed: "Cerrado",
+};
 
 const AdminBadge = () => (
   <span className='inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 rounded-full px-1.5 py-0.5 shrink-0'>
@@ -405,9 +420,9 @@ const ClientsManagement = () => {
                     >
                       <span className='text-sm text-gray-700 dark:text-night-300 truncate'>{t.title}</span>
                       <span
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 border ${TICKET_STATUS[t.status]?.badgeClass ?? ""}`}
+                        className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${statusBadgeColor[t.status]}`}
                       >
-                        {TICKET_STATUS[t.status]?.label || t.status}
+                        {statusLabels[t.status] || t.status}
                       </span>
                     </div>
                   ))}

@@ -22,8 +22,15 @@ import {
   Send,
   Loader2,
   CheckCircle2,
-  XCircle,
   AlertCircle,
+  XCircle,
+  PauseCircle,
+  PlayCircle,
+  Bug,
+  HelpCircle,
+  Lightbulb,
+  Headphones,
+  MoreHorizontal,
   Lock,
   Eye,
   Hand,
@@ -33,7 +40,6 @@ import {
   Crown,
 } from "lucide-react";
 import { ticketsAPI, teamsAPI } from "../../utils/api";
-import { TICKET_STATUS, TICKET_PRIORITY, TICKET_TYPE } from "../../constants/tickets";
 
 const TicketDetailModal = ({
   isOpen,
@@ -227,7 +233,7 @@ const TicketDetailModal = ({
         status: newStatus,
       });
       await loadTicketDetails({ silent: true });
-      notifyClientMail(result, `Estado actualizado a "${TICKET_STATUS[newStatus]?.label}"`);
+      notifyClientMail(result, `Estado actualizado a "${statusConfig[newStatus]?.label}"`);
       onUpdate?.();
     } catch (err) {
       console.error("Error updating status:", err);
@@ -237,8 +243,69 @@ const TicketDetailModal = ({
     }
   };
 
-  const StatusIcon = ticket ? TICKET_STATUS[ticket.status]?.icon : AlertCircle;
-  const TypeIcon = ticket ? TICKET_TYPE[ticket.type]?.icon : MessageSquare;
+  const statusConfig = {
+    open: {
+      color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800",
+      icon: AlertCircle,
+      label: "Abierto",
+    },
+    in_progress: {
+      color: "text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800",
+      icon: PlayCircle,
+      label: "En progreso",
+    },
+    pending: {
+      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
+      icon: PauseCircle,
+      label: "Pendiente",
+    },
+    resolved: {
+      color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800",
+      icon: CheckCircle2,
+      label: "Resuelto",
+    },
+    closed: {
+      color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700",
+      icon: XCircle,
+      label: "Cerrado",
+    },
+  };
+
+  const priorityConfig = {
+    urgent: {
+      color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
+      label: "Urgente",
+    },
+    high: {
+      color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800",
+      label: "Alta",
+    },
+    medium: {
+      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
+      label: "Media",
+    },
+    low: { color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700", label: "Baja" },
+  };
+
+  const typeConfig = {
+    request: {
+      icon: MessageSquare,
+      label: "Solicitud",
+      color: "text-blue-500 dark:text-blue-400",
+    },
+    bug: { icon: Bug, label: "Bug", color: "text-red-500 dark:text-red-400" },
+    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500 dark:text-accent-400" },
+    feature: {
+      icon: Lightbulb,
+      label: "Funcionalidad",
+      color: "text-yellow-500 dark:text-yellow-400",
+    },
+    support: { icon: Headphones, label: "Soporte", color: "text-green-500 dark:text-green-400" },
+    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500 dark:text-night-400" },
+  };
+
+  const StatusIcon = ticket ? statusConfig[ticket.status]?.icon : AlertCircle;
+  const TypeIcon = ticket ? typeConfig[ticket.type]?.icon : MessageSquare;
 
   return (
     <Modal
@@ -255,7 +322,7 @@ const TicketDetailModal = ({
           <div className='flex flex-col md:flex-row md:items-start gap-4'>
             <div
               className={`p-3 rounded-lg bg-gray-50 dark:bg-night-800 ${
-                TICKET_TYPE[ticket.type]?.iconClass
+                typeConfig[ticket.type]?.color
               }`}
             >
               <TypeIcon className='w-6 h-6' />
@@ -268,24 +335,24 @@ const TicketDetailModal = ({
                 {/* Estado */}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 border ${
-                    TICKET_STATUS[ticket.status]?.badgeClass
+                    statusConfig[ticket.status]?.color
                   }`}
                 >
                   <StatusIcon className='w-4 h-4' />
-                  {TICKET_STATUS[ticket.status]?.label}
+                  {statusConfig[ticket.status]?.label}
                 </span>
                 {/* Prioridad */}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                    TICKET_PRIORITY[ticket.priority]?.badgeClass
+                    priorityConfig[ticket.priority]?.color
                   }`}
                 >
                   <Flag className='w-3 h-3 inline mr-1' />
-                  {TICKET_PRIORITY[ticket.priority]?.label}
+                  {priorityConfig[ticket.priority]?.label}
                 </span>
                 {/* Tipo */}
                 <span className='px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-night-800 text-gray-600 dark:text-night-300'>
-                  {TICKET_TYPE[ticket.type]?.label}
+                  {typeConfig[ticket.type]?.label}
                 </span>
               </div>
             </div>
@@ -562,7 +629,7 @@ const TicketDetailModal = ({
                 Cambiar Estado
               </h3>
               <div className='flex flex-wrap gap-2'>
-                {Object.entries(TICKET_STATUS).map(([status, config]) => {
+                {Object.entries(statusConfig).map(([status, config]) => {
                   if (status === ticket.status) return null;
                   const Icon = config.icon;
                   return (
@@ -570,7 +637,7 @@ const TicketDetailModal = ({
                       key={status}
                       onClick={() => handleStatusChange(status)}
                       disabled={updatingStatus}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 border transition-all hover:scale-105 disabled:opacity-50 ${config.badgeClass}`}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 border transition-all hover:scale-105 disabled:opacity-50 ${config.color}`}
                     >
                       <Icon className='w-4 h-4' />
                       {config.label}

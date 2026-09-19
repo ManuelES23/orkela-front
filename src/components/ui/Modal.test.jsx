@@ -91,6 +91,29 @@ describe("Modal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it("ignora Escape y Tab que nacen en otro overlay fuera del diálogo", () => {
+    const onClose = vi.fn();
+    render(
+      <>
+        <Modal isOpen onClose={onClose} title='Simple'>
+          <button>Dentro</button>
+        </Modal>
+        <div role='alertdialog'>
+          <button>Otro overlay</button>
+        </div>
+      </>,
+    );
+    const outside = screen.getByRole("button", { name: "Otro overlay" });
+    outside.focus();
+
+    fireEvent.keyDown(outside, { key: "Escape" });
+    const tab = fireEvent.keyDown(outside, { key: "Tab" });
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(tab).toBe(true);
+    expect(outside).toHaveFocus();
+  });
+
   it("con dos modales abiertos, Escape solo cierra el de arriba", async () => {
     const Stacked = () => {
       const [outer, setOuter] = useState(true);

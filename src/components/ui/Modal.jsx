@@ -49,6 +49,9 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
 
     const handleKeyDown = (event) => {
       if (openModals[openModals.length - 1] !== token) return;
+      // Teclas de otro overlay que no usa esta pila (ConfirmModal,
+      // RemovedFromOrgModal) no son de este diálogo
+      if (!dialog || !dialog.contains(event.target)) return;
 
       if (event.key === "Escape") {
         // Un control interno (p. ej. el menú de react-select) ya la usó
@@ -58,7 +61,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
         return;
       }
 
-      if (event.key !== "Tab" || !dialog) return;
+      if (event.key !== "Tab") return;
 
       const items = focusables();
       if (items.length === 0) {

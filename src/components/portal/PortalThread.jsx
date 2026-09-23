@@ -18,6 +18,8 @@ const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 const PortalThread = ({
   ticketId,
   ticket,
+  error = null,
+  onRetry,
   onBack,
   onSendComment,
   sending,
@@ -58,6 +60,44 @@ const PortalThread = ({
     return (
       <div className='hidden md:flex flex-1 items-center justify-center text-gray-400 dark:text-night-500 text-sm'>
         Selecciona un ticket para ver la conversación
+      </div>
+    );
+  }
+
+  // Error al cargar el detalle: sin esto `ticket` quedaba en null y el
+  // LoadingSwap mostraba el esqueleto para siempre.
+  if (error) {
+    const notFound = error === "not_found";
+    return (
+      <div className='flex-1 flex items-center justify-center p-6 text-center'>
+        <div role='alert'>
+          <p className='text-gray-900 dark:text-night-50 font-semibold mb-2'>
+            {notFound ? "No encontramos este ticket" : "No pudimos cargar la conversación"}
+          </p>
+          <p className='text-gray-500 dark:text-night-400 text-sm max-w-sm mb-4'>
+            {notFound
+              ? "Puede que el enlace sea antiguo o que ya no tengas acceso a este ticket."
+              : "Ocurrió un problema al conectar con el servidor. Intenta de nuevo."}
+          </p>
+          <div className='flex items-center justify-center gap-3'>
+            {!notFound && (
+              <button
+                type='button'
+                onClick={onRetry}
+                className='px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors'
+              >
+                Reintentar
+              </button>
+            )}
+            <button
+              type='button'
+              onClick={onBack}
+              className='px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:text-brand-600 dark:text-night-300 dark:hover:text-brand-400 transition-colors'
+            >
+              Volver a mis tickets
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

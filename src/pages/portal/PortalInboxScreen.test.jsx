@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act, waitFor } from "@testing-library/react";
+import { render, screen, act, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import PortalInboxScreen from "./PortalInboxScreen";
 import { portalAPI } from "../../utils/portalApi";
@@ -153,5 +153,55 @@ describe("PortalInboxScreen realtime echo handler", () => {
   it("un contacto normal escucha su propio canal", async () => {
     renderScreen();
     await waitFor(() => expect(echoMock.private).toHaveBeenCalledWith("client-portal.55"));
+  });
+});
+
+describe("PortalInboxScreen detalle del ticket", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setUpEchoMock();
+    portalAPI.me.mockResolvedValue({
+      contact: { id: 55 },
+      organization: { name: "Acme" },
+      tickets: [ticket1, ticket2],
+    });
+    portalAPI.getTicket.mockImplementation((id) =>
+      id === 1 ? Promise.resolve(ticket1Detail) : Promise.resolve({ ...ticket2 })
+    );
+  });
+
+  const renderScreen = () =>
+    render(
+      <MemoryRouter initialEntries={["/portal/tickets/1"]}>
+        <Routes>
+          <Route path="/portal/tickets/:id" element={<PortalInboxScreen />} />
+          <Route path="/portal/dashboard" element={<PortalInboxScreen />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+  it("muestra el error con Reintentar en vez de un esqueleto infinito y recupera al reintentar", async () => {
+    portalAPI.getTicket.mockRejectedValueOnce(Object.assign(new Error("Error del servidor"), { status: 500 }));
+    renderScreen();
+
+    expect(await screen.findByText("No pudimos cargar la conversación")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByText("Descripción")).toBeInTheDocument();
+    expect(portalAPI.getTicket).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText("No pudimos cargar la conversación")).not.toBeInTheDocument();
+  });
+
+  it("un 404 muestra que el ticket no existe, sin Reintentar", async () => {
+    portalAPI.getTicket.mockRejectedValueOnce(Object.assign(new Error("No encontrado"), { status: 404 }));
+    renderScreen();
+
+    expect(await screen.findByText("No encontramos este ticket")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Volver a mis tickets" }));
+    await waitFor(() => expect(screen.queryByText("No encontramos este ticket")).not.toBeInTheDocument());
   });
 });

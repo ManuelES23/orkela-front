@@ -19,6 +19,10 @@ const PortalInboxScreen = () => {
   const [tickets, setTickets] = useState([]);
   const [organization, setOrganization] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  // Error del detalle, separado de la carga: "not_found" (404) o "failed".
+  const [detailError, setDetailError] = useState(null);
+  // Se incrementa con "Reintentar" para volver a pedir el mismo ticket.
+  const [detailAttempt, setDetailAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -113,6 +117,7 @@ const PortalInboxScreen = () => {
   }, []);
 
   useEffect(() => {
+    setDetailError(null);
     if (!selectedId) {
       setSelectedTicket(null);
       return;
@@ -126,8 +131,8 @@ const PortalInboxScreen = () => {
       .then((ticket) => {
         if (!cancelled) setSelectedTicket(ticket);
       })
-      .catch(() => {
-        if (!cancelled) setSelectedTicket(null);
+      .catch((err) => {
+        if (!cancelled) setDetailError(err?.status === 404 ? "not_found" : "failed");
       });
     setTickets((prev) =>
       prev.map((t) => (t.id === selectedId ? { ...t, has_unread: false } : t))
@@ -135,7 +140,7 @@ const PortalInboxScreen = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedId]);
+  }, [selectedId, detailAttempt]);
 
   // Canal en vivo: el admin del Cliente escucha el canal del Cliente (ve
   // los tickets de sus colegas, B3); el resto, el propio. El evento llega a
@@ -268,13 +273,15 @@ const PortalInboxScreen = () => {
             key={selectedId}
             ticketId={selectedId}
             ticket={selectedTicket?.id === selectedId ? selectedTicket : null}
+            error={detailError}
+            onRetry={() => setDetailAttempt((n) => n + 1)}
             onBack={() => navigate("/portal/dashboard")}
             onSendComment={handleSendComment}
             sending={sending}
             onShowDetails={openDetails}
           />
         </div>
-        {selectedId && (
+        {selectedId && !detailError && (
           <div className='hidden lg:block w-72 border-l border-gray-200 dark:border-night-700 shrink-0 overflow-y-auto'>
             <PortalTicketDetailsPanel
               ticket={selectedTicket?.id === selectedId ? selectedTicket : null}

@@ -251,3 +251,43 @@ describe("fase B: accesos perdidos, workspace y organización", () => {
     expect(organizationSyncAffectsUser({ entity: "organization", action: "updated" }, me)).toBe(true);
   });
 });
+
+describe("fase 2: tickets de cliente", () => {
+  const t = (type, data = {}) => notificationTarget({ type, data });
+  const noTeam = { ticket_id: 8, organization_id: 7, team_id: null };
+  const withTeam = { ticket_id: 8, organization_id: 7, team_id: 4 };
+
+  it.each([
+    ["ticket_client_created", noTeam, "/client-tickets?ticket=8&org=7"],
+    ["ticket_comment_added", { ...noTeam, comment_id: 1 }, "/client-tickets?ticket=8&org=7"],
+    ["ticket_client_reopened", noTeam, "/client-tickets?ticket=8&org=7"],
+    ["ticket_routed_to_team", withTeam, "/tickets?ticket=8&org=7"],
+    ["ticket_client_reopened", withTeam, "/tickets?ticket=8&org=7"],
+    ["ticket_comment_added", { ...withTeam, comment_id: 1 }, "/tickets?ticket=8&org=7"],
+  ])("%s → %s", (type, data, expected) => {
+    expect(t(type, data)).toBe(expected);
+  });
+
+  it("sin la clave team_id (avisos viejos o internos) sigue abriendo Tickets", () => {
+    expect(t("ticket_comment_added", { ticket_id: 8 })).toBe("/tickets?ticket=8");
+    expect(t("ticket_created", { ticket_id: 8, organization_id: 3, team_id: 2 })).toBe("/tickets?ticket=8&org=3");
+  });
+
+  it("sin ticket_id va al listado que corresponda", () => {
+    expect(t("ticket_client_created", { organization_id: 7, team_id: null })).toBe("/client-tickets?org=7");
+  });
+
+  it("un aviso de ticket sin equipo también refresca la Bandeja de Clientes", () => {
+    expect(refreshKeysFor({ type: "ticket_client_created", data: { ticket_id: 3, team_id: null } })).toEqual(
+      expect.arrayContaining(["tickets", "clientTickets", "ticketDetail-3"])
+    );
+    expect(refreshKeysFor({ type: "ticket_routed_to_team", data: { ticket_id: 3, team_id: 4 } })).not.toContain(
+      "clientTickets"
+    );
+  });
+
+  it("la reapertura por el cliente se avisa como advertencia", () => {
+    expect(toastKindFor("ticket_client_reopened")).toBe("warning");
+    expect(toastKindFor("ticket_client_created")).toBe("info");
+  });
+});

@@ -100,10 +100,13 @@ export const notificationTarget = ({ type = "", data = {} } = {}) => {
       if (GONE_TYPES.has(type)) return withOrg("/projects", d.organization_id);
       return resourcePath("project", d);
     case "tickets": {
+      // Ticket de cliente sin equipo (team_id null): solo se trabaja desde la
+      // Bandeja de Clientes. Sin la clave (avisos viejos o internos): Tickets.
+      const base = d.team_id === null ? "/client-tickets" : "/tickets";
       // org: OrganizationRoute cambia a ese workspace si el usuario está en
       // modo personal o en otra organización
-      if (!d.ticket_id) return withOrg("/tickets", d.organization_id);
-      return withOrg(`/tickets?ticket=${d.ticket_id}`, d.organization_id);
+      if (!d.ticket_id) return withOrg(base, d.organization_id);
+      return withOrg(`${base}?ticket=${d.ticket_id}`, d.organization_id);
     }
     case "teams":
       if (GONE_TYPES.has(type)) return withOrg("/teams", d.organization_id);
@@ -161,6 +164,8 @@ export const refreshKeysFor = ({ type = "", data = {} } = {}) => {
         break;
       case "tickets":
         keys.add("tickets");
+        // Ticket de cliente sin equipo: vive en la Bandeja de Clientes
+        if (d.team_id === null) keys.add("clientTickets");
         if (d.ticket_id) keys.add(`ticketDetail-${d.ticket_id}`);
         break;
       case "teams":
@@ -245,6 +250,7 @@ const WARNING_TYPES = new Set([
   "organization_plan_downgraded",
   "organization_member_deactivated",
   "project_access_revoked",
+  "ticket_client_reopened",
 ]);
 
 export const toastKindFor = (type) => {

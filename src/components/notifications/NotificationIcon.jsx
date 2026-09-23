@@ -13,6 +13,7 @@ import {
   MailX,
   MessageSquare,
   RefreshCw,
+  RotateCcw,
   Ticket,
   Trash2,
   UserCheck,
@@ -70,6 +71,9 @@ const VISUALS = {
   ticket_resolved: [CheckCircle, "green"],
   ticket_returned_to_inbox: [Inbox, "amber"],
   ticket_comment_added: [MessageSquare, "blue"],
+  ticket_client_created: [Building2, "orange"],
+  ticket_routed_to_team: [Users, "purple"],
+  ticket_client_reopened: [RotateCcw, "amber"],
 };
 
 const NotificationIcon = ({ type, size = "md" }) => {

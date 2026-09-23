@@ -6,6 +6,8 @@ import Button from "../../components/ui/Button";
 import { motionTokens } from "../../components/animations/variants";
 import {
   setPortalToken,
+  getPortalToken,
+  clearPortalToken,
   setPortalOrgSlug,
   getPortalOrgSlug,
   portalAPI,
@@ -15,6 +17,28 @@ import {
 // del correo y no debe poder mandar al usuario a otra parte de la app.
 const safePortalRedirect = (value) =>
   value && value.startsWith("/portal/") && !value.startsWith("//") ? value : "/portal/dashboard";
+
+// El slug llega en la URL del correo (?org=): solo se acepta con forma de slug.
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const ME_RETRY_DELAY_MS = 500;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const LINK_USED_MESSAGE =
+  "Este enlace ya se usó o venció. Por seguridad, cada enlace sirve una sola vez.";
+const GENERIC_MESSAGE = "No pudimos verificar tu acceso. Intenta de nuevo.";
+
+// me() con un reintento: el canje ya creó la sesión y un fallo puntual de
+// red no debe hacerla perder. Un 401 no se reintenta (la sesión no vale).
+const loadMeWithRetry = async () => {
+  try {
+    return await portalAPI.me();
+  } catch (err) {
+    if (err?.status === 401) throw err;
+    await wait(ME_RETRY_DELAY_MS);
+    return await portalAPI.me();
+  }
+};
 
 /**
  * El enlace del correo es de un solo uso: se canjea por una sesión al pulsar
@@ -28,25 +52,57 @@ const PortalAccessConsume = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const orgSlug = getPortalOrgSlug();
+
+  const orgFromLink = searchParams.get("org");
+  const orgSlug = orgFromLink && SLUG_PATTERN.test(orgFromLink) ? orgFromLink : getPortalOrgSlug();
+  const destination = safePortalRedirect(searchParams.get("redirect"));
+
+  // Entra con la sesión guardada. Lanza solo si la sesión no vale (401).
+  const enterWithSession = async () => {
+    try {
+      const data = await loadMeWithRetry();
+      setPortalOrgSlug(data.organization.slug);
+    } catch (err) {
+      if (err?.status === 401) {
+        clearPortalToken();
+        throw err;
+      }
+      // Sesión creada pero me() sigue fallando: la bandeja tiene su propio
+      // "Reintentar"; basta con conservar el slug para el guard del layout.
+      if (orgSlug) setPortalOrgSlug(orgSlug);
+    }
+    navigate(destination, { replace: true });
+  };
 
   const handleEnter = async () => {
     setError(null);
     setLoading(true);
 
+    let sessionToken;
     try {
-      const { token: sessionToken } = await portalAPI.exchangeAccess(token);
-      setPortalToken(sessionToken);
-      const data = await portalAPI.me();
-      setPortalOrgSlug(data.organization.slug);
-      navigate(safePortalRedirect(searchParams.get("redirect")), { replace: true });
+      ({ token: sessionToken } = await portalAPI.exchangeAccess(token));
     } catch (err) {
+      // Enlace ya gastado (doble clic, otra pestaña, antivirus) pero con una
+      // sesión abierta en este navegador: se entra con ella.
+      if (err?.status === 410 && getPortalToken()) {
+        try {
+          await enterWithSession();
+          return;
+        } catch {
+          // la sesión guardada tampoco vale: se explica el 410
+        }
+      }
       setLoading(false);
-      setError(
-        err?.status === 410
-          ? "Este enlace ya se usó o venció. Por seguridad, cada enlace sirve una sola vez."
-          : "No pudimos verificar tu acceso. Intenta de nuevo."
-      );
+      setError(err?.status === 410 ? LINK_USED_MESSAGE : GENERIC_MESSAGE);
+      return;
+    }
+
+    setPortalToken(sessionToken);
+    try {
+      await enterWithSession();
+    } catch {
+      setLoading(false);
+      setError(GENERIC_MESSAGE);
     }
   };
 

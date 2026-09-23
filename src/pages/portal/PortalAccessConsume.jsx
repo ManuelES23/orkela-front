@@ -54,13 +54,25 @@ const PortalAccessConsume = () => {
   const [error, setError] = useState(null);
 
   const orgFromLink = searchParams.get("org");
-  const orgSlug = orgFromLink && SLUG_PATTERN.test(orgFromLink) ? orgFromLink : getPortalOrgSlug();
+  const validOrgFromLink = orgFromLink && SLUG_PATTERN.test(orgFromLink) ? orgFromLink : null;
+  const orgSlug = validOrgFromLink || getPortalOrgSlug();
   const destination = safePortalRedirect(searchParams.get("redirect"));
 
   // Entra con la sesión guardada. Lanza solo si la sesión no vale (401).
-  const enterWithSession = async () => {
+  // `checkOrgMatch` se activa únicamente en el camino de reuso por 410: la
+  // sesión guardada es de token único por navegador, no por enlace, así que
+  // en un dispositivo compartido puede pertenecer a otro contacto (u otra
+  // organización). Si el enlace traía un `?org=` y no coincide con la
+  // organización de la sesión guardada, esa sesión no sirve para *este*
+  // enlace — se descarta en vez de entrar silenciosamente como otra
+  // persona (I-2).
+  const enterWithSession = async ({ checkOrgMatch = false } = {}) => {
     try {
       const data = await loadMeWithRetry();
+      if (checkOrgMatch && validOrgFromLink && data.organization.slug !== validOrgFromLink) {
+        clearPortalToken();
+        throw Object.assign(new Error("Sesión de otra organización"), { status: 401 });
+      }
       setPortalOrgSlug(data.organization.slug);
     } catch (err) {
       if (err?.status === 401) {
@@ -86,7 +98,7 @@ const PortalAccessConsume = () => {
       // sesión abierta en este navegador: se entra con ella.
       if (err?.status === 410 && getPortalToken()) {
         try {
-          await enterWithSession();
+          await enterWithSession({ checkOrgMatch: true });
           return;
         } catch {
           // la sesión guardada tampoco vale: se explica el 410

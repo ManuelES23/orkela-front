@@ -197,6 +197,26 @@ describe("PortalInboxScreen detalle del ticket", () => {
     expect(screen.queryByText("No pudimos cargar la conversación")).not.toBeInTheDocument();
   });
 
+  it("un evento en vivo que refresca con éxito limpia el error de detalle pendiente (I-1)", async () => {
+    portalAPI.getTicket
+      .mockRejectedValueOnce(Object.assign(new Error("Error del servidor"), { status: 500 }))
+      .mockResolvedValueOnce(ticket1Detail);
+    renderScreen();
+
+    expect(await screen.findByText("No pudimos cargar la conversación")).toBeInTheDocument();
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    // El agente responde mientras el detalle seguía en error: la recarga que
+    // dispara el evento en vivo trae el ticket completo, así que el error
+    // viejo no debe seguir tapando los datos ya disponibles.
+    act(() => {
+      clientNotificationListener({ type: "comment_added", data: { ticket_id: 1 } });
+    });
+
+    expect(await screen.findByText("Descripción")).toBeInTheDocument();
+    expect(screen.queryByText("No pudimos cargar la conversación")).not.toBeInTheDocument();
+  });
+
   it("un 404 muestra que el ticket no existe, sin Reintentar", async () => {
     portalAPI.getTicket.mockRejectedValueOnce(Object.assign(new Error("No encontrado"), { status: 404 }));
     renderScreen();

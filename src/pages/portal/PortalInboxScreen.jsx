@@ -179,6 +179,12 @@ const PortalInboxScreen = () => {
         .then((fresh) => {
           if (selectedIdRef.current !== ticketId) return;
           setSelectedTicket((prev) => mergeTicketDetail(prev, fresh));
+          // Un fetch previo (carga inicial o Reintentar) pudo haber dejado
+          // detailError en "failed"/"not_found"; esta recarga trajo el
+          // ticket con éxito, así que ya no hay error que mostrar — si no
+          // se limpia, PortalThread sigue tapando los datos con la pantalla
+          // de error hasta que el usuario pulse Reintentar (I-1).
+          setDetailError(null);
         })
         .catch(() => {});
     };

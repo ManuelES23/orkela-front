@@ -90,6 +90,22 @@ describe("PortalAccessConsume", () => {
     expect(clearPortalToken).toHaveBeenCalled();
   });
 
+  it("un 410 con una sesión guardada de OTRA organización no entra con ella (I-2)", async () => {
+    getPortalToken.mockReturnValue("sesion-de-otro-contacto");
+    portalAPI.exchangeAccess.mockRejectedValue(httpError(410));
+    // La sesión guardada en este navegador compartido es de una organización
+    // distinta a la del enlace que se está canjeando.
+    portalAPI.me.mockResolvedValue({ organization: { slug: "otra-org" } });
+
+    renderAt("/portal/access/abc?org=acme&redirect=%2Fportal%2Ftickets%2F7");
+    enter();
+
+    expect(await screen.findByText(/Este enlace ya se usó o venció/)).toBeInTheDocument();
+    expect(screen.queryByText("Ticket abierto")).not.toBeInTheDocument();
+    expect(clearPortalToken).toHaveBeenCalled();
+    expect(setPortalOrgSlug).not.toHaveBeenCalledWith("otra-org");
+  });
+
   it("ignora un slug con caracteres no válidos", async () => {
     portalAPI.exchangeAccess.mockRejectedValue(httpError(410));
 

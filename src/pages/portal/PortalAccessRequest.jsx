@@ -13,14 +13,25 @@ const PortalAccessRequest = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     setNotFound(false);
+    setRateLimited(false);
     portalAPI
       .getOrgInfo(orgSlug)
       .then(setOrg)
-      .catch(() => setNotFound(true));
+      .catch((err) => {
+        // El throttle de `GET /api/portal/{orgSlug}` (30/min por IP) puede
+        // saltar con tráfico legítimo (varios empleados detrás del mismo
+        // NAT de oficina) — no es que el portal no exista.
+        if (err?.status === 429) {
+          setRateLimited(true);
+        } else {
+          setNotFound(true);
+        }
+      });
   }, [orgSlug]);
 
   const handleSubmit = async (e) => {
@@ -36,6 +47,16 @@ const PortalAccessRequest = () => {
       setLoading(false);
     }
   };
+
+  if (rateLimited) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-[#f7f5fb] dark:bg-night-950 p-6 text-center'>
+        <p className='text-gray-700 dark:text-night-300' role='alert'>
+          Demasiados intentos. Espera un minuto y vuelve a intentarlo.
+        </p>
+      </div>
+    );
+  }
 
   if (notFound) {
     return (

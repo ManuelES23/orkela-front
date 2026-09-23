@@ -184,6 +184,7 @@ const PortalThread = ({
                 <input
                   type='text'
                   value={draft}
+                  maxLength={5000}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder='Escribe una respuesta...'
                   disabled={sending}

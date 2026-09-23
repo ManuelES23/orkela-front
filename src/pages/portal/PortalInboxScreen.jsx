@@ -85,6 +85,13 @@ const PortalInboxScreen = () => {
     selectedIdRef.current = selectedId;
   }, [selectedId]);
 
+  // El listener del canal vive mientras dure el canal (no se recrea por
+  // contacto): lee el id del contacto desde un ref.
+  const contactIdRef = useRef(null);
+  useEffect(() => {
+    contactIdRef.current = contactId;
+  }, [contactId]);
+
   // Extraído para poder reintentar desde el botón de error sin duplicar
   // lógica. Lee `selectedIdRef.current` (no `selectedId` cerrado) porque
   // también se invoca desde el mount effect antes de que exista un render
@@ -159,7 +166,9 @@ const PortalInboxScreen = () => {
 
     const token = getPortalToken();
     const echo = getPortalEcho(token);
-    // El token pudo renovarse desde que se creó la instancia (B11)
+    // La instancia de Echo es un singleton: si se creó con otra sesión (se
+    // canjeó otro enlace en esta pestaña), se le pasa la actual. La
+    // renovación deslizante no cambia el token, solo su vencimiento.
     updatePortalEchoAuth(token);
     const channel = echo.private(channelName);
 
@@ -175,6 +184,16 @@ const PortalInboxScreen = () => {
     };
 
     channel.listen(".client-notification", (payload) => {
+      // Contacto o Cliente archivado: el backend ya borró la sesión. Se
+      // cierra aquí sin esperar al próximo 401. El admin escucha el canal del
+      // Cliente y recibe también las revocaciones de sus colegas.
+      if (payload.type === "session_revoked") {
+        if (payload.data?.contact_id === contactIdRef.current) {
+          window.dispatchEvent(new CustomEvent("portal:unauthorized"));
+        }
+        return;
+      }
+
       const ticketId = payload.data?.ticket_id;
       if (!ticketId) return;
 

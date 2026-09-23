@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, act, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import PortalInboxScreen from "./PortalInboxScreen";
-import { portalAPI } from "../../utils/portalApi";
+import { portalAPI, clearPortalToken } from "../../utils/portalApi";
 import { getPortalEcho } from "../../utils/echo";
 
 vi.mock("../../utils/portalApi", () => ({
@@ -11,8 +11,11 @@ vi.mock("../../utils/portalApi", () => ({
     getTicket: vi.fn(),
     addComment: vi.fn(),
     createTicket: vi.fn(),
+    logout: vi.fn(),
   },
   getPortalToken: vi.fn(() => "portal-token"),
+  clearPortalToken: vi.fn(),
+  getPortalOrgSlug: vi.fn(() => "acme"),
 }));
 
 vi.mock("../../utils/echo", () => ({
@@ -231,5 +234,53 @@ describe("PortalInboxScreen detalle del ticket", () => {
     });
 
     await waitFor(() => expect(screen.getAllByText("Hola equipo")).toHaveLength(1));
+  });
+});
+
+describe("PortalInboxScreen acceso revocado", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setUpEchoMock();
+    portalAPI.getTicket.mockResolvedValue(ticket1Detail);
+  });
+
+  const renderWithAccessRoute = () =>
+    render(
+      <MemoryRouter initialEntries={["/portal/tickets/1"]}>
+        <Routes>
+          <Route path="/portal/tickets/:id" element={<PortalInboxScreen />} />
+          <Route path="/portal/:orgSlug" element={<p>Pantalla de acceso</p>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+  it("cierra la sesión al recibir session_revoked para este contacto", async () => {
+    portalAPI.me.mockResolvedValue({ contact: { id: 55 }, organization: { name: "Acme" }, tickets: [ticket1] });
+    renderWithAccessRoute();
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    act(() => {
+      clientNotificationListener({ type: "session_revoked", data: { contact_id: 55 } });
+    });
+
+    expect(await screen.findByText("Pantalla de acceso")).toBeInTheDocument();
+    expect(clearPortalToken).toHaveBeenCalled();
+  });
+
+  it("el admin del Cliente ignora la revocación de un colega", async () => {
+    portalAPI.me.mockResolvedValue({
+      contact: { id: 55, is_admin: true, client: { id: 8 } },
+      organization: { name: "Acme" },
+      tickets: [ticket1],
+    });
+    renderWithAccessRoute();
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    act(() => {
+      clientNotificationListener({ type: "session_revoked", data: { contact_id: 99 } });
+    });
+
+    expect(clearPortalToken).not.toHaveBeenCalled();
+    expect(screen.queryByText("Pantalla de acceso")).not.toBeInTheDocument();
   });
 });

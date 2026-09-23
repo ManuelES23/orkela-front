@@ -88,7 +88,9 @@ export const getPortalEcho = (token) => {
   return portalEchoInstance;
 };
 
-// El token del portal puede renovarse sin recargar la página (B11)
+// Pone la sesión actual en la instancia ya creada (p. ej. tras canjear otro
+// enlace en la misma pestaña). La renovación deslizante de la sesión no
+// cambia el token: solo extiende su vencimiento en el servidor.
 export const updatePortalEchoAuth = (token) => {
   if (portalEchoInstance) {
     portalEchoInstance.connector.options.auth.headers.Authorization = `Bearer ${token}`;

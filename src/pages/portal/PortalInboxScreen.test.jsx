@@ -204,4 +204,32 @@ describe("PortalInboxScreen detalle del ticket", () => {
     fireEvent.click(screen.getByRole("button", { name: "Volver a mis tickets" }));
     await waitFor(() => expect(screen.queryByText("No encontramos este ticket")).not.toBeInTheDocument());
   });
+
+  it("no duplica el comentario si el evento en vivo llega antes que la respuesta del envío", async () => {
+    const comment = { id: 10, content: "Hola equipo", contact_id: 55, created_at: "2026-01-02T00:00:00Z" };
+    let resolvePost;
+    portalAPI.addComment.mockImplementation(
+      () => new Promise((resolve) => { resolvePost = resolve; })
+    );
+    renderScreen();
+    await screen.findByText("Descripción");
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    fireEvent.change(screen.getByPlaceholderText("Escribe una respuesta..."), {
+      target: { value: "Hola equipo" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+
+    portalAPI.getTicket.mockResolvedValue({ ...ticket1Detail, comments: [comment] });
+    act(() => {
+      clientNotificationListener({ type: "comment_added", data: { ticket_id: 1, comment_id: 10 } });
+    });
+    await screen.findByText("Hola equipo");
+
+    await act(async () => {
+      resolvePost(comment);
+    });
+
+    await waitFor(() => expect(screen.getAllByText("Hola equipo")).toHaveLength(1));
+  });
 });

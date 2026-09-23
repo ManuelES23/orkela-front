@@ -11,6 +11,7 @@ import LoadingScreen from "../../components/ui/LoadingScreen";
 import { portalAPI, getPortalToken } from "../../utils/portalApi";
 import { getPortalEcho, disconnectPortalEcho, updatePortalEchoAuth } from "../../utils/echo";
 import { applyTicketNotification } from "../../utils/portalTicketNotifications";
+import { mergeComments, mergeTicketDetail } from "../../utils/portalComments";
 import { modalBackdropVariants, slideVariants } from "../../components/animations/variants";
 
 const PortalInboxScreen = () => {
@@ -162,6 +163,17 @@ const PortalInboxScreen = () => {
     updatePortalEchoAuth(token);
     const channel = echo.private(channelName);
 
+    // Recarga el ticket abierto sin pisar comentarios ya añadidos por el POST.
+    const refreshSelected = (ticketId) => {
+      portalAPI
+        .getTicket(ticketId)
+        .then((fresh) => {
+          if (selectedIdRef.current !== ticketId) return;
+          setSelectedTicket((prev) => mergeTicketDetail(prev, fresh));
+        })
+        .catch(() => {});
+    };
+
     channel.listen(".client-notification", (payload) => {
       const ticketId = payload.data?.ticket_id;
       if (!ticketId) return;
@@ -171,13 +183,13 @@ const PortalInboxScreen = () => {
           prev.map((t) => (t.id === ticketId ? applyTicketNotification(t, payload) : t))
         );
         if (ticketId === selectedIdRef.current) {
-          portalAPI.getTicket(ticketId).then(setSelectedTicket).catch(() => {});
+          refreshSelected(ticketId);
         }
       }
 
       if (payload.type === "comment_added") {
         if (ticketId === selectedIdRef.current) {
-          portalAPI.getTicket(ticketId).then(setSelectedTicket).catch(() => {});
+          refreshSelected(ticketId);
         } else {
           setTickets((prev) =>
             prev.map((t) => (t.id === ticketId ? { ...t, has_unread: true } : t))
@@ -204,10 +216,11 @@ const PortalInboxScreen = () => {
     try {
       const comment = await portalAPI.addComment(targetId, content);
       if (selectedIdRef.current === targetId) {
-        setSelectedTicket((prev) => ({
-          ...prev,
-          comments: [...(prev.comments || []), comment],
-        }));
+        setSelectedTicket((prev) =>
+          prev && prev.id === targetId
+            ? { ...prev, comments: mergeComments(prev.comments, [comment]) }
+            : prev
+        );
       }
     } finally {
       setSending(false);

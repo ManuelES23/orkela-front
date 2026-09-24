@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, act, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, act, waitFor, fireEvent, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import PortalInboxScreen from "./PortalInboxScreen";
 import { portalAPI, clearPortalToken } from "../../utils/portalApi";
@@ -158,6 +158,58 @@ describe("PortalInboxScreen realtime echo handler", () => {
   it("un contacto normal escucha su propio canal", async () => {
     renderScreen();
     await waitFor(() => expect(echoMock.private).toHaveBeenCalledWith("client-portal.55"));
+  });
+
+  const rowOf = (title) => screen.getByText(title).closest("button");
+
+  it("respeta has_unread que devuelve el servidor", async () => {
+    portalAPI.me.mockResolvedValue({
+      contact: { id: 55 },
+      organization: { name: "Acme" },
+      tickets: [ticket1, { ...ticket2, has_unread: true }],
+    });
+    renderScreen();
+    await screen.findByText("Ticket en la lista");
+    expect(within(rowOf("Ticket en la lista")).getByText("Sin leer")).toBeInTheDocument();
+  });
+
+  it("marca sin leer un ticket con respuesta del equipo en vivo", async () => {
+    renderScreen();
+    await screen.findByText("Ticket en la lista");
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    act(() => {
+      clientNotificationListener({ type: "comment_added", data: { ticket_id: 2, comment_id: 70 } });
+    });
+
+    expect(within(rowOf("Ticket en la lista")).getByText("Sin leer")).toBeInTheDocument();
+  });
+
+  it("ignora el eco de sus propios comentarios", async () => {
+    renderScreen();
+    await screen.findByText("Ticket en la lista");
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+    portalAPI.getTicket.mockClear();
+
+    act(() => {
+      clientNotificationListener({ type: "comment_added", data: { ticket_id: 2, comment_id: 71, author_contact_id: 55 } });
+      clientNotificationListener({ type: "comment_added", data: { ticket_id: 1, comment_id: 72, author_contact_id: 55 } });
+    });
+
+    expect(within(rowOf("Ticket en la lista")).queryByText("Sin leer")).not.toBeInTheDocument();
+    expect(portalAPI.getTicket).not.toHaveBeenCalled();
+  });
+
+  it("un cambio de estado en otro ticket también queda sin leer", async () => {
+    renderScreen();
+    await screen.findByText("Ticket en la lista");
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    act(() => {
+      clientNotificationListener({ type: "status_changed", data: { ticket_id: 2, new_status: "resolved" } });
+    });
+
+    expect(within(rowOf("Ticket en la lista")).getByText("Sin leer")).toBeInTheDocument();
   });
 });
 

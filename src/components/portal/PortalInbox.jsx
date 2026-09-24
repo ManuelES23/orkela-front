@@ -98,10 +98,10 @@ const PortalInbox = ({ tickets, selectedId, onSelect, onNewTicket }) => {
                       {ticket.title}
                     </span>
                     {ticket.has_unread && (
-                      <span
-                        aria-label='Actualización nueva'
-                        className='w-2 h-2 rounded-full bg-brand-600 shrink-0'
-                      />
+                      <>
+                        <span aria-hidden='true' className='w-2 h-2 rounded-full bg-brand-600 shrink-0' />
+                        <span className='sr-only'>Sin leer</span>
+                      </>
                     )}
                   </div>
                   <div className='flex items-center gap-1.5 mt-1'>

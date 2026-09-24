@@ -256,23 +256,36 @@ const PortalInboxScreen = () => {
       const ticketId = payload.data?.ticket_id;
       if (!ticketId) return;
 
-      if (payload.type === "status_changed" || payload.type === "ticket_assigned") {
-        setTickets((prev) =>
-          prev.map((t) => (t.id === ticketId ? applyTicketNotification(t, payload) : t))
-        );
-        if (ticketId === selectedIdRef.current) {
-          refreshSelected(ticketId);
-        }
+      const isSelected = ticketId === selectedIdRef.current;
+
+      // El propio contacto ve su comentario aparecer por el POST optimista;
+      // el eco del websocket para ese mismo comentario no debe reabrir el
+      // "sin leer" ni disparar un refetch innecesario.
+      if (payload.type === "comment_added" && payload.data?.author_contact_id === contactIdRef.current) {
+        return;
       }
 
-      if (payload.type === "comment_added") {
-        if (ticketId === selectedIdRef.current) {
-          refreshSelected(ticketId);
-        } else {
-          setTickets((prev) =>
-            prev.map((t) => (t.id === ticketId ? { ...t, has_unread: true } : t))
-          );
-        }
+      if (payload.type === "status_changed" || payload.type === "ticket_assigned") {
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === ticketId
+              ? { ...applyTicketNotification(t, payload), has_unread: isSelected ? t.has_unread : true }
+              : t
+          )
+        );
+      }
+
+      if (payload.type === "comment_added" && !isSelected) {
+        setTickets((prev) =>
+          prev.map((t) => (t.id === ticketId ? { ...t, has_unread: true } : t))
+        );
+      }
+
+      // El ticket abierto se vuelve a pedir (`show` además lo marca como
+      // leído en el servidor) y se fusiona con mergeTicketDetail para no
+      // perder un comentario que el POST ya añadió.
+      if (isSelected && ["status_changed", "ticket_assigned", "comment_added"].includes(payload.type)) {
+        refreshSelected(ticketId);
       }
     });
 

@@ -558,7 +558,7 @@ const Tickets = () => {
                                       <span className='flex items-center gap-1 text-brand-700 dark:text-brand-300 font-medium'>
                                         <User className='w-3.5 h-3.5' />
                                         {ticket.assigned_user.name}
-                                        {ticket.can_resolve &&
+                                        {ticket.can_change_status &&
                                           !ticket.is_in_inbox && (
                                             <button
                                               onClick={(e) =>

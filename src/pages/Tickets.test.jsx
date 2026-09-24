@@ -191,4 +191,44 @@ describe("Tickets", () => {
     await waitFor(() => expect(screen.queryByText("Antes")).not.toBeInTheDocument());
     expect(ticketsAPI.getAll).toHaveBeenLastCalledWith({});
   });
+
+  it("'Devolver al buzón' depende de can_change_status, sin el alias can_resolve", async () => {
+    ticketsAPI.getAll.mockResolvedValue([
+      {
+        ...ticket(5, "Ticket con permiso", "in_progress"),
+        assigned_user: { id: 1, name: "Beto" },
+        is_in_inbox: false,
+        can_change_status: true,
+      },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Ticket con permiso")).toBeInTheDocument();
+    expect(screen.getByTitle("Devolver al buzón")).toBeInTheDocument();
+  });
+
+  it("sin can_change_status no ofrece 'Devolver al buzón'", async () => {
+    ticketsAPI.getAll.mockResolvedValue([
+      {
+        ...ticket(6, "Ticket sin permiso", "in_progress"),
+        assigned_user: { id: 2, name: "Lía" },
+        is_in_inbox: false,
+        can_change_status: false,
+      },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Ticket sin permiso")).toBeInTheDocument();
+    expect(screen.queryByTitle("Devolver al buzón")).not.toBeInTheDocument();
+  });
 });

@@ -1,10 +1,13 @@
+import { useEffect } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import ClientTicketsInbox from "./ClientTicketsInbox";
 import { ticketsAPI } from "../utils/api";
+import { TICKET_STATUS } from "../constants/tickets";
 
-const notification = { success: vi.fn(), error: vi.fn() };
+const notification = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
+
 vi.mock("../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),
   ticketsAPI: { getClientInbox: vi.fn(), getClientInboxTeams: vi.fn(), assignToTeam: vi.fn() },
@@ -17,152 +20,193 @@ vi.mock("../components/modals/TicketDetailModal", () => ({
   default: ({ isOpen, ticket, onClose }) =>
     isOpen ? (
       <div role='dialog' aria-label='Detalle del ticket'>
-        <p>Detalle {ticket?.id}</p>
+        Ticket #{ticket?.id}
         <button onClick={onClose}>Cerrar detalle</button>
       </div>
     ) : null,
 }));
 
-describe("ClientTicketsInbox", () => {
+const COUNTS = { sin_asignar: 1, abiertos: 2, esperando_cliente: 0, resueltos: 3, todos: 6 };
+const now = () => new Date().toISOString();
+const row = (overrides = {}) => ({
+  id: 1,
+  title: "Acceso VPN",
+  status: "open",
+  priority: "high",
+  type: "support",
+  team_id: null,
+  team: null,
+  assigned_user: null,
+  client_id: 7,
+  client: { id: 7, name: "Acme" },
+  contact: { id: 3, name: "Ana Torres" },
+  comments_count: 2,
+  last_client_comment_at: now(),
+  has_unread_client_reply: true,
+  created_at: now(),
+  can_route: true,
+  ...overrides,
+});
+const inboxPage = (rows, meta = {}) => ({
+  data: rows,
+  meta: { current_page: 1, last_page: 1, per_page: 25, total: rows.length, counts: COUNTS, client: null, ...meta },
+});
+
+let location;
+// La URL que ve el test. La captura va en un efecto, no en el render: escribir
+// en una variable de módulo mientras se renderiza es un efecto secundario
+// (react-hooks/globals) y el render puede repetirse.
+const LocationProbe = () => {
+  const current = useLocation();
+  useEffect(() => {
+    location = current;
+  }, [current]);
+  return null;
+};
+const renderInbox = (url = "/client-tickets") =>
+  render(
+    <MemoryRouter initialEntries={[url]}>
+      <ClientTicketsInbox />
+      <LocationProbe />
+    </MemoryRouter>
+  );
+const lastInboxCall = () => ticketsAPI.getClientInbox.mock.calls.at(-1)[0];
+
+describe("ClientTicketsInbox v2", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     ticketsAPI.getClientInboxTeams.mockResolvedValue([]);
-    ticketsAPI.assignToTeam.mockResolvedValue({});
   });
 
-  it("ignora la respuesta vieja al marcar 'Solo sin asignar'", async () => {
-    let resolveAll;
-    ticketsAPI.getClientInbox.mockImplementation((filters) =>
-      filters.unassigned
-        ? Promise.resolve({ data: [{ id: 2, title: "Sin asignar", status: "open", team_id: null }], meta: {} })
-        : new Promise((r) => (resolveAll = r))
-    );
+  it("muestra la fila completa y los contadores; abre por defecto 'Sin asignar'", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox();
 
-    render(
-      <MemoryRouter>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
+    expect(await screen.findByRole("button", { name: "Acceso VPN" })).toBeInTheDocument();
+    expect(screen.getByText("Acme · Ana Torres")).toBeInTheDocument();
+    expect(screen.getByText(TICKET_STATUS.open.label)).toBeInTheDocument();
+    expect(screen.getByText("Respuesta nueva del cliente")).toBeInTheDocument();
+    expect(screen.getByText(/Último mensaje del cliente hace/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByLabelText("Solo sin asignar"));
-    expect(await screen.findByText("Sin asignar")).toBeInTheDocument();
-
-    await act(async () => {
-      resolveAll({ data: [{ id: 1, title: "Asignado", status: "open", team_id: 3, team: { name: "Soporte" } }], meta: {} });
-    });
-
-    expect(screen.queryByText("Asignado")).not.toBeInTheDocument();
-    expect(screen.getByText("Sin asignar")).toBeInTheDocument();
+    const unassigned = screen.getByRole("tab", { name: /Sin asignar/ });
+    expect(unassigned).toHaveAttribute("aria-selected", "true");
+    expect(within(unassigned).getByText("1")).toBeInTheDocument();
+    expect(within(screen.getByRole("tab", { name: /Resueltos/ })).getByText("3")).toBeInTheDocument();
+    expect(screen.getByRole("tabpanel")).toHaveAttribute("aria-labelledby", "inbox-tab-sin_asignar");
+    expect(lastInboxCall()).toEqual({ tab: "sin_asignar", page: 1 });
   });
 
-  it("se recarga en vivo con organization.sync (clave clientTickets)", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue({ data: [{ id: 1, title: "Primero", status: "open", team_id: null }], meta: {} });
-    render(
-      <MemoryRouter>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
-    await screen.findByText("Primero");
+  it("cambiar de pestaña pide esa pestaña y la guarda en la URL", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox();
+    await screen.findByRole("button", { name: "Acceso VPN" });
 
-    ticketsAPI.getClientInbox.mockResolvedValue({
-      data: [
-        { id: 2, title: "Nuevo del portal", status: "open", team_id: null },
-        { id: 1, title: "Primero", status: "open", team_id: null },
-      ],
-      meta: {},
-    });
-    const refresh = realtime.registerRefresh.mock.calls.filter(([key]) => key === "clientTickets").at(-1)[1];
-    await act(async () => refresh());
+    fireEvent.click(screen.getByRole("tab", { name: /Abiertos/ }));
 
-    expect(await screen.findByText("Nuevo del portal")).toBeInTheDocument();
+    await waitFor(() => expect(lastInboxCall()).toEqual({ tab: "abiertos", page: 1 }));
+    expect(location.search).toContain("tab=abiertos");
   });
 
-  const portalTicket = {
-    id: 7,
-    title: "Sin luz en la oficina",
-    status: "open",
-    team_id: null,
-    client: { name: "Acme SA" },
-    contact: { name: "Ana", is_admin: true },
-  };
+  it("?client= se ve como chip con el nombre y se puede quitar", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()], { client: { id: 7, name: "Acme" } }));
+    renderInbox("/client-tickets?client=7&tab=todos");
 
-  it("abre el detalle al hacer clic en la fila", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
-    render(
-      <MemoryRouter>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
+    expect(await screen.findByText("Cliente: Acme")).toBeInTheDocument();
+    expect(lastInboxCall()).toEqual({ tab: "todos", page: 1, client_id: "7" });
 
-    fireEvent.click(await screen.findByRole("button", { name: /sin luz en la oficina/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Quitar filtro Cliente: Acme" }));
 
-    expect(screen.getByText("Detalle 7")).toBeInTheDocument();
+    await waitFor(() => expect(lastInboxCall()).toEqual({ tab: "todos", page: 1 }));
+    expect(location.search).not.toContain("client=");
   });
 
-  it("abre el detalle con Enter y con Espacio", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
-    render(
-      <MemoryRouter>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
-    const row = await screen.findByRole("button", { name: /sin luz en la oficina/i });
+  it("un error de carga se anuncia y 'Reintentar' vuelve a pedir", async () => {
+    ticketsAPI.getClientInbox.mockRejectedValueOnce(new Error("500")).mockResolvedValue(inboxPage([row()]));
+    renderInbox();
 
-    fireEvent.keyDown(row, { key: "Enter" });
-    expect(screen.getByText("Detalle 7")).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("No se pudieron cargar los tickets.");
+    fireEvent.click(within(alert).getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByRole("button", { name: "Acceso VPN" })).toBeInTheDocument();
+  });
+
+  it("si fallan los equipos se avisa y se puede reintentar", async () => {
+    ticketsAPI.getClientInboxTeams.mockReset();
+    ticketsAPI.getClientInboxTeams
+      .mockRejectedValueOnce(new Error("500"))
+      .mockResolvedValue([{ id: 4, name: "Soporte" }]);
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox();
+
+    expect(await screen.findByText("No se pudieron cargar los equipos.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar carga de equipos" }));
+
+    await waitFor(() => expect(screen.queryByText("No se pudieron cargar los equipos.")).not.toBeInTheDocument());
+    expect(within(screen.getByLabelText("Equipo")).getByRole("option", { name: "Soporte" })).toBeInTheDocument();
+  });
+
+  it("abrir una fila muestra el detalle; ?ticket= también lo abre y se limpia", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox("/client-tickets?ticket=9");
+
+    expect(await screen.findByRole("dialog", { name: "Detalle del ticket" })).toHaveTextContent("Ticket #9");
+    await waitFor(() => expect(location.search).not.toContain("ticket="));
 
     fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle" }));
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-
-    fireEvent.keyDown(row, { key: " " });
-    expect(screen.getByText("Detalle 7")).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Acceso VPN" }));
+    expect(screen.getByRole("dialog", { name: "Detalle del ticket" })).toHaveTextContent("Ticket #1");
   });
 
-  it("abre el ticket del enlace ?ticket=ID", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
-    render(
-      <MemoryRouter initialEntries={["/client-tickets?ticket=7"]}>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
+  it("asignar a un equipo desde la fila avisa y recarga sin abrir el detalle", async () => {
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 4, name: "Soporte" }]);
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    ticketsAPI.assignToTeam.mockResolvedValue({});
+    renderInbox();
 
-    expect(await screen.findByText("Detalle 7")).toBeInTheDocument();
-  });
+    const select = await screen.findByLabelText("Asignar equipo a Acceso VPN");
+    await waitFor(() => expect(within(select).getByRole("option", { name: "Soporte" })).toBeInTheDocument());
+    fireEvent.change(select, { target: { value: "4" } });
 
-  it("el selector de equipo de la fila lista los equipos de la organización y no abre el detalle", async () => {
-    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 3, name: "Soporte" }]);
-    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
-    render(
-      <MemoryRouter>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
-
-    const placeholder = await screen.findByText("Asignar a equipo...");
-    fireEvent.mouseDown(placeholder);
-    fireEvent.click(await screen.findByText("Soporte"));
-
-    await waitFor(() => expect(ticketsAPI.assignToTeam).toHaveBeenCalledWith(7, 3));
-    expect(notification.success).toHaveBeenCalledWith("Ticket asignado al equipo");
+    await waitFor(() => expect(ticketsAPI.assignToTeam).toHaveBeenCalledWith(1, 4));
+    await waitFor(() => expect(notification.success).toHaveBeenCalledWith("Ticket asignado al equipo"));
+    await waitFor(() => expect(ticketsAPI.getClientInbox).toHaveBeenCalledTimes(2));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("si asignar al equipo falla, avisa con un error y no recarga la lista", async () => {
-    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 3, name: "Soporte" }]);
-    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
-    ticketsAPI.assignToTeam.mockRejectedValue(new Error("boom"));
-    render(
-      <MemoryRouter>
-        <ClientTicketsInbox />
-      </MemoryRouter>
-    );
+  it("si falla la asignación se avisa", async () => {
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 4, name: "Soporte" }]);
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    ticketsAPI.assignToTeam.mockRejectedValue(new Error("403"));
+    renderInbox();
 
-    fireEvent.mouseDown(await screen.findByText("Asignar a equipo..."));
-    fireEvent.click(await screen.findByText("Soporte"));
+    const select = await screen.findByLabelText("Asignar equipo a Acceso VPN");
+    await waitFor(() => expect(within(select).getByRole("option", { name: "Soporte" })).toBeInTheDocument());
+    fireEvent.change(select, { target: { value: "4" } });
 
     await waitFor(() => expect(notification.error).toHaveBeenCalledWith("No se pudo asignar el ticket"));
-    expect(notification.success).not.toHaveBeenCalled();
-    expect(ticketsAPI.getClientInbox).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("vacío explica la pestaña; con filtros ofrece limpiarlos", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([]));
+    const { unmount } = renderInbox("/client-tickets?tab=esperando_cliente");
+    expect(await screen.findByText("Ningún ticket está esperando al cliente.")).toBeInTheDocument();
+    unmount();
+
+    renderInbox("/client-tickets?priority=high");
+    expect(await screen.findByText("Ningún ticket coincide con los filtros.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Limpiar filtros" }));
+    await waitFor(() => expect(lastInboxCall()).toEqual({ tab: "sin_asignar", page: 1 }));
+  });
+
+  it("pagina de 25 en 25 con Anterior/Siguiente", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()], { last_page: 2, total: 26 }));
+    renderInbox();
+
+    expect(await screen.findByText("Página 1 de 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+
+    await waitFor(() => expect(lastInboxCall()).toEqual({ tab: "sin_asignar", page: 2 }));
+    expect(location.search).toContain("page=2");
   });
 });

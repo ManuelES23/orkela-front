@@ -580,6 +580,15 @@ const ProjectDetail = () => {
     }
   };
 
+  // Handler para cerrar el modal de miembros: además de cerrarlo, descarta
+  // cualquier invitación a medio escribir (mismo efecto que tenía el cierre
+  // por click en el backdrop antes de migrar este diálogo a <Modal>).
+  const handleCloseMembersModal = () => {
+    setIsMembersModalOpen(false);
+    setShowInviteForm(false);
+    setInviteEmail("");
+  };
+
   const handleRemoveMember = async (userId, userName) => {
     setRemovingMember(userId);
     try {
@@ -1454,59 +1463,26 @@ const ProjectDetail = () => {
       />
 
       {/* Modal de Miembros del Proyecto */}
-      <AnimatePresence>
-        {isMembersModalOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => {
-                setIsMembersModalOpen(false);
-                setShowInviteForm(false);
-                setInviteEmail("");
-              }}
-              className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50'
-            />
-
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'
-            >
-              <div className='bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col'>
-                {/* Header */}
-                <div className='flex items-center justify-between p-5 border-b border-gray-200 dark:border-night-700'>
-                  <div>
-                    <h2 className='text-lg font-bold text-gray-900 dark:text-night-50 flex items-center gap-2'>
-                      <Users className='w-5 h-5 text-brand-600' />
-                      Miembros del Proyecto
-                    </h2>
-                    <p className='text-sm text-gray-500 dark:text-night-400 mt-0.5'>
-                      {hasTeamAssigned
-                        ? `Equipo: ${project?.team?.name}`
-                        : `${getAllProjectMembers().length} miembros`}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsMembersModalOpen(false);
-                      setShowInviteForm(false);
-                      setInviteEmail("");
-                    }}
-                    className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition-colors'
-                  >
-                    <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
-                  </button>
-                </div>
-
-                {/* Body */}
-                <div className='flex-1 overflow-y-auto p-5'>
-                  {/* Aviso si tiene equipo */}
+      <Modal
+        isOpen={isMembersModalOpen}
+        onClose={handleCloseMembersModal}
+        title='Miembros del Proyecto'
+        size='sm'
+        footer={
+          <button
+            onClick={handleCloseMembersModal}
+            className='w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-night-300 bg-white dark:bg-night-900 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
+          >
+            Cerrar
+          </button>
+        }
+      >
+        <p className='text-sm text-gray-500 dark:text-night-400 -mt-2 mb-4'>
+          {hasTeamAssigned
+            ? `Equipo: ${project?.team?.name}`
+            : `${getAllProjectMembers().length} miembros`}
+        </p>
+        {/* Aviso si tiene equipo */}
                   {hasTeamAssigned && (
                     <div className='mb-4 p-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-lg'>
                       <p className='text-sm text-purple-700 dark:text-purple-300'>
@@ -1783,26 +1759,7 @@ const ProjectDetail = () => {
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Footer */}
-                <div className='px-5 py-3 bg-gray-50 dark:bg-night-800 border-t border-gray-200 dark:border-night-700'>
-                  <button
-                    onClick={() => {
-                      setIsMembersModalOpen(false);
-                      setShowInviteForm(false);
-                      setInviteEmail("");
-                    }}
-                    className='w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-night-300 bg-white dark:bg-night-900 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800 transition-colors'
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </Modal>
 
       {/* Modal de Gestión de Etiquetas */}
       <Modal
@@ -1818,49 +1775,25 @@ const ProjectDetail = () => {
       </Modal>
 
       {/* Modal de Estadísticas de Colaborador */}
-      <AnimatePresence>
-        {collaboratorStatsModal.isOpen && (
-          <div className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='absolute inset-0 bg-black/50'
-              onClick={handleCloseCollaboratorStats}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className='relative bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
-            >
-              {/* Header */}
-              <div className='sticky top-0 bg-white dark:bg-night-900 border-b border-gray-200 dark:border-night-700 px-6 py-4 flex items-center justify-between z-10'>
-                <div className='flex items-center gap-3'>
-                  <UserAvatar
-                    user={collaboratorStatsModal.collaborator}
-                    size='md'
-                  />
-                  <div>
-                    <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
-                      {collaboratorStatsModal.collaborator?.name}
-                    </h3>
-                    <p className='text-sm text-gray-500 dark:text-night-400'>
-                      {collaboratorStatsModal.collaborator?.email}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleCloseCollaboratorStats}
-                  className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg'
-                >
-                  <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
-                </button>
-              </div>
-
-              {/* Content */}
-              <div className='p-6'>
-                {loadingCollaboratorStats ? (
+      <Modal
+        isOpen={collaboratorStatsModal.isOpen}
+        onClose={handleCloseCollaboratorStats}
+        title={
+          collaboratorStatsModal.collaborator?.name ||
+          "Estadísticas de colaborador"
+        }
+        size='md'
+      >
+        <div className='flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-night-700'>
+          <UserAvatar
+            user={collaboratorStatsModal.collaborator}
+            size='md'
+          />
+          <p className='text-sm text-gray-500 dark:text-night-400'>
+            {collaboratorStatsModal.collaborator?.email}
+          </p>
+        </div>
+        {loadingCollaboratorStats ? (
                   <div className='flex flex-col items-center justify-center py-12'>
                     <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
                     <p className='text-gray-500 dark:text-night-400'>Cargando estadísticas...</p>
@@ -2012,11 +1945,7 @@ const ProjectDetail = () => {
                     </p>
                   </div>
                 )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      </Modal>
     </Layout>
   );
 };

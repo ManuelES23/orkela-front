@@ -5,6 +5,7 @@ import { getAssetUrl } from "../utils/assetUrl";
 import OrganizationModal from "../components/modals/OrganizationModal";
 import OrganizationMailConfig from "../components/organizations/OrganizationMailConfig";
 import ConfirmModal from "../components/ui/ConfirmModal";
+import Modal from "../components/ui/Modal";
 import { SkeletonDetail } from "../components/ui/Skeleton";
 import UserAvatar from "../components/ui/UserAvatar";
 import PlanUsageBars from "../components/ui/PlanUsageBars";
@@ -1182,106 +1183,90 @@ const OrganizationDetail = () => {
       />
 
       {/* Invite Modal */}
-      <AnimatePresence>
-        {isInviteModalOpen && (
-          <div className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='absolute inset-0 bg-black/50'
-              onClick={() => setIsInviteModalOpen(false)}
+      <Modal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        title='Invitar miembro'
+        size='sm'
+      >
+        <form onSubmit={handleSendInvitation} className='space-y-4'>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+              Email *
+            </label>
+            <input
+              type='email'
+              required
+              value={inviteForm.email}
+              onChange={(e) =>
+                setInviteForm((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
+              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500'
+              placeholder='email@ejemplo.com'
             />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className='relative bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-md w-full p-6'
-            >
-              <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-4'>
-                Invitar miembro
-              </h3>
-              <form onSubmit={handleSendInvitation} className='space-y-4'>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-                    Email *
-                  </label>
-                  <input
-                    type='email'
-                    required
-                    value={inviteForm.email}
-                    onChange={(e) =>
-                      setInviteForm((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500'
-                    placeholder='email@ejemplo.com'
-                  />
-                </div>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-                    Rol
-                  </label>
-                  <select
-                    value={inviteForm.role}
-                    onChange={(e) =>
-                      setInviteForm((prev) => ({
-                        ...prev,
-                        role: e.target.value,
-                      }))
-                    }
-                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg'
-                  >
-                    <option value='member'>Miembro</option>
-                    <option value='manager'>Manager</option>
-                    <option value='admin'>Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-                    Puesto (opcional)
-                  </label>
-                  <input
-                    type='text'
-                    value={inviteForm.job_title}
-                    onChange={(e) =>
-                      setInviteForm((prev) => ({
-                        ...prev,
-                        job_title: e.target.value,
-                      }))
-                    }
-                    className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg'
-                    placeholder='Ej: Desarrollador Senior'
-                  />
-                </div>
-                <div className='flex gap-3 pt-4'>
-                  <button
-                    type='submit'
-                    disabled={sendingInvite}
-                    className='flex-1 bg-linear-to-r from-brand-600 to-accent-600 text-white py-2 rounded-lg font-medium hover:shadow-md hover:shadow-brand-600/20 disabled:opacity-50 flex items-center justify-center gap-2'
-                  >
-                    {sendingInvite ? (
-                      <Loader2 className='w-4 h-4 animate-spin' />
-                    ) : (
-                      <Send className='w-4 h-4' />
-                    )}
-                    Enviar invitación
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => setIsInviteModalOpen(false)}
-                    className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800'
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+              Rol
+            </label>
+            <select
+              value={inviteForm.role}
+              onChange={(e) =>
+                setInviteForm((prev) => ({
+                  ...prev,
+                  role: e.target.value,
+                }))
+              }
+              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 rounded-lg'
+            >
+              <option value='member'>Miembro</option>
+              <option value='manager'>Manager</option>
+              <option value='admin'>Admin</option>
+            </select>
+          </div>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+              Puesto (opcional)
+            </label>
+            <input
+              type='text'
+              value={inviteForm.job_title}
+              onChange={(e) =>
+                setInviteForm((prev) => ({
+                  ...prev,
+                  job_title: e.target.value,
+                }))
+              }
+              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg'
+              placeholder='Ej: Desarrollador Senior'
+            />
+          </div>
+          <div className='flex gap-3 pt-4'>
+            <button
+              type='submit'
+              disabled={sendingInvite}
+              className='flex-1 bg-linear-to-r from-brand-600 to-accent-600 text-white py-2 rounded-lg font-medium hover:shadow-md hover:shadow-brand-600/20 disabled:opacity-50 flex items-center justify-center gap-2'
+            >
+              {sendingInvite ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <Send className='w-4 h-4' />
+              )}
+              Enviar invitación
+            </button>
+            <button
+              type='button'
+              onClick={() => setIsInviteModalOpen(false)}
+              className='px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg hover:bg-gray-50 dark:hover:bg-night-800'
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Confirm Modal */}
       <ConfirmModal
@@ -1299,46 +1284,19 @@ const OrganizationDetail = () => {
       />
 
       {/* Member Stats Modal */}
-      <AnimatePresence>
-        {memberStatsModal.isOpen && (
-          <div className='fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 md:pb-4'>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='absolute inset-0 bg-black/50'
-              onClick={handleCloseMemberStats}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className='relative bg-white dark:bg-night-900 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto'
-            >
-              {/* Header */}
-              <div className='sticky top-0 bg-white dark:bg-night-900 border-b border-gray-200 dark:border-night-700 px-6 py-4 flex items-center justify-between'>
-                <div className='flex items-center gap-3'>
-                  <UserAvatar user={memberStatsModal.member} size='md' />
-                  <div>
-                    <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>
-                      {memberStatsModal.member?.name}
-                    </h3>
-                    <p className='text-sm text-gray-500 dark:text-night-400'>
-                      {memberStatsModal.member?.email}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleCloseMemberStats}
-                  className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg'
-                >
-                  <X className='w-5 h-5 text-gray-500 dark:text-night-400' />
-                </button>
-              </div>
-
-              {/* Content */}
-              <div className='p-6'>
-                {memberStatsModal.loading ? (
+      <Modal
+        isOpen={memberStatsModal.isOpen}
+        onClose={handleCloseMemberStats}
+        title={memberStatsModal.member?.name || "Estadísticas de miembro"}
+        size='md'
+      >
+        <div className='flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-night-700'>
+          <UserAvatar user={memberStatsModal.member} size='md' />
+          <p className='text-sm text-gray-500 dark:text-night-400'>
+            {memberStatsModal.member?.email}
+          </p>
+        </div>
+        {memberStatsModal.loading ? (
                   <div className='flex flex-col items-center justify-center py-12'>
                     <Loader2 className='w-8 h-8 animate-spin text-brand-600 mb-3' />
                     <p className='text-gray-500 dark:text-night-400'>Cargando estadísticas...</p>
@@ -1562,11 +1520,7 @@ const OrganizationDetail = () => {
                     </p>
                   </div>
                 )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      </Modal>
     </Layout>
   );
 };

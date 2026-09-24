@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { useUserContext } from "../../hooks/useOrganizationPermissions";
+import { useUserContext, useOrganizationPermissions } from "../../hooks/useOrganizationPermissions";
 import UserAvatar from "../ui/UserAvatar";
 import {
   X,
@@ -15,6 +15,8 @@ import {
   BarChart3,
   Shield,
   User,
+  Contact,
+  Inbox,
   Sun,
   Moon,
   Monitor,
@@ -34,6 +36,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
 
   const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
   const { isOrganizationContext: isInOrganizationMode } = useUserContext();
+  const { canTriageClients } = useOrganizationPermissions();
 
   const menuItems = isSuperAdmin
     ? [
@@ -44,6 +47,13 @@ const MobileMenu = ({ isOpen, onClose }) => {
     : [
         ...(isInOrganizationMode
           ? [{ icon: Users, label: "Equipos", path: "/teams" }]
+          : []),
+        // Clientes y Bandeja: solo owner/admin/manager (triage de clientes)
+        ...(isInOrganizationMode && canTriageClients
+          ? [
+              { icon: Contact, label: "Clientes", path: "/clients" },
+              { icon: Inbox, label: "Bandeja de Clientes", path: "/client-tickets" },
+            ]
           : []),
         ...(isInOrganizationMode && user.is_organization_owner
           ? [
@@ -95,9 +105,10 @@ const MobileMenu = ({ isOpen, onClose }) => {
                 <h3 className='text-lg font-semibold text-gray-900 dark:text-night-50'>Menú</h3>
                 <button
                   onClick={onClose}
+                  aria-label='Cerrar menú'
                   className='p-2 hover:bg-gray-100 dark:hover:bg-night-800 rounded-full transition-colors'
                 >
-                  <X className='w-5 h-5 text-gray-600 dark:text-night-300' />
+                  <X aria-hidden='true' className='w-5 h-5 text-gray-600 dark:text-night-300' />
                 </button>
               </div>
             </div>
@@ -131,7 +142,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
                     className='flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-night-800 active:bg-gray-100 dark:active:bg-night-700 transition-colors'
                   >
                     <div className='p-2 bg-gray-100 dark:bg-night-800 rounded-lg'>
-                      <Icon className='w-5 h-5 text-gray-700 dark:text-night-300' />
+                      <Icon aria-hidden='true' className='w-5 h-5 text-gray-700 dark:text-night-300' />
                     </div>
                     <span className='font-medium text-gray-900 dark:text-night-50'>
                       {item.label}

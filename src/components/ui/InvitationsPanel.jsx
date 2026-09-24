@@ -12,6 +12,7 @@ import {
   Loader2,
   MailOpen,
 } from "lucide-react";
+import Modal from "./Modal";
 import { myInvitationsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
 import { useRealtime } from "../../context/RealtimeContext";
@@ -353,95 +354,81 @@ const InvitationsPanel = () => {
       </AnimatePresence>
 
       {/* Modal de selección de contexto para organización */}
-      <AnimatePresence>
+      <Modal
+        isOpen={Boolean(showOrgContextModal)}
+        onClose={() => setShowOrgContextModal(null)}
+        title={
+          showOrgContextModal
+            ? `¡Bienvenido a ${showOrgContextModal.name}!`
+            : ""
+        }
+        size='sm'
+      >
         {showOrgContextModal && (
           <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className='fixed inset-0 bg-black/50 backdrop-blur-sm z-100'
-              onClick={() => setShowOrgContextModal(null)}
-            />
-
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className='fixed inset-0 z-101 flex items-center justify-center p-4'
-            >
-              <div className='bg-white dark:bg-night-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden'>
-                {/* Header */}
-                <div className='p-6 text-center bg-linear-to-br from-brand-50 to-accent-50 dark:from-brand-900/20 dark:to-accent-900/20'>
-                  <div className='w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4'>
-                    <Check className='w-8 h-8 text-green-600 dark:text-green-400' />
-                  </div>
-                  <h2 className='text-xl font-semibold text-gray-900 dark:text-night-50 mb-2'>
-                    ¡Bienvenido a {showOrgContextModal.name}!
-                  </h2>
-                  <p className='text-gray-600 dark:text-night-300'>
-                    Te has unido exitosamente a la organización. ¿Cómo deseas
-                    continuar?
-                  </p>
-                </div>
-
-                {/* Opciones de contexto */}
-                <div className='p-6 space-y-3'>
-                  {/* Opción: Modo Organización */}
-                  <button
-                    onClick={() =>
-                      // Cambiar a la organización RECIÉN aceptada: el legacy
-                      // "organization" resuelve la organización previa.
-                      handleOrgContextSelection(
-                        showOrgContextModal.id
-                          ? String(showOrgContextModal.id)
-                          : "organization"
-                      )
-                    }
-                    className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 rounded-xl hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all group text-left'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
-                        <Building2 className='w-6 h-6 text-brand-600 dark:text-brand-300' />
-                      </div>
-                      <div>
-                        <p className='font-semibold text-gray-900 dark:text-night-50'>
-                          Entrar como {showOrgContextModal.name}
-                        </p>
-                        <p className='text-sm text-gray-500 dark:text-night-400'>
-                          Ver proyectos y equipos de la organización
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* Opción: Modo Personal */}
-                  <button
-                    onClick={() => handleOrgContextSelection("personal")}
-                    className='w-full p-4 border-2 border-gray-200 dark:border-night-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-night-800 transition-all group text-left'
-                  >
-                    <div className='flex items-center gap-3'>
-                      <div className='p-2 bg-gray-100 dark:bg-night-700 rounded-lg group-hover:bg-gray-200 dark:group-hover:bg-night-600 transition-colors'>
-                        <Users className='w-6 h-6 text-gray-600 dark:text-night-300' />
-                      </div>
-                      <div>
-                        <p className='font-semibold text-gray-900 dark:text-night-50'>
-                          Continuar en modo personal
-                        </p>
-                        <p className='text-sm text-gray-500 dark:text-night-400'>
-                          Ver tus proyectos y equipos personales
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                </div>
+            <div className='text-center mb-2'>
+              <div className='w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <Check className='w-8 h-8 text-green-600 dark:text-green-400' />
               </div>
-            </motion.div>
+              <p className='text-gray-600 dark:text-night-300'>
+                Te has unido exitosamente a la organización. ¿Cómo deseas
+                continuar?
+              </p>
+            </div>
+
+            {/* Opciones de contexto */}
+            <div className='space-y-3 mt-4'>
+              {/* Opción: Modo Organización */}
+              <button
+                onClick={() =>
+                  // Cambiar a la organización RECIÉN aceptada: el legacy
+                  // "organization" resuelve la organización previa.
+                  handleOrgContextSelection(
+                    showOrgContextModal.id
+                      ? String(showOrgContextModal.id)
+                      : "organization"
+                  )
+                }
+                className='w-full p-4 border-2 border-brand-200 dark:border-brand-800 rounded-xl hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all group text-left'
+              >
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-brand-100 dark:bg-brand-900/30 rounded-lg group-hover:bg-brand-200 dark:group-hover:bg-brand-900/50 transition-colors'>
+                    <Building2 className='w-6 h-6 text-brand-600 dark:text-brand-300' />
+                  </div>
+                  <div>
+                    <p className='font-semibold text-gray-900 dark:text-night-50'>
+                      Entrar como {showOrgContextModal.name}
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>
+                      Ver proyectos y equipos de la organización
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Opción: Modo Personal */}
+              <button
+                onClick={() => handleOrgContextSelection("personal")}
+                className='w-full p-4 border-2 border-gray-200 dark:border-night-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-night-800 transition-all group text-left'
+              >
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 bg-gray-100 dark:bg-night-700 rounded-lg group-hover:bg-gray-200 dark:group-hover:bg-night-600 transition-colors'>
+                    <Users className='w-6 h-6 text-gray-600 dark:text-night-300' />
+                  </div>
+                  <div>
+                    <p className='font-semibold text-gray-900 dark:text-night-50'>
+                      Continuar en modo personal
+                    </p>
+                    <p className='text-sm text-gray-500 dark:text-night-400'>
+                      Ver tus proyectos y equipos personales
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </>
         )}
-      </AnimatePresence>
+      </Modal>
     </div>
   );
 };

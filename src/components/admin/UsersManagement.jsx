@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext";
 import ConfirmModal from "../ui/ConfirmModal";
+import Modal from "../ui/Modal";
 import UserAvatar from "../ui/UserAvatar";
 import { SkeletonTableRows } from "../ui/Skeleton";
 import { adminUsersAPI, adminOrganizationsAPI } from "../../utils/adminAPI";
@@ -334,21 +335,20 @@ const UsersManagement = ({ onStatsUpdate }) => {
       )}
 
       {/* Modal de crear/editar usuario */}
-      {isModalOpen && (
-        <UserModal
-          user={selectedUser}
-          organizations={organizations}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedUser(null);
-          }}
-          onSuccess={() => {
-            setIsModalOpen(false);
-            setSelectedUser(null);
-            loadUsers();
-          }}
-        />
-      )}
+      <UserModal
+        isOpen={isModalOpen}
+        user={selectedUser}
+        organizations={organizations}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedUser(null);
+        }}
+        onSuccess={() => {
+          setIsModalOpen(false);
+          setSelectedUser(null);
+          loadUsers();
+        }}
+      />
 
       {/* Modal de Confirmación de Eliminación */}
       <ConfirmModal
@@ -366,7 +366,7 @@ const UsersManagement = ({ onStatsUpdate }) => {
 };
 
 // Modal de crear/editar usuario
-const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
+const UserModal = ({ isOpen, user, organizations = [], onClose, onSuccess }) => {
   const { success, error } = useNotification();
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -375,6 +375,22 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
     password_confirmation: "",
     organization_id: user?.organization_id || "",
   });
+
+  // El modal ya no se desmonta al cerrarse, así que hay que reiniciar el
+  // formulario cada vez que se abre (puede ser para otro usuario distinto).
+  useEffect(() => {
+    if (!isOpen) return;
+    const resetForm = async () => {
+      setFormData({
+        name: user?.name || "",
+        email: user?.email || "",
+        password: "",
+        password_confirmation: "",
+        organization_id: user?.organization_id || "",
+      });
+    };
+    resetForm();
+  }, [isOpen, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -409,131 +425,124 @@ const UserModal = ({ user, organizations = [], onClose, onSuccess }) => {
   };
 
   return (
-    <div className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 pb-20 md:pb-4'>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className='bg-white dark:bg-night-900 rounded-xl shadow-2xl w-full max-w-md'
-      >
-        <div className='p-6 border-b border-gray-200 dark:border-night-700'>
-          <h2 className='text-xl font-bold text-gray-900 dark:text-night-50'>
-            {user ? "Editar Usuario" : "Nuevo Usuario"}
-          </h2>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={user ? "Editar Usuario" : "Nuevo Usuario"}
+      size='sm'
+    >
+      <form onSubmit={handleSubmit} className='space-y-4'>
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+            Nombre completo
+          </label>
+          <input
+            type='text'
+            required
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className='p-6 space-y-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-              Nombre completo
-            </label>
-            <input
-              type='text'
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
-            />
-          </div>
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+            Email
+          </label>
+          <input
+            type='email'
+            required
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+          />
+        </div>
 
-          <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-              Email
-            </label>
-            <input
-              type='email'
-              required
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
-            />
-          </div>
-
-          {!user && (
-            <>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-                  Contraseña
-                </label>
-                <input
-                  type='password'
-                  required={!user}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-                  Confirmar contraseña
-                </label>
-                <input
-                  type='password'
-                  required={!user}
-                  value={formData.password_confirmation}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      password_confirmation: e.target.value,
-                    })
-                  }
-                  className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
-                />
-              </div>
-            </>
-          )}
-
-          {/* Organización */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
-              Organización
-            </label>
-            <div className='relative'>
-              <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
-              <select
-                value={formData.organization_id}
+        {!user && (
+          <>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+                Contraseña
+              </label>
+              <input
+                type='password'
+                required={!user}
+                value={formData.password}
                 onChange={(e) =>
-                  setFormData({ ...formData, organization_id: e.target.value })
+                  setFormData({ ...formData, password: e.target.value })
                 }
-                className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none'
-              >
-                <option value=''>Sin organización (Usuario libre)</option>
-                {organizations.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name} ({org.plan?.name || "Sin plan"})
-                  </option>
-                ))}
-              </select>
+                className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+              />
             </div>
-            <p className='mt-1 text-xs text-gray-500 dark:text-night-400'>
-              Los usuarios sin organización solo tienen acceso al plan gratuito
-            </p>
-          </div>
 
-          <div className='flex justify-end gap-2 pt-4'>
-            <button
-              type='button'
-              onClick={onClose}
-              className='px-4 py-2 text-gray-700 dark:text-night-300 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition'
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+                Confirmar contraseña
+              </label>
+              <input
+                type='password'
+                required={!user}
+                value={formData.password_confirmation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    password_confirmation: e.target.value,
+                  })
+                }
+                className='w-full px-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+              />
+            </div>
+          </>
+        )}
+
+        {/* Organización */}
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-1'>
+            Organización
+          </label>
+          <div className='relative'>
+            <Building2 className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
+            <select
+              value={formData.organization_id}
+              onChange={(e) =>
+                setFormData({ ...formData, organization_id: e.target.value })
+              }
+              className='w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent appearance-none'
             >
-              Cancelar
-            </button>
-            <button
-              type='submit'
-              className='px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:shadow-md hover:shadow-brand-600/20 transition'
-            >
-              {user ? "Guardar cambios" : "Crear usuario"}
-            </button>
+              <option value=''>Sin organización (Usuario libre)</option>
+              {organizations.map((org) => (
+                <option key={org.id} value={org.id}>
+                  {org.name} ({org.plan?.name || "Sin plan"})
+                </option>
+              ))}
+            </select>
           </div>
-        </form>
-      </motion.div>
-    </div>
+          <p className='mt-1 text-xs text-gray-500 dark:text-night-400'>
+            Los usuarios sin organización solo tienen acceso al plan gratuito
+          </p>
+        </div>
+
+        <div className='flex justify-end gap-2 pt-4'>
+          <button
+            type='button'
+            onClick={onClose}
+            className='px-4 py-2 text-gray-700 dark:text-night-300 hover:bg-gray-100 dark:hover:bg-night-800 rounded-lg transition'
+          >
+            Cancelar
+          </button>
+          <button
+            type='submit'
+            className='px-4 py-2 bg-linear-to-r from-brand-600 to-accent-600 text-white rounded-lg hover:shadow-md hover:shadow-brand-600/20 transition'
+          >
+            {user ? "Guardar cambios" : "Crear usuario"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 

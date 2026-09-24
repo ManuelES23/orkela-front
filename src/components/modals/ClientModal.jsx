@@ -1,6 +1,7 @@
 import { useId, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Building2, User, Mail, Phone, FileText, Users } from "lucide-react";
+import { Building2, User, Mail, Phone, FileText, Users } from "lucide-react";
+import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { motionTokens } from "../animations/variants";
 import { clientsAPI } from "../../utils/api";
@@ -193,153 +194,118 @@ const ClientModal = ({ isOpen, client, onClose, onSaved }) => {
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: motionTokens.duration.base, ease: motionTokens.ease }}
-          className='fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50'
-          onClick={loading ? undefined : onClose}
+    <Modal
+      isOpen={isOpen}
+      onClose={loading ? () => {} : onClose}
+      title={client ? "Editar cliente" : "Nuevo cliente"}
+      footer={
+        <Button
+          type='submit'
+          form={formId}
+          variant='primary'
+          size='lg'
+          loading={loading}
+          loadingText='Guardando...'
+          className='w-full sm:w-auto'
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={motionTokens.springSoft}
-            onClick={(e) => e.stopPropagation()}
-            className='bg-white dark:bg-night-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto'
+          {client ? "Guardar cambios" : "Crear cliente"}
+        </Button>
+      }
+    >
+      <p className='text-sm text-gray-400 dark:text-night-500 -mt-2 mb-4'>
+        {client ? "Actualiza los datos del cliente" : "Registra un nuevo cliente y su primer contacto"}
+      </p>
+
+      <AnimatePresence initial={false}>
+        {fieldError && (
+          <motion.p
+            role='alert'
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease }}
+            className='overflow-hidden text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900 rounded-lg px-3.5 py-2.5'
           >
-            <div className='flex items-center gap-3 mb-5'>
-              <span className='shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-brand-50 to-accent-50 dark:from-brand-900/30 dark:to-accent-900/30 text-brand-600 dark:text-brand-400 flex items-center justify-center'>
-                <Building2 className='w-5 h-5' />
-              </span>
-              <div className='flex-1 min-w-0'>
-                <h2 className='text-xl font-bold text-gray-900 dark:text-night-50 truncate'>
-                  {client ? "Editar cliente" : "Nuevo cliente"}
-                </h2>
-                <p className='text-sm text-gray-400 dark:text-night-500'>
-                  {client ? "Actualiza los datos del cliente" : "Registra un nuevo cliente y su primer contacto"}
-                </p>
-              </div>
-              <motion.button
-                type='button'
-                onClick={onClose}
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                aria-label='Cerrar'
-                className='shrink-0 text-gray-400 dark:text-night-500 hover:text-gray-600 dark:hover:text-night-300 hover:bg-gray-50 dark:hover:bg-night-800 rounded-lg p-1.5'
-              >
-                <X className='w-5 h-5' />
-              </motion.button>
-            </div>
+            {fieldError}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
-            <AnimatePresence initial={false}>
-              {fieldError && (
-                <motion.p
-                  role='alert'
-                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
-                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  transition={{ duration: motionTokens.duration.fast, ease: motionTokens.ease }}
-                  className='overflow-hidden text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900 rounded-lg px-3.5 py-2.5'
-                >
-                  {fieldError}
-                </motion.p>
-              )}
-            </AnimatePresence>
+      <motion.form
+        id={formId}
+        variants={fieldsContainer}
+        initial='hidden'
+        animate='visible'
+        onSubmit={handleSubmit}
+        className='space-y-4'
+        noValidate
+      >
+        <TypeToggle value={form.type} onChange={(type) => setForm({ ...form, type })} />
+        <Field
+          icon={Building2}
+          label={form.type === "company" ? "Nombre de la empresa" : "Nombre"}
+          id={`${formId}-name`}
+          type='text'
+          required
+          placeholder={form.type === "company" ? "Ej. Comercializadora del Norte S.A." : "Ej. Ana Torres"}
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <Field
+          icon={FileText}
+          label='Notas'
+          id={`${formId}-notes`}
+          textarea
+          rows={3}
+          placeholder='Contexto interno sobre este cliente (opcional)'
+          value={form.notes}
+          onChange={(e) => setForm({ ...form, notes: e.target.value })}
+        />
 
-            <motion.form
-              variants={fieldsContainer}
-              initial='hidden'
-              animate='visible'
-              onSubmit={handleSubmit}
-              className='space-y-4'
-              noValidate
-            >
-              <TypeToggle value={form.type} onChange={(type) => setForm({ ...form, type })} />
+        {!client && (
+          <div className='border-t border-gray-100 dark:border-night-700 pt-4'>
+            <p className='text-xs font-semibold text-gray-400 dark:text-night-500 uppercase tracking-wide mb-4 flex items-center gap-1.5'>
+              <Users className='w-3.5 h-3.5' aria-hidden='true' />
+              Primer contacto
+            </p>
+            <div className='space-y-4'>
               <Field
-                icon={Building2}
-                label={form.type === "company" ? "Nombre de la empresa" : "Nombre"}
-                id={`${formId}-name`}
+                icon={User}
+                label='Nombre del contacto'
+                id={`${formId}-contact-name`}
                 type='text'
                 required
-                placeholder={form.type === "company" ? "Ej. Comercializadora del Norte S.A." : "Ej. Ana Torres"}
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder='Ej. Ana Torres'
+                autoComplete='name'
+                value={form.contactName}
+                onChange={(e) => setForm({ ...form, contactName: e.target.value })}
               />
               <Field
-                icon={FileText}
-                label='Notas'
-                id={`${formId}-notes`}
-                textarea
-                rows={3}
-                placeholder='Contexto interno sobre este cliente (opcional)'
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                icon={Mail}
+                label='Correo del contacto'
+                id={`${formId}-contact-email`}
+                type='email'
+                required
+                placeholder='ana@empresa.com'
+                autoComplete='email'
+                value={form.contactEmail}
+                onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
               />
-
-              {!client && (
-                <div className='border-t border-gray-100 dark:border-night-700 pt-4'>
-                  <p className='text-xs font-semibold text-gray-400 dark:text-night-500 uppercase tracking-wide mb-4 flex items-center gap-1.5'>
-                    <Users className='w-3.5 h-3.5' aria-hidden='true' />
-                    Primer contacto
-                  </p>
-                  <div className='space-y-4'>
-                    <Field
-                      icon={User}
-                      label='Nombre del contacto'
-                      id={`${formId}-contact-name`}
-                      type='text'
-                      required
-                      placeholder='Ej. Ana Torres'
-                      autoComplete='name'
-                      value={form.contactName}
-                      onChange={(e) => setForm({ ...form, contactName: e.target.value })}
-                    />
-                    <Field
-                      icon={Mail}
-                      label='Correo del contacto'
-                      id={`${formId}-contact-email`}
-                      type='email'
-                      required
-                      placeholder='ana@empresa.com'
-                      autoComplete='email'
-                      value={form.contactEmail}
-                      onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
-                    />
-                    <Field
-                      icon={Phone}
-                      label='Teléfono del contacto'
-                      id={`${formId}-contact-phone`}
-                      type='tel'
-                      placeholder='+52 55 1234 5678'
-                      autoComplete='tel'
-                      value={form.contactPhone}
-                      onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <motion.div variants={fieldItem}>
-                <Button
-                  type='submit'
-                  variant='primary'
-                  size='lg'
-                  loading={loading}
-                  loadingText='Guardando...'
-                  className='w-full'
-                >
-                  {client ? "Guardar cambios" : "Crear cliente"}
-                </Button>
-              </motion.div>
-            </motion.form>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              <Field
+                icon={Phone}
+                label='Teléfono del contacto'
+                id={`${formId}-contact-phone`}
+                type='tel'
+                placeholder='+52 55 1234 5678'
+                autoComplete='tel'
+                value={form.contactPhone}
+                onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
+              />
+            </div>
+          </div>
+        )}
+      </motion.form>
+    </Modal>
   );
 };
 

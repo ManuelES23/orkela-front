@@ -22,6 +22,21 @@ Se presentaron y aprobaron dos rondas de mockups:
 - **Reuso máximo de lo que ya existe:** `motionTokens`/`ease-brand`, `Button`, `AuthShell` (adaptado, no reescrito, para la pantalla de solicitar acceso), iconos de `lucide-react` ya usados en `Tickets.jsx` (Bug/Lightbulb/Headphones/Clock/CheckCircle2 etc.), y el patrón de refresco silencioso vía `useRealtime` que ya usan `Teams.jsx`/`Tickets.jsx`.
 - **Tiempo real del portal es una conexión Echo separada** (`getPortalEcho`), no una extensión del `RealtimeContext` interno — autentica contra `/api/portal/broadcasting/auth` con el token del portal, nunca con la sesión de Sanctum.
 
+## Vocabulario
+
+Añadido el 2026-09-18 (fase 6 del spec `docs/superpowers/specs/2026-09-18-clientes-bandeja-portal-design.md` del workspace).
+
+| En la interfaz | En el código | Qué es |
+|---|---|---|
+| Cliente | `client`: tabla `clients`, modelo `Client`, `clientsAPI`, `ClientsManagement`, `ClientModal` | La **empresa** a la que se da servicio (o una persona física, `type: "individual"`). Es dueña de los tickets (`tickets.client_id`). No inicia sesión. |
+| Contacto | `contact`: tabla `contacts`, modelo `Contact`, `contactsAPI`, `ContactModal` | La **persona** de un cliente que entra al portal con enlace mágico. Un cliente tiene uno o más; uno solo es `is_admin` a la vez. Tickets y comentarios guardan también `contact_id` (quién escribió). |
+| Bandeja de Clientes | `clientInbox`: `TicketController::clientInbox`, `GET /api/client-tickets`, `ticketsAPI.getClientInbox`, página `ClientTicketsInbox`, ruta `/client-tickets` | Cola del staff con los tickets que llegan del portal (`source = "client_portal"`). La atienden `owner`, `admin` y `manager`. |
+| Portal | `portal`: rutas `/portal/*`, `utils/portalApi.js`, componentes en `components/portal/` | La parte pública que usa el contacto. |
+
+En la interfaz se escribe siempre "Bandeja de Clientes" (no "buzón de clientes"; "Buzón" es el de un equipo en `/tickets`).
+
+Nota histórica: hasta la migración `2026_09_10_140000_split_clients_into_clients_and_contacts`, la tabla `clients` guardaba a la persona y `companies` a la empresa. Las secciones de este documento escritas antes de esa fecha usan "cliente" para la persona que inicia sesión; léase "contacto".
+
 ## Rutas
 
 ### Portal público (sin `PrivateRoute`/`OrganizationRoute`, layout `PortalLayout`)

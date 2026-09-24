@@ -14,7 +14,9 @@ vi.mock("../utils/api", async (importOriginal) => ({
 }));
 vi.mock("../components/layout/Layout", () => ({ default: ({ children }) => <div>{children}</div> }));
 vi.mock("../components/modals/TicketModal", () => ({ default: () => null }));
-vi.mock("../components/modals/TicketDetailModal", () => ({ default: () => null }));
+vi.mock("../components/modals/TicketDetailModal", () => ({
+  default: ({ isOpen, ticket }) => (isOpen ? <div data-testid='ticket-detail'>{ticket?.title}</div> : null),
+}));
 vi.mock("../context/NotificationContext", () => ({ useNotification: () => notification }));
 vi.mock("../context/RealtimeContext", () => ({ useRealtime: () => realtime }));
 
@@ -87,5 +89,51 @@ describe("Tickets", () => {
 
     expect(await screen.findByRole("button", { name: "Abiertos (4)" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Buzón de equipo\s*2/ })).toBeInTheDocument();
+  });
+
+  it("abre el detalle con Enter desde la fila", async () => {
+    ticketsAPI.getAll.mockResolvedValue([ticket(7, "Impresora rota", "open")]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    const row = await screen.findByRole("button", { name: "Ver ticket #7: Impresora rota" });
+    expect(row).toHaveAttribute("tabindex", "0");
+
+    fireEvent.keyDown(row, { key: "Enter" });
+
+    expect(screen.getByTestId("ticket-detail")).toHaveTextContent("Impresora rota");
+  });
+
+  it("abre el detalle con Espacio desde la fila", async () => {
+    ticketsAPI.getAll.mockResolvedValue([ticket(8, "VPN caída", "open")]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    fireEvent.keyDown(await screen.findByRole("button", { name: "Ver ticket #8: VPN caída" }), { key: " " });
+
+    expect(screen.getByTestId("ticket-detail")).toHaveTextContent("VPN caída");
+  });
+
+  it("Enter sobre un botón de la fila no abre el detalle", async () => {
+    ticketsAPI.getAll.mockResolvedValue([{ ...ticket(9, "En el buzón", "open"), can_take: true }]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    const take = (await screen.findByText("Tomar")).closest("button");
+    fireEvent.keyDown(take, { key: "Enter" });
+
+    expect(screen.queryByTestId("ticket-detail")).not.toBeInTheDocument();
   });
 });

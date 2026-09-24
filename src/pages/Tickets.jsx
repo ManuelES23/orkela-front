@@ -240,6 +240,16 @@ const Tickets = () => {
     setIsDetailModalOpen(true);
   };
 
+  // Enter/Espacio sobre la fila abren el detalle. Solo cuando el foco está en
+  // la fila misma: en un botón interno (Tomar, Editar…) hace lo suyo.
+  const handleRowKeyDown = (e, ticket) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleView(ticket);
+    }
+  };
+
   // /tickets?ticket=ID (clic en una notificación): abrir el detalle de ese ticket
   useOpenFromQuery("ticket", handleView);
 
@@ -512,8 +522,12 @@ const Tickets = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.2 }}
+                            role='button'
+                            tabIndex={0}
+                            aria-label={`Ver ticket #${ticket.id}: ${ticket.title}`}
                             onClick={() => handleView(ticket)}
-                            className='group flex items-start gap-3 py-4 px-2 -mx-2 border-b border-gray-100 dark:border-night-700 last:border-b-0 rounded-lg cursor-pointer hover:bg-gray-50/70 dark:hover:bg-night-800/70 transition-colors'
+                            onKeyDown={(e) => handleRowKeyDown(e, ticket)}
+                            className='group flex items-start gap-3 py-4 px-2 -mx-2 border-b border-gray-100 dark:border-night-700 last:border-b-0 rounded-lg cursor-pointer hover:bg-gray-50/70 dark:hover:bg-night-800/70 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500'
                           >
                             {/* Punto de estado */}
                             <span
@@ -646,7 +660,7 @@ const Tickets = () => {
                                     </motion.button>
                                   )}
 
-                                  <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                  <div className='flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity'>
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();

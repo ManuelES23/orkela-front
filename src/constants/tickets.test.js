@@ -29,3 +29,30 @@ describe("constantes de tickets", () => {
     });
   });
 });
+
+describe("constantes de ticket — claves de la fase 6", () => {
+  it("cada estado tiene label, badgeClass, icon y dotClass", () => {
+    expect(Object.keys(TICKET_STATUS).sort()).toEqual(["closed", "in_progress", "open", "pending", "resolved"]);
+    for (const cfg of Object.values(TICKET_STATUS)) {
+      expect(typeof cfg.label).toBe("string");
+      expect(typeof cfg.badgeClass).toBe("string");
+      expect(cfg.icon).toBeTruthy();
+      expect(cfg.dotClass).toMatch(/^bg-/);
+    }
+  });
+
+  it("cada prioridad tiene label, badgeClass y flagClass", () => {
+    expect(Object.keys(TICKET_PRIORITY).sort()).toEqual(["high", "low", "medium", "urgent"]);
+    for (const cfg of Object.values(TICKET_PRIORITY)) {
+      expect(typeof cfg.label).toBe("string");
+      expect(typeof cfg.badgeClass).toBe("string");
+      expect(cfg.flagClass).toMatch(/^text-/);
+    }
+  });
+
+  it("los tipos con vocabulario propio del portal lo declaran en portalLabel", () => {
+    expect(TICKET_TYPE.bug.portalLabel).toBe("Reportar un problema");
+    expect(TICKET_TYPE.feature.portalLabel).toBe("Pedir una función nueva");
+    expect(TICKET_TYPE.question.portalLabel).toBeUndefined();
+  });
+});

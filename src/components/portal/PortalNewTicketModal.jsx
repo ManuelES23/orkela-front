@@ -15,23 +15,23 @@ import {
 import Button from "../ui/Button";
 import Modal from "../ui/Modal";
 import { motionTokens } from "../animations/variants";
+import { TYPE_LABELS, PRIORITY_LABELS } from "./ticketVocabulary";
 
-// Mismo vocabulario de tipo que ticketVocabulary.js (TYPE_LABELS), para que
-// el ticket se lea igual al crearlo y una vez creado.
+// Etiquetas desde ticketVocabulary.js (fuente única en constants/tickets.js).
 const typeOptions = [
-  { value: "request", label: "Solicitud", icon: MessageSquare, color: "text-brand-500" },
-  { value: "bug", label: "Reportar un problema", icon: Bug, color: "text-red-500" },
-  { value: "feature", label: "Pedir una función nueva", icon: Lightbulb, color: "text-yellow-500" },
-  { value: "question", label: "Pregunta", icon: HelpCircle, color: "text-accent-500" },
-  { value: "support", label: "Soporte", icon: Headphones, color: "text-green-500" },
-  { value: "other", label: "Otro", icon: MoreHorizontal, color: "text-gray-500 dark:text-night-400" },
+  { value: "request", label: TYPE_LABELS.request, icon: MessageSquare, color: "text-brand-500" },
+  { value: "bug", label: TYPE_LABELS.bug, icon: Bug, color: "text-red-500" },
+  { value: "feature", label: TYPE_LABELS.feature, icon: Lightbulb, color: "text-yellow-500" },
+  { value: "question", label: TYPE_LABELS.question, icon: HelpCircle, color: "text-accent-500" },
+  { value: "support", label: TYPE_LABELS.support, icon: Headphones, color: "text-green-500" },
+  { value: "other", label: TYPE_LABELS.other, icon: MoreHorizontal, color: "text-gray-500 dark:text-night-400" },
 ];
 
 const priorityOptions = [
-  { value: "low", label: "Baja", color: "text-gray-400 dark:text-night-500" },
-  { value: "medium", label: "Media", color: "text-yellow-500" },
-  { value: "high", label: "Alta", color: "text-orange-500" },
-  { value: "urgent", label: "Urgente", color: "text-red-500" },
+  { value: "low", label: PRIORITY_LABELS.low, color: "text-gray-400 dark:text-night-500" },
+  { value: "medium", label: PRIORITY_LABELS.medium, color: "text-yellow-500" },
+  { value: "high", label: PRIORITY_LABELS.high, color: "text-orange-500" },
+  { value: "urgent", label: PRIORITY_LABELS.urgent, color: "text-red-500" },
 ];
 
 // Igual que el límite del backend (`description` max:5000).

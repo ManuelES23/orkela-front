@@ -33,9 +33,13 @@ import { useNotification } from "../context/NotificationContext";
 const railLabelClass =
   "mb-2 block text-[10.5px] font-extrabold tracking-[0.07em] text-gray-400 uppercase dark:text-night-400";
 const cardClass = "rounded-2xl border border-gray-200 bg-white dark:border-night-700 dark:bg-night-900";
-// Hoja inferior en móvil (.sheet + .grab) → bloque normal dentro del carril en lg
+// Hoja inferior en móvil (.sheet + .grab) → bloque normal dentro del carril en lg.
+// z-[101] y el velo en z-[100], como MobileMenu: BottomNav es `fixed bottom-0
+// … z-50 md:hidden` con una barra opaca de 64 px, así que por debajo de md una
+// hoja con menos z queda tapada justo donde está el selector «Equipo» — y el
+// toque iría a la barra de navegación en vez de al filtro.
 const sheetOpenClass =
-  "fixed inset-x-0 bottom-0 z-40 max-h-[82vh] overflow-y-auto rounded-t-[20px] border border-b-0 border-gray-200 bg-white px-4 pt-1 pb-5 shadow-[0_-12px_34px_-14px_rgba(20,15,32,0.35)] dark:border-night-700 dark:bg-night-900";
+  "fixed inset-x-0 bottom-0 z-[101] max-h-[82vh] overflow-y-auto rounded-t-[20px] border border-b-0 border-gray-200 bg-white px-4 pt-1 pb-5 shadow-[0_-12px_34px_-14px_rgba(20,15,32,0.35)] dark:border-night-700 dark:bg-night-900";
 const sheetInRailClass =
   "lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none";
 
@@ -72,6 +76,20 @@ const ClientTicketsInbox = () => {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+  }, [filtersOpen, closeFilters]);
+
+  // Al pasar a lg los filtros ya se ven en el carril: dejar la hoja "abierta"
+  // la haría reaparecer sola al volver a angostar la ventana.
+  useEffect(() => {
+    if (!filtersOpen) return undefined;
+    const wide = window.matchMedia?.("(min-width: 1024px)");
+    if (!wide) return undefined;
+    const sync = () => {
+      if (wide.matches) closeFilters();
+    };
+    sync();
+    wide.addEventListener?.("change", sync);
+    return () => wide.removeEventListener?.("change", sync);
   }, [filtersOpen, closeFilters]);
 
   const handleAssign = useCallback(
@@ -140,7 +158,7 @@ const ClientTicketsInbox = () => {
                 transition={{ duration: reduceMotion ? 0 : 0.15 }}
                 onClick={closeFilters}
                 aria-hidden='true'
-                className='fixed inset-0 z-30 bg-night-950/45 lg:hidden'
+                className='fixed inset-0 z-[100] bg-night-950/45 lg:hidden'
               />
             )}
           </AnimatePresence>
@@ -170,6 +188,23 @@ const ClientTicketsInbox = () => {
               onRetryTeams={teamOptions.retry}
               onChange={setFilter}
             />
+
+            {/* .clr del carril: lleva el contador, así que su nombre accesible
+                («Limpiar filtros (2)») nunca choca con el botón pelado de
+                InboxEmpty ni con el de la fila de chips. */}
+            {chips.length > 0 && (
+              <button
+                type='button'
+                onClick={() => {
+                  clearFilters();
+                  closeFilters();
+                }}
+                className='mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-red-300 px-3 text-[12.5px] font-extrabold text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30'
+              >
+                <X className='h-3.5 w-3.5' aria-hidden='true' />
+                {`Limpiar filtros (${chips.length})`}
+              </button>
+            )}
           </div>
         </aside>
 

@@ -98,4 +98,14 @@ export const portalAPI = {
       body: JSON.stringify({ content }),
     });
   },
+
+  // "Confirmar solución": cierra un ticket resuelto. Devuelve el detalle.
+  confirmResolution: async (id) => {
+    return await portalRequest(`/portal/tickets/${id}/confirm-resolution`, { method: "POST" });
+  },
+
+  // "Sigue sin funcionar": reabre un ticket resuelto o cerrado.
+  reopenTicket: async (id) => {
+    return await portalRequest(`/portal/tickets/${id}/reopen`, { method: "POST" });
+  },
 };

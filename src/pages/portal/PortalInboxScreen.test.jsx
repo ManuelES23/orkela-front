@@ -12,6 +12,8 @@ vi.mock("../../utils/portalApi", () => ({
     addComment: vi.fn(),
     createTicket: vi.fn(),
     logout: vi.fn(),
+    confirmResolution: vi.fn(),
+    reopenTicket: vi.fn(),
   },
   getPortalToken: vi.fn(() => "portal-token"),
   clearPortalToken: vi.fn(),
@@ -272,6 +274,42 @@ describe("PortalInboxScreen detalle del ticket", () => {
     expect(portalAPI.addComment).toHaveBeenCalledWith(1, "Hola equipo");
     await waitFor(() => expect(screen.queryByText("Enviando…")).not.toBeInTheDocument());
     expect(screen.getAllByText("Hola equipo")).toHaveLength(1);
+  });
+
+  it("confirmar la solución actualiza el hilo y la fila", async () => {
+    portalAPI.getTicket.mockImplementation((id) =>
+      Promise.resolve(id === 1 ? { ...ticket1Detail, status: "resolved" } : { ...ticket2 })
+    );
+    portalAPI.confirmResolution.mockResolvedValue({ ...ticket1Detail, status: "closed" });
+    renderScreen();
+
+    const confirmButton = await screen.findByRole("button", { name: "Confirmar solución" });
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
+
+    expect(portalAPI.confirmResolution).toHaveBeenCalledWith(1);
+    expect(await screen.findByText(/Este ticket está cerrado/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirmar solución" })).not.toBeInTheDocument();
+  });
+
+  it("responder en un ticket resuelto avisa y vuelve a pedir el ticket reabierto", async () => {
+    portalAPI.getTicket.mockImplementation((id) =>
+      Promise.resolve(id === 1 ? { ...ticket1Detail, status: "resolved" } : { ...ticket2 })
+    );
+    portalAPI.addComment.mockResolvedValue({ id: 91, content: "Sigue igual", created_at: "2026-01-01T00:05:00Z", contact_id: 55, contact: { id: 55, name: "Ana" }, user: null });
+    renderScreen();
+
+    const input = await screen.findByLabelText("Tu respuesta");
+    expect(input).toHaveAccessibleDescription("Si respondes, el ticket se reabrirá.");
+    portalAPI.getTicket.mockClear();
+
+    fireEvent.change(input, { target: { value: "Sigue igual" } });
+    await act(async () => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+
+    await waitFor(() => expect(portalAPI.getTicket).toHaveBeenCalledWith(1));
   });
 });
 

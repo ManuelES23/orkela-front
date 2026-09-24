@@ -9,6 +9,8 @@ import PortalMessageBubble from "./chat/PortalMessageBubble";
 import PortalComposer from "./chat/PortalComposer";
 import { buildThreadMessages } from "./chat/threadMessages";
 import { useStickToBottom } from "./chat/useStickToBottom";
+import PortalTicketStatusBar from "./PortalTicketStatusBar";
+import { REOPENS_ON_REPLY } from "./portalStatusHelp";
 
 const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 
@@ -30,6 +32,8 @@ const PortalThread = ({
   onBack,
   onSendComment,
   onShowDetails,
+  onConfirmResolution,
+  onReopen,
 }) => {
   // El borrador sobrevive en sessionStorage por si la sesión vence a medio
   // escribir y PortalLayout redirige (desmontando el hilo).
@@ -94,6 +98,12 @@ const PortalThread = ({
   const retry = (tempId) => {
     const item = outbox.find((m) => m.tempId === tempId);
     if (item) deliver(item);
+  };
+
+  // Tras "Sigue sin funcionar", el foco va al compositor para contar qué falla.
+  const handleReopen = async () => {
+    await onReopen();
+    composerRef.current?.focus();
   };
 
   if (!ticketId) {
@@ -187,6 +197,11 @@ const PortalThread = ({
         <PortalThreadSkeleton />
       ) : (
         <>
+          <PortalTicketStatusBar
+            ticket={ticket}
+            onConfirmResolution={onConfirmResolution}
+            onReopen={handleReopen}
+          />
           <div className='relative flex-1 min-h-0'>
             <div
               ref={containerRef}
@@ -217,7 +232,13 @@ const PortalThread = ({
               </button>
             )}
           </div>
-          <PortalComposer value={draft} onChange={setDraft} onSubmit={handleSubmit} inputRef={composerRef} />
+          <PortalComposer
+            value={draft}
+            onChange={setDraft}
+            onSubmit={handleSubmit}
+            inputRef={composerRef}
+            hint={REOPENS_ON_REPLY.includes(ticket.status) ? "Si respondes, el ticket se reabrirá." : null}
+          />
         </>
       )}
     </div>

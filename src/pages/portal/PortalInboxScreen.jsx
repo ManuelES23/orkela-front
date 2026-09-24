@@ -13,6 +13,7 @@ import { getPortalEcho, disconnectPortalEcho, updatePortalEchoAuth } from "../..
 import { applyTicketNotification } from "../../utils/portalTicketNotifications";
 import { mergeComments, mergeTicketDetail } from "../../utils/portalComments";
 import { modalBackdropVariants, slideVariants } from "../../components/animations/variants";
+import { REOPENS_ON_REPLY } from "../../components/portal/portalStatusHelp";
 
 const PortalInboxScreen = () => {
   const { id } = useParams();
@@ -122,6 +123,35 @@ const PortalInboxScreen = () => {
     // Solo debe correr al montar — la selección se maneja aparte.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Aplica un detalle recién devuelto por el servidor al hilo (si sigue
+  // visible) y a su fila de la lista.
+  const applyTicketUpdate = useCallback((updated) => {
+    if (!updated?.id) return;
+    // mergeTicketDetail (fase 3): no pierde un comentario que el POST ya añadió.
+    if (selectedIdRef.current === updated.id) setSelectedTicket((prev) => mergeTicketDetail(prev, updated));
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === updated.id
+          ? {
+              ...t,
+              status: updated.status,
+              assigned_agent: updated.assigned_agent ?? null,
+              team: updated.team ?? null,
+              has_unread: false,
+            }
+          : t
+      )
+    );
+  }, []);
+
+  const handleConfirmResolution = async () => {
+    applyTicketUpdate(await portalAPI.confirmResolution(selectedId));
+  };
+
+  const handleReopen = async () => {
+    applyTicketUpdate(await portalAPI.reopenTicket(selectedId));
+  };
 
   useEffect(() => {
     setDetailError(null);
@@ -258,9 +288,10 @@ const PortalInboxScreen = () => {
   // Devuelve el comentario guardado (o rechaza): PortalThread lleva el
   // estado "enviando / error — reintentar" de cada mensaje.
   const handleSendComment = async (content) => {
-    // Si el usuario cambia de ticket antes de que resuelva, el comentario
-    // no debe aparecer en el hilo que quedó visible.
     const targetId = selectedId;
+    // Responder en resuelto/cerrado lo reabre en el servidor: luego se pide
+    // el detalle para reflejar el estado y el evento nuevos.
+    const reopens = REOPENS_ON_REPLY.includes(selectedTicket?.status);
     const comment = await portalAPI.addComment(targetId, content);
     if (selectedIdRef.current === targetId) {
       setSelectedTicket((prev) =>
@@ -268,6 +299,9 @@ const PortalInboxScreen = () => {
           ? { ...prev, comments: mergeComments(prev.comments, [comment]) }
           : prev
       );
+    }
+    if (reopens) {
+      portalAPI.getTicket(targetId).then(applyTicketUpdate).catch(() => {});
     }
     return comment;
   };
@@ -337,6 +371,8 @@ const PortalInboxScreen = () => {
             onBack={() => navigate("/portal/dashboard")}
             onSendComment={handleSendComment}
             onShowDetails={openDetails}
+            onConfirmResolution={handleConfirmResolution}
+            onReopen={handleReopen}
           />
         </div>
         {selectedId && !detailError && (

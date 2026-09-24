@@ -100,4 +100,25 @@ describe("useClientsDirectory", () => {
     expect(result.current.loadingMore).toBe(false);
     expect(result.current.clients).toEqual([acme]);
   });
+
+  it("loadMore no compite con una recarga completa en curso: 'loading' no queda colgado", async () => {
+    let resolveInitial;
+    clientsAPI.getAll.mockImplementation(() => new Promise((resolve) => (resolveInitial = resolve)));
+    const { result } = renderHook(() => useClientsDirectory());
+
+    expect(result.current.loading).toBe(true);
+
+    act(() => {
+      result.current.loadMore();
+    });
+
+    // loadMore fue un no-op: ni pidió una página más ni tocó ningún estado.
+    expect(clientsAPI.getAll).toHaveBeenCalledTimes(1);
+    expect(result.current.loadingMore).toBe(false);
+
+    await act(async () => resolveInitial(directoryPage([acme], { last_page: 2, total: 2 })));
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.clients).toEqual([acme]);
+  });
 });

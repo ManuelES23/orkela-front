@@ -31,6 +31,11 @@ const useClientsDirectory = () => {
   const requestIdRef = useRef(0);
   // Páginas ya mostradas: la recarga en vivo las vuelve a pedir todas
   const pagesRef = useRef(1);
+  // requestId de la recarga completa (no silenciosa) en curso, o null si no hay ninguna.
+  // loadMore no debe competir con ella: cargaría una página de una lista a punto de
+  // ser reemplazada y, de paso, invalidaría el requestId que la recarga espera ver
+  // al terminar (dejando 'loading' colgado en true).
+  const fullReloadRequestIdRef = useRef(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setQuery(search.trim()), CLIENT_SEARCH_DEBOUNCE_MS);
@@ -42,6 +47,7 @@ const useClientsDirectory = () => {
       const requestId = ++requestIdRef.current;
       const pages = silent ? pagesRef.current : 1;
       if (!silent) {
+        fullReloadRequestIdRef.current = requestId;
         setLoading(true);
         setError(false);
       }
@@ -58,6 +64,9 @@ const useClientsDirectory = () => {
         if (requestId === requestIdRef.current && !silent) setError(true);
       } finally {
         if (requestId === requestIdRef.current) setLoading(false);
+        // Solo limpiar si seguimos siendo la recarga completa más reciente: otra
+        // pudo haber empezado (p. ej. una nueva búsqueda) mientras esta esperaba.
+        if (!silent && fullReloadRequestIdRef.current === requestId) fullReloadRequestIdRef.current = null;
       }
     },
     [query]
@@ -70,6 +79,10 @@ const useClientsDirectory = () => {
   useDebouncedRefresh(["clients"], () => load({ silent: true }));
 
   const loadMore = useCallback(async () => {
+    // Hay una recarga completa en curso: no tiene sentido pedir "la página siguiente"
+    // de una lista que está a punto de ser reemplazada entera, y hacerlo invalidaría
+    // el requestId que esa recarga necesita para poder apagar 'loading' al terminar.
+    if (fullReloadRequestIdRef.current !== null) return;
     const nextPage = pagesRef.current + 1;
     const requestId = ++requestIdRef.current;
     setLoadingMore(true);

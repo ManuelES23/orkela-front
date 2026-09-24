@@ -163,4 +163,45 @@ describe("Modal", () => {
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "Interior" })).not.toBeInTheDocument());
     expect(screen.getByRole("dialog", { name: "Exterior" })).toBeInTheDocument();
   });
+
+  it("con dismissible={false} ni Escape ni el fondo lo cierran y no hay botón Cerrar", () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title='Aviso obligatorio' dismissible={false}>
+        <button type='button'>Continuar</button>
+      </Modal>,
+    );
+
+    fireEvent.keyDown(document.activeElement, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Cerrar" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Aviso obligatorio" })).toBeInTheDocument();
+  });
+
+  it("variant='alert' no muestra cabecera pero sí un título accesible centrado", () => {
+    const onClose = vi.fn();
+    render(
+      <Modal isOpen onClose={onClose} title='¿Eliminar etiqueta?' variant='alert'>
+        <p>No se puede deshacer.</p>
+      </Modal>,
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "¿Eliminar etiqueta?" });
+    expect(dialog).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cerrar" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "¿Eliminar etiqueta?" })).toBeInTheDocument();
+  });
+
+  it("con footer, las acciones quedan fuera del área con scroll del cuerpo", () => {
+    render(
+      <Modal isOpen onClose={vi.fn()} title='Editar cliente' footer={<button type='button'>Guardar</button>}>
+        <p>Contenido del formulario</p>
+      </Modal>,
+    );
+
+    const save = screen.getByRole("button", { name: "Guardar" });
+    const body = screen.getByText("Contenido del formulario");
+    // El botón del footer no debe estar dentro del contenedor con overflow-y del cuerpo.
+    expect(body.closest("[class*='overflow-y-auto']")).not.toContainElement(save);
+  });
 });

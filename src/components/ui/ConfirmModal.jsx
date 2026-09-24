@@ -52,6 +52,13 @@ const ConfirmModal = ({
 
       <div className='grid w-full gap-2'>
         <button
+          onClick={onClose}
+          disabled={loading}
+          className='w-full px-4 py-2 text-gray-700 dark:text-night-300 font-medium rounded-lg border border-gray-300 dark:border-night-600 hover:bg-gray-100 dark:hover:bg-night-800 transition-colors disabled:opacity-50'
+        >
+          {cancelText}
+        </button>
+        <button
           onClick={handleConfirm}
           disabled={loading}
           className={`w-full px-4 py-2 text-white font-medium rounded-lg transition-colors disabled:opacity-50 ${styles.buttonBg}`}
@@ -79,13 +86,6 @@ const ConfirmModal = ({
           ) : (
             confirmText
           )}
-        </button>
-        <button
-          onClick={onClose}
-          disabled={loading}
-          className='w-full px-4 py-2 text-gray-700 dark:text-night-300 font-medium rounded-lg border border-gray-300 dark:border-night-600 hover:bg-gray-100 dark:hover:bg-night-800 transition-colors disabled:opacity-50'
-        >
-          {cancelText}
         </button>
       </div>
     </Modal>

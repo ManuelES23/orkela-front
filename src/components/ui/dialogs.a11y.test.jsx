@@ -41,6 +41,17 @@ describe("Diálogos sobre el Modal accesible", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("ConfirmModal (type='danger') enfoca Cancelar al abrir, no la acción destructiva", () => {
+    render(
+      <MemoryRouter>
+        <ConfirmModal isOpen onClose={vi.fn()} onConfirm={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    expect(document.activeElement).toHaveTextContent("Cancelar");
+    expect(document.activeElement).not.toHaveTextContent("Confirmar");
+  });
+
   it("RemovedFromOrgModal es un diálogo que no se descarta con Escape", () => {
     const onClose = vi.fn();
     render(

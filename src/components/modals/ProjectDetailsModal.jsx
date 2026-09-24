@@ -132,20 +132,29 @@ const ProjectDetailsModal = ({
       }
     >
       <div className='space-y-6'>
-        {/* Badges de estado/prioridad + acciones rápidas (antes en la cabecera propia) */}
+        {/* Identidad de color + badges de estado/prioridad + acciones rápidas (antes en la cabecera propia) */}
         <div className='flex items-center justify-between gap-2 flex-wrap'>
-          <div className='flex items-center gap-2'>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color} flex items-center gap-1`}
+          <div className='flex items-center gap-3'>
+            <div
+              className={`${project.color} w-12 h-12 rounded-xl flex items-center justify-center shadow-sm shrink-0`}
             >
-              <StatusIcon className='w-4 h-4' />
-              {statusInfo.label}
-            </span>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${priorityInfo.bgColor} ${priorityInfo.color}`}
-            >
-              Prioridad {priorityInfo.label}
-            </span>
+              <span className='text-white font-bold text-lg'>
+                {project.name.charAt(0)}
+              </span>
+            </div>
+            <div className='flex items-center gap-2 flex-wrap'>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.color} flex items-center gap-1`}
+              >
+                <StatusIcon className='w-4 h-4' />
+                {statusInfo.label}
+              </span>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${priorityInfo.bgColor} ${priorityInfo.color}`}
+              >
+                Prioridad {priorityInfo.label}
+              </span>
+            </div>
           </div>
           <div className='flex items-center gap-2'>
             <button

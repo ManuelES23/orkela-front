@@ -51,9 +51,12 @@ const PortalAccessRequest = () => {
   if (rateLimited) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-[#f7f5fb] dark:bg-night-950 p-6 text-center'>
-        <p className='text-gray-700 dark:text-night-300' role='alert'>
-          Demasiados intentos. Espera un minuto y vuelve a intentarlo.
-        </p>
+        <div>
+          <h1 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-2'>Demasiados intentos</h1>
+          <p className='text-gray-700 dark:text-night-300' role='alert'>
+            Demasiados intentos. Espera un minuto y vuelve a intentarlo.
+          </p>
+        </div>
       </div>
     );
   }

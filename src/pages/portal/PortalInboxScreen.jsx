@@ -412,9 +412,7 @@ const PortalInboxScreen = () => {
         translated off-screen — confirmed live) but AnimatePresence never
         unmounted the plain wrapper, so the full-screen backdrop stayed in
         the DOM and kept swallowing clicks on the thread underneath long
-        after the drawer looked closed. Mirrors PortalNewTicketModal.jsx's
-        already-working shape: outer motion.div *is* the backdrop, panel
-        nests inside it as its own motion.div.
+        after the drawer looked closed.
       */}
       <AnimatePresence>
         {detailsOpen && selectedTicket?.id === selectedId && (

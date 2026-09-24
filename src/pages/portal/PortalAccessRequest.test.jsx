@@ -39,9 +39,12 @@ describe("PortalAccessRequest", () => {
 
     renderAt("acme");
 
-    expect(await screen.findByText(/Demasiados intentos/)).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(/Demasiados intentos/);
     expect(
-      screen.queryByText(/No encontramos este portal de soporte/)
+      screen.getByRole("heading", { level: 1, name: "Demasiados intentos" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { level: 1, name: "No encontramos este portal" })
     ).not.toBeInTheDocument();
   });
 

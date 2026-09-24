@@ -303,4 +303,54 @@ describe("PortalInboxScreen acceso revocado", () => {
     expect(clearPortalToken).not.toHaveBeenCalled();
     expect(screen.queryByText("Pantalla de acceso")).not.toBeInTheDocument();
   });
+
+  it("recarga /portal/me y cambia del canal del Cliente al propio al recibir client_admin_revoked para este contacto", async () => {
+    portalAPI.me
+      .mockResolvedValueOnce({
+        contact: { id: 55, is_admin: true, client: { id: 8 } },
+        organization: { name: "Acme" },
+        tickets: [ticket1],
+      })
+      .mockResolvedValueOnce({
+        contact: { id: 55, is_admin: false, client: { id: 8 } },
+        organization: { name: "Acme" },
+        tickets: [ticket1],
+      });
+    renderWithAccessRoute();
+    await waitFor(() => expect(echoMock.private).toHaveBeenCalledWith("client-portal-client.8"));
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    act(() => {
+      clientNotificationListener({ type: "client_admin_revoked", data: { contact_id: 55 } });
+    });
+
+    // isClientAdmin pasa a false tras la recarga, así que channelName
+    // cambia: el efecto abandona el canal del Cliente y se resuscribe al
+    // canal propio del contacto (no queda escuchando un canal para el que
+    // ya no está autorizado).
+    await waitFor(() => expect(portalAPI.me).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(echoMock.leave).toHaveBeenCalledWith("client-portal-client.8"));
+    await waitFor(() => expect(echoMock.private).toHaveBeenCalledWith("client-portal.55"));
+    // A diferencia de session_revoked, la sesión sigue vigente: no cierra
+    // sesión ni navega a la pantalla de acceso.
+    expect(clearPortalToken).not.toHaveBeenCalled();
+    expect(screen.queryByText("Pantalla de acceso")).not.toBeInTheDocument();
+  });
+
+  it("ignora client_admin_revoked de un colega", async () => {
+    portalAPI.me.mockResolvedValue({
+      contact: { id: 55, is_admin: true, client: { id: 8 } },
+      organization: { name: "Acme" },
+      tickets: [ticket1],
+    });
+    renderWithAccessRoute();
+    await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
+
+    act(() => {
+      clientNotificationListener({ type: "client_admin_revoked", data: { contact_id: 99 } });
+    });
+
+    expect(portalAPI.me).toHaveBeenCalledTimes(1);
+    expect(echoMock.leave).not.toHaveBeenCalled();
+  });
 });

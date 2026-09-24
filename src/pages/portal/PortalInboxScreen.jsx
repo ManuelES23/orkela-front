@@ -189,6 +189,23 @@ const PortalInboxScreen = () => {
         .catch(() => {});
     };
 
+    // promote() degradó a este contacto: su sesión sigue vigente pero ya no
+    // está autorizado en client-portal-client.{clientId} (solo lo escuchaba
+    // por ser admin). Un refetch acotado de /portal/me — sin pasar por
+    // loadMe(), que dispara el LoadingScreen de pantalla completa — alcanza
+    // para refrescar isClientAdmin/clientId; eso cambia channelName, lo que
+    // dispara el cleanup de este efecto (echo.leave del canal del Cliente) y
+    // resuscribe al canal propio, sin interrumpir el ticket que se esté viendo.
+    const refreshClientAdminStatus = () => {
+      portalAPI
+        .me()
+        .then((data) => {
+          setIsClientAdmin(Boolean(data.contact.is_admin));
+          setClientId(data.contact.client?.id ?? null);
+        })
+        .catch(() => {});
+    };
+
     channel.listen(".client-notification", (payload) => {
       // Contacto o Cliente archivado: el backend ya borró la sesión. Se
       // cierra aquí sin esperar al próximo 401. El admin escucha el canal del
@@ -196,6 +213,13 @@ const PortalInboxScreen = () => {
       if (payload.type === "session_revoked") {
         if (payload.data?.contact_id === contactIdRef.current) {
           window.dispatchEvent(new CustomEvent("portal:unauthorized"));
+        }
+        return;
+      }
+
+      if (payload.type === "client_admin_revoked") {
+        if (payload.data?.contact_id === contactIdRef.current) {
+          refreshClientAdminStatus();
         }
         return;
       }

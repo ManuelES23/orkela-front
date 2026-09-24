@@ -27,7 +27,6 @@ const PortalInboxScreen = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sending, setSending] = useState(false);
   const [contactId, setContactId] = useState(null);
   const [isClientAdmin, setIsClientAdmin] = useState(false);
   const [clientId, setClientId] = useState(null);
@@ -256,24 +255,21 @@ const PortalInboxScreen = () => {
     return () => disconnectPortalEcho();
   }, []);
 
+  // Devuelve el comentario guardado (o rechaza): PortalThread lleva el
+  // estado "enviando / error — reintentar" de cada mensaje.
   const handleSendComment = async (content) => {
-    // Captura a qué ticket se manda este comentario — si el usuario cambia
-    // de ticket antes de que la petición resuelva, no debe terminar
-    // apareciendo en el hilo que quedó visible.
+    // Si el usuario cambia de ticket antes de que resuelva, el comentario
+    // no debe aparecer en el hilo que quedó visible.
     const targetId = selectedId;
-    setSending(true);
-    try {
-      const comment = await portalAPI.addComment(targetId, content);
-      if (selectedIdRef.current === targetId) {
-        setSelectedTicket((prev) =>
-          prev && prev.id === targetId
-            ? { ...prev, comments: mergeComments(prev.comments, [comment]) }
-            : prev
-        );
-      }
-    } finally {
-      setSending(false);
+    const comment = await portalAPI.addComment(targetId, content);
+    if (selectedIdRef.current === targetId) {
+      setSelectedTicket((prev) =>
+        prev && prev.id === targetId
+          ? { ...prev, comments: mergeComments(prev.comments, [comment]) }
+          : prev
+      );
     }
+    return comment;
   };
 
   const handleCreateTicket = async (ticketData) => {
@@ -335,11 +331,11 @@ const PortalInboxScreen = () => {
             key={selectedId}
             ticketId={selectedId}
             ticket={selectedTicket?.id === selectedId ? selectedTicket : null}
+            contactId={contactId}
             error={detailError}
             onRetry={() => setDetailAttempt((n) => n + 1)}
             onBack={() => navigate("/portal/dashboard")}
             onSendComment={handleSendComment}
-            sending={sending}
             onShowDetails={openDetails}
           />
         </div>

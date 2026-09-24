@@ -238,7 +238,7 @@ describe("PortalInboxScreen detalle del ticket", () => {
     await screen.findByText("Descripción");
     await waitFor(() => expect(clientNotificationListener).toBeTypeOf("function"));
 
-    fireEvent.change(screen.getByPlaceholderText("Escribe una respuesta..."), {
+    fireEvent.change(screen.getByLabelText("Tu respuesta"), {
       target: { value: "Hola equipo" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
@@ -247,13 +247,31 @@ describe("PortalInboxScreen detalle del ticket", () => {
     act(() => {
       clientNotificationListener({ type: "comment_added", data: { ticket_id: 1, comment_id: 10 } });
     });
-    await screen.findByText("Hola equipo");
+    // Recarga disparada por el evento en vivo (la primera llamada fue la carga inicial).
+    await waitFor(() => expect(portalAPI.getTicket).toHaveBeenCalledTimes(2));
 
     await act(async () => {
       resolvePost(comment);
     });
 
     await waitFor(() => expect(screen.getAllByText("Hola equipo")).toHaveLength(1));
+  });
+
+  it("envía desde el compositor y el comentario aparece una sola vez", async () => {
+    portalAPI.addComment.mockResolvedValue({
+      id: 90, content: "Hola equipo", created_at: "2026-01-01T00:05:00Z", contact_id: 55, contact: { id: 55, name: "Ana" }, user: null,
+    });
+    renderScreen();
+    const input = await screen.findByLabelText("Tu respuesta");
+
+    fireEvent.change(input, { target: { value: "Hola equipo" } });
+    await act(async () => {
+      fireEvent.keyDown(input, { key: "Enter" });
+    });
+
+    expect(portalAPI.addComment).toHaveBeenCalledWith(1, "Hola equipo");
+    await waitFor(() => expect(screen.queryByText("Enviando…")).not.toBeInTheDocument());
+    expect(screen.getAllByText("Hola equipo")).toHaveLength(1);
   });
 });
 

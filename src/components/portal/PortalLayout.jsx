@@ -78,7 +78,7 @@ const PortalLayout = ({ children, organization }) => {
   }
 
   return (
-    <div className='min-h-screen bg-[#f7f5fb] dark:bg-night-950 flex flex-col'>
+    <div className='h-dvh overflow-hidden bg-[#f7f5fb] dark:bg-night-950 flex flex-col'>
       <header className='border-b border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 px-6 py-3.5 flex items-center gap-2.5 shrink-0'>
         <img
           src={organization?.logo || "/img/isotipo_orkela.png"}
@@ -98,7 +98,7 @@ const PortalLayout = ({ children, organization }) => {
           Salir
         </button>
       </header>
-      <main className='flex-1 flex flex-col min-h-0'>{children}</main>
+      <main className='flex-1 flex flex-col min-h-0 overflow-hidden'>{children}</main>
     </div>
   );
 };

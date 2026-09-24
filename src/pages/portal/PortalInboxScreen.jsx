@@ -9,6 +9,7 @@ import PortalNewTicketModal from "../../components/portal/PortalNewTicketModal";
 import PortalTicketDetailsPanel from "../../components/portal/PortalTicketDetailsPanel";
 import LoadingScreen from "../../components/ui/LoadingScreen";
 import { portalAPI, getPortalToken } from "../../utils/portalApi";
+import { isDesktopViewport } from "../../utils/viewport";
 import { getPortalEcho, disconnectPortalEcho, updatePortalEchoAuth } from "../../utils/echo";
 import { applyTicketNotification } from "../../utils/portalTicketNotifications";
 import { mergeComments, mergeTicketDetail } from "../../utils/portalComments";
@@ -108,7 +109,9 @@ const PortalInboxScreen = () => {
         setTickets(data.tickets);
         setOrganization(data.organization);
         setLoading(false);
-        if (!selectedIdRef.current && data.tickets.length > 0) {
+        // En móvil /portal/dashboard es la lista: abrir un ticket solo
+        // escondería la lista detrás del hilo.
+        if (!selectedIdRef.current && data.tickets.length > 0 && isDesktopViewport()) {
           navigate(`/portal/tickets/${data.tickets[0].id}`, { replace: true });
         }
       })
@@ -362,7 +365,7 @@ const PortalInboxScreen = () => {
     <PortalLayout organization={organization}>
       <div className='flex-1 flex min-h-0'>
         <div
-          className={`w-full md:w-80 border-r border-gray-200 dark:border-night-700 shrink-0 ${
+          className={`w-full md:w-80 border-r border-gray-200 dark:border-night-700 shrink-0 min-h-0 ${
             selectedId ? "hidden md:block" : "block"
           }`}
         >
@@ -373,7 +376,7 @@ const PortalInboxScreen = () => {
             onNewTicket={() => setIsModalOpen(true)}
           />
         </div>
-        <div className={`flex-1 min-w-0 ${selectedId ? "flex" : "hidden md:flex"}`}>
+        <div className={`flex-1 min-w-0 min-h-0 ${selectedId ? "flex" : "hidden md:flex"}`}>
           <PortalThread
             key={selectedId}
             ticketId={selectedId}

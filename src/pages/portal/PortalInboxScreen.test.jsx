@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, waitFor, fireEvent, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import PortalInboxScreen from "./PortalInboxScreen";
 import { portalAPI, clearPortalToken } from "../../utils/portalApi";
 import { getPortalEcho } from "../../utils/echo";
+import { DESKTOP_QUERY } from "../../utils/viewport";
 
 vi.mock("../../utils/portalApi", () => ({
   portalAPI: {
@@ -460,5 +461,57 @@ describe("PortalInboxScreen acceso revocado", () => {
 
     expect(portalAPI.me).toHaveBeenCalledTimes(1);
     expect(echoMock.leave).not.toHaveBeenCalled();
+  });
+});
+
+describe("PortalInboxScreen en /portal/dashboard", () => {
+  const originalMatchMedia = window.matchMedia;
+
+  const mockViewport = (isDesktop) => {
+    window.matchMedia = (query) => ({
+      matches: isDesktop && query === DESKTOP_QUERY,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    });
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setUpEchoMock();
+    portalAPI.me.mockResolvedValue({ contact: { id: 55 }, organization: { name: "Acme" }, tickets: [ticket1, ticket2] });
+    portalAPI.getTicket.mockResolvedValue(ticket1Detail);
+  });
+
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
+  const renderDashboard = () =>
+    render(
+      <MemoryRouter initialEntries={["/portal/dashboard"]}>
+        <Routes>
+          <Route path="/portal/dashboard" element={<PortalInboxScreen />} />
+          <Route path="/portal/tickets/:id" element={<PortalInboxScreen />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+  it("en móvil muestra la lista y no abre ningún ticket solo", async () => {
+    mockViewport(false);
+    renderDashboard();
+    expect(await screen.findByText("Ticket en la lista")).toBeInTheDocument();
+    expect(portalAPI.getTicket).not.toHaveBeenCalled();
+    expect(screen.queryByRole("log")).not.toBeInTheDocument();
+  });
+
+  it("en escritorio abre el primer ticket", async () => {
+    mockViewport(true);
+    renderDashboard();
+    await waitFor(() => expect(portalAPI.getTicket).toHaveBeenCalledWith(1));
   });
 });

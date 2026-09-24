@@ -15,8 +15,13 @@ import {
 
 // Solo se aceptan destinos dentro del portal: el parámetro viene en la URL
 // del correo y no debe poder mandar al usuario a otra parte de la app.
-const safePortalRedirect = (value) =>
-  value && value.startsWith("/portal/") && !value.startsWith("//") ? value : "/portal/dashboard";
+// Se resuelve con URL para que segmentos ".." (p.ej. "/portal/../admin")
+// no escapen del prefijo tras la normalización del navegador.
+const safePortalRedirect = (value) => {
+  if (!value || value.startsWith("//")) return "/portal/dashboard";
+  const resolvedPath = new URL(value, "https://portal.invalid").pathname;
+  return resolvedPath.startsWith("/portal/") ? resolvedPath : "/portal/dashboard";
+};
 
 // El slug llega en la URL del correo (?org=): solo se acepta con forma de slug.
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

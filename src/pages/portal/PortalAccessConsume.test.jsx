@@ -28,6 +28,7 @@ const renderAt = (url) =>
         <Route path="/portal/access/:token" element={<PortalAccessConsume />} />
         <Route path="/portal/dashboard" element={<p>Bandeja del portal</p>} />
         <Route path="/portal/tickets/:id" element={<p>Ticket abierto</p>} />
+        <Route path="/admin" element={<p>Panel admin</p>} />
       </Routes>
     </MemoryRouter>
   );
@@ -114,5 +115,16 @@ describe("PortalAccessConsume", () => {
 
     expect(await screen.findByText(/Pide un enlace nuevo al equipo de soporte/)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Pedir un enlace nuevo" })).not.toBeInTheDocument();
+  });
+
+  it("un redirect con segmentos .. que escapan de /portal/ cae a la bandeja", async () => {
+    portalAPI.exchangeAccess.mockResolvedValue({ token: "sesion" });
+    portalAPI.me.mockResolvedValue({ organization: { slug: "acme" } });
+
+    renderAt("/portal/access/abc?org=acme&redirect=%2Fportal%2F..%2Fadmin");
+    enter();
+
+    expect(await screen.findByText("Bandeja del portal", {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(screen.queryByText("Panel admin")).not.toBeInTheDocument();
   });
 });

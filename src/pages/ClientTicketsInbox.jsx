@@ -50,7 +50,7 @@ const ClientTicketsInbox = () => {
         onlyUnassigned ? { unassigned: true } : {}
       );
       if (requestId !== requestIdRef.current) return;
-      setTickets(data);
+      setTickets(data.data);
     } catch {
       if (requestId !== requestIdRef.current) return;
       setLoadError(true);

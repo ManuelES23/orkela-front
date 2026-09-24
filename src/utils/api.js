@@ -601,11 +601,14 @@ export const ticketsAPI = {
     });
   },
 
+  // Bandeja de Clientes paginada: { data, meta: { counts, client, ... } }
   getClientInbox: async (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.status) params.append("status", filters.status);
+    ["tab", "status", "priority", "type", "client_id", "team_id", "q", "page"].forEach((key) => {
+      const value = filters[key];
+      if (value !== undefined && value !== null && value !== "") params.append(key, String(value));
+    });
     if (filters.unassigned) params.append("unassigned", "1");
-    if (filters.client_id) params.append("client_id", filters.client_id);
 
     const query = params.toString();
     return await request(`/client-tickets${query ? `?${query}` : ""}`);
@@ -856,9 +859,13 @@ export const plansAPI = {
 
 // Clients API
 export const clientsAPI = {
+  // Directorio paginado: { data, meta }. `q` busca por cliente o contacto.
   getAll: async (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.status) params.append("status", filters.status);
+    ["status", "q", "page"].forEach((key) => {
+      const value = filters[key];
+      if (value !== undefined && value !== null && value !== "") params.append(key, String(value));
+    });
 
     const query = params.toString();
     return await request(`/clients${query ? `?${query}` : ""}`);

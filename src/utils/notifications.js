@@ -197,9 +197,15 @@ export const organizationSyncKeysFor = (payload = {}) => {
 
   switch (payload.entity) {
     case "client_ticket":
-      // Bandeja de Clientes, y el buzón del equipo si ya tiene uno
+      // Bandeja de Clientes, el buzón del equipo si ya tiene uno, y la
+      // pantalla Clientes (conteo y tickets recientes)
       keys.add("clientTickets");
       keys.add("tickets");
+      keys.add("clients");
+      break;
+    case "client":
+      // Alta/edición/archivo de clientes y contactos
+      keys.add("clients");
       break;
     case "team":
       ["teams", "organizations", "dashboard"].forEach((k) => keys.add(k));

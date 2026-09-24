@@ -34,7 +34,7 @@ describe("ClientTicketsInbox", () => {
     let resolveAll;
     ticketsAPI.getClientInbox.mockImplementation((filters) =>
       filters.unassigned
-        ? Promise.resolve([{ id: 2, title: "Sin asignar", status: "open", team_id: null }])
+        ? Promise.resolve({ data: [{ id: 2, title: "Sin asignar", status: "open", team_id: null }], meta: {} })
         : new Promise((r) => (resolveAll = r))
     );
 
@@ -48,7 +48,7 @@ describe("ClientTicketsInbox", () => {
     expect(await screen.findByText("Sin asignar")).toBeInTheDocument();
 
     await act(async () => {
-      resolveAll([{ id: 1, title: "Asignado", status: "open", team_id: 3, team: { name: "Soporte" } }]);
+      resolveAll({ data: [{ id: 1, title: "Asignado", status: "open", team_id: 3, team: { name: "Soporte" } }], meta: {} });
     });
 
     expect(screen.queryByText("Asignado")).not.toBeInTheDocument();
@@ -56,7 +56,7 @@ describe("ClientTicketsInbox", () => {
   });
 
   it("se recarga en vivo con organization.sync (clave clientTickets)", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue([{ id: 1, title: "Primero", status: "open", team_id: null }]);
+    ticketsAPI.getClientInbox.mockResolvedValue({ data: [{ id: 1, title: "Primero", status: "open", team_id: null }], meta: {} });
     render(
       <MemoryRouter>
         <ClientTicketsInbox />
@@ -64,10 +64,13 @@ describe("ClientTicketsInbox", () => {
     );
     await screen.findByText("Primero");
 
-    ticketsAPI.getClientInbox.mockResolvedValue([
-      { id: 2, title: "Nuevo del portal", status: "open", team_id: null },
-      { id: 1, title: "Primero", status: "open", team_id: null },
-    ]);
+    ticketsAPI.getClientInbox.mockResolvedValue({
+      data: [
+        { id: 2, title: "Nuevo del portal", status: "open", team_id: null },
+        { id: 1, title: "Primero", status: "open", team_id: null },
+      ],
+      meta: {},
+    });
     const refresh = realtime.registerRefresh.mock.calls.filter(([key]) => key === "clientTickets").at(-1)[1];
     await act(async () => refresh());
 
@@ -84,7 +87,7 @@ describe("ClientTicketsInbox", () => {
   };
 
   it("abre el detalle al hacer clic en la fila", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
     render(
       <MemoryRouter>
         <ClientTicketsInbox />
@@ -97,7 +100,7 @@ describe("ClientTicketsInbox", () => {
   });
 
   it("abre el detalle con Enter y con Espacio", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
     render(
       <MemoryRouter>
         <ClientTicketsInbox />
@@ -116,7 +119,7 @@ describe("ClientTicketsInbox", () => {
   });
 
   it("abre el ticket del enlace ?ticket=ID", async () => {
-    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
     render(
       <MemoryRouter initialEntries={["/client-tickets?ticket=7"]}>
         <ClientTicketsInbox />
@@ -128,7 +131,7 @@ describe("ClientTicketsInbox", () => {
 
   it("el selector de equipo de la fila lista los equipos de la organización y no abre el detalle", async () => {
     ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 3, name: "Soporte" }]);
-    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
     render(
       <MemoryRouter>
         <ClientTicketsInbox />
@@ -146,7 +149,7 @@ describe("ClientTicketsInbox", () => {
 
   it("si asignar al equipo falla, avisa con un error y no recarga la lista", async () => {
     ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 3, name: "Soporte" }]);
-    ticketsAPI.getClientInbox.mockResolvedValue([portalTicket]);
+    ticketsAPI.getClientInbox.mockResolvedValue({ data: [portalTicket], meta: {} });
     ticketsAPI.assignToTeam.mockRejectedValue(new Error("boom"));
     render(
       <MemoryRouter>

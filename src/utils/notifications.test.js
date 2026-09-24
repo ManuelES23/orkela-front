@@ -241,6 +241,13 @@ describe("fase B: accesos perdidos, workspace y organización", () => {
     expect(organizationSyncKeysFor({ entity: "invitation", action: "cancelled" })).toContain("organizations");
   });
 
+  it("organization.sync de clientes y de tickets de cliente refresca la pantalla Clientes", () => {
+    expect(organizationSyncKeysFor({ entity: "client", action: "updated", client_id: 3 })).toEqual(["clients"]);
+    expect(organizationSyncKeysFor({ entity: "client_ticket", action: "comment_added", ticket_id: 4, client_id: 3 })).toEqual(
+      expect.arrayContaining(["clientTickets", "tickets", "clients", "ticketDetail-4"])
+    );
+  });
+
   it("organization.sync pide refrescar el usuario si me afecta o cambia la organización", () => {
     const me = { id: 2 };
     expect(organizationSyncAffectsUser({ entity: "member", action: "role_updated", member_id: 2 }, me)).toBe(true);

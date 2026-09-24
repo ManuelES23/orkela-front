@@ -54,7 +54,7 @@ const ClientsManagement = () => {
     setLoading(true);
     setLoadError(false);
     try {
-      const data = await clientsAPI.getAll();
+      const { data } = await clientsAPI.getAll();
       setClients(data);
       if (!id && data.length > 0) {
         navigate(`/clients/${data[0].id}`, { replace: true });

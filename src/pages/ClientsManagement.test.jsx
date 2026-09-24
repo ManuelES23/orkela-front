@@ -47,7 +47,7 @@ const renderPage = () =>
 describe("ClientsManagement — tickets recientes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    clientsAPI.getAll.mockResolvedValue([{ ...client, tickets_count: 1 }]);
+    clientsAPI.getAll.mockResolvedValue({ data: [{ ...client, tickets_count: 1 }], meta: {} });
     clientsAPI.getById.mockResolvedValue(client);
   });
 

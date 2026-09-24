@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Tickets from "./Tickets";
 import { ticketsAPI, teamsAPI } from "../utils/api";
@@ -135,5 +135,60 @@ describe("Tickets", () => {
     fireEvent.keyDown(take, { key: "Enter" });
 
     expect(screen.queryByTestId("ticket-detail")).not.toBeInTheDocument();
+  });
+
+  it("si la carga falla muestra el error", async () => {
+    ticketsAPI.getAll.mockRejectedValue(new Error("caído"));
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("No se pudieron cargar los tickets")).toBeInTheDocument();
+  });
+
+  it("un refresco en tiempo real que falla no muestra error ni vacía la lista", async () => {
+    ticketsAPI.getAll.mockResolvedValue([ticket(1, "Sigue aquí", "open")]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+    expect(await screen.findByText("Sigue aquí")).toBeInTheDocument();
+
+    const refresh = realtime.registerRefresh.mock.calls.at(-1)[1];
+    ticketsAPI.getAll.mockRejectedValue(new Error("caído"));
+    await act(async () => {
+      await refresh();
+    });
+
+    expect(screen.getByText("Sigue aquí")).toBeInTheDocument();
+    expect(screen.queryByText("No se pudieron cargar los tickets")).not.toBeInTheDocument();
+  });
+
+  it("un refresco en tiempo real actualiza la lista sin pasar por el esqueleto", async () => {
+    ticketsAPI.getAll.mockResolvedValue([ticket(1, "Antes", "open")]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+    expect(await screen.findByText("Antes")).toBeInTheDocument();
+
+    const refresh = realtime.registerRefresh.mock.calls.at(-1)[1];
+    ticketsAPI.getAll.mockResolvedValue([ticket(2, "Después", "open")]);
+    await act(async () => {
+      await refresh({ resource: "tickets" });
+    });
+
+    expect(screen.getByText("Después")).toBeInTheDocument();
+    // La fila anterior se anima con AnimatePresence (exit dura 0.2s en tiempo
+    // real): esperamos a que termine en lugar de asumir que desaparece ya.
+    await waitFor(() => expect(screen.queryByText("Antes")).not.toBeInTheDocument());
+    expect(ticketsAPI.getAll).toHaveBeenLastCalledWith({});
   });
 });

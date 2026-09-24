@@ -52,6 +52,15 @@ const STATUS_TABS = [
   { key: "closed", label: "Cerrados", statKey: "closed" },
 ];
 
+// Filtros de ticketsAPI.getAll según pestaña de estado, vista del rail y equipo.
+const buildTicketFilters = (status, view, teamId) => {
+  const filters = {};
+  if (status !== "all") filters.status = status;
+  if (view !== "all") filters.filter = view;
+  if (teamId) filters.team_id = teamId;
+  return filters;
+};
+
 const Tickets = () => {
   const { success, error: showError, info } = useNotification();
   const { registerRefresh, unregisterRefresh } = useRealtime();
@@ -91,73 +100,45 @@ const Tickets = () => {
   // se descarta la respuesta de la petición anterior que llegue tarde.
   const requestIdRef = useRef(0);
 
-  // Función para cargar tickets con indicador de carga (carga inicial)
-  const loadTickets = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    try {
-      setLoading(true);
-      setError(null);
-
-      const filters = {};
-      if (activeTab !== "all") {
-        filters.status = activeTab;
+  // Carga de la lista + estadísticas. `silent` (tiempo real) no muestra el
+  // esqueleto ni el error: si falla, se queda la lista que había.
+  const fetchTickets = useCallback(
+    async ({ silent = false } = {}) => {
+      const requestId = ++requestIdRef.current;
+      if (!silent) {
+        setLoading(true);
+        setError(null);
       }
-      if (activeFilter !== "all") {
-        filters.filter = activeFilter;
-      }
-      // Filtro por equipo específico
-      if (selectedTeamId) {
-        filters.team_id = selectedTeamId;
-      }
+      try {
+        const filters = buildTicketFilters(activeTab, activeFilter, selectedTeamId);
+        const [ticketsData, statsData] = await Promise.all([
+          ticketsAPI.getAll(filters),
+          ticketsAPI.getStats(),
+        ]);
 
-      const [ticketsData, statsData] = await Promise.all([
-        ticketsAPI.getAll(filters),
-        ticketsAPI.getStats(),
-      ]);
-
-      if (requestId !== requestIdRef.current) return;
-      setTickets(ticketsData);
-      setStats(statsData);
-    } catch (err) {
-      if (requestId !== requestIdRef.current) return;
-      console.error("Error al cargar tickets:", err);
-      setError("No se pudieron cargar los tickets");
-    } finally {
-      if (requestId === requestIdRef.current) setLoading(false);
-    }
-  }, [activeTab, activeFilter, selectedTeamId]);
-
-  // Función para refrescar tickets silenciosamente (sin spinner, para tiempo real)
-  const refreshTicketsSilently = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    try {
-      const filters = {};
-      if (activeTab !== "all") {
-        filters.status = activeTab;
+        if (requestId !== requestIdRef.current) return;
+        setTickets(ticketsData);
+        setStats(statsData);
+      } catch (err) {
+        if (silent) {
+          console.error("Error refreshing tickets:", err);
+          return;
+        }
+        if (requestId !== requestIdRef.current) return;
+        console.error("Error al cargar tickets:", err);
+        setError("No se pudieron cargar los tickets");
+      } finally {
+        // También si un refresco silencioso reemplazó a una carga con esqueleto
+        if (requestId === requestIdRef.current) setLoading(false);
       }
-      if (activeFilter !== "all") {
-        filters.filter = activeFilter;
-      }
-      if (selectedTeamId) {
-        filters.team_id = selectedTeamId;
-      }
+    },
+    [activeTab, activeFilter, selectedTeamId]
+  );
 
-      const [ticketsData, statsData] = await Promise.all([
-        ticketsAPI.getAll(filters),
-        ticketsAPI.getStats(),
-      ]);
-
-      if (requestId !== requestIdRef.current) return;
-      setTickets(ticketsData);
-      setStats(statsData);
-    } catch (err) {
-      console.error("Error refreshing tickets:", err);
-      // No mostrar error en actualización silenciosa
-    } finally {
-      // Si reemplazó a una carga con skeleton en curso, quitarlo
-      if (requestId === requestIdRef.current) setLoading(false);
-    }
-  }, [activeTab, activeFilter, selectedTeamId]);
+  // Envolturas sin argumentos: registerRefresh/useResourceSync pasan el evento
+  // y no debe confundirse con las opciones de fetchTickets.
+  const loadTickets = useCallback(() => fetchTickets(), [fetchTickets]);
+  const refreshTicketsSilently = useCallback(() => fetchTickets({ silent: true }), [fetchTickets]);
 
   useEffect(() => {
     loadTickets();

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import PortalAccessRequest from "./PortalAccessRequest";
 import { portalAPI } from "../../utils/portalApi";
@@ -30,7 +30,7 @@ describe("PortalAccessRequest", () => {
     renderAt("no-existe");
 
     expect(
-      await screen.findByText(/No encontramos este portal de soporte/)
+      await screen.findByRole("heading", { level: 1, name: "No encontramos este portal" })
     ).toBeInTheDocument();
   });
 
@@ -45,12 +45,26 @@ describe("PortalAccessRequest", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("carga la organización y muestra el formulario", async () => {
+  it("carga la organización y muestra el formulario con campos etiquetados", async () => {
     portalAPI.getOrgInfo.mockResolvedValue({ name: "Acme", logo: null });
 
     renderAt("acme");
 
     expect(await screen.findByText("Acme")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Accede a tus tickets" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Correo electrónico")).toHaveAttribute("type", "email");
     expect(screen.getByRole("button", { name: /Enviar enlace de acceso/ })).toBeInTheDocument();
+  });
+
+  it("anuncia el error de envío", async () => {
+    portalAPI.getOrgInfo.mockResolvedValue({ name: "Acme", logo: null });
+    portalAPI.requestAccess.mockRejectedValue(new Error("red"));
+
+    renderAt("acme");
+
+    fireEvent.change(await screen.findByLabelText("Correo electrónico"), { target: { value: "ana@acme.com" } });
+    fireEvent.click(screen.getByRole("button", { name: /Enviar enlace de acceso/ }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo enviar el enlace");
   });
 });

@@ -61,10 +61,12 @@ const PortalAccessRequest = () => {
   if (notFound) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-[#f7f5fb] dark:bg-night-950 p-6 text-center'>
-        <p className='text-gray-700 dark:text-night-300'>
-          No encontramos este portal de soporte. Verifica el enlace que te
-          compartieron.
-        </p>
+        <div>
+          <h1 className='text-lg font-semibold text-gray-900 dark:text-night-50 mb-2'>No encontramos este portal</h1>
+          <p className='text-gray-700 dark:text-night-300'>
+            Verifica el enlace de soporte que te compartieron.
+          </p>
+        </div>
       </div>
     );
   }
@@ -92,36 +94,46 @@ const PortalAccessRequest = () => {
           </span>
         </div>
 
+        <h1 className='text-2xl font-extrabold text-gray-900 dark:text-night-50 mb-3'>
+          Accede a tus tickets
+        </h1>
         {sent ? (
-          <p className='text-gray-700 dark:text-night-300'>
+          <p className='text-gray-700 dark:text-night-300' role='status'>
             Si tu correo está registrado, te llegará un enlace de acceso en
             breve. Revisa tu bandeja de entrada.
           </p>
         ) : (
           <form onSubmit={handleSubmit} className='space-y-5' noValidate>
-            <h2 className='text-2xl font-extrabold text-gray-900 dark:text-night-50'>
-              Accede a tus tickets
-            </h2>
             <p className='text-gray-500 dark:text-night-400 text-sm'>
               Escribe el correo con el que te registró{" "}
               {org?.name || "la organización"} y te enviaremos un enlace de
               acceso.
             </p>
-            {error && <p className='text-sm text-red-600 dark:text-red-400'>{error}</p>}
-            <div className='relative'>
-              <Mail
-                aria-hidden='true'
-                className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500'
-              />
-              <input
-                type='email'
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder='tu@empresa.com'
-                autoComplete='email'
-                className='w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-night-700 dark:bg-night-900 dark:text-night-50 dark:placeholder:text-night-500'
-              />
+            {error && (
+              <p role='alert' className='text-sm text-red-600 dark:text-red-400'>
+                {error}
+              </p>
+            )}
+            <div>
+              <label htmlFor='portal-access-email' className='sr-only'>
+                Correo electrónico
+              </label>
+              <div className='relative'>
+                <Mail
+                  aria-hidden='true'
+                  className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500'
+                />
+                <input
+                  id='portal-access-email'
+                  type='email'
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder='tu@empresa.com'
+                  autoComplete='email'
+                  className='w-full pl-11 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-night-700 dark:bg-night-900 dark:text-night-50 dark:placeholder:text-night-500'
+                />
+              </div>
             </div>
             <Button
               type='submit'
@@ -131,7 +143,7 @@ const PortalAccessRequest = () => {
               loadingText='Enviando...'
               className='w-full'
             >
-              <Send className='w-5 h-5' />
+              <Send className='w-5 h-5' aria-hidden='true' />
               Enviar enlace de acceso
             </Button>
           </form>

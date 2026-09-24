@@ -43,12 +43,26 @@ const sheetOpenClass =
 const sheetInRailClass =
   "lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none";
 
+// Mismo selector y misma técnica de trampa de foco que components/ui/Modal.jsx.
+// Se replica aquí en vez de importarla porque en Modal está dentro del propio
+// componente (no es un hook reutilizable) y no toca modificar ese archivo.
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
 const ClientTicketsInbox = () => {
   const inbox = useClientInbox();
   const teamOptions = useTeamOptions();
   const { success, error: showError } = useNotification();
   const reduceMotion = useReducedMotion();
   const listTopRef = useRef(null);
+  const sheetRef = useRef(null);
+  const filtersButtonRef = useRef(null);
 
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [assigningId, setAssigningId] = useState(null);
@@ -77,6 +91,55 @@ const ClientTicketsInbox = () => {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [filtersOpen, closeFilters]);
+
+  // Abierta, la hoja es un diálogo modal de verdad: el foco entra en ella, Tab
+  // y Shift+Tab ciclan dentro y al cerrar vuelve al botón «Filtros».
+  //
+  // Sin esto el velo era solo una barrera de puntero, no de foco: tabulando
+  // desde el último control de la hoja se llegaba a los botones de título de las
+  // filas que quedan detrás, y pulsar Enter abría TicketDetailModal, que se
+  // pinta en z-50 — por debajo de la hoja (z-[101]) y del velo (z-[100]). El
+  // modal se llevaba el foco pero quedaba invisible detrás de la hoja.
+  useEffect(() => {
+    if (!filtersOpen) return undefined;
+
+    const sheet = sheetRef.current;
+    if (!sheet) return undefined;
+    const opener = filtersButtonRef.current;
+    const focusables = () => Array.from(sheet.querySelectorAll(FOCUSABLE_SELECTOR));
+
+    (focusables()[0] ?? sheet).focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key !== "Tab") return;
+
+      const items = focusables();
+      if (items.length === 0) {
+        event.preventDefault();
+        sheet.focus();
+        return;
+      }
+
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || !sheet.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !sheet.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, [filtersOpen]);
 
   // Al pasar a lg los filtros ya se ven en el carril: dejar la hoja "abierta"
   // la haría reaparecer sola al volver a angostar la ventana.
@@ -134,6 +197,7 @@ const ClientTicketsInbox = () => {
           {/* En móvil los filtros viven tras este botón con su contador */}
           <button
             type='button'
+            ref={filtersButtonRef}
             onClick={() => setFiltersOpen((open) => !open)}
             aria-expanded={filtersOpen}
             aria-controls='inbox-facets'
@@ -163,14 +227,28 @@ const ClientTicketsInbox = () => {
             )}
           </AnimatePresence>
 
-          <div id='inbox-facets' className={`${filtersOpen ? sheetOpenClass : "hidden"} lg:block ${sheetInRailClass}`}>
+          {/* Abierta (solo por debajo de lg: el efecto de matchMedia la cierra al
+              llegar a lg) la hoja se anuncia como diálogo modal y se nombra con
+              su propio encabezado «Filtros». En el carril de lg el mismo nodo
+              es contenido normal, así que la semántica de diálogo es condicional. */}
+          <div
+            id='inbox-facets'
+            ref={sheetRef}
+            role={filtersOpen ? "dialog" : undefined}
+            aria-modal={filtersOpen ? "true" : undefined}
+            aria-labelledby={filtersOpen ? "inbox-facets-title" : undefined}
+            tabIndex={filtersOpen ? -1 : undefined}
+            className={`${filtersOpen ? sheetOpenClass : "hidden"} lg:block ${sheetInRailClass} focus:outline-none`}
+          >
             {/* .grab y la cabecera de la hoja no existen en el carril de lg */}
             <span
               className='mx-auto mb-2 block h-1 w-[42px] rounded-full bg-gray-200 lg:hidden dark:bg-night-700'
               aria-hidden='true'
             />
             <div className='mb-3 flex items-center justify-between gap-2 lg:hidden'>
-              <h2 className='text-[15px] font-extrabold text-gray-900 dark:text-night-50'>Filtros</h2>
+              <h2 id='inbox-facets-title' className='text-[15px] font-extrabold text-gray-900 dark:text-night-50'>
+                Filtros
+              </h2>
               <button
                 type='button'
                 onClick={closeFilters}

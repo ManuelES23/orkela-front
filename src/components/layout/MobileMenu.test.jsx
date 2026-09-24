@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
@@ -28,8 +29,14 @@ vi.mock("../ui/ContextSwitcher", () => ({ default: () => null }));
 vi.mock("../ui/UserAvatar", () => ({ default: () => null }));
 
 let location;
+// La URL que ve el test. La captura va en un efecto, no en el render: escribir
+// en una variable de módulo mientras se renderiza es un efecto secundario
+// (react-hooks/globals) y el render puede repetirse.
 const LocationProbe = () => {
-  location = useLocation();
+  const current = useLocation();
+  useEffect(() => {
+    location = current;
+  }, [current]);
   return null;
 };
 const renderMenu = (onClose = vi.fn()) =>

@@ -278,12 +278,13 @@ const ClientsManagement = () => {
 
   return (
     <Layout title='Clientes' subtitle='Empresas e individuos con acceso al portal de soporte'>
-      {/* .ph de la propuesta C: título + recuento a la izquierda, buscador de
-          ~320px y «Nuevo cliente» a la derecha. */}
+      {/* .ph de la propuesta C: recuento a la izquierda, buscador de ~320px y
+          «Nuevo cliente» a la derecha. El título de la página lo pone el
+          Header del Layout a partir de title='Clientes', así que aquí no se
+          repite (el <h3> del mockup ERA esa barra de cabecera). */}
       <div className='mb-3.5 flex flex-wrap items-center gap-3'>
         <div className='min-w-0 flex-1'>
-          <h2 className='text-[15px] font-extrabold text-gray-900 dark:text-night-50'>Clientes</h2>
-          <p className='mt-0.5 text-[12px] font-bold text-gray-400 dark:text-night-400' role='status' aria-live='polite'>
+          <p className='text-[12px] font-bold text-gray-400 dark:text-night-400' role='status' aria-live='polite'>
             {countLabel}
           </p>
         </div>
@@ -303,7 +304,7 @@ const ClientsManagement = () => {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder='Cliente, contacto o correo'
-            className='min-h-11 w-full rounded-xl border border-gray-200 pr-3 pl-9 text-[13px] focus:ring-2 focus:ring-brand-500 focus:outline-none dark:border-night-600 dark:bg-night-800 dark:text-night-50 dark:placeholder-night-500'
+            className='min-h-11 w-full rounded-xl border border-gray-200 pr-3 pl-9 text-[13px] focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:outline-none dark:border-night-600 dark:bg-night-800 dark:text-night-50 dark:placeholder-night-500'
           />
         </div>
 
@@ -359,7 +360,7 @@ const ClientsManagement = () => {
                 <div className='p-6 text-center text-sm text-gray-500 dark:text-night-400'>
                   {search.trim()
                     ? "Ningún cliente coincide con la búsqueda."
-                    : "Aún no hay clientes. Da de alta el primero con el botón +."}
+                    : "Aún no hay clientes. Da de alta el primero con «Nuevo cliente»."}
                 </div>
               ) : (
                 <AnimatePresence initial={false} mode='popLayout'>

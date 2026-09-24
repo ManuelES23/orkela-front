@@ -209,4 +209,46 @@ describe("ClientTicketsInbox v2", () => {
     await waitFor(() => expect(lastInboxCall()).toEqual({ tab: "sin_asignar", page: 2 }));
     expect(location.search).toContain("page=2");
   });
+
+  it("la hoja de filtros es un diálogo modal: atrapa el foco y lo devuelve al cerrar", async () => {
+    ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 4, name: "Soporte" }]);
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox();
+
+    const ticketRow = await screen.findByRole("button", { name: "Acceso VPN" });
+    const toggle = screen.getByRole("button", { name: /^Filtros/ });
+    fireEvent.click(toggle);
+
+    // Semántica de diálogo, nombrado por su propio encabezado «Filtros»
+    const sheet = screen.getByRole("dialog", { name: "Filtros" });
+    expect(sheet).toHaveAttribute("aria-modal", "true");
+    expect(sheet.id).toBe("inbox-facets");
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    // El foco entra en la hoja (primer control: cerrar)
+    const close = within(sheet).getByRole("button", { name: "Cerrar filtros" });
+    expect(document.activeElement).toBe(close);
+
+    // Tab desde el último control cicla al primero en vez de escapar a la lista
+    const focusables = Array.from(
+      sheet.querySelectorAll(
+        "a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])"
+      )
+    );
+    const last = focusables[focusables.length - 1];
+    expect(last).not.toBe(close);
+    last.focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(close);
+
+    // Shift+Tab desde el primero cicla al último, nunca a la fila de detrás
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
+    expect(document.activeElement).not.toBe(ticketRow);
+
+    // Y al cerrar el foco vuelve al botón «Filtros» que la abrió
+    fireEvent.click(close);
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Filtros" })).not.toBeInTheDocument());
+    expect(document.activeElement).toBe(toggle);
+  });
 });

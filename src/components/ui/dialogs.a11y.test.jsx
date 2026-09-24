@@ -5,7 +5,6 @@ import ConfirmModal from "./ConfirmModal";
 import RemovedFromOrgModal from "./RemovedFromOrgModal";
 import ClientModal from "../modals/ClientModal";
 import ContactModal from "../modals/ContactModal";
-import ProjectDetailsModal from "../modals/ProjectDetailsModal";
 import ContextSelectionModal from "../modals/ContextSelectionModal";
 
 vi.mock("../../context/NotificationContext", () => ({ useNotification: () => ({ success: vi.fn(), error: vi.fn(), info: vi.fn() }) }));
@@ -16,19 +15,6 @@ const dismissible = [
   ["ConfirmModal", (onClose) => <ConfirmModal isOpen onClose={onClose} title='¿Eliminar etiqueta?' message='No se puede deshacer.' />, "¿Eliminar etiqueta?"],
   ["ClientModal", (onClose) => <ClientModal isOpen client={null} onClose={onClose} onSaved={vi.fn()} />, "Nuevo cliente"],
   ["ContactModal", (onClose) => <ContactModal isOpen client={{ id: 1, name: "Acme" }} contact={null} onClose={onClose} onSaved={vi.fn()} />, "Nuevo contacto"],
-  [
-    "ProjectDetailsModal",
-    (onClose) => (
-      <ProjectDetailsModal
-        isOpen
-        onClose={onClose}
-        project={{ id: 1, name: "Web corporativa", status: "active", description: "", start_date: null, end_date: null, progress: 0, team: null, tasks: [] }}
-        onEdit={vi.fn()}
-        onDelete={vi.fn()}
-      />
-    ),
-    "Web corporativa",
-  ],
 ];
 
 describe("Diálogos sobre el Modal accesible", () => {

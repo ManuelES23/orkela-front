@@ -2,37 +2,11 @@ import { motion } from "framer-motion";
 import { containerVariants, itemVariants } from "../animations/variants";
 import { formatDateTime } from "../../utils/dateUtils";
 import { TYPE_LABELS, PRIORITY_LABELS } from "./ticketVocabulary";
+import { buildPortalTimeline } from "./portalTimeline";
 import Avatar from "./PortalAvatar";
 import LoadingSwap from "../ui/LoadingSwap";
 import DetailPanel from "../ui/DetailPanel";
 import { PortalPanelSkeleton } from "./PortalSkeletons";
-
-// Construye la línea de tiempo solo con los pasos que realmente ocurrieron —
-// un ticket recién creado no debe mostrar "Resuelto" ni "Cerrado" vacíos.
-// Se ordena por fecha (no por el orden en que se agregan los pasos): un
-// ticket reabierto y vuelto a cerrar puede dejar un resolved_at más nuevo
-// que su closed_at anterior, y el timeline debe reflejar eso, no el orden
-// "feliz" open→taken→resolved→closed.
-const buildTimeline = (ticket) => {
-  const steps = [{ label: "Creado", at: ticket.created_at }];
-
-  if (ticket.taken_at) {
-    steps.push({
-      label: ticket.assigned_agent
-        ? `Tomado por ${ticket.assigned_agent.name}`
-        : "Tomado",
-      at: ticket.taken_at,
-    });
-  }
-  if (ticket.resolved_at) {
-    steps.push({ label: "Resuelto", at: ticket.resolved_at });
-  }
-  if (ticket.closed_at) {
-    steps.push({ label: "Cerrado", at: ticket.closed_at });
-  }
-
-  return steps.sort((a, b) => new Date(a.at) - new Date(b.at));
-};
 
 const PortalTicketDetailsPanel = ({ ticket }) => {
   return (
@@ -43,7 +17,7 @@ const PortalTicketDetailsPanel = ({ ticket }) => {
 };
 
 const renderDetails = (ticket) => {
-  const timeline = buildTimeline(ticket);
+  const timeline = buildPortalTimeline(ticket);
 
   return (
     <motion.div
@@ -119,8 +93,8 @@ const renderDetails = (ticket) => {
       <motion.div variants={itemVariants}>
         <p className='text-xs text-gray-400 dark:text-night-500 mb-3'>Línea de tiempo</p>
         <ol className='relative border-l border-gray-200 dark:border-night-700 ml-1 space-y-4'>
-          {timeline.map((step, index) => (
-            <li key={index} className='pl-4 relative'>
+          {timeline.map((step) => (
+            <li key={step.key} className='pl-4 relative'>
               <span className='absolute -left-[4.5px] top-1 w-2 h-2 rounded-full bg-brand-600' />
               <p className='text-sm font-medium text-gray-900 dark:text-night-50'>{step.label}</p>
               <p className='text-xs text-gray-400 dark:text-night-500'>{formatDateTime(step.at)}</p>

@@ -60,4 +60,32 @@ describe("Tickets", () => {
     expect(screen.queryByText("Ticket abierto")).not.toBeInTheDocument();
     expect(screen.getByText("Ticket resuelto")).toBeInTheDocument();
   });
+
+  it("muestra la etiqueta de tipo y el punto de estado de cada fila", async () => {
+    ticketsAPI.getAll.mockResolvedValue([{ ...ticket(3, "Duda de facturación", "pending"), type: "question" }]);
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Duda de facturación")).toBeInTheDocument();
+    expect(screen.getByText("Pregunta")).toBeInTheDocument();
+    expect(screen.getByTitle("Pendiente")).toHaveClass("bg-yellow-500");
+  });
+
+  it("muestra el contador de cada pestaña de estado desde las estadísticas", async () => {
+    ticketsAPI.getAll.mockResolvedValue([]);
+    ticketsAPI.getStats.mockResolvedValue({ total: 9, open: 4, inbox: 2 });
+
+    render(
+      <MemoryRouter>
+        <Tickets />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByRole("button", { name: "Abiertos (4)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Buzón de equipo\s*2/ })).toBeInTheDocument();
+  });
 });

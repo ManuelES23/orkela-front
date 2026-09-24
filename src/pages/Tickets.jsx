@@ -16,8 +16,6 @@ import {
   Search,
   Ticket,
   Clock,
-  CheckCircle2,
-  AlertCircle,
   MessageSquare,
   Edit,
   Trash2,
@@ -26,14 +24,6 @@ import {
   Users,
   Flag,
   Eye,
-  XCircle,
-  PauseCircle,
-  PlayCircle,
-  Bug,
-  HelpCircle,
-  Lightbulb,
-  Headphones,
-  MoreHorizontal,
   Inbox,
   Hand,
   ArrowLeft,
@@ -42,6 +32,25 @@ import {
   ListFilter,
 } from "lucide-react";
 import { ticketsAPI, teamsAPI } from "../utils/api";
+import { TICKET_STATUS, TICKET_PRIORITY, TICKET_TYPE } from "../constants/tickets";
+
+// Vistas del rail izquierdo. `statKey` es la clave de ticketsAPI.getStats().
+const VIEW_FILTERS = [
+  { key: "all", label: "Todos mis tickets", icon: ListFilter, statKey: "total" },
+  { key: "inbox", label: "Buzón de equipo", icon: Inbox, statKey: "inbox" },
+  { key: "assigned", label: "Asignados a mí", icon: User, statKey: "assigned_to_me" },
+  { key: "created", label: "Creados por mí", icon: PenLine, statKey: "created_by_me" },
+];
+
+// Pestañas de estado (etiquetas en plural, propias de esta vista).
+const STATUS_TABS = [
+  { key: "all", label: "Todos", statKey: "total" },
+  { key: "open", label: "Abiertos", statKey: "open" },
+  { key: "in_progress", label: "En progreso", statKey: "in_progress" },
+  { key: "pending", label: "Pendientes", statKey: "pending" },
+  { key: "resolved", label: "Resueltos", statKey: "resolved" },
+  { key: "closed", label: "Cerrados", statKey: "closed" },
+];
 
 const Tickets = () => {
   const { success, error: showError, info } = useNotification();
@@ -269,98 +278,6 @@ const Tickets = () => {
     });
   }, [tickets, searchTerm]);
 
-  const priorityConfig = {
-    urgent: {
-      color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800",
-      label: "Urgente",
-    },
-    high: {
-      color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800",
-      label: "Alta",
-    },
-    medium: {
-      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200 dark:border-yellow-800",
-      label: "Media",
-    },
-    low: { color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800 border-gray-200 dark:border-night-700", label: "Baja" },
-  };
-
-  const statusConfig = {
-    open: {
-      color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40",
-      icon: AlertCircle,
-      label: "Abierto",
-    },
-    in_progress: {
-      color: "text-brand-600 bg-brand-50 dark:bg-brand-900/20",
-      icon: PlayCircle,
-      label: "En progreso",
-    },
-    pending: {
-      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40",
-      icon: PauseCircle,
-      label: "Pendiente",
-    },
-    resolved: {
-      color: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40",
-      icon: CheckCircle2,
-      label: "Resuelto",
-    },
-    closed: {
-      color: "text-gray-600 dark:text-night-300 bg-gray-50 dark:bg-night-800",
-      icon: XCircle,
-      label: "Cerrado",
-    },
-  };
-
-  const typeConfig = {
-    request: {
-      icon: MessageSquare,
-      label: "Solicitud",
-      color: "text-blue-500 dark:text-blue-400",
-    },
-    bug: { icon: Bug, label: "Bug", color: "text-red-500 dark:text-red-400" },
-    question: { icon: HelpCircle, label: "Pregunta", color: "text-accent-500" },
-    feature: {
-      icon: Lightbulb,
-      label: "Funcionalidad",
-      color: "text-yellow-500 dark:text-yellow-400",
-    },
-    support: { icon: Headphones, label: "Soporte", color: "text-green-500 dark:text-green-400" },
-    other: { icon: MoreHorizontal, label: "Otro", color: "text-gray-500 dark:text-night-400" },
-  };
-
-  const statusDotColor = {
-    open: "bg-blue-500",
-    in_progress: "bg-brand-600",
-    pending: "bg-yellow-500",
-    resolved: "bg-green-500",
-    closed: "bg-gray-400 dark:bg-night-500",
-  };
-
-  const priorityFlagColor = {
-    urgent: "text-red-500 dark:text-red-400",
-    high: "text-orange-500 dark:text-orange-400",
-    medium: "text-yellow-500 dark:text-yellow-400",
-    low: "text-gray-300 dark:text-night-600",
-  };
-
-  const viewFilters = [
-    { key: "all", label: "Todos mis tickets", icon: ListFilter, count: stats?.total },
-    { key: "inbox", label: "Buzón de equipo", icon: Inbox, count: stats?.inbox },
-    { key: "assigned", label: "Asignados a mí", icon: User, count: stats?.assigned_to_me },
-    { key: "created", label: "Creados por mí", icon: PenLine, count: stats?.created_by_me },
-  ];
-
-  const statusTabsCfg = [
-    { key: "all", label: "Todos", count: stats?.total },
-    { key: "open", label: "Abiertos", count: stats?.open },
-    { key: "in_progress", label: "En progreso", count: stats?.in_progress },
-    { key: "pending", label: "Pendientes", count: stats?.pending },
-    { key: "resolved", label: "Resueltos", count: stats?.resolved },
-    { key: "closed", label: "Cerrados", count: stats?.closed },
-  ];
-
   return (
     <Layout
       title='Tickets'
@@ -428,7 +345,7 @@ const Tickets = () => {
             </div>
 
             <div className='flex flex-row flex-wrap md:flex-col gap-1'>
-              {viewFilters.map((f) => {
+              {VIEW_FILTERS.map((f) => {
                 const active = activeFilter === f.key;
                 return (
                   <button
@@ -453,7 +370,7 @@ const Tickets = () => {
                       {f.label}
                     </span>
                     <span className='relative font-mono text-xs text-gray-400 dark:text-night-500'>
-                      {f.count ?? 0}
+                      {stats?.[f.statKey] ?? 0}
                     </span>
                   </button>
                 );
@@ -528,7 +445,7 @@ const Tickets = () => {
           <div className='flex-1 min-w-0'>
             {/* Tabs de estado - subrayado deslizante */}
             <div className='relative flex flex-wrap gap-x-5 gap-y-1 mb-4 border-b border-gray-200 dark:border-night-700 text-sm'>
-              {statusTabsCfg.map((tab) => {
+              {STATUS_TABS.map((tab) => {
                 const active = activeTab === tab.key;
                 return (
                   <button
@@ -540,7 +457,7 @@ const Tickets = () => {
                         : "text-gray-500 dark:text-night-400 hover:text-gray-800 dark:hover:text-night-100"
                     }`}
                   >
-                    {tab.label} ({tab.count ?? 0})
+                    {tab.label} ({stats?.[tab.statKey] ?? 0})
                     {active && (
                       <motion.span
                         layoutId='tickets-status-underline'
@@ -582,8 +499,8 @@ const Tickets = () => {
                   <div>
                     <AnimatePresence mode='popLayout'>
                       {filteredTickets.map((ticket) => {
-                        const TypeIcon =
-                          typeConfig[ticket.type]?.icon || MessageSquare;
+                        const typeCfg = TICKET_TYPE[ticket.type];
+                        const TypeIcon = typeCfg?.icon || MessageSquare;
                         const isProcessing =
                           processingTicketId === ticket.id;
 
@@ -600,9 +517,9 @@ const Tickets = () => {
                           >
                             {/* Punto de estado */}
                             <span
-                              title={statusConfig[ticket.status]?.label}
+                              title={TICKET_STATUS[ticket.status]?.label}
                               className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
-                                statusDotColor[ticket.status] ||
+                                TICKET_STATUS[ticket.status]?.dotClass ||
                                 "bg-gray-400 dark:bg-night-500"
                               }`}
                             />
@@ -619,12 +536,9 @@ const Tickets = () => {
                                     </span>
                                     <Flag
                                       className={`w-3.5 h-3.5 ${
-                                        priorityFlagColor[ticket.priority]
+                                        TICKET_PRIORITY[ticket.priority]?.flagClass ?? ""
                                       }`}
-                                      title={
-                                        priorityConfig[ticket.priority]
-                                          ?.label
-                                      }
+                                      title={TICKET_PRIORITY[ticket.priority]?.label}
                                     />
                                     {ticket.is_in_inbox && (
                                       <span className='px-1.5 py-0.5 bg-accent-50 dark:bg-accent-900/20 text-accent-700 dark:text-accent-300 rounded text-[10px] font-semibold'>
@@ -640,11 +554,9 @@ const Tickets = () => {
                                   <div className='flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-night-400 mt-1.5'>
                                     <span className='flex items-center gap-1'>
                                       <TypeIcon
-                                        className={`w-3 h-3 ${
-                                          typeConfig[ticket.type]?.color
-                                        }`}
+                                        className={`w-3 h-3 ${typeCfg?.iconClass ?? ""}`}
                                       />
-                                      {typeConfig[ticket.type]?.label}
+                                      {typeCfg?.label}
                                     </span>
 
                                     {ticket.assigned_user && (

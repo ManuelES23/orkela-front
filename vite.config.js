@@ -4,6 +4,10 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    port: 5175,
+    strictPort: true, // opcional: falla si el puerto ya está en uso, en vez de tomar otro automáticamente
+  },
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {

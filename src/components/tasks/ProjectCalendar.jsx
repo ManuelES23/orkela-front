@@ -13,21 +13,73 @@ import {
   LayoutList,
 } from "lucide-react";
 
+// Parsear fecha string a Date (formato YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss)
+const parseDateString = (dateStr) => {
+  if (!dateStr) return null;
+  const parts = dateStr.split("T")[0].split("-");
+  return new Date(
+    parseInt(parts[0]),
+    parseInt(parts[1]) - 1,
+    parseInt(parts[2])
+  );
+};
+
+// Calcula la posición (semana/día de inicio y fin) de una tarea dentro del
+// calendario del mes; devuelve null si no es visible en este mes.
+const positionTaskInMonth = (task, monthStart, monthEnd, calendarData) => {
+  if (!task.due_date) return null;
+
+  const dueDate = parseDateString(task.due_date);
+  const startDate = task.start_date
+    ? parseDateString(task.start_date)
+    : dueDate;
+
+  // Verificar si la tarea es visible en este mes
+  if (dueDate < monthStart || startDate > monthEnd) return null;
+
+  // Calcular fechas efectivas dentro del mes
+  const effectiveStart = startDate < monthStart ? monthStart : startDate;
+  const effectiveEnd = dueDate > monthEnd ? monthEnd : dueDate;
+
+  // Encontrar la semana y día donde empieza y termina
+  let startWeekIndex = -1;
+  let startDayIndex = -1;
+  let endWeekIndex = -1;
+  let endDayIndex = -1;
+
+  calendarData.forEach((week, wIndex) => {
+    week.forEach((day, dIndex) => {
+      if (day.date.toDateString() === effectiveStart.toDateString()) {
+        startWeekIndex = wIndex;
+        startDayIndex = dIndex;
+      }
+      if (day.date.toDateString() === effectiveEnd.toDateString()) {
+        endWeekIndex = wIndex;
+        endDayIndex = dIndex;
+      }
+    });
+  });
+
+  if (startWeekIndex === -1 || endWeekIndex === -1) return null;
+
+  return {
+    ...task,
+    startWeekIndex,
+    startDayIndex,
+    endWeekIndex,
+    endDayIndex,
+    effectiveStart,
+    effectiveEnd,
+    originalStart: startDate,
+    originalEnd: dueDate,
+    spansDays: effectiveEnd.getTime() !== effectiveStart.getTime(),
+  };
+};
+
 const ProjectCalendar = ({ tasks, onTaskClick }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [viewMode, setViewMode] = useState("timeline"); // "timeline" o "classic"
-
-  // Parsear fecha string a Date (formato YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss)
-  const parseDateString = (dateStr) => {
-    if (!dateStr) return null;
-    const parts = dateStr.split("T")[0].split("-");
-    return new Date(
-      parseInt(parts[0]),
-      parseInt(parts[1]) - 1,
-      parseInt(parts[2])
-    );
-  };
 
   // Generar estructura del calendario
   const calendarData = useMemo(() => {
@@ -80,55 +132,7 @@ const ProjectCalendar = ({ tasks, onTaskClick }) => {
     const monthEnd = new Date(year, month + 1, 0);
 
     return tasks
-      .map((task) => {
-        if (!task.due_date) return null;
-
-        const dueDate = parseDateString(task.due_date);
-        const startDate = task.start_date
-          ? parseDateString(task.start_date)
-          : dueDate;
-
-        // Verificar si la tarea es visible en este mes
-        if (dueDate < monthStart || startDate > monthEnd) return null;
-
-        // Calcular fechas efectivas dentro del mes
-        const effectiveStart = startDate < monthStart ? monthStart : startDate;
-        const effectiveEnd = dueDate > monthEnd ? monthEnd : dueDate;
-
-        // Encontrar la semana y día donde empieza y termina
-        let startWeekIndex = -1;
-        let startDayIndex = -1;
-        let endWeekIndex = -1;
-        let endDayIndex = -1;
-
-        calendarData.forEach((week, wIndex) => {
-          week.forEach((day, dIndex) => {
-            if (day.date.toDateString() === effectiveStart.toDateString()) {
-              startWeekIndex = wIndex;
-              startDayIndex = dIndex;
-            }
-            if (day.date.toDateString() === effectiveEnd.toDateString()) {
-              endWeekIndex = wIndex;
-              endDayIndex = dIndex;
-            }
-          });
-        });
-
-        if (startWeekIndex === -1 || endWeekIndex === -1) return null;
-
-        return {
-          ...task,
-          startWeekIndex,
-          startDayIndex,
-          endWeekIndex,
-          endDayIndex,
-          effectiveStart,
-          effectiveEnd,
-          originalStart: startDate,
-          originalEnd: dueDate,
-          spansDays: effectiveEnd.getTime() !== effectiveStart.getTime(),
-        };
-      })
+      .map((task) => positionTaskInMonth(task, monthStart, monthEnd, calendarData))
       .filter(Boolean);
   }, [tasks, currentMonth, calendarData]);
 

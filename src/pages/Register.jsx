@@ -41,8 +41,13 @@ const Register = () => {
 
   // Si el email cambia en el state (ej. navegación desde invitación)
   useEffect(() => {
-    if (prefilledEmail && formData.email !== prefilledEmail) {
-      setFormData((prev) => ({ ...prev, email: prefilledEmail }));
+    if (prefilledEmail) {
+      // Se compara contra el estado más reciente (prev) en vez de leer
+      // formData.email: así el efecto solo depende de prefilledEmail y no
+      // pisa lo que el usuario teclee después.
+      setFormData((prev) =>
+        prev.email !== prefilledEmail ? { ...prev, email: prefilledEmail } : prev,
+      );
     }
   }, [prefilledEmail]);
 

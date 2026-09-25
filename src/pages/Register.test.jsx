@@ -49,4 +49,21 @@ describe("Register", () => {
     expect(await screen.findByText("check-email:ana@example.com")).toBeInTheDocument();
     expect(register).toHaveBeenCalledWith("Ana", "ana@example.com", "Password123");
   });
+
+  it("precarga el correo de la invitación y no lo pisa cuando el usuario lo edita", () => {
+    render(
+      <MemoryRouter initialEntries={[{ pathname: "/register", state: { email: "invitado@example.com" } }]}>
+        <Routes>
+          <Route path='/register' element={<Register />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const email = screen.getByLabelText("Correo electrónico");
+    expect(email).toHaveValue("invitado@example.com");
+
+    fireEvent.change(email, { target: { value: "otro@example.com" } });
+
+    expect(email).toHaveValue("otro@example.com");
+  });
 });

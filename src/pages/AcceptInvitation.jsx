@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { invitationsAPI } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -23,7 +23,7 @@ const AcceptInvitation = () => {
     return () => clearTimeout(redirectTimerRef.current);
   }, []);
 
-  const acceptInvitation = async () => {
+  const acceptInvitation = useCallback(async () => {
     setStatus("accepting");
     try {
       const response = await invitationsAPI.acceptInvitation(token);
@@ -40,7 +40,7 @@ const AcceptInvitation = () => {
       setMessage(err.message || "Error al aceptar la invitación");
       isProcessing.current = false;
     }
-  };
+  }, [token, navigate]);
 
   // Paso 1: Obtener info de la invitación (público, sin auth)
   useEffect(() => {
@@ -95,15 +95,19 @@ const AcceptInvitation = () => {
     };
 
     fetchInvitationInfo();
-  }, [token, authLoading, user]);
+  }, [token, authLoading, user, acceptInvitation, navigate]);
 
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
-    if (user && invitationInfo && status === "redirecting") {
-      clearTimeout(redirectTimerRef.current);
-      acceptInvitation();
-    }
-  }, [user, invitationInfo, status]);
+    if (!(user && invitationInfo && status === "redirecting")) return;
+    clearTimeout(redirectTimerRef.current);
+    // La transición redirecting -> accepting ocurre una sola vez: la propia
+    // función cambia status y la condición deja de cumplirse.
+    const acceptAfterLogin = async () => {
+      await acceptInvitation();
+    };
+    acceptAfterLogin();
+  }, [user, invitationInfo, status, acceptInvitation]);
 
   // Estado: Verificando invitación
   if (status === "checking" || status === "loading") {

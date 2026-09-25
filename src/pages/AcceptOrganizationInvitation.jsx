@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Building2, Check, X, Loader2, User, ArrowRight } from "lucide-react";
@@ -27,9 +27,16 @@ const AcceptOrganizationInvitation = () => {
     return () => clearTimeout(redirectTimerRef.current);
   }, []);
   const hasAccepted = useRef(false);
+  // refreshUser cambia de identidad en cada render del AuthProvider: se lee
+  // desde un ref para que processInvitation (y los efectos que lo usan) sea
+  // estable y no re-dispare la aceptación tras un error.
+  const refreshUserRef = useRef(refreshUser);
+  useEffect(() => {
+    refreshUserRef.current = refreshUser;
+  }, [refreshUser]);
 
   // Función para procesar la invitación
-  const processInvitation = async (invitationToken) => {
+  const processInvitation = useCallback(async (invitationToken) => {
     if (hasAccepted.current) return; // Evitar doble procesamiento
     hasAccepted.current = true;
 
@@ -39,7 +46,7 @@ const AcceptOrganizationInvitation = () => {
     try {
       const response = await organizationsAPI.acceptInvitation(tokenToUse);
 
-      setOrganizationName(response.organization?.name || organizationName);
+      setOrganizationName((prev) => response.organization?.name || prev);
       setOrganizationId(response.organization?.id);
       setMessage(
         response.message || "Te has unido a la organización exitosamente"
@@ -47,7 +54,7 @@ const AcceptOrganizationInvitation = () => {
 
       // IMPORTANTE: Refrescar datos del usuario para que tenga la nueva organización
       try {
-        await refreshUser();
+        await refreshUserRef.current();
       } catch (refreshErr) {
         console.error("Error refreshing user after invitation:", refreshErr);
       }
@@ -60,7 +67,7 @@ const AcceptOrganizationInvitation = () => {
       setMessage(err.message || "No se pudo aceptar la invitación");
       hasAccepted.current = false;
     }
-  };
+  }, [token]);
 
   // Manejar selección de contexto
   const handleContextSelection = async (contextType) => {
@@ -139,15 +146,18 @@ const AcceptOrganizationInvitation = () => {
     if (token) {
       fetchInvitationInfo();
     }
-  }, [token, authLoading, user]);
+  }, [token, authLoading, user, processInvitation, navigate]);
 
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
-    if (user && invitationInfo && status === "redirecting") {
-      clearTimeout(redirectTimerRef.current);
-      processInvitation(token);
-    }
-  }, [user, invitationInfo, status, token]);
+    if (!(user && invitationInfo && status === "redirecting")) return;
+    clearTimeout(redirectTimerRef.current);
+    // hasAccepted (ref) impide una segunda aceptación aunque el efecto se repita.
+    const acceptAfterLogin = async () => {
+      await processInvitation(token);
+    };
+    acceptAfterLogin();
+  }, [user, invitationInfo, status, token, processInvitation]);
 
   // Estado: Verificando invitación
   if (status === "checking" || status === "loading") {

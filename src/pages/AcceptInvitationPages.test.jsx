@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
@@ -21,6 +22,9 @@ const pages = [
     name: "AcceptInvitation",
     Component: AcceptInvitation,
     path: "/accept-invitation/:token",
+    // Éxito: muestra el mensaje y a los 3 s navega al proyecto
+    successText: /invitación aceptada/i,
+    redirectsTo: "/projects/1",
     setup: () => {
       invitationsAPI.getInfo.mockResolvedValue({
         email: "ana@example.com",
@@ -36,6 +40,8 @@ const pages = [
     name: "AcceptTeamInvitation",
     Component: AcceptTeamInvitation,
     path: "/accept-team-invitation/:token",
+    successText: /bienvenido al equipo/i,
+    redirectsTo: "/teams",
     setup: () => {
       teamInvitationsAPI.getInfo.mockResolvedValue({
         email: "ana@example.com",
@@ -51,6 +57,8 @@ const pages = [
     name: "AcceptOrganizationInvitation",
     Component: AcceptOrganizationInvitation,
     path: "/accept-organization-invitation/:token",
+    // Organización: no redirige sola, pide elegir contexto
+    successText: /en qué modo deseas continuar/i,
     setup: () => {
       organizationsAPI.getInvitationInfo.mockResolvedValue({
         email: "ana@example.com",
@@ -64,15 +72,20 @@ const pages = [
   },
 ];
 
-const renderAt = (page) => {
+const renderAt = (page, { strict = false } = {}) => {
   const entry = page.path.replace(":token", "tok");
+  const Wrapper = strict ? StrictMode : ({ children }) => children;
   const ui = () => (
-    <MemoryRouter initialEntries={[entry]}>
-      <Routes>
-        <Route path={page.path} element={<page.Component />} />
-        <Route path='/login' element={<p>pantalla-login</p>} />
-      </Routes>
-    </MemoryRouter>
+    <Wrapper>
+      <MemoryRouter initialEntries={[entry]}>
+        <Routes>
+          <Route path={page.path} element={<page.Component />} />
+          <Route path='/login' element={<p>pantalla-login</p>} />
+          <Route path='/projects/:id' element={<p>pantalla-destino</p>} />
+          <Route path='/teams' element={<p>pantalla-destino</p>} />
+        </Routes>
+      </MemoryRouter>
+    </Wrapper>
   );
   const result = render(ui());
   return { ...result, rerenderPage: () => result.rerender(ui()) };
@@ -116,5 +129,81 @@ describe.each(pages)("$name con sesión iniciada", (page) => {
 
     expect(screen.getByText("pantalla-login")).toBeInTheDocument();
     expect(api.acceptInvitation).not.toHaveBeenCalled();
+  });
+
+  it("acepta la invitación una sola vez con sesión iniciada, aunque haya re-renders y StrictMode", async () => {
+    const api = page.setup();
+    auth = { ...auth, user: { id: 1 }, loading: false };
+    const { rerenderPage } = renderAt(page, { strict: true });
+
+    await vi.waitFor(() => expect(api.acceptInvitation).toHaveBeenCalledWith("tok"));
+    await screen.findByText(page.successText);
+
+    // Re-renders del AuthProvider: refreshUser/switchContext cambian de identidad
+    auth = { ...auth, refreshUser: vi.fn().mockResolvedValue({}), switchContext: vi.fn() };
+    rerenderPage();
+    rerenderPage();
+    await act(async () => {
+      vi.advanceTimersByTime(4000);
+    });
+
+    expect(api.acceptInvitation).toHaveBeenCalledTimes(1);
+    expect(api.acceptInvitation).toHaveBeenCalledWith("tok");
+    expect(screen.queryByText("pantalla-login")).not.toBeInTheDocument();
+  });
+
+  it("al aceptar muestra el éxito y redirige (si corresponde)", async () => {
+    page.setup();
+    auth = { ...auth, user: { id: 1 }, loading: false };
+    renderAt(page);
+
+    await screen.findByText(page.successText);
+    await act(async () => {
+      vi.advanceTimersByTime(3500);
+    });
+
+    if (page.redirectsTo) {
+      expect(screen.getByText("pantalla-destino")).toBeInTheDocument();
+    } else {
+      expect(screen.getByText(page.successText)).toBeInTheDocument();
+    }
+  });
+
+  it("si aceptar falla muestra el error y no reintenta en los re-renders", async () => {
+    const api = page.setup();
+    api.acceptInvitation.mockRejectedValue(new Error("token vencido"));
+    auth = { ...auth, user: { id: 1 }, loading: false };
+    const { rerenderPage } = renderAt(page);
+
+    await screen.findByText("token vencido");
+
+    auth = { ...auth, refreshUser: vi.fn().mockResolvedValue({}), switchContext: vi.fn() };
+    rerenderPage();
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByText("token vencido")).toBeInTheDocument();
+    expect(api.acceptInvitation).toHaveBeenCalledTimes(1);
+  });
+
+  it("si la sesión se inicia con la pantalla de redirección ya visible, acepta una sola vez y no va al login", async () => {
+    const api = page.setup();
+    auth = { ...auth, user: null, loading: false };
+    const { rerenderPage } = renderAt(page);
+
+    await screen.findByText(/redirigiendo a iniciar sesión/i);
+    expect(api.acceptInvitation).not.toHaveBeenCalled();
+
+    auth = { ...auth, user: { id: 1 } };
+    rerenderPage();
+
+    await screen.findByText(page.successText);
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(api.acceptInvitation).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("pantalla-login")).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { teamInvitationsAPI } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -23,13 +23,13 @@ const AcceptTeamInvitation = () => {
     return () => clearTimeout(redirectTimerRef.current);
   }, []);
 
-  const processInvitation = async () => {
+  const processInvitation = useCallback(async () => {
     setStatus("accepting");
     try {
       const response = await teamInvitationsAPI.acceptInvitation(token);
       setStatus("success");
       setMessage(response.message || "Te has unido al equipo exitosamente");
-      setTeamName(response.team?.name || teamName);
+      setTeamName((prev) => response.team?.name || prev);
 
       // Redirigir a la página de equipos después de 3 segundos
       setTimeout(() => {
@@ -43,7 +43,7 @@ const AcceptTeamInvitation = () => {
       );
       isProcessing.current = false;
     }
-  };
+  }, [token, navigate]);
 
   // Paso 1: Obtener info de la invitación (público, sin auth)
   useEffect(() => {
@@ -99,15 +99,19 @@ const AcceptTeamInvitation = () => {
     };
 
     fetchInvitationInfo();
-  }, [token, authLoading, user]);
+  }, [token, authLoading, user, processInvitation, navigate]);
 
   // Paso 2: Si el usuario se autentica después de cargar la página
   useEffect(() => {
-    if (user && invitationInfo && status === "redirecting") {
-      clearTimeout(redirectTimerRef.current);
-      processInvitation();
-    }
-  }, [user, invitationInfo, status]);
+    if (!(user && invitationInfo && status === "redirecting")) return;
+    clearTimeout(redirectTimerRef.current);
+    // La transición redirecting -> accepting ocurre una sola vez: la propia
+    // función cambia status y la condición deja de cumplirse.
+    const acceptAfterLogin = async () => {
+      await processInvitation();
+    };
+    acceptAfterLogin();
+  }, [user, invitationInfo, status, processInvitation]);
 
   // Estado: Verificando invitación
   if (status === "checking" || status === "loading") {

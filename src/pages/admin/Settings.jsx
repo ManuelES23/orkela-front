@@ -63,6 +63,7 @@ export default function Settings() {
 
   useEffect(() => {
     loadConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- carga inicial solo al montar; loadConfig no es estable (se recrea cada render)
   }, []);
 
   const loadConfig = async () => {

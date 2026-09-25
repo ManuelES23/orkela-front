@@ -1466,8 +1466,13 @@ const ProjectDetail = () => {
       <Modal
         isOpen={isMembersModalOpen}
         onClose={handleCloseMembersModal}
-        title='Miembros del Proyecto'
-        size='sm'
+        title={
+          <span className='flex items-center gap-2'>
+            <Users className='w-5 h-5 text-brand-600' aria-hidden='true' />
+            Miembros del Proyecto
+          </span>
+        }
+        size='md'
         footer={
           <button
             onClick={handleCloseMembersModal}

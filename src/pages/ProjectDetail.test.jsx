@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route, useNavigate } from "react-router-dom";
 import ProjectDetail from "./ProjectDetail";
 import { projectsAPI, tasksAPI } from "../utils/api";
@@ -187,5 +187,21 @@ describe("ProjectDetail", () => {
 
     expect(await screen.findByText("listado-proyectos")).toBeInTheDocument();
     expect(notification.warning).toHaveBeenCalled();
+  });
+
+  it("el diálogo de miembros conserva su nombre accesible, el icono decorativo y un ancho holgado", async () => {
+    projectsAPI.getById.mockResolvedValue(project(7, "P", []));
+    tasksAPI.getAll.mockResolvedValue([]);
+    renderAt("/projects/7");
+    await screen.findByText("P");
+
+    fireEvent.click(screen.getByText("Ver y gestionar"));
+
+    // El icono es aria-hidden: el nombre accesible sigue siendo solo el texto
+    const dialog = await screen.findByRole("dialog", { name: "Miembros del Proyecto" });
+    const heading = within(dialog).getByRole("heading", { name: "Miembros del Proyecto" });
+    expect(heading.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    // Filas avatar + nombre + badge + email + 2 acciones no caben con holgura en max-w-md (448px)
+    expect(dialog).toHaveClass("max-w-2xl");
   });
 });

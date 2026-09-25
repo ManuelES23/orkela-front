@@ -11,7 +11,12 @@ import { useSearchParams } from "react-router-dom";
 const useOpenFromQuery = (param, onOpen) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const onOpenRef = useRef(onOpen);
-  onOpenRef.current = onOpen;
+  // Mantiene el ref al día tras cada render. Debe declararse ANTES del efecto
+  // que lo lee: los efectos corren en orden de declaración, así el efecto de
+  // abajo siempre ve el último onOpen.
+  useEffect(() => {
+    onOpenRef.current = onOpen;
+  });
 
   const raw = searchParams.get(param);
 

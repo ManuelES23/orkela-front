@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import ClientTicketsInbox from "./ClientTicketsInbox";
@@ -210,23 +210,27 @@ describe("ClientTicketsInbox v2", () => {
     expect(location.search).toContain("page=2");
   });
 
-  it("la hoja de filtros es un diálogo modal: atrapa el foco y lo devuelve al cerrar", async () => {
+  it("la hoja de filtros es un Modal: atrapa el foco y lo devuelve al cerrar", async () => {
     ticketsAPI.getClientInboxTeams.mockResolvedValue([{ id: 4, name: "Soporte" }]);
     ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
     renderInbox();
 
     const ticketRow = await screen.findByRole("button", { name: "Acceso VPN" });
     const toggle = screen.getByRole("button", { name: /^Filtros/ });
+    toggle.focus();
     fireEvent.click(toggle);
 
-    // Semántica de diálogo, nombrado por su propio encabezado «Filtros»
+    // Semántica de diálogo, nombrado por su título «Filtros»
     const sheet = screen.getByRole("dialog", { name: "Filtros" });
     expect(sheet).toHaveAttribute("aria-modal", "true");
-    expect(sheet.id).toBe("inbox-facets");
     expect(toggle).toHaveAttribute("aria-expanded", "true");
 
+    // Los filtros se montan una sola vez: ni el carril ni el Modal los duplican
+    expect(document.querySelectorAll("#inbox-search")).toHaveLength(1);
+    expect(within(sheet).getByLabelText("Buscar tickets")).toBeInTheDocument();
+
     // El foco entra en la hoja (primer control: cerrar)
-    const close = within(sheet).getByRole("button", { name: "Cerrar filtros" });
+    const close = within(sheet).getByRole("button", { name: "Cerrar" });
     expect(document.activeElement).toBe(close);
 
     // Tab desde el último control cicla al primero en vez de escapar a la lista
@@ -238,11 +242,11 @@ describe("ClientTicketsInbox v2", () => {
     const last = focusables[focusables.length - 1];
     expect(last).not.toBe(close);
     last.focus();
-    fireEvent.keyDown(document, { key: "Tab" });
+    fireEvent.keyDown(document.activeElement, { key: "Tab" });
     expect(document.activeElement).toBe(close);
 
     // Shift+Tab desde el primero cicla al último, nunca a la fila de detrás
-    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    fireEvent.keyDown(document.activeElement, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(last);
     expect(document.activeElement).not.toBe(ticketRow);
 
@@ -250,5 +254,64 @@ describe("ClientTicketsInbox v2", () => {
     fireEvent.click(close);
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "Filtros" })).not.toBeInTheDocument());
     expect(document.activeElement).toBe(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    // Cerrada, los filtros vuelven al carril (una sola copia)
+    expect(document.querySelectorAll("#inbox-search")).toHaveLength(1);
+  });
+
+  it("Escape cierra la hoja de filtros y devuelve el foco al botón", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox();
+    await screen.findByRole("button", { name: "Acceso VPN" });
+
+    const toggle = screen.getByRole("button", { name: /^Filtros/ });
+    toggle.focus();
+    fireEvent.click(toggle);
+    const sheet = screen.getByRole("dialog", { name: "Filtros" });
+
+    fireEvent.keyDown(within(sheet).getByRole("button", { name: "Cerrar" }), { key: "Escape" });
+
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Filtros" })).not.toBeInTheDocument());
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it("la hoja lleva 'Limpiar filtros (n)' en su pie y al pulsarlo se cierra", async () => {
+    ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+    renderInbox("/client-tickets?priority=high");
+    await screen.findByRole("button", { name: "Acceso VPN" });
+
+    fireEvent.click(screen.getByRole("button", { name: /^Filtros/ }));
+    const sheet = screen.getByRole("dialog", { name: "Filtros" });
+    fireEvent.click(within(sheet).getByRole("button", { name: "Limpiar filtros (1)" }));
+
+    await waitFor(() => expect(lastInboxCall()).toEqual({ tab: "sin_asignar", page: 1 }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Filtros" })).not.toBeInTheDocument());
+  });
+
+  describe("en escritorio (lg)", () => {
+    const originalMatchMedia = window.matchMedia;
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia;
+    });
+
+    it("la hoja no se queda abierta: el Modal solo existe en móvil", async () => {
+      window.matchMedia = (query) => ({
+        matches: query === "(min-width: 1024px)",
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      });
+      ticketsAPI.getClientInbox.mockResolvedValue(inboxPage([row()]));
+      renderInbox();
+      await screen.findByRole("button", { name: "Acceso VPN" });
+
+      fireEvent.click(screen.getByRole("button", { name: /^Filtros/ }));
+
+      await waitFor(() => expect(screen.getByRole("button", { name: /^Filtros/ })).toHaveAttribute("aria-expanded", "false"));
+      // El Modal sale con animación: se espera a que termine de desmontarse
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      // Los filtros siguen inline en el carril
+      expect(screen.getByLabelText("Buscar tickets")).toBeInTheDocument();
+    });
   });
 });

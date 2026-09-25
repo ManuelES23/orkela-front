@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { SlidersHorizontal, X } from "lucide-react";
 import Layout from "../components/layout/Layout";
+import Modal from "../components/ui/Modal";
 import LoadingSwap from "../components/ui/LoadingSwap";
 import { SkeletonRows } from "../components/ui/Skeleton";
 import TicketDetailModal from "../components/modals/TicketDetailModal";
@@ -24,45 +25,22 @@ import { useNotification } from "../context/NotificationContext";
 // filtros facetados debajo; a la derecha, la lista densa con su cabecera de
 // chips y su pie de paginación. Por debajo de lg la rejilla se pliega a una
 // columna: las pestañas pasan a carrusel horizontal (lo resuelve InboxTabs) y
-// el mismo bloque de filtros se muestra como hoja inferior (.sheet) tras el
-// botón «Filtros» con su contador.
+// el mismo bloque de filtros se muestra en un Modal (pantalla completa en móvil)
+// tras el botón «Filtros» con su contador.
 //
 // El bloque de filtros se monta UNA sola vez, nunca una copia para móvil y
 // otra para escritorio: duplicarlo duplicaría los id y los label de sus
-// controles (inbox-search, inbox-priority, inbox-type, inbox-team).
+// controles (inbox-search, inbox-priority, inbox-type, inbox-team). Con el
+// Modal abierto el carril deja de renderizarlo, y al revés.
 const railLabelClass =
   "mb-2 block text-[10.5px] font-extrabold tracking-[0.07em] text-gray-400 uppercase dark:text-night-400";
 const cardClass = "rounded-2xl border border-gray-200 bg-white dark:border-night-700 dark:bg-night-900";
-// Hoja inferior en móvil (.sheet + .grab) → bloque normal dentro del carril en lg.
-// z-[101] y el velo en z-[100], como MobileMenu: BottomNav es `fixed bottom-0
-// … z-50 md:hidden` con una barra opaca de 64 px, así que por debajo de md una
-// hoja con menos z queda tapada justo donde está el selector «Equipo» — y el
-// toque iría a la barra de navegación en vez de al filtro.
-const sheetOpenClass =
-  "fixed inset-x-0 bottom-0 z-[101] max-h-[82vh] overflow-y-auto rounded-t-[20px] border border-b-0 border-gray-200 bg-white px-4 pt-1 pb-5 shadow-[0_-12px_34px_-14px_rgba(20,15,32,0.35)] dark:border-night-700 dark:bg-night-900";
-const sheetInRailClass =
-  "lg:static lg:z-auto lg:max-h-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none";
-
-// Mismo selector y misma técnica de trampa de foco que components/ui/Modal.jsx.
-// Se replica aquí en vez de importarla porque en Modal está dentro del propio
-// componente (no es un hook reutilizable) y no toca modificar ese archivo.
-const FOCUSABLE_SELECTOR = [
-  "a[href]",
-  "button:not([disabled])",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  '[tabindex]:not([tabindex="-1"])',
-].join(",");
-
 const ClientTicketsInbox = () => {
   const inbox = useClientInbox();
   const teamOptions = useTeamOptions();
   const { success, error: showError } = useNotification();
   const reduceMotion = useReducedMotion();
   const listTopRef = useRef(null);
-  const sheetRef = useRef(null);
-  const filtersButtonRef = useRef(null);
 
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [assigningId, setAssigningId] = useState(null);
@@ -82,67 +60,9 @@ const ClientTicketsInbox = () => {
 
   const closeFilters = useCallback(() => setFiltersOpen(false), []);
 
-  // Escape cierra la hoja de filtros aunque el foco siga en el botón que la abrió
-  useEffect(() => {
-    if (!filtersOpen) return undefined;
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") closeFilters();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [filtersOpen, closeFilters]);
-
-  // Abierta, la hoja es un diálogo modal de verdad: el foco entra en ella, Tab
-  // y Shift+Tab ciclan dentro y al cerrar vuelve al botón «Filtros».
-  //
-  // Sin esto el velo era solo una barrera de puntero, no de foco: tabulando
-  // desde el último control de la hoja se llegaba a los botones de título de las
-  // filas que quedan detrás, y pulsar Enter abría TicketDetailModal, que se
-  // pinta en z-50 — por debajo de la hoja (z-[101]) y del velo (z-[100]). El
-  // modal se llevaba el foco pero quedaba invisible detrás de la hoja.
-  useEffect(() => {
-    if (!filtersOpen) return undefined;
-
-    const sheet = sheetRef.current;
-    if (!sheet) return undefined;
-    const opener = filtersButtonRef.current;
-    const focusables = () => Array.from(sheet.querySelectorAll(FOCUSABLE_SELECTOR));
-
-    (focusables()[0] ?? sheet).focus();
-
-    const handleKeyDown = (event) => {
-      if (event.key !== "Tab") return;
-
-      const items = focusables();
-      if (items.length === 0) {
-        event.preventDefault();
-        sheet.focus();
-        return;
-      }
-
-      const first = items[0];
-      const last = items[items.length - 1];
-      const active = document.activeElement;
-
-      if (event.shiftKey && (active === first || !sheet.contains(active))) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && (active === last || !sheet.contains(active))) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      if (opener?.isConnected) opener.focus();
-    };
-  }, [filtersOpen]);
-
-  // Al pasar a lg los filtros ya se ven en el carril: dejar la hoja "abierta"
-  // la haría reaparecer sola al volver a angostar la ventana.
+  // Modal no tiene `lg:hidden`: en lg los filtros ya se ven en el carril, así
+  // que `filtersOpen` nunca debe quedar en true ahí. Cerrarlo al pasar a lg
+  // también evita que el Modal reaparezca solo al volver a angostar la ventana.
   useEffect(() => {
     if (!filtersOpen) return undefined;
     const wide = window.matchMedia?.("(min-width: 1024px)");
@@ -178,6 +98,34 @@ const ClientTicketsInbox = () => {
 
   const hasPagination = (inbox.meta?.last_page ?? 1) > 1;
 
+  const filtersBlock = (
+    <InboxFilters
+      filters={filters}
+      teams={teamOptions.teams}
+      teamsError={teamOptions.error}
+      onRetryTeams={teamOptions.retry}
+      onChange={setFilter}
+    />
+  );
+
+  // .clr del carril: lleva el contador, así que su nombre accesible
+  // («Limpiar filtros (2)») nunca choca con el botón pelado de InboxEmpty ni
+  // con el de la fila de chips.
+  const clearButton =
+    chips.length > 0 ? (
+      <button
+        type='button'
+        onClick={() => {
+          clearFilters();
+          closeFilters();
+        }}
+        className='inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-red-300 px-3 text-[12.5px] font-extrabold text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30'
+      >
+        <X className='h-3.5 w-3.5' aria-hidden='true' />
+        {`Limpiar filtros (${chips.length})`}
+      </button>
+    ) : null;
+
   return (
     <Layout title='Bandeja de Clientes' subtitle='Tickets creados desde el portal de clientes'>
       {/* .a-bandeja { grid-template-columns: 262px minmax(0,1fr); gap: 14px; align-items: stretch } */}
@@ -194,13 +142,12 @@ const ClientTicketsInbox = () => {
             <InboxTabs value={filters.tab} counts={inbox.counts} onChange={setTab} />
           </div>
 
-          {/* En móvil los filtros viven tras este botón con su contador */}
+          {/* En móvil los filtros viven en un Modal tras este botón con su contador */}
           <button
             type='button'
-            ref={filtersButtonRef}
             onClick={() => setFiltersOpen((open) => !open)}
             aria-expanded={filtersOpen}
-            aria-controls='inbox-facets'
+            aria-haspopup='dialog'
             className='inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 text-[12.5px] font-bold text-gray-800 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 lg:hidden dark:border-night-600 dark:text-night-100 dark:hover:bg-night-800'
           >
             <SlidersHorizontal className='h-4 w-4' aria-hidden='true' />
@@ -212,78 +159,21 @@ const ClientTicketsInbox = () => {
             )}
           </button>
 
-          {/* .scrim: solo acompaña a la hoja inferior del móvil */}
-          <AnimatePresence>
-            {filtersOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reduceMotion ? 0 : 0.15 }}
-                onClick={closeFilters}
-                aria-hidden='true'
-                className='fixed inset-0 z-[100] bg-night-950/45 lg:hidden'
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Abierta (solo por debajo de lg: el efecto de matchMedia la cierra al
-              llegar a lg) la hoja se anuncia como diálogo modal y se nombra con
-              su propio encabezado «Filtros». En el carril de lg el mismo nodo
-              es contenido normal, así que la semántica de diálogo es condicional. */}
-          <div
-            id='inbox-facets'
-            ref={sheetRef}
-            role={filtersOpen ? "dialog" : undefined}
-            aria-modal={filtersOpen ? "true" : undefined}
-            aria-labelledby={filtersOpen ? "inbox-facets-title" : undefined}
-            tabIndex={filtersOpen ? -1 : undefined}
-            className={`${filtersOpen ? sheetOpenClass : "hidden"} lg:block ${sheetInRailClass} focus:outline-none`}
-          >
-            {/* .grab y la cabecera de la hoja no existen en el carril de lg */}
-            <span
-              className='mx-auto mb-2 block h-1 w-[42px] rounded-full bg-gray-200 lg:hidden dark:bg-night-700'
-              aria-hidden='true'
-            />
-            <div className='mb-3 flex items-center justify-between gap-2 lg:hidden'>
-              <h2 id='inbox-facets-title' className='text-[15px] font-extrabold text-gray-900 dark:text-night-50'>
-                Filtros
-              </h2>
-              <button
-                type='button'
-                onClick={closeFilters}
-                aria-label='Cerrar filtros'
-                className='inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-night-600 dark:text-night-300 dark:hover:bg-night-800'
-              >
-                <X className='h-4 w-4' aria-hidden='true' />
-              </button>
+          {/* Carril de lg: los filtros son contenido normal. En móvil (`hidden`) los
+              muestra el Modal de abajo, y mientras está abierto este bloque se
+              desmonta para no duplicar id ni label. */}
+          {!filtersOpen && (
+            <div className='hidden lg:block'>
+              {filtersBlock}
+              {clearButton && <div className='mt-3'>{clearButton}</div>}
             </div>
+          )}
 
-            <InboxFilters
-              filters={filters}
-              teams={teamOptions.teams}
-              teamsError={teamOptions.error}
-              onRetryTeams={teamOptions.retry}
-              onChange={setFilter}
-            />
-
-            {/* .clr del carril: lleva el contador, así que su nombre accesible
-                («Limpiar filtros (2)») nunca choca con el botón pelado de
-                InboxEmpty ni con el de la fila de chips. */}
-            {chips.length > 0 && (
-              <button
-                type='button'
-                onClick={() => {
-                  clearFilters();
-                  closeFilters();
-                }}
-                className='mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-red-300 px-3 text-[12.5px] font-extrabold text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30'
-              >
-                <X className='h-3.5 w-3.5' aria-hidden='true' />
-                {`Limpiar filtros (${chips.length})`}
-              </button>
-            )}
-          </div>
+          {/* Solo móvil: `filtersOpen` no llega a true en lg (ver el efecto de
+              matchMedia). El botón de limpiar va en el pie fijo del Modal. */}
+          <Modal isOpen={filtersOpen} onClose={closeFilters} title='Filtros' footer={clearButton}>
+            {filtersBlock}
+          </Modal>
         </aside>
 
         {/* Lista: tarjeta con cabecera de chips, panel de la pestaña y pie de paginación */}

@@ -506,14 +506,17 @@ export const RealtimeProvider = ({ children }) => {
       connection.bind("disconnected", onDisconnected);
       connection.bind("error", onError);
 
+      // channelsRef.current es un Map creado una sola vez y nunca reasignado:
+      // guardarlo en una variable local es equivalente y evita el aviso.
+      const channels = channelsRef.current;
       return () => {
         clearTimeout(fallbackTimer);
         connection.unbind?.("connected", onConnected);
         connection.unbind?.("disconnected", onDisconnected);
         connection.unbind?.("error", onError);
         echo.leave(`user.${user.id}`);
-        channelsRef.current.forEach((_entry, name) => echo.leave(name));
-        channelsRef.current.clear();
+        channels.forEach((_entry, name) => echo.leave(name));
+        channels.clear();
         setIsConnected(false);
       };
     } catch (error) {

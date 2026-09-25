@@ -156,6 +156,27 @@ describe("InboxFilters", () => {
     expect(screen.getByRole("searchbox", { name: "Buscar tickets" })).toHaveValue("");
     expect(within(screen.getByLabelText("Equipo")).getByRole("option", { name: "Soporte" })).toBeInTheDocument();
   });
+
+  it("aplica la búsqueda pendiente si el bloque se desmonta antes de la pausa", () => {
+    const onChange = vi.fn();
+    const { unmount } = render(
+      <InboxFilters filters={{ q: "", priority: "", type: "", team: "" }} teams={[]} teamsError={false} onRetryTeams={vi.fn()} onChange={onChange} />,
+    );
+    fireEvent.change(screen.getByRole("searchbox", { name: "Buscar tickets" }), { target: { value: "vpn" } });
+    expect(onChange).not.toHaveBeenCalled();
+
+    unmount();
+    expect(onChange).toHaveBeenCalledWith("q", "vpn");
+  });
+
+  it("no dispara onChange al desmontar si no hay búsqueda pendiente", () => {
+    const onChange = vi.fn();
+    const { unmount } = render(
+      <InboxFilters filters={{ q: "vpn", priority: "", type: "", team: "" }} teams={[]} teamsError={false} onRetryTeams={vi.fn()} onChange={onChange} />,
+    );
+    unmount();
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
 
 describe("InboxTicketRow", () => {

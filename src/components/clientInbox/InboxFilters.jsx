@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, RefreshCw, Search } from "lucide-react";
 import { TICKET_PRIORITY, TICKET_TYPE } from "../../constants/tickets";
 
@@ -30,6 +30,20 @@ const InboxFilters = ({ filters, teams, teamsError, onRetryTeams, onChange }) =>
     const timer = setTimeout(() => onChange("q", draft), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [draft, filters.q, onChange]);
+
+  // Si el bloque se desmonta (p. ej. se cierra la hoja de filtros móvil) con una
+  // búsqueda aún en espera, se aplica en vez de perderla.
+  const latest = useRef({ draft, q: filters.q, onChange });
+  useEffect(() => {
+    latest.current = { draft, q: filters.q, onChange };
+  });
+  useEffect(
+    () => () => {
+      const { draft: pending, q, onChange: apply } = latest.current;
+      if (pending !== q) apply("q", pending);
+    },
+    [],
+  );
 
   return (
     <div className='space-y-3'>

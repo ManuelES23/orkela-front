@@ -13,5 +13,9 @@ export default defineConfig({
     // Margen para tests con muchos ciclos de act/temporizadores falsos
     // cuando corren en paralelo con el resto de la suite.
     testTimeout: 20000,
+    // Por defecto Vitest lanza un worker por núcleo (aquí 31): cada uno crea su
+    // jsdom y transforma módulos a la vez, la máquina se satura y aparecen
+    // timeouts al azar. Con menos workers la suite es más rápida y estable.
+    maxWorkers: 8,
   },
 });

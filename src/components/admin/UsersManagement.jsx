@@ -36,9 +36,12 @@ const UsersManagement = ({ onStatsUpdate }) => {
   });
   const [deleting, setDeleting] = useState(false);
 
+  // Solo al montar: loadUsers/loadOrganizations se recrean en cada render y
+  // añadirlas como dependencia dispararía las peticiones en bucle.
   useEffect(() => {
     loadUsers();
     loadOrganizations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- carga inicial solo al montar; los loaders son funciones inestables (no memoizadas)
   }, []);
 
   const loadOrganizations = async () => {

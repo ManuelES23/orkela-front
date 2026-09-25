@@ -513,6 +513,68 @@ const ProjectDetail = () => {
     refreshDataSilently();
   };
 
+  // Obtener lista de todos los miembros del proyecto
+  const getAllProjectMembers = useCallback(() => {
+    if (!project) return [];
+
+    const members = [];
+    const addedIds = new Set();
+
+    // Si tiene equipo asignado, mostrar miembros del equipo
+    if (project.team) {
+      // Agregar dueño del equipo
+      if (project.team.user) {
+        members.push({
+          ...project.team.user,
+          role: "team_owner",
+          roleLabel: "Líder del equipo",
+        });
+        addedIds.add(project.team.user.id);
+      }
+
+      // Agregar miembros del equipo
+      if (project.team.members && project.team.members.length > 0) {
+        project.team.members.forEach((member) => {
+          if (!addedIds.has(member.id)) {
+            members.push({
+              ...member,
+              role: "team_member",
+              roleLabel: "Miembro del equipo",
+            });
+            addedIds.add(member.id);
+          }
+        });
+      }
+    } else {
+      // Sin equipo: mostrar dueño y colaboradores individuales
+      // Agregar al dueño del proyecto
+      if (project.user) {
+        members.push({
+          ...project.user,
+          role: "owner",
+          roleLabel: "Propietario",
+        });
+        addedIds.add(project.user.id);
+      }
+
+      // Agregar colaboradores (excluyendo al dueño)
+      if (project.users && project.users.length > 0) {
+        project.users.forEach((user) => {
+          if (!addedIds.has(user.id)) {
+            members.push({
+              ...user,
+              role: "collaborator",
+              roleLabel: "Colaborador",
+            });
+            addedIds.add(user.id);
+          }
+        });
+      }
+    }
+
+    return members;
+  }, [project]);
+
   // Cargar miembros de la organización (solo en modo empresa)
   const loadOrgMembers = useCallback(async () => {
     if (!isOrganizationContext || !organizationId) return;
@@ -531,7 +593,7 @@ const ProjectDetail = () => {
     } finally {
       setLoadingOrgMembers(false);
     }
-  }, [isOrganizationContext, organizationId]);
+  }, [isOrganizationContext, organizationId, getAllProjectMembers]);
 
   // Cargar miembros de org cuando se abre el formulario de invitación
   useEffect(() => {
@@ -628,68 +690,6 @@ const ProjectDetail = () => {
       collaborator: null,
     });
     setCollaboratorStats(null);
-  };
-
-  // Obtener lista de todos los miembros del proyecto
-  const getAllProjectMembers = () => {
-    if (!project) return [];
-
-    const members = [];
-    const addedIds = new Set();
-
-    // Si tiene equipo asignado, mostrar miembros del equipo
-    if (project.team) {
-      // Agregar dueño del equipo
-      if (project.team.user) {
-        members.push({
-          ...project.team.user,
-          role: "team_owner",
-          roleLabel: "Líder del equipo",
-        });
-        addedIds.add(project.team.user.id);
-      }
-
-      // Agregar miembros del equipo
-      if (project.team.members && project.team.members.length > 0) {
-        project.team.members.forEach((member) => {
-          if (!addedIds.has(member.id)) {
-            members.push({
-              ...member,
-              role: "team_member",
-              roleLabel: "Miembro del equipo",
-            });
-            addedIds.add(member.id);
-          }
-        });
-      }
-    } else {
-      // Sin equipo: mostrar dueño y colaboradores individuales
-      // Agregar al dueño del proyecto
-      if (project.user) {
-        members.push({
-          ...project.user,
-          role: "owner",
-          roleLabel: "Propietario",
-        });
-        addedIds.add(project.user.id);
-      }
-
-      // Agregar colaboradores (excluyendo al dueño)
-      if (project.users && project.users.length > 0) {
-        project.users.forEach((user) => {
-          if (!addedIds.has(user.id)) {
-            members.push({
-              ...user,
-              role: "collaborator",
-              roleLabel: "Colaborador",
-            });
-            addedIds.add(user.id);
-          }
-        });
-      }
-    }
-
-    return members;
   };
 
   // Verificar si el proyecto usa equipo (no permite gestionar miembros individualmente)

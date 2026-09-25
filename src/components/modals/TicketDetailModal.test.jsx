@@ -246,7 +246,7 @@ describe("TicketDetailModal", () => {
 
     fireEvent.click(screen.getByLabelText(/comentario interno/i));
 
-    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("note")).not.toBeInTheDocument());
   });
 
   it("sin can_comment_internal no hay nota interna, pero sí el aviso de correo", async () => {
@@ -276,8 +276,10 @@ describe("TicketDetailModal", () => {
     rerender(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 31 }} />);
 
     expect(screen.getByText("Ticket #31")).toBeInTheDocument();
-    expect(screen.queryByText("Acme SA")).not.toBeInTheDocument();
-    expect(screen.queryByText("Comentario de Acme")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("Acme SA")).not.toBeInTheDocument();
+      expect(screen.queryByText("Comentario de Acme")).not.toBeInTheDocument();
+    });
     expect(screen.queryByText("No se pudo cargar el ticket")).not.toBeInTheDocument();
 
     await act(async () => {

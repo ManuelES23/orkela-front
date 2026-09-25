@@ -176,7 +176,7 @@ describe("ClientsManagement", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Archivar" }));
 
-    expect(await screen.findByRole("button", { name: /Acme/ })).toHaveTextContent("Archivado");
+    await waitFor(() => expect(screen.getByRole("button", { name: /Acme/ })).toHaveTextContent("Archivado"));
     expect(clientsAPI.getAll).toHaveBeenCalledTimes(1);
   });
 

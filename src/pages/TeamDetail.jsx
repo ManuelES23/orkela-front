@@ -195,16 +195,6 @@ const TeamDetail = () => {
     }
   }, [id]);
 
-  // Cargar estadísticas
-  const loadStats = useCallback(async () => {
-    try {
-      const data = await teamsAPI.getStats(id);
-      setStats(data);
-    } catch (err) {
-      console.error("Error al cargar estadísticas:", err);
-    }
-  }, [id]);
-
   // Id de la última carga completa: al pasar de /teams/1 a /teams/2 se
   // descartan las respuestas del equipo anterior que lleguen tarde.
   const loadRequestIdRef = useRef(0);
@@ -259,7 +249,8 @@ const TeamDetail = () => {
   // Carga inicial - cargar TODO antes de mostrar la página
   useEffect(() => {
     loadAllData();
-  }, [id]); // Solo recargar cuando cambie el ID del equipo
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo recargar todo al cambiar el ID del equipo: loadAllData también cambia con ticketFilter/ticketStatusFilter y esos cambios los gestiona otro efecto (refetch de tickets), no deben relanzar la carga completa con spinner
+  }, [id]);
 
   // Últimas funciones de refresco (las define el efecto de abajo)
   const refreshAllRef = useRef(null);

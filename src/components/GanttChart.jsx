@@ -21,6 +21,65 @@ import { tasksAPI } from "../utils/api";
 import AnimatedNumber from "./ui/AnimatedNumber";
 import ProgressRing from "./ui/ProgressRing";
 
+// Parsear fecha de string "YYYY-MM-DD" o objeto Date
+const parseDateString = (dateStr) => {
+  if (!dateStr) return null;
+
+  // Si ya es un objeto Date, devolverlo
+  if (dateStr instanceof Date) return dateStr;
+
+  // Asegurar que es un string
+  if (typeof dateStr !== "string") {
+    // Intentar convertir a string si es posible
+    try {
+      dateStr = String(dateStr);
+    } catch {
+      return null;
+    }
+  }
+
+  const cleanDate = dateStr.split("T")[0];
+  const [year, month, day] = cleanDate.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+// Calcular días restantes
+const getDaysRemaining = (endDate) => {
+  if (!endDate) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = parseDateString(endDate);
+  if (!end) return null;
+  end.setHours(0, 0, 0, 0);
+  return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+};
+
+// Clasificar un item en uno de los 4 grupos de estado (Atrasados / En
+// progreso / Próximos / Completados) para la vista agrupada
+const classifyGroup = (item) => {
+  if (item.status === "done" || item.status === "completed") return "done";
+  const daysRemaining = getDaysRemaining(item.endDate);
+  if (daysRemaining !== null && daysRemaining < 0) return "late";
+  if (
+    item.status === "in-progress" ||
+    item.status === "in_progress" ||
+    item.status === "active"
+  )
+    return "progress";
+  return "upcoming";
+};
+
+const GROUP_META = {
+  late: { label: "Atrasados", stripe: "bg-red-500", text: "text-red-700 dark:text-red-300" },
+  progress: {
+    label: "En progreso",
+    stripe: "bg-brand-600",
+    text: "text-brand-700 dark:text-brand-300",
+  },
+  upcoming: { label: "Próximos", stripe: "bg-gray-400 dark:bg-night-500", text: "text-gray-600 dark:text-night-300" },
+  done: { label: "Completados", stripe: "bg-green-500", text: "text-green-700 dark:text-green-300" },
+};
+
 const GanttChart = ({ projects }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState("projects"); // 'projects', 'tasks'
@@ -47,28 +106,6 @@ const GanttChart = ({ projects }) => {
     };
     loadTasks();
   }, []);
-
-  // Parsear fecha de string "YYYY-MM-DD" o objeto Date
-  const parseDateString = (dateStr) => {
-    if (!dateStr) return null;
-
-    // Si ya es un objeto Date, devolverlo
-    if (dateStr instanceof Date) return dateStr;
-
-    // Asegurar que es un string
-    if (typeof dateStr !== "string") {
-      // Intentar convertir a string si es posible
-      try {
-        dateStr = String(dateStr);
-      } catch {
-        return null;
-      }
-    }
-
-    const cleanDate = dateStr.split("T")[0];
-    const [year, month, day] = cleanDate.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  };
 
   // Calcular rango de fechas visible
   const dateRange = useMemo(() => {
@@ -199,17 +236,6 @@ const GanttChart = ({ projects }) => {
       low: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
     };
     return colors[priority] || colors.medium;
-  };
-
-  // Calcular días restantes
-  const getDaysRemaining = (endDate) => {
-    if (!endDate) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const end = parseDateString(endDate);
-    if (!end) return null;
-    end.setHours(0, 0, 0, 0);
-    return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
   };
 
   // Generar items para el Gantt
@@ -477,32 +503,6 @@ const GanttChart = ({ projects }) => {
     priorityFilter,
     statusFilter,
   ]);
-
-  // Clasificar un item en uno de los 4 grupos de estado (Atrasados / En
-  // progreso / Próximos / Completados) para la vista agrupada
-  const classifyGroup = (item) => {
-    if (item.status === "done" || item.status === "completed") return "done";
-    const daysRemaining = getDaysRemaining(item.endDate);
-    if (daysRemaining !== null && daysRemaining < 0) return "late";
-    if (
-      item.status === "in-progress" ||
-      item.status === "in_progress" ||
-      item.status === "active"
-    )
-      return "progress";
-    return "upcoming";
-  };
-
-  const GROUP_META = {
-    late: { label: "Atrasados", stripe: "bg-red-500", text: "text-red-700 dark:text-red-300" },
-    progress: {
-      label: "En progreso",
-      stripe: "bg-brand-600",
-      text: "text-brand-700 dark:text-brand-300",
-    },
-    upcoming: { label: "Próximos", stripe: "bg-gray-400 dark:bg-night-500", text: "text-gray-600 dark:text-night-300" },
-    done: { label: "Completados", stripe: "bg-green-500", text: "text-green-700 dark:text-green-300" },
-  };
 
   // Fondo de la barra según el grupo (más coherente con la franja de
   // métricas y las cabeceras de sección que con el estado granular)

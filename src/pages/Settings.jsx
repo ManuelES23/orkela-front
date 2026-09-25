@@ -77,6 +77,7 @@ const Settings = () => {
   // Cargar perfil al montar
   useEffect(() => {
     loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- carga inicial solo al montar; loadProfile no es estable (se recrea cada render)
   }, []);
 
   const loadProfile = async () => {

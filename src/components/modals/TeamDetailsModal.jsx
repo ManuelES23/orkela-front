@@ -19,7 +19,7 @@ import {
 import { teamsAPI, teamInvitationsAPI } from "../../utils/api";
 import { parseLocalDate } from "../../utils/dateUtils";
 
-const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
+const TeamDetailsModal = ({ isOpen, onClose, team }) => {
   const { error: showError } = useNotification();
   const { notifyInvitation } = useMailResult();
   const [teamDetails, setTeamDetails] = useState(null);
@@ -31,6 +31,7 @@ const TeamDetailsModal = ({ isOpen, onClose, team, onUpdate }) => {
     if (isOpen && team) {
       loadTeamDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- debe recargar solo al abrir/cambiar de equipo; loadTeamDetails no es estable (se recrea cada render) y forzarla como dep recargaría en bucle
   }, [isOpen, team]);
 
   const loadTeamDetails = async () => {

@@ -11,12 +11,10 @@ import {
   Menu,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
 
 const BottomNav = ({ onMenuClick }) => {
   const location = useLocation();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState(location.pathname);
 
   const isSuperAdmin = user?.isSystemAdmin || user?.role === "superadmin";
   const { isOrganizationContext: isInOrganizationMode } = useUserContext();
@@ -49,8 +47,6 @@ const BottomNav = ({ onMenuClick }) => {
   const handleNavClick = (item) => {
     if (item.isMenu) {
       onMenuClick?.();
-    } else {
-      setActiveTab(item.path);
     }
   };
 

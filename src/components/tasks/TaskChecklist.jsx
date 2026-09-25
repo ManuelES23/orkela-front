@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckSquare,
@@ -189,7 +189,7 @@ const TaskChecklist = ({ taskId, items = [], onUpdate, onLocalChange }) => {
       {/* Lista de items */}
       <div className='space-y-1'>
         <AnimatePresence mode='popLayout'>
-          {checklistItems.map((item, index) => (
+          {checklistItems.map((item) => (
             <motion.div
               key={item.tempId || item.id}
               initial={{ opacity: 0, y: -10 }}

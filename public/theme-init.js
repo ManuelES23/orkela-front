@@ -9,7 +9,7 @@
       stored === "dark" ||
       (stored === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
     document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-  } catch (e) {
+  } catch {
     // localStorage inaccesible (modo privado, etc.) - se queda en claro
   }
 })();

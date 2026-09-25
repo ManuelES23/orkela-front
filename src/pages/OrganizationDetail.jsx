@@ -173,39 +173,6 @@ const OrganizationDetail = () => {
     }
   }, [id, organization?.can_manage]);
 
-  const loadStats = useCallback(async () => {
-    try {
-      const data = await organizationsAPI.getStats(id);
-      setStats(data);
-    } catch (err) {
-      console.error("Error loading stats:", err);
-    }
-  }, [id]);
-
-  const loadTeams = useCallback(async () => {
-    try {
-      setLoadingTeams(true);
-      const data = await organizationsAPI.getTeams(id);
-      setTeams(data);
-    } catch (err) {
-      console.error("Error loading teams:", err);
-    } finally {
-      setLoadingTeams(false);
-    }
-  }, [id]);
-
-  const loadProjects = useCallback(async () => {
-    try {
-      setLoadingProjects(true);
-      const data = await organizationsAPI.getProjects(id);
-      setProjects(data);
-    } catch (err) {
-      console.error("Error loading projects:", err);
-    } finally {
-      setLoadingProjects(false);
-    }
-  }, [id]);
-
   // Función de refresco silencioso para tiempo real - recarga TODOS los datos
   const refreshAllSilently = useCallback(async () => {
     try {

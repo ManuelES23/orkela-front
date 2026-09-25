@@ -19,7 +19,7 @@ import { organizationsAPI } from "../../utils/api";
 import { useNotification } from "../../context/NotificationContext";
 
 const OrganizationMailConfig = ({ organizationId, isOwner }) => {
-  const { success, error: showError, info } = useNotification();
+  const { success, error: showError } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);

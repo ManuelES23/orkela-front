@@ -72,7 +72,6 @@ const PortalInboxScreen = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailsOpen]);
 
   // Ref con el ticket seleccionado "actual" — necesario porque las promesas

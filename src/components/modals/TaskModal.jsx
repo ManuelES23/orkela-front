@@ -236,12 +236,6 @@ const TaskModal = ({
     </div>
   );
 
-  const getSelectedUsers = () => {
-    return projectMembers.filter((member) =>
-      formData.assigned_user_ids.includes(member.id),
-    );
-  };
-
   // Callback para cuando cambian los items del checklist en modo local (crear tarea)
   const handleChecklistChange = (items) => {
     setChecklistItems(items);

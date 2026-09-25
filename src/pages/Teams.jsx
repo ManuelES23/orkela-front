@@ -6,7 +6,6 @@ import ConfirmModal from "../components/ui/ConfirmModal";
 import { useNotification } from "../context/NotificationContext";
 import { useMailResult } from "../hooks/useMailResult";
 import { useRealtime } from "../context/RealtimeContext";
-import { useAuth } from "../context/AuthContext";
 import {
   useOrganizationPermissions,
   useUserContext,
@@ -57,14 +56,13 @@ const getTeamHex = (team) =>
 
 const Teams = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { success, error: showError } = useNotification();
   const { notifyInvitation } = useMailResult();
   const { registerRefresh, unregisterRefresh } = useRealtime();
 
   // Permisos de organización
   const { isOrganizationContext } = useUserContext();
-  const { canCreateTeams, role, hasOrganization } =
+  const { canCreateTeams, role } =
     useOrganizationPermissions();
 
   const [isModalOpen, setIsModalOpen] = useState(false);

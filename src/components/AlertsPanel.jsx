@@ -15,7 +15,6 @@ const AlertsPanel = ({ projects, tasks }) => {
 
   // Obtener fecha actual
   const today = new Date();
-  const todayTime = today.getTime();
 
   // Calcular días hasta vencimiento
   const getDaysUntil = (dateString) => {

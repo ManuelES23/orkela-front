@@ -35,7 +35,7 @@ const getBarFill = (groupKey) => {
   }
 };
 
-const ProjectGantt = ({ tasks, projectDueDate, projectColor }) => {
+const ProjectGantt = ({ tasks }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Generar días del mes actual

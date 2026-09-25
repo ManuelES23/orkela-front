@@ -32,7 +32,6 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
   const [inviteEmails, setInviteEmails] = useState([""]);
   const [availableMembers, setAvailableMembers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState(null);
   const [initializing, setInitializing] = useState(true);
 
@@ -359,7 +358,6 @@ const TeamModal = ({ isOpen, onClose, team = null, onSuccess }) => {
               options={memberOptions}
               value={selectedMembers}
               onChange={handleMemberChange}
-              isLoading={loadingMembers}
               placeholder='Buscar y seleccionar usuarios a invitar...'
               noOptionsMessage={() =>
                 "No hay usuarios disponibles para invitar"

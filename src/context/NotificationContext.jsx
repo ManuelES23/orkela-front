@@ -28,6 +28,10 @@ export const NotificationProvider = ({ children }) => {
   // Enlaces de invitaciones cuyo correo no salió (ver showInvitationLinks)
   const [invitationLinks, setInvitationLinks] = useState([]);
 
+  const removeNotification = useCallback((id) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
   const addNotification = useCallback(
     ({ type = "info", message, title, duration = 5000, onClick }) => {
       const id = ++nextIdRef.current;
@@ -44,12 +48,8 @@ export const NotificationProvider = ({ children }) => {
 
       return id;
     },
-    []
+    [removeNotification]
   );
-
-  const removeNotification = useCallback((id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
 
   const success = useCallback(
     (message, duration, options = {}) => {

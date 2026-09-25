@@ -139,11 +139,13 @@ const Modal = ({
 
   const isAlert = variant === "alert";
 
+  // z-[90]: por encima de BottomNav (z-50, si no tapa el pie en móvil) y por
+  // debajo de los toasts y el menú móvil (z-100).
   // La alerta se queda centrada siempre (no es una hoja que se arrastra).
   // La estándar va a pantalla completa en móvil y a tarjeta centrada desde `sm`.
   const overlayClass = isAlert
-    ? "fixed inset-0 z-50 flex items-center justify-center p-4"
-    : "fixed inset-0 z-50 flex items-stretch sm:items-center justify-center p-0 sm:p-4";
+    ? "fixed inset-0 z-[90] flex items-center justify-center p-4"
+    : "fixed inset-0 z-[90] flex items-stretch sm:items-center justify-center p-0 sm:p-4";
 
   const dialogClass = isAlert
     ? "max-w-md rounded-2xl max-h-[90vh]"

@@ -23,7 +23,9 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // `motion` de framer-motion solo se usa como <motion.div> (JSX member
+      // expression), que no-unused-vars no cuenta como uso: falso positivo.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^(motion$|[A-Z_])' }],
     },
   },
 ])

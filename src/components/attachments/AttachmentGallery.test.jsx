@@ -60,6 +60,25 @@ describe("AttachmentGallery", () => {
     expect(screen.getByRole("button", { name: "Ver imagen 3 de 6: img3.png (y 3 más)" })).toHaveTextContent("+3");
   });
 
+  it("la raíz ocupa todo el ancho disponible (w-full): sin él, en una burbuja flex mide 0 hasta que carga la imagen", () => {
+    const { container } = render(<AttachmentGallery scope='portal' attachments={make(2)} />);
+    expect(container.firstChild).toHaveClass("w-full", "max-w-sm");
+  });
+
+  it("si la miniatura falla, el reintento tiene un área táctil de 44px y vuelve a pedir la imagen", async () => {
+    attachmentsAPI.getBlob.mockRejectedValueOnce(new Error("Red"));
+    render(<AttachmentGallery scope='portal' attachments={make(1)} />);
+
+    const retry = await screen.findByRole("button", { name: "Reintentar" });
+    expect(retry.className).toContain("relative");
+    expect(retry.className).toContain("after:absolute");
+    expect(retry.className).toContain("after:-inset-x-2");
+    expect(retry.className).toContain("after:-inset-y-3.5");
+
+    fireEvent.click(retry);
+    await waitFor(() => expect(attachmentsAPI.getBlob).toHaveBeenCalledTimes(2));
+  });
+
   it("al tocar una celda abre el visor en esa imagen", async () => {
     render(<AttachmentGallery scope='portal' attachments={make(2)} />);
 

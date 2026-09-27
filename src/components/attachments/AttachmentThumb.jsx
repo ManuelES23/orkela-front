@@ -41,7 +41,8 @@ const AttachmentThumb = ({ scope, attachment, className = "" }) => {
                 retry();
               }
             }}
-            className='inline-flex items-center gap-1 underline'
+            // Área táctil de 44px aunque el texto mida ~16px de alto.
+            className='relative inline-flex items-center gap-1 underline after:absolute after:-inset-x-2 after:-inset-y-3.5'
           >
             <RefreshCw className='h-3 w-3' aria-hidden='true' />
             Reintentar

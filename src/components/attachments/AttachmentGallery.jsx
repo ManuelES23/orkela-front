@@ -37,7 +37,7 @@ const AttachmentGallery = ({ scope, attachments = [], onDelete, className = "" }
   };
 
   return (
-    <div className={`grid max-w-sm gap-1 ${layout} ${className}`}>
+    <div className={`grid w-full min-w-56 max-w-sm gap-1 ${layout} ${className}`}>
       {visible.map((attachment, index) => {
         const overflow = index === 2 && hidden > 0;
         const label = `Ver imagen ${index + 1} de ${total}: ${attachment.name}${overflow ? ` (y ${hidden} más)` : ""}`;

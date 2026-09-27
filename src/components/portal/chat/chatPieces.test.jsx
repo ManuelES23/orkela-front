@@ -158,4 +158,15 @@ describe("PortalMessageBubble con adjuntos", () => {
     expect(container.contains(gallery)).toBe(true);
     expect(gallery).toHaveClass("w-full", "min-w-56", "max-w-sm", "mt-1");
   });
+
+  it("en un mensaje propio con texto y adjuntos la galería conserva mt-1 y justify-self-end como clases separadas", () => {
+    render(
+      <PortalMessageBubble message={{ ...message, own: true, attachments: [{ id: 9, name: "c.png", mime: "image/png", size: 3 }] }} />
+    );
+    const gallery = screen.getByRole("button", { name: /Ver imagen 1 de 1: c\.png/ }).parentElement;
+    const tokens = gallery.className.split(/\s+/);
+    expect(tokens).toContain("mt-1");
+    expect(tokens).toContain("justify-self-end");
+    expect(tokens).not.toContain("mt-1justify-self-end");
+  });
 });

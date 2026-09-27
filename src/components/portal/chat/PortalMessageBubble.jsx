@@ -50,7 +50,7 @@ const PortalMessageBubble = ({ message, onRetry }) => {
         <AttachmentGallery
           scope='portal'
           attachments={attachments}
-          className={`w-full min-w-56 ${content ? "mt-1" : ""}${own ? "justify-self-end" : ""} ${status === "failed" ? "opacity-70" : ""}`}
+          className={["w-full min-w-56", content && "mt-1", own && "justify-self-end", status === "failed" && "opacity-70"].filter(Boolean).join(" ")}
         />
       )}
       <div className='text-[11px] text-gray-400 dark:text-night-500 mt-1 px-1'>

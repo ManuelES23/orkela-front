@@ -15,6 +15,9 @@ const FOCUSABLE_SELECTOR = [
 // (p. ej. un ConfirmModal abierto encima de un detalle).
 const openModals = [];
 
+// Modales que bloquean el scroll de la página ahora mismo.
+let scrollLocks = 0;
+
 /**
  * Diálogo accesible con dos chromes (decisión de la puerta de diseño: mezcla B + C).
  *
@@ -55,14 +58,15 @@ const Modal = ({
     dismissibleRef.current = dismissible;
   }, [dismissible]);
 
+  // Solo bloquea mientras está abierto; el contador evita que un modal que
+  // se cierra (o uno montado cerrado) libere el bloqueo de otro aún abierto.
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (!isOpen) return undefined;
+    scrollLocks += 1;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "unset";
+      scrollLocks -= 1;
+      if (scrollLocks === 0) document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 

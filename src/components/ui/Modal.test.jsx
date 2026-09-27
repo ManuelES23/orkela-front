@@ -1,7 +1,14 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useState } from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Modal from "./Modal";
+import AttachmentGallery from "../attachments/AttachmentGallery";
+import { attachmentsAPI } from "../../utils/attachmentsApi";
+
+vi.mock("../../utils/attachmentsApi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  attachmentsAPI: { getBlob: vi.fn(), upload: vi.fn(), remove: vi.fn() },
+}));
 
 const Harness = () => {
   const [open, setOpen] = useState(false);
@@ -203,5 +210,59 @@ describe("Modal", () => {
     const body = screen.getByText("Contenido del formulario");
     // El botón del footer no debe estar dentro del contenedor con overflow-y del cuerpo.
     expect(body.closest("[class*='overflow-y-auto']")).not.toContainElement(save);
+  });
+
+  describe("bloqueo del scroll de la página", () => {
+    beforeEach(() => {
+      document.body.style.overflow = "";
+      attachmentsAPI.getBlob.mockResolvedValue(new Blob(["x"]));
+      global.URL.createObjectURL = vi.fn(() => "blob:x");
+      global.URL.revokeObjectURL = vi.fn();
+    });
+
+    it("un Modal cerrado no toca el overflow del body", () => {
+      document.body.style.overflow = "hidden";
+      render(
+        <Modal isOpen={false} onClose={vi.fn()} title='Cerrado'>
+          <p>x</p>
+        </Modal>,
+      );
+      expect(document.body.style.overflow).toBe("hidden");
+    });
+
+    it("con dos modales abiertos mantiene el bloqueo hasta que cierran ambos", () => {
+      const first = render(
+        <Modal isOpen onClose={vi.fn()} title='Uno'>
+          <p>uno</p>
+        </Modal>,
+      );
+      const second = render(
+        <Modal isOpen onClose={vi.fn()} title='Dos'>
+          <p>dos</p>
+        </Modal>,
+      );
+      expect(document.body.style.overflow).toBe("hidden");
+
+      second.unmount();
+      expect(document.body.style.overflow).toBe("hidden");
+
+      first.unmount();
+      expect(document.body.style.overflow).toBe("unset");
+    });
+
+    it("una galería dentro de un Modal abierto no libera el bloqueo", () => {
+      render(
+        <Modal isOpen onClose={vi.fn()} title='Detalle'>
+          <AttachmentGallery scope='staff' attachments={[{ id: 1, name: "a.png", mime: "image/png", size: 1 }]} onDelete={vi.fn()} />
+        </Modal>,
+      );
+      expect(document.body.style.overflow).toBe("hidden");
+
+      // Abrir y cerrar el visor tampoco lo libera.
+      fireEvent.click(screen.getByRole("button", { name: /Ver imagen 1 de 1/ }));
+      expect(document.body.style.overflow).toBe("hidden");
+      fireEvent.keyDown(document, { key: "Escape" });
+      expect(document.body.style.overflow).toBe("hidden");
+    });
   });
 });

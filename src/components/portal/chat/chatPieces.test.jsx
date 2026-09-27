@@ -149,4 +149,13 @@ describe("PortalMessageBubble con adjuntos", () => {
     expect(container.querySelector(".whitespace-pre-wrap")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Ver imagen 1 de 1: c\.png/ })).toBeInTheDocument();
   });
+
+  it("la galería de la burbuja ocupa el ancho (w-full min-w-56): en una columna flex que se ajusta al contenido mediría 0 hasta cargar la imagen", () => {
+    const { container } = render(
+      <PortalMessageBubble message={{ ...message, attachments: [{ id: 9, name: "c.png", mime: "image/png", size: 3 }] }} />
+    );
+    const gallery = screen.getByRole("button", { name: /Ver imagen 1 de 1: c\.png/ }).parentElement;
+    expect(container.contains(gallery)).toBe(true);
+    expect(gallery).toHaveClass("w-full", "min-w-56", "max-w-sm", "mt-1");
+  });
 });

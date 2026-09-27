@@ -60,9 +60,11 @@ describe("AttachmentGallery", () => {
     expect(screen.getByRole("button", { name: "Ver imagen 3 de 6: img3.png (y 3 más)" })).toHaveTextContent("+3");
   });
 
-  it("la raíz ocupa todo el ancho disponible (w-full): sin él, en una burbuja flex mide 0 hasta que carga la imagen", () => {
-    const { container } = render(<AttachmentGallery scope='portal' attachments={make(2)} />);
-    expect(container.firstChild).toHaveClass("w-full", "max-w-sm");
+  it("la raíz no fuerza w-full por defecto (los consumidores con margen, como ml-10, no se desbordan) y fusiona el className recibido", () => {
+    const { container } = render(<AttachmentGallery scope='staff' attachments={make(2)} className='ml-10 mt-2' />);
+    expect(container.firstChild).toHaveClass("max-w-sm", "ml-10", "mt-2");
+    expect(container.firstChild).not.toHaveClass("w-full");
+    expect(container.firstChild).not.toHaveClass("min-w-56");
   });
 
   it("si la miniatura falla, el reintento tiene un área táctil de 44px y vuelve a pedir la imagen", async () => {

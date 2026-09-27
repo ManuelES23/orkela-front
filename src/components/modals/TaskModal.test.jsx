@@ -6,7 +6,7 @@ import { attachmentsAPI } from "../../utils/attachmentsApi";
 
 vi.mock("../../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),
-  tasksAPI: { getProjectMembers: vi.fn(), update: vi.fn(), create: vi.fn() },
+  tasksAPI: { getProjectMembers: vi.fn(), update: vi.fn(), create: vi.fn(), getById: vi.fn() },
   projectsAPI: { getAll: vi.fn() },
 }));
 vi.mock("../../utils/attachmentsApi", async (importOriginal) => ({
@@ -38,6 +38,7 @@ describe("TaskModal: estado", () => {
 
   it("muestra el estado real de una tarea existente", async () => {
     const task = { id: 5, title: "T", project_id: 1, status: "in-progress" };
+    tasksAPI.getById.mockResolvedValue({ ...task, attachments: [] });
     render(<TaskModal isOpen onClose={vi.fn()} task={task} />);
 
     await screen.findByText("Estado");
@@ -197,5 +198,109 @@ describe("TaskModal: imágenes", () => {
     });
 
     await waitFor(() => expect(attachmentsAPI.upload).toHaveBeenCalled());
+  });
+});
+
+describe("TaskModal: cupo de imágenes desde un listado", () => {
+  const listRow = { id: 5, title: "Vieja", project_id: 1, status: "todo" }; // sin attachments, como en los listados
+  const pasteImage = (name = "p.png") =>
+    fireEvent.paste(screen.getByPlaceholderText("Describe la tarea en detalle..."), { clipboardData: { files: [png(name)] } });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    projectsAPI.getAll.mockResolvedValue([{ id: 1, name: "Proyecto" }]);
+    tasksAPI.getProjectMembers.mockResolvedValue([]);
+    attachmentsAPI.remove.mockResolvedValue(undefined);
+    attachmentsAPI.upload.mockResolvedValue({ id: 40, name: "p.png", mime: "image/png", size: 3 });
+  });
+
+  it("consulta la tarea una vez, muestra cuántas hay y limita el cupo", async () => {
+    tasksAPI.getById.mockResolvedValue({ ...listRow, attachments: images(3) });
+    render(<TaskModal isOpen onClose={vi.fn()} task={listRow} />);
+
+    expect(await screen.findByText("3 imágenes ya adjuntas")).toBeInTheDocument();
+    fireEvent.change(attachInput(), { target: { files: [png("a.png"), png("b.png"), png("c.png")] } });
+
+    expect(await screen.findByText("Máximo 2 imágenes.")).toBeInTheDocument();
+    expect(tasksAPI.getById).toHaveBeenCalledTimes(1);
+    expect(tasksAPI.getById).toHaveBeenCalledWith(5);
+  });
+
+  it("no consulta si la tarea ya trae sus imágenes", async () => {
+    render(<TaskModal isOpen onClose={vi.fn()} task={existingTask(images(2))} />);
+
+    expect(await screen.findByText("2 imágenes ya adjuntas")).toBeInTheDocument();
+    expect(tasksAPI.getById).not.toHaveBeenCalled();
+  });
+
+  it("si la consulta falla, deja un selector usable", async () => {
+    tasksAPI.getById.mockRejectedValue(new Error("boom"));
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(<TaskModal isOpen onClose={vi.fn()} task={listRow} />);
+
+    await waitFor(() => expect(attachInput()).not.toBeDisabled());
+    fireEvent.change(attachInput(), { target: { files: [png("a.png")] } });
+    await waitFor(() => expect(attachmentsAPI.upload).toHaveBeenCalled());
+    expect(screen.queryByText(/ya adjunta/)).not.toBeInTheDocument();
+    spy.mockRestore();
+  });
+
+  it("con 5 imágenes (por la consulta) muestra el aviso y no el selector", async () => {
+    tasksAPI.getById.mockResolvedValue({ ...listRow, attachments: images(5) });
+    render(<TaskModal isOpen onClose={vi.fn()} task={listRow} />);
+
+    expect(await screen.findByText("Esta tarea ya tiene 5 imágenes.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Adjuntar imágenes", { selector: "input" })).not.toBeInTheDocument();
+  });
+
+  it("el selector y el pegado están deshabilitados mientras se consulta", async () => {
+    let resolve;
+    tasksAPI.getById.mockReturnValue(new Promise((r) => (resolve = r)));
+    render(<TaskModal isOpen onClose={vi.fn()} task={listRow} />);
+
+    await screen.findByPlaceholderText(TITLE);
+    expect(attachInput()).toBeDisabled();
+    pasteImage();
+    expect(attachmentsAPI.upload).not.toHaveBeenCalled();
+
+    resolve({ ...listRow, attachments: images(1) });
+    await screen.findByText("1 imagen ya adjunta");
+    expect(attachInput()).not.toBeDisabled();
+  });
+
+  it("ignora la respuesta si el modal se cerró antes de recibirla", async () => {
+    let resolve;
+    tasksAPI.getById.mockReturnValue(new Promise((r) => (resolve = r)));
+    const { rerender } = render(<TaskModal isOpen onClose={vi.fn()} task={listRow} />);
+    await screen.findByPlaceholderText(TITLE);
+    rerender(<TaskModal isOpen={false} onClose={vi.fn()} task={listRow} />);
+    resolve({ ...listRow, attachments: images(5) });
+    await new Promise((r) => setTimeout(r, 20));
+
+    tasksAPI.getById.mockResolvedValue({ ...listRow, attachments: images(1) });
+    rerender(<TaskModal isOpen onClose={vi.fn()} task={listRow} />);
+
+    expect(await screen.findByText("1 imagen ya adjunta")).toBeInTheDocument();
+  });
+
+  it("pegar se ignora con 5 imágenes ya adjuntas", async () => {
+    render(<TaskModal isOpen onClose={vi.fn()} task={existingTask(images(5))} />);
+
+    await screen.findByText("Esta tarea ya tiene 5 imágenes.");
+    pasteImage();
+
+    expect(attachmentsAPI.upload).not.toHaveBeenCalled();
+  });
+
+  it("pegar se ignora mientras se envía", async () => {
+    tasksAPI.create.mockReturnValue(new Promise(() => {}));
+    render(<TaskModal isOpen onClose={vi.fn()} projectId={1} />);
+
+    fireEvent.change(await screen.findByPlaceholderText(TITLE), { target: { value: "Nueva" } });
+    submit();
+    await screen.findByText("Guardando...");
+    pasteImage();
+
+    expect(attachmentsAPI.upload).not.toHaveBeenCalled();
   });
 });

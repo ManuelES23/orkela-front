@@ -50,12 +50,42 @@ const TaskModal = ({
   const [error, setError] = useState(null);
   const [initializing, setInitializing] = useState(true);
   // Imágenes: al editar, las nuevas se SUMAN a las ya adjuntas (máximo 5 en total)
-  const existingCount = task?.attachments?.length ?? 0;
+  // Las filas de listados no traen `attachments`: en ese caso se consulta la tarea
+  // completa para conocer el cupo real antes de ofrecer subir imágenes.
+  const [fetchedCount, setFetchedCount] = useState(null); // { id, count }
+  const taskId = task?.id;
+  const needsCount = Boolean(isOpen && taskId && !Array.isArray(task.attachments));
+  const loadedCount = fetchedCount && fetchedCount.id === taskId ? fetchedCount.count : null;
+  const countPending = needsCount && loadedCount === null;
+  const existingCount = task?.attachments ? task.attachments.length : (loadedCount ?? 0);
   const isFull = existingCount >= MAX_ATTACHMENTS;
   const uploads = useAttachmentUploads({
     scope: "staff",
     max: Math.max(0, MAX_ATTACHMENTS - existingCount),
   });
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadCount = async () => {
+      if (!needsCount) {
+        // Cerrado o cambiada la tarea: no se arrastra un cupo antiguo
+        setFetchedCount(null);
+        return;
+      }
+      let count = 0; // Si falla la consulta, el servidor sigue siendo la red de seguridad
+      try {
+        const full = await tasksAPI.getById(taskId);
+        count = full?.attachments?.length ?? 0;
+      } catch (err) {
+        console.error("Error loading task attachments:", err);
+      }
+      if (!cancelled) setFetchedCount({ id: taskId, count });
+    };
+    loadCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [needsCount, taskId]);
 
   // Cerrar sin guardar (botón, Escape o el padre sin desmontar): se borran las ya
   // subidas. Con el envío en curso no se descarta: ya viajan en la petición.
@@ -358,7 +388,7 @@ const TaskModal = ({
               name='description'
               value={formData.description}
               onChange={handleChange}
-              onPaste={pasteHandler(uploads, { disabled: loading || isFull })}
+              onPaste={pasteHandler(uploads, { disabled: loading || isFull || countPending })}
               rows='3'
               className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
               placeholder='Describe la tarea en detalle...'
@@ -374,7 +404,7 @@ const TaskModal = ({
                   Esta tarea ya tiene {MAX_ATTACHMENTS} imágenes.
                 </p>
               ) : (
-                <AttachmentPicker uploads={uploads} variant='dropzone' disabled={loading} />
+                <AttachmentPicker uploads={uploads} variant='dropzone' disabled={loading || countPending} />
               )}
             </div>
           </div>

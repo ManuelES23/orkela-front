@@ -21,6 +21,8 @@ import {
   Info,
 } from "lucide-react";
 import { ticketsAPI, teamsAPI, projectsAPI } from "../../utils/api";
+import { useAttachmentUploads } from "../attachments/useAttachmentUploads";
+import AttachmentPicker, { pasteHandler } from "../attachments/AttachmentPicker";
 
 const TicketModal = ({
   isOpen,
@@ -42,6 +44,19 @@ const TicketModal = ({
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState(null);
+  // Imágenes de la descripción (solo al crear); se suben al elegirlas y se envían como ids
+  const uploads = useAttachmentUploads({ scope: "staff" });
+
+  // Cerrar sin guardar (botón, Escape o el padre sin desmontar): se borran las ya subidas
+  const { discardAll } = uploads;
+  useEffect(() => {
+    if (!isOpen) discardAll();
+  }, [isOpen, discardAll]);
+
+  const handleClose = () => {
+    discardAll();
+    onClose();
+  };
 
   useEffect(() => {
     const initializeModal = async () => {
@@ -160,8 +175,12 @@ const TicketModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    if (!ticket && (uploads.isUploading || uploads.hasErrors)) {
+      setError("Espera a que terminen de subir las imágenes o quita las que fallaron.");
+      return;
+    }
+    setLoading(true);
 
     try {
       const dataToSend = {
@@ -176,7 +195,8 @@ const TicketModal = ({
       if (ticket) {
         await ticketsAPI.update(ticket.id, dataToSend);
       } else {
-        await ticketsAPI.create(dataToSend);
+        await ticketsAPI.create({ ...dataToSend, attachment_ids: uploads.ids });
+        uploads.reset();
       }
 
       onSuccess?.();
@@ -192,7 +212,7 @@ const TicketModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={ticket ? "Editar Ticket" : "Nuevo Ticket"}
       size='md'
     >
@@ -201,12 +221,13 @@ const TicketModal = ({
         <form onSubmit={handleSubmit} className='space-y-5'>
           {/* Título */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
+            <label htmlFor='ticket-title' className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Título del Ticket *
             </label>
             <div className='relative'>
               <Ticket className='absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-night-500' />
               <input
+                id='ticket-title'
                 type='text'
                 name='title'
                 value={formData.title}
@@ -220,18 +241,25 @@ const TicketModal = ({
 
           {/* Descripción */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
+            <label htmlFor='ticket-description' className='block text-sm font-medium text-gray-700 dark:text-night-300 mb-2'>
               Descripción *
             </label>
             <textarea
+              id='ticket-description'
               name='description'
               value={formData.description}
               onChange={handleChange}
+              onPaste={ticket ? undefined : pasteHandler(uploads, { disabled: loading })}
               rows='4'
               className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
               placeholder='Describe detalladamente tu solicitud o problema...'
               required
             ></textarea>
+            {!ticket && (
+              <div className='mt-2'>
+                <AttachmentPicker uploads={uploads} variant='dropzone' disabled={loading} />
+              </div>
+            )}
           </div>
 
           {/* Tipo y Prioridad */}
@@ -379,7 +407,7 @@ const TicketModal = ({
             </button>
             <button
               type='button'
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
               className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
             >

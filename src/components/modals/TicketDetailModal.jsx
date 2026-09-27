@@ -33,6 +33,10 @@ import {
   Mail,
 } from "lucide-react";
 import { ticketsAPI, teamsAPI, projectsAPI } from "../../utils/api";
+import { attachmentsAPI } from "../../utils/attachmentsApi";
+import { useAttachmentUploads } from "../attachments/useAttachmentUploads";
+import AttachmentPicker, { AttachButton, pasteHandler, dropHandlers } from "../attachments/AttachmentPicker";
+import AttachmentGallery from "../attachments/AttachmentGallery";
 import { TICKET_STATUS, TICKET_PRIORITY, TICKET_TYPE } from "../../constants/tickets";
 
 // Select nativo con etiqueta: accesible por teclado y lector de pantalla
@@ -82,6 +86,9 @@ const TicketDetailModal = ({
   const [routing, setRouting] = useState(false);
   const [projects, setProjects] = useState([]);
   const [savingField, setSavingField] = useState(null);
+  // Imágenes pendientes del comentario (heredan su visibilidad: pública o interna)
+  const uploads = useAttachmentUploads({ scope: "staff" });
+  const [draggingComment, setDraggingComment] = useState(false);
 
   // Id de la última carga: al cambiar de ticket se descartan las respuestas
   // de la carga anterior que lleguen tarde.
@@ -135,6 +142,7 @@ const TicketDetailModal = ({
       setTeamMembers([]);
       setNewComment("");
       setIsInternal(false);
+      uploads.discardAll();
       setRouting(false);
       setSavingField(null);
       setProcessingAction(false);
@@ -146,6 +154,12 @@ const TicketDetailModal = ({
     // apertura debe reiniciar el estado
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialTicket?.id]);
+
+  // Cerrar el modal sin desmontarlo: las imágenes subidas y no enviadas se borran
+  const { discardAll } = uploads;
+  useEffect(() => {
+    if (!isOpen) discardAll();
+  }, [isOpen, discardAll]);
 
   // Registrar callback para actualizaciones en tiempo real
   useEffect(() => {
@@ -311,18 +325,16 @@ const TicketDetailModal = ({
 
   const handleSendComment = async (e) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    const content = newComment.trim();
+    if ((!content && uploads.ids.length === 0) || uploads.isUploading || uploads.hasErrors) return;
 
     setSendingComment(true);
     try {
-      const comment = await ticketsAPI.addComment(
-        ticket.id,
-        newComment,
-        isInternal
-      );
+      const comment = await ticketsAPI.addComment(ticket.id, content, isInternal, uploads.ids);
       setComments((prev) => [...prev, comment]);
       setNewComment("");
       setIsInternal(false);
+      uploads.reset();
       // Comentario público en ticket del portal: avisar si el correo al cliente no salió
       notifyClientMail(comment);
     } catch (err) {
@@ -332,6 +344,21 @@ const TicketDetailModal = ({
       setSendingComment(false);
     }
   };
+
+  // Quitar una imagen de un comentario: el servidor decide si se puede; si falla,
+  // el error sube al visor, que lo muestra.
+  const removeCommentAttachment = (commentId) => async (attachment) => {
+    await attachmentsAPI.remove("staff", attachment.id);
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId ? { ...c, attachments: (c.attachments ?? []).filter((a) => a.id !== attachment.id) } : c
+      )
+    );
+  };
+
+  // Owner y admin de la organización pueden borrar la imagen de cualquier comentario
+  // (el servidor lo autoriza; aquí solo se decide si se ofrece el botón).
+  const canModerateAttachments = Boolean(user?.is_organization_owner || user?.organization_role === "admin");
 
   const handleStatusChange = async (newStatus) => {
     setUpdatingStatus(true);
@@ -743,6 +770,7 @@ const TicketDetailModal = ({
               <p className='text-gray-700 dark:text-night-300 whitespace-pre-wrap'>
                 {ticket.description || "Sin descripción"}
               </p>
+              <AttachmentGallery scope='staff' attachments={ticket.attachments ?? []} className='mt-3' />
             </div>
           </div>
 
@@ -781,7 +809,7 @@ const TicketDetailModal = ({
             </h3>
 
             {/* Lista de comentarios */}
-            <div className='space-y-3 max-h-64 overflow-y-auto mb-4'>
+            <div className='space-y-3 max-h-96 overflow-y-auto mb-4'>
               {comments.length === 0 ? (
                 <p className='text-center text-gray-400 dark:text-night-500 py-4'>
                   No hay comentarios aún
@@ -824,9 +852,23 @@ const TicketDetailModal = ({
                           {new Date(comment.created_at).toLocaleString("es-ES")}
                         </span>
                       </div>
-                      <p className='text-gray-700 dark:text-night-300 text-sm ml-10 whitespace-pre-wrap'>
-                        {comment.content}
-                      </p>
+                      {comment.content && (
+                        <p className='text-gray-700 dark:text-night-300 text-sm ml-10 whitespace-pre-wrap'>
+                          {comment.content}
+                        </p>
+                      )}
+                      {comment.attachments?.length > 0 && (
+                        <AttachmentGallery
+                          scope='staff'
+                          attachments={comment.attachments}
+                          className='ml-10 mt-2'
+                          onDelete={
+                            comment.user_id === user?.id || canModerateAttachments
+                              ? removeCommentAttachment(comment.id)
+                              : undefined
+                          }
+                        />
+                      )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -835,26 +877,44 @@ const TicketDetailModal = ({
 
             {/* Nuevo comentario */}
             {!["closed"].includes(ticket.status) && (
-              <form onSubmit={handleSendComment} className='space-y-2'>
-                <div className='relative'>
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder='Escribe un comentario...'
-                    rows='2'
-                    className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder:text-gray-400 dark:placeholder:text-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
-                  />
-                  <button
-                    type='submit'
-                    disabled={!newComment.trim() || sendingComment}
-                    className='absolute right-2 bottom-2 p-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
-                  >
-                    {sendingComment ? (
-                      <Loader2 className='w-5 h-5 animate-spin' />
-                    ) : (
-                      <Send className='w-5 h-5' />
-                    )}
-                  </button>
+              <form
+                onSubmit={handleSendComment}
+                {...dropHandlers(uploads, setDraggingComment)}
+                className={`space-y-2 rounded-lg transition-shadow ${
+                  draggingComment ? "ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-night-900" : ""
+                }`}
+              >
+                <AttachmentPicker uploads={uploads} variant='inline' />
+                <div className='flex items-end gap-2'>
+                  <AttachButton uploads={uploads} disabled={sendingComment} />
+                  <div className='relative flex-1 min-w-0'>
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      onPaste={pasteHandler(uploads, { disabled: sendingComment })}
+                      aria-label='Comentario'
+                      placeholder='Escribe un comentario...'
+                      rows='2'
+                      className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder:text-gray-400 dark:placeholder:text-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none'
+                    />
+                    <button
+                      type='submit'
+                      aria-label='Enviar comentario'
+                      disabled={
+                        (!newComment.trim() && uploads.ids.length === 0) ||
+                        uploads.isUploading ||
+                        uploads.hasErrors ||
+                        sendingComment
+                      }
+                      className='absolute right-2 bottom-2 p-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                    >
+                      {sendingComment ? (
+                        <Loader2 className='w-5 h-5 animate-spin' />
+                      ) : (
+                        <Send className='w-5 h-5' />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Nota interna: quien trabaja el ticket (asignado, equipo o triage) */}

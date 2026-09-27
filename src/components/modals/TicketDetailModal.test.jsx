@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import TicketDetailModal from "./TicketDetailModal";
 import { ticketsAPI, projectsAPI } from "../../utils/api";
+import { attachmentsAPI } from "../../utils/attachmentsApi";
 
 vi.mock("../../utils/api", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -19,7 +20,13 @@ vi.mock("../../utils/api", async (importOriginal) => ({
   teamsAPI: { getMembers: vi.fn().mockResolvedValue([]), getAll: vi.fn().mockResolvedValue([]) },
   projectsAPI: { getAll: vi.fn().mockResolvedValue([]) },
 }));
-vi.mock("../../context/AuthContext", () => ({ useAuth: () => ({ user: { id: 1 } }) }));
+vi.mock("../../utils/attachmentsApi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  attachmentsAPI: { upload: vi.fn(), remove: vi.fn().mockResolvedValue(undefined), getBlob: vi.fn() },
+}));
+// Usuario mutable por test (los de borrado por rol lo cambian); referencia estable entre renders
+const auth = { user: { id: 1 } };
+vi.mock("../../context/AuthContext", () => ({ useAuth: () => auth }));
 // Referencias estables, como en los providers reales (useCallback)
 const notification = { success: vi.fn(), error: vi.fn(), info: vi.fn() };
 const realtime = { registerRefresh: vi.fn(() => () => {}), unregisterRefresh: vi.fn(), subscribeChannel: vi.fn(() => () => {}), channelEpoch: 0 };
@@ -58,6 +65,9 @@ const portalTicket = {
 describe("TicketDetailModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    auth.user = { id: 1 };
+    attachmentsAPI.remove.mockResolvedValue(undefined);
+    attachmentsAPI.getBlob.mockResolvedValue(new Blob(["x"]));
     ticketsAPI.getById.mockReset();
     ticketsAPI.getComments.mockResolvedValue([]);
     ticketsAPI.getClientInboxTeams.mockResolvedValue([]);
@@ -319,5 +329,166 @@ describe("TicketDetailModal", () => {
     render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
 
     await waitFor(() => expect(notification.error).toHaveBeenCalledWith("No se pudieron cargar los proyectos"));
+  });
+
+  const png = (name = "c.png") => new File([new Uint8Array(3)], name, { type: "image/png" });
+  const attachInput = () => screen.getByLabelText("Adjuntar imágenes", { selector: "input" });
+  const commentWithImage = (extra = {}) => ({
+    id: 55,
+    content: "Mira la captura",
+    is_internal: false,
+    user_id: 1,
+    user: { id: 1, name: "Yo" },
+    created_at: new Date().toISOString(),
+    attachments: [{ id: 60, name: "z.png", mime: "image/png", size: 3 }],
+    ...extra,
+  });
+
+  it("comenta solo con una imagen y la muestra en el comentario", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    attachmentsAPI.upload.mockResolvedValue({ id: 40, name: "c.png", mime: "image/png", size: 3 });
+    ticketsAPI.addComment.mockResolvedValue({
+      id: 99,
+      content: null,
+      is_internal: false,
+      user: { id: 2, name: "Bea" },
+      created_at: new Date().toISOString(),
+      attachments: [{ id: 40, name: "c.png", mime: "image/png", size: 3 }],
+    });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    await screen.findByText("Acme SA");
+    expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeDisabled();
+
+    fireEvent.change(attachInput(), { target: { files: [png()] } });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeEnabled());
+    fireEvent.click(screen.getByRole("button", { name: "Enviar comentario" }));
+
+    await waitFor(() => expect(ticketsAPI.addComment).toHaveBeenCalledWith(20, "", false, [40]));
+    expect(await screen.findByRole("button", { name: "Ver imagen 1 de 1: c.png" })).toBeInTheDocument();
+    // La imagen enviada ya no queda como pendiente
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Quitar c.png" })).not.toBeInTheDocument());
+  });
+
+  it("deshabilita el envío mientras sube o si una imagen falló", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    const slow = deferred();
+    attachmentsAPI.upload.mockReturnValue(slow.promise);
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    await screen.findByText("Acme SA");
+    fireEvent.change(screen.getByLabelText("Comentario"), { target: { value: "hola" } });
+    expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeEnabled();
+
+    fireEvent.change(attachInput(), { target: { files: [png()] } });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeDisabled());
+
+    await act(async () => slow.resolve({ id: 41, name: "c.png", mime: "image/png", size: 3 }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeEnabled());
+
+    attachmentsAPI.upload.mockRejectedValue(new Error("Falló"));
+    fireEvent.change(attachInput(), { target: { files: [png("d.png")] } });
+    await screen.findByRole("button", { name: "Reintentar d.png" });
+    expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeDisabled();
+  });
+
+  it("envía el texto con las imágenes y limpia el compositor", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, can_comment_internal: true });
+    attachmentsAPI.upload.mockResolvedValue({ id: 42, name: "c.png", mime: "image/png", size: 3 });
+    ticketsAPI.addComment.mockResolvedValue({
+      id: 100,
+      content: "Nota",
+      is_internal: true,
+      user_id: 1,
+      user: { id: 1, name: "Yo" },
+      created_at: new Date().toISOString(),
+      attachments: [{ id: 42, name: "c.png", mime: "image/png", size: 3 }],
+    });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    await screen.findByText("Acme SA");
+    fireEvent.change(screen.getByLabelText("Comentario"), { target: { value: "Nota" } });
+    fireEvent.change(attachInput(), { target: { files: [png()] } });
+    await screen.findByRole("button", { name: "Quitar c.png" });
+    // Alternar la nota interna no descarta las imágenes pendientes
+    fireEvent.click(screen.getByLabelText(/comentario interno/i));
+    expect(screen.getByRole("button", { name: "Quitar c.png" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeEnabled());
+    fireEvent.click(screen.getByRole("button", { name: "Enviar comentario" }));
+
+    await waitFor(() => expect(ticketsAPI.addComment).toHaveBeenCalledWith(20, "Nota", true, [42]));
+    await waitFor(() => expect(screen.getByLabelText("Comentario")).toHaveValue(""));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Quitar c.png" })).not.toBeInTheDocument());
+    expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+  });
+
+  it("no pinta el párrafo de un comentario sin texto", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    ticketsAPI.getComments.mockResolvedValue([commentWithImage({ content: null })]);
+    const { container } = render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByRole("button", { name: "Ver imagen 1 de 1: z.png" })).toBeInTheDocument();
+    // Solo el párrafo de la descripción
+    expect(container.querySelectorAll("p.whitespace-pre-wrap").length).toBe(1);
+  });
+
+  it("el autor abre el visor y quita la imagen de su comentario", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    ticketsAPI.getComments.mockResolvedValue([commentWithImage()]);
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Ver imagen 1 de 1: z.png" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Eliminar z.png" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Eliminar" }));
+
+    await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 60));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Ver imagen 1 de 1: z.png" })).not.toBeInTheDocument());
+    expect(screen.getByText("Mira la captura")).toBeInTheDocument();
+  });
+
+  it("un comentario ajeno no ofrece borrar salvo a owner o admin de la organización", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    ticketsAPI.getComments.mockResolvedValue([commentWithImage({ user_id: 2, user: { id: 2, name: "Bea" } })]);
+    const { unmount } = render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Ver imagen 1 de 1: z.png" }));
+    await screen.findByRole("button", { name: "Descargar z.png" });
+    expect(screen.queryByRole("button", { name: "Eliminar z.png" })).not.toBeInTheDocument();
+    unmount();
+
+    auth.user = { id: 1, organization_role: "admin" };
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Ver imagen 1 de 1: z.png" }));
+    expect(await screen.findByRole("button", { name: "Eliminar z.png" })).toBeInTheDocument();
+  });
+
+  it("muestra las imágenes de la descripción", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket, attachments: [{ id: 3, name: "d.png", mime: "image/png", size: 1 }] });
+    render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    expect(await screen.findByRole("button", { name: "Ver imagen 1 de 1: d.png" })).toBeInTheDocument();
+  });
+
+  it("al cambiar de ticket descarta las imágenes pendientes del anterior", async () => {
+    ticketsAPI.getById.mockImplementation((id) => Promise.resolve({ ...portalTicket, id }));
+    attachmentsAPI.upload.mockResolvedValue({ id: 43, name: "c.png", mime: "image/png", size: 3 });
+    const { rerender } = render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    await screen.findByText("Acme SA");
+    fireEvent.change(attachInput(), { target: { files: [png()] } });
+    await screen.findByRole("button", { name: "Quitar c.png" });
+
+    rerender(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 21 }} />);
+
+    await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 43));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Quitar c.png" })).not.toBeInTheDocument());
+  });
+
+  it("al cerrar el modal sin desmontarlo descarta las imágenes pendientes", async () => {
+    ticketsAPI.getById.mockResolvedValue({ ...portalTicket });
+    attachmentsAPI.upload.mockResolvedValue({ id: 44, name: "c.png", mime: "image/png", size: 3 });
+    const { rerender } = render(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 20 }} />);
+    await screen.findByText("Acme SA");
+    fireEvent.change(attachInput(), { target: { files: [png()] } });
+    await screen.findByRole("button", { name: "Quitar c.png" });
+
+    rerender(<TicketDetailModal isOpen={false} onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+    await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 44));
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import AttachmentPicker, { AttachButton, pasteHandler, dropHandlers } from "./AttachmentPicker";
 
@@ -16,6 +16,8 @@ const makeUploads = (overrides = {}) => ({
 const png = new File([new Uint8Array(3)], "c.png", { type: "image/png" });
 
 describe("AttachmentPicker", () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it("el botón clip abre el selector y entrega los archivos", () => {
     const uploads = makeUploads();
     render(<AttachButton uploads={uploads} />);
@@ -86,5 +88,115 @@ describe("AttachmentPicker", () => {
   it("anuncia el aviso de máximo", () => {
     render(<AttachmentPicker uploads={makeUploads({ notice: "Máximo 5 imágenes." })} variant='dropzone' />);
     expect(screen.getByText("Máximo 5 imágenes.")).toBeInTheDocument();
+  });
+
+  it("el botón clip dispara el clic del input oculto", () => {
+    const click = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => {});
+    render(<AttachButton uploads={makeUploads()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Adjuntar imágenes" }));
+
+    expect(click).toHaveBeenCalledTimes(1);
+  });
+
+  it("AttachButton deshabilitado deshabilita también el input", () => {
+    render(<AttachButton uploads={makeUploads()} disabled />);
+    expect(screen.getByLabelText("Adjuntar imágenes", { selector: "input" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Adjuntar imágenes" })).toBeDisabled();
+  });
+
+  it("pegar un archivo que no es imagen no intercepta", () => {
+    const uploads = makeUploads();
+    const pdf = new File(["x"], "a.pdf", { type: "application/pdf" });
+    const event = { clipboardData: { files: [pdf] }, preventDefault: vi.fn() };
+
+    pasteHandler(uploads)(event);
+
+    expect(uploads.addFiles).not.toHaveBeenCalled();
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("pasteHandler deshabilitado no hace nada", () => {
+    const uploads = makeUploads();
+    const event = { clipboardData: { files: [png] }, preventDefault: vi.fn() };
+
+    pasteHandler(uploads, { disabled: true })(event);
+
+    expect(uploads.addFiles).not.toHaveBeenCalled();
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("arrastrar sin archivos se ignora (texto sobre el contenedor no se cancela)", () => {
+    const uploads = makeUploads();
+    const setDragging = vi.fn();
+    const handlers = dropHandlers(uploads, setDragging);
+    const event = { preventDefault: vi.fn(), dataTransfer: { files: [], types: ["text/plain"] } };
+
+    handlers.onDragEnter(event);
+    handlers.onDragOver(event);
+    handlers.onDrop(event);
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(setDragging).not.toHaveBeenCalled();
+    expect(uploads.addFiles).not.toHaveBeenCalled();
+  });
+
+  it("onDragEnter con archivos activa el estado de arrastre", () => {
+    const setDragging = vi.fn();
+    const event = { preventDefault: vi.fn(), dataTransfer: { files: [png], types: ["Files"] } };
+
+    dropHandlers(makeUploads(), setDragging).onDragEnter(event);
+
+    expect(setDragging).toHaveBeenCalledWith(true);
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("un item inválido oculta el reintento pero muestra su error", () => {
+    const uploads = makeUploads({
+      items: [{ key: "x", name: "x.pdf", previewUrl: "blob:x", status: "error", progress: 0, error: "Formato no admitido.", invalid: true }],
+      hasErrors: true,
+    });
+    render(<AttachmentPicker uploads={uploads} variant='inline' />);
+
+    expect(screen.getByText("x.pdf: Formato no admitido.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reintentar x.pdf" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Quitar x.pdf" })).toBeInTheDocument();
+  });
+
+  it("dropzone deshabilitada ignora soltar y deshabilita el input", () => {
+    const uploads = makeUploads();
+    const { container } = render(<AttachmentPicker uploads={uploads} variant='dropzone' disabled />);
+
+    const zone = container.querySelector(".border-dashed");
+    fireEvent.drop(zone, { dataTransfer: { files: [png], types: ["Files"] } });
+
+    expect(uploads.addFiles).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Adjuntar imágenes", { selector: "input" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "elige imágenes" })).toBeDisabled();
+  });
+
+  it("dropzone: el texto de ayuda sale de los límites", () => {
+    render(<AttachmentPicker uploads={makeUploads()} variant='dropzone' />);
+    expect(screen.getByText("Hasta 5 · JPG, PNG, WebP o GIF · 5 MB cada una")).toBeInTheDocument();
+  });
+
+  it("inline: la región viva no se remonta al aparecer el primer item con error", () => {
+    const empty = makeUploads();
+    const { container, rerender } = render(<AttachmentPicker uploads={empty} variant='inline' />);
+    const before = container.querySelector("[aria-live='polite']");
+
+    rerender(
+      <AttachmentPicker
+        uploads={makeUploads({
+          items: [{ key: "b", name: "b.png", previewUrl: "blob:b", status: "error", progress: 0, error: "Demasiado grande.", invalid: true }],
+          hasErrors: true,
+        })}
+        variant='inline'
+      />,
+    );
+
+    const after = container.querySelector("[aria-live='polite']");
+    expect(after).toBe(before);
+    expect(after).toHaveTextContent("b.png: Demasiado grande.");
   });
 });

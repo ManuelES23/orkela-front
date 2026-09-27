@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, ImagePlus, Loader2, Paperclip, RefreshCw, X } from "lucide-react";
 import { ATTACHMENT_LIMITS } from "../../utils/attachmentsApi";
@@ -7,17 +7,21 @@ const formatSize = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024))
 
 const imagesOnly = (files) => Array.from(files ?? []).filter((file) => file.type?.startsWith("image/"));
 
-/** Para el onPaste del textarea: solo intercepta si el portapapeles trae imágenes. */
 // Los helpers viven junto al componente por contrato (los consumen Tasks 14-16); recargar el módulo entero en HMR es aceptable.
+/**
+ * Para el onPaste del textarea: solo intercepta si el portapapeles trae imágenes.
+ * Con `{ disabled: true }` no hace nada (el consumidor no debería adjuntarlo si está deshabilitado).
+ */
 // eslint-disable-next-line react-refresh/only-export-components
-export const pasteHandler = (uploads) => (event) => {
+export const pasteHandler = (uploads, { disabled = false } = {}) => (event) => {
+  if (disabled) return;
   const files = imagesOnly(event.clipboardData?.files);
   if (files.length === 0) return;
   event.preventDefault();
   uploads.addFiles(files);
 };
 
-/** Convierte un contenedor en zona de soltar. */
+/** Convierte un contenedor en zona de soltar. Solo reacciona a arrastres de archivos. */
 // eslint-disable-next-line react-refresh/only-export-components
 export const dropHandlers = (uploads, setDragging) => ({
   onDragEnter: (event) => {
@@ -34,6 +38,7 @@ export const dropHandlers = (uploads, setDragging) => ({
     setDragging(false);
   },
   onDrop: (event) => {
+    if (!event.dataTransfer?.types?.includes("Files")) return;
     event.preventDefault();
     setDragging(false);
     const files = Array.from(event.dataTransfer?.files ?? []);
@@ -41,14 +46,15 @@ export const dropHandlers = (uploads, setDragging) => ({
   },
 });
 
-const HiddenInput = ({ inputRef, uploads, id }) => (
+const HiddenInput = ({ inputRef, uploads, disabled }) => (
   <input
     ref={inputRef}
-    id={id}
     type='file'
     accept={ATTACHMENT_LIMITS.accept}
     multiple
+    disabled={disabled}
     aria-label='Adjuntar imágenes'
+    aria-hidden='true'
     className='sr-only'
     tabIndex={-1}
     onChange={(event) => {
@@ -60,10 +66,9 @@ const HiddenInput = ({ inputRef, uploads, id }) => (
 
 export const AttachButton = ({ uploads, disabled = false, className = "" }) => {
   const inputRef = useRef(null);
-  const id = useId();
   return (
     <>
-      <HiddenInput inputRef={inputRef} uploads={uploads} id={id} />
+      <HiddenInput inputRef={inputRef} uploads={uploads} disabled={disabled} />
       <button
         type='button'
         disabled={disabled}
@@ -115,11 +120,12 @@ const Progress = ({ item, className = "" }) => (
 );
 
 // Errores y avisos en una región viva: se anuncian sin mover el foco.
+// El nodo aria-live es siempre el mismo (solo cambia su contenido) para que los anuncios funcionen.
 const Messages = ({ uploads }) => {
   const errors = uploads.items.filter((item) => item.status === "error");
-  if (!uploads.notice && errors.length === 0) return <div aria-live='polite' className='sr-only' />;
+  const empty = !uploads.notice && errors.length === 0;
   return (
-    <div aria-live='polite' className='mt-2 space-y-1 text-xs text-red-600 dark:text-red-400'>
+    <div aria-live='polite' className={empty ? "sr-only" : "mt-2 space-y-1 text-xs text-red-600 dark:text-red-400"}>
       {uploads.notice && <p className='text-amber-700 dark:text-amber-400'>{uploads.notice}</p>}
       {errors.map((item) => (
         <p key={item.key} className='flex items-center gap-1'>
@@ -133,10 +139,10 @@ const Messages = ({ uploads }) => {
 
 const InlineStrip = ({ uploads }) => {
   const reduceMotion = useReducedMotion();
-  if (uploads.items.length === 0) return <Messages uploads={uploads} />;
+  // Misma estructura con o sin miniaturas: la región viva no se remonta y las salidas animan.
   return (
     <div>
-      <ul className='flex flex-wrap gap-3 pb-1' aria-label='Imágenes para enviar'>
+      <ul className='flex flex-wrap gap-3 pb-1 empty:hidden' aria-label='Imágenes para enviar'>
         <AnimatePresence initial={false}>
           {uploads.items.map((item) => (
             <motion.li
@@ -173,14 +179,13 @@ const InlineStrip = ({ uploads }) => {
 const Dropzone = ({ uploads, disabled }) => {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef(null);
-  const id = useId();
   return (
     <div>
       <div
-        {...dropHandlers(uploads, setDragging)}
+        {...(disabled ? {} : dropHandlers(uploads, setDragging))}
         className={`rounded-lg border border-dashed px-4 py-3 text-center text-sm transition-colors ${dragging ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20" : "border-gray-300 dark:border-night-600"}`}
       >
-        <HiddenInput inputRef={inputRef} uploads={uploads} id={id} />
+        <HiddenInput inputRef={inputRef} uploads={uploads} disabled={disabled} />
         <ImagePlus className='mx-auto mb-1 h-5 w-5 text-gray-400 dark:text-night-500' aria-hidden='true' />
         <span className='text-gray-600 dark:text-night-300'>
           Arrastra, pega o{" "}
@@ -188,7 +193,7 @@ const Dropzone = ({ uploads, disabled }) => {
             elige imágenes
           </button>
         </span>
-        <span className='block text-xs text-gray-400 dark:text-night-500'>Hasta 5 · JPG, PNG, WebP o GIF · 5 MB cada una</span>
+        <span className='block text-xs text-gray-400 dark:text-night-500'>Hasta {ATTACHMENT_LIMITS.maxFiles} · JPG, PNG, WebP o GIF · {ATTACHMENT_LIMITS.maxBytes / (1024 * 1024)} MB cada una</span>
       </div>
       {uploads.items.length > 0 && (
         <ul className='mt-2 space-y-2' aria-label='Imágenes para enviar'>

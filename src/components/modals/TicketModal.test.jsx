@@ -113,6 +113,64 @@ describe("TicketModal", () => {
     await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 10));
   });
 
+  describe("cerrar con la creación en curso", () => {
+    const startPendingCreate = async (id) => {
+      attachmentsAPI.upload.mockResolvedValue({ id, name: "c.png", mime: "image/png", size: 3 });
+      let rejectCreate;
+      ticketsAPI.create.mockReturnValue(new Promise((_, reject) => { rejectCreate = reject; }));
+      const view = render(<TicketModal isOpen onClose={vi.fn()} onSuccess={vi.fn()} />);
+      await fill();
+      fireEvent.change(attachInput(), { target: { files: [png()] } });
+      await screen.findByRole("button", { name: "Quitar c.png" });
+      await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
+      submit();
+      await screen.findByText("Guardando...");
+      return { ...view, rejectCreate: (error) => rejectCreate(error) };
+    };
+
+    it("no descarta las imágenes si el padre lo cierra mientras se crea", async () => {
+      const { rerender } = await startPendingCreate(20);
+      rerender(<TicketModal isOpen={false} onClose={vi.fn()} onSuccess={vi.fn()} />);
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+    });
+
+    it("Escape mientras se crea no descarta las imágenes", async () => {
+      await startPendingCreate(21);
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+    });
+
+    it("si la creación falla con el modal ya cerrado, sí descarta las pendientes", async () => {
+      const { rerender, rejectCreate } = await startPendingCreate(22);
+      rerender(<TicketModal isOpen={false} onClose={vi.fn()} onSuccess={vi.fn()} />);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+
+      rejectCreate(new Error("Falló"));
+
+      await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 22));
+    });
+  });
+
+  it("el aviso de espera desaparece al quitar la imagen que falló", async () => {
+    attachmentsAPI.upload.mockRejectedValue(new Error("Falló"));
+    render(<TicketModal isOpen onClose={vi.fn()} onSuccess={vi.fn()} />);
+
+    await fill();
+    fireEvent.change(attachInput(), { target: { files: [png()] } });
+    await screen.findByRole("button", { name: "Reintentar c.png" });
+    submit();
+    expect(await screen.findByText("Espera a que terminen de subir las imágenes o quita las que fallaron.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Quitar c.png" }));
+
+    await waitFor(() => expect(screen.queryByText("Espera a que terminen de subir las imágenes o quita las que fallaron.")).not.toBeInTheDocument());
+  });
+
   it("al editar no ofrece adjuntar imágenes", async () => {
     ticketsAPI.update.mockResolvedValue({ id: 4 });
     render(

@@ -24,6 +24,8 @@ import { ticketsAPI, teamsAPI, projectsAPI } from "../../utils/api";
 import { useAttachmentUploads } from "../attachments/useAttachmentUploads";
 import AttachmentPicker, { pasteHandler } from "../attachments/AttachmentPicker";
 
+const WAIT_FOR_UPLOADS = "Espera a que terminen de subir las imágenes o quita las que fallaron.";
+
 const TicketModal = ({
   isOpen,
   onClose,
@@ -47,14 +49,16 @@ const TicketModal = ({
   // Imágenes de la descripción (solo al crear); se suben al elegirlas y se envían como ids
   const uploads = useAttachmentUploads({ scope: "staff" });
 
-  // Cerrar sin guardar (botón, Escape o el padre sin desmontar): se borran las ya subidas
+  // Cerrar sin guardar (botón, Escape o el padre sin desmontar): se borran las ya subidas.
+  // Con la creación en curso no se descarta: esas imágenes viajan en la petición. Si falla,
+  // loading vuelve a false y el efecto las descarta entonces (no se creó ningún ticket).
   const { discardAll } = uploads;
   useEffect(() => {
-    if (!isOpen) discardAll();
-  }, [isOpen, discardAll]);
+    if (!isOpen && !loading) discardAll();
+  }, [isOpen, loading, discardAll]);
 
   const handleClose = () => {
-    discardAll();
+    if (!loading) discardAll();
     onClose();
   };
 
@@ -173,11 +177,14 @@ const TicketModal = ({
     { value: "urgent", label: "Urgente", color: "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400" },
   ];
 
+  // El aviso de "espera" queda obsoleto en cuanto ya no hay subidas ni fallos pendientes.
+  const visibleError = error === WAIT_FOR_UPLOADS && !uploads.isUploading && !uploads.hasErrors ? null : error;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     if (!ticket && (uploads.isUploading || uploads.hasErrors)) {
-      setError("Espera a que terminen de subir las imágenes o quita las que fallaron.");
+      setError(WAIT_FOR_UPLOADS);
       return;
     }
     setLoading(true);
@@ -381,9 +388,9 @@ const TicketModal = ({
           </div>
 
           {/* Error message */}
-          {error && (
+          {visibleError && (
             <div className='p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm'>
-              {error}
+              {visibleError}
             </div>
           )}
 

@@ -18,6 +18,10 @@ import {
 import { tasksAPI, projectsAPI } from "../../utils/api";
 import TaskChecklist from "../tasks/TaskChecklist";
 import TagSelector from "../tasks/TagSelector";
+import { useAttachmentUploads } from "../attachments/useAttachmentUploads";
+import AttachmentPicker, { pasteHandler } from "../attachments/AttachmentPicker";
+
+const MAX_ATTACHMENTS = 5;
 
 const TaskModal = ({
   isOpen,
@@ -45,6 +49,25 @@ const TaskModal = ({
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState(null);
   const [initializing, setInitializing] = useState(true);
+  // Imágenes: al editar, las nuevas se SUMAN a las ya adjuntas (máximo 5 en total)
+  const existingCount = task?.attachments?.length ?? 0;
+  const isFull = existingCount >= MAX_ATTACHMENTS;
+  const uploads = useAttachmentUploads({
+    scope: "staff",
+    max: Math.max(0, MAX_ATTACHMENTS - existingCount),
+  });
+
+  // Cerrar sin guardar (botón, Escape o el padre sin desmontar): se borran las ya
+  // subidas. Con el envío en curso no se descarta: ya viajan en la petición.
+  const { discardAll } = uploads;
+  useEffect(() => {
+    if (!isOpen && !loading) discardAll();
+  }, [isOpen, loading, discardAll]);
+
+  const handleClose = () => {
+    if (!loading) discardAll();
+    onClose();
+  };
 
   // Efecto principal para inicializar el modal
   useEffect(() => {
@@ -251,13 +274,18 @@ const TaskModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    if (uploads.isUploading || uploads.hasErrors) {
+      setError("Espera a que terminen de subir las imágenes o quita las que fallaron.");
+      return;
+    }
+    setLoading(true);
 
     try {
       const dataToSend = {
         ...formData,
         due_date: formData.due_date || null,
+        attachment_ids: uploads.ids,
       };
 
       if (task) {
@@ -275,6 +303,7 @@ const TaskModal = ({
         await tasksAPI.create(dataToSend);
       }
 
+      uploads.reset();
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -288,7 +317,7 @@ const TaskModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={task ? "Editar Tarea" : "Nueva Tarea"}
       size='md'
     >
@@ -329,10 +358,25 @@ const TaskModal = ({
               name='description'
               value={formData.description}
               onChange={handleChange}
+              onPaste={pasteHandler(uploads, { disabled: loading || isFull })}
               rows='3'
               className='w-full px-4 py-3 border border-gray-300 dark:border-night-600 bg-white dark:bg-night-900 text-gray-900 dark:text-night-50 placeholder-gray-400 dark:placeholder-night-500 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none transition-all duration-200 hover:border-gray-400 dark:hover:border-night-500'
               placeholder='Describe la tarea en detalle...'
             ></textarea>
+            {existingCount > 0 && (
+              <p className='mt-2 text-sm text-gray-500 dark:text-night-400'>
+                {existingCount} {existingCount === 1 ? "imagen ya adjunta" : "imágenes ya adjuntas"}
+              </p>
+            )}
+            <div className='mt-2'>
+              {isFull ? (
+                <p className='text-sm text-gray-500 dark:text-night-400'>
+                  Esta tarea ya tiene {MAX_ATTACHMENTS} imágenes.
+                </p>
+              ) : (
+                <AttachmentPicker uploads={uploads} variant='dropzone' disabled={loading} />
+              )}
+            </div>
           </div>
 
           {/* Lista de tareas (Checklist) - Opcional */}
@@ -529,7 +573,7 @@ const TaskModal = ({
             </button>
             <button
               type='button'
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
               className='px-6 py-3 border border-gray-300 dark:border-night-600 text-gray-700 dark:text-night-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-night-800 transition-all duration-200 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed'
             >

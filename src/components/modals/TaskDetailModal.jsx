@@ -24,6 +24,8 @@ import { useNotification } from "../../context/NotificationContext";
 import { useRealtime } from "../../context/RealtimeContext";
 import useResourceSync from "../../hooks/useResourceSync";
 import { useAuth } from "../../context/AuthContext";
+import { attachmentsAPI } from "../../utils/attachmentsApi";
+import AttachmentGallery from "../attachments/AttachmentGallery";
 
 const TaskDetailModal = ({
   isOpen,
@@ -262,6 +264,17 @@ const TaskDetailModal = ({
     return false;
   };
 
+  // Borra una imagen de la tarea (quien puede editarla). Si falla, el error llega
+  // al visor, que lo muestra; solo se actualiza la lista tras un borrado correcto.
+  const removeAttachment = async (attachment) => {
+    await attachmentsAPI.remove("staff", attachment.id);
+    setCurrentTask((prev) => ({
+      ...prev,
+      attachments: (prev.attachments ?? []).filter((a) => a.id !== attachment.id),
+    }));
+    onUpdate?.();
+  };
+
   const days = getDaysUntilDue(currentTask.due_date);
   const isCompleted =
     currentTask.status === "done" || currentTask.status === "completed";
@@ -355,6 +368,20 @@ const TaskDetailModal = ({
               <p className='text-gray-600 dark:text-night-300 whitespace-pre-wrap'>
                 {currentTask.description}
               </p>
+            </div>
+          )}
+
+          {/* Imágenes adjuntas */}
+          {currentTask.attachments?.length > 0 && (
+            <div>
+              <h3 className='text-sm font-semibold text-gray-700 dark:text-night-300 mb-2'>
+                Imágenes
+              </h3>
+              <AttachmentGallery
+                scope='staff'
+                attachments={currentTask.attachments}
+                onDelete={hasEditPermission ? removeAttachment : undefined}
+              />
             </div>
           )}
 

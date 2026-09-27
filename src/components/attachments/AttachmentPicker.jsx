@@ -21,13 +21,17 @@ export const pasteHandler = (uploads, { disabled = false } = {}) => (event) => {
   uploads.addFiles(files);
 };
 
-/** Convierte un contenedor en zona de soltar. Solo reacciona a arrastres de archivos. */
+/**
+ * Convierte un contenedor en zona de soltar. Solo reacciona a arrastres de archivos.
+ * Con `{ disabled: true }` sigue cancelando el arrastre de archivos (para que el
+ * navegador no abra la imagen soltada) pero no la sube ni resalta la zona.
+ */
 // eslint-disable-next-line react-refresh/only-export-components
-export const dropHandlers = (uploads, setDragging) => ({
+export const dropHandlers = (uploads, setDragging, { disabled = false } = {}) => ({
   onDragEnter: (event) => {
     if (!event.dataTransfer?.types?.includes("Files")) return;
     event.preventDefault();
-    setDragging(true);
+    if (!disabled) setDragging(true);
   },
   onDragOver: (event) => {
     if (!event.dataTransfer?.types?.includes("Files")) return;
@@ -41,6 +45,7 @@ export const dropHandlers = (uploads, setDragging) => ({
     if (!event.dataTransfer?.types?.includes("Files")) return;
     event.preventDefault();
     setDragging(false);
+    if (disabled) return;
     const files = Array.from(event.dataTransfer?.files ?? []);
     if (files.length) uploads.addFiles(files);
   },
@@ -83,24 +88,29 @@ export const AttachButton = ({ uploads, disabled = false, className = "" }) => {
   );
 };
 
-const RemoveButton = ({ item, uploads }) => (
+// 28px visibles; el pseudo-elemento amplía el área táctil a 44px.
+const hitArea = "relative after:absolute after:-inset-2";
+
+const RemoveButton = ({ item, uploads, disabled }) => (
   <button
     type='button'
+    disabled={disabled}
     onClick={() => uploads.remove(item.key)}
     aria-label={`Quitar ${item.name}`}
-    className='inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-night-600 dark:bg-night-900 dark:text-night-300'
+    className={`${hitArea} inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-sm hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-night-600 dark:bg-night-900 dark:text-night-300`}
   >
     <X className='h-3.5 w-3.5' aria-hidden='true' />
   </button>
 );
 
-const RetryButton = ({ item, uploads }) =>
+const RetryButton = ({ item, uploads, disabled }) =>
   item.invalid ? null : (
     <button
       type='button'
+      disabled={disabled}
       onClick={() => uploads.retry(item.key)}
       aria-label={`Reintentar ${item.name}`}
-      className='inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:bg-night-900/90 dark:text-red-400'
+      className={`${hitArea} inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-night-900/90 dark:text-red-400`}
     >
       <RefreshCw className='h-3.5 w-3.5' aria-hidden='true' />
     </button>
@@ -137,7 +147,7 @@ const Messages = ({ uploads }) => {
   );
 };
 
-const InlineStrip = ({ uploads }) => {
+const InlineStrip = ({ uploads, disabled }) => {
   const reduceMotion = useReducedMotion();
   // Misma estructura con o sin miniaturas: la región viva no se remonta y las salidas animan.
   return (
@@ -161,11 +171,11 @@ const InlineStrip = ({ uploads }) => {
               )}
               {item.status === "error" && (
                 <div className='absolute inset-0 flex items-center justify-center'>
-                  <RetryButton item={item} uploads={uploads} />
+                  <RetryButton item={item} uploads={uploads} disabled={disabled} />
                 </div>
               )}
               <div className='absolute -right-2 -top-2'>
-                <RemoveButton item={item} uploads={uploads} />
+                <RemoveButton item={item} uploads={uploads} disabled={disabled} />
               </div>
             </motion.li>
           ))}
@@ -182,7 +192,7 @@ const Dropzone = ({ uploads, disabled }) => {
   return (
     <div>
       <div
-        {...(disabled ? {} : dropHandlers(uploads, setDragging))}
+        {...dropHandlers(uploads, setDragging, { disabled })}
         className={`rounded-lg border border-dashed px-4 py-3 text-center text-sm transition-colors ${dragging ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20" : "border-gray-300 dark:border-night-600"}`}
       >
         <HiddenInput inputRef={inputRef} uploads={uploads} disabled={disabled} />
@@ -211,8 +221,8 @@ const Dropzone = ({ uploads, disabled }) => {
                 {item.status === "uploading" && <Progress item={item} className='mt-1' />}
               </div>
               {item.status === "uploading" && <Loader2 className='h-4 w-4 animate-spin text-gray-400' aria-hidden='true' />}
-              {item.status === "error" && <RetryButton item={item} uploads={uploads} />}
-              <RemoveButton item={item} uploads={uploads} />
+              {item.status === "error" && <RetryButton item={item} uploads={uploads} disabled={disabled} />}
+              <RemoveButton item={item} uploads={uploads} disabled={disabled} />
             </li>
           ))}
         </ul>
@@ -227,6 +237,6 @@ const Dropzone = ({ uploads, disabled }) => {
  * compositor de conversación; `dropzone` (propuesta B) en formularios.
  */
 const AttachmentPicker = ({ uploads, variant = "inline", disabled = false }) =>
-  variant === "dropzone" ? <Dropzone uploads={uploads} disabled={disabled} /> : <InlineStrip uploads={uploads} />;
+  variant === "dropzone" ? <Dropzone uploads={uploads} disabled={disabled} /> : <InlineStrip uploads={uploads} disabled={disabled} />;
 
 export default AttachmentPicker;

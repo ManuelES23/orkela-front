@@ -199,4 +199,74 @@ describe("AttachmentPicker", () => {
     expect(after).toBe(before);
     expect(after).toHaveTextContent("b.png: Demasiado grande.");
   });
+
+  describe("con el picker deshabilitado (hay una petición en curso)", () => {
+    const withItems = () =>
+      makeUploads({
+        items: [
+          { key: "a", name: "a.png", size: 10, previewUrl: "blob:a", status: "uploading", progress: 40, error: null },
+          { key: "b", name: "b.png", size: 10, previewUrl: "blob:b", status: "error", progress: 0, error: "Falló" },
+        ],
+        hasErrors: true,
+      });
+
+    it.each(["inline", "dropzone"])("%s: Quitar y Reintentar quedan deshabilitados y conservan su nombre", (variant) => {
+      const uploads = withItems();
+      render(<AttachmentPicker uploads={uploads} variant={variant} disabled />);
+
+      const remove = screen.getByRole("button", { name: "Quitar a.png" });
+      const retry = screen.getByRole("button", { name: "Reintentar b.png" });
+      expect(remove).toBeDisabled();
+      expect(retry).toBeDisabled();
+      fireEvent.click(remove);
+      fireEvent.click(retry);
+      expect(uploads.remove).not.toHaveBeenCalled();
+      expect(uploads.retry).not.toHaveBeenCalled();
+    });
+
+    it.each(["inline", "dropzone"])("%s: habilitado, Quitar y Reintentar funcionan", (variant) => {
+      render(<AttachmentPicker uploads={withItems()} variant={variant} />);
+      expect(screen.getByRole("button", { name: "Quitar a.png" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Reintentar b.png" })).toBeEnabled();
+    });
+
+    it("dropHandlers deshabilitado cancela el arrastre de archivos pero no sube ni resalta", () => {
+      const uploads = makeUploads();
+      const setDragging = vi.fn();
+      const handlers = dropHandlers(uploads, setDragging, { disabled: true });
+      const files = { preventDefault: vi.fn(), dataTransfer: { files: [png], types: ["Files"] } };
+      const text = { preventDefault: vi.fn(), dataTransfer: { files: [], types: ["text/plain"] } };
+
+      handlers.onDragEnter(files);
+      handlers.onDragOver(files);
+      handlers.onDrop(files);
+      handlers.onDrop(text);
+
+      expect(files.preventDefault).toHaveBeenCalledTimes(3);
+      expect(text.preventDefault).not.toHaveBeenCalled();
+      expect(uploads.addFiles).not.toHaveBeenCalled();
+      expect(setDragging).not.toHaveBeenCalledWith(true);
+    });
+
+    it("la dropzone deshabilitada cancela el drop de archivos (el navegador no abre la imagen)", () => {
+      const { container } = render(<AttachmentPicker uploads={makeUploads()} variant='dropzone' disabled />);
+      const notCancelled = fireEvent.drop(container.querySelector(".border-dashed"), { dataTransfer: { files: [png], types: ["Files"] } });
+      expect(notCancelled).toBe(false);
+    });
+  });
+
+  it("Quitar y Reintentar tienen un área táctil de al menos 44px (28px visibles + after:-inset-2)", () => {
+    const uploads = makeUploads({
+      items: [{ key: "b", name: "b.png", size: 10, previewUrl: "blob:b", status: "error", progress: 0, error: "Falló" }],
+      hasErrors: true,
+    });
+    render(<AttachmentPicker uploads={uploads} variant='inline' />);
+
+    for (const name of ["Quitar b.png", "Reintentar b.png"]) {
+      const button = screen.getByRole("button", { name });
+      expect(button.className).toContain("relative");
+      expect(button.className).toContain("after:absolute");
+      expect(button.className).toContain("after:-inset-2");
+    }
+  });
 });

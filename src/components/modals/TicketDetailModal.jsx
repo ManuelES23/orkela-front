@@ -142,7 +142,8 @@ const TicketDetailModal = ({
       setTeamMembers([]);
       setNewComment("");
       setIsInternal(false);
-      uploads.discardAll();
+      // Con un comentario enviándose, esas imágenes viajan en la petición: no se borran.
+      if (!sendingComment) uploads.discardAll();
       setRouting(false);
       setSavingField(null);
       setProcessingAction(false);
@@ -155,11 +156,12 @@ const TicketDetailModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialTicket?.id]);
 
-  // Cerrar el modal sin desmontarlo: las imágenes subidas y no enviadas se borran
+  // Cerrar el modal sin desmontarlo: las imágenes subidas y no enviadas se borran.
+  // Con un comentario enviándose no: si falla, sendingComment vuelve a false y se descartan entonces.
   const { discardAll } = uploads;
   useEffect(() => {
-    if (!isOpen) discardAll();
-  }, [isOpen, discardAll]);
+    if (!isOpen && !sendingComment) discardAll();
+  }, [isOpen, sendingComment, discardAll]);
 
   // Registrar callback para actualizaciones en tiempo real
   useEffect(() => {
@@ -879,12 +881,12 @@ const TicketDetailModal = ({
             {!["closed"].includes(ticket.status) && (
               <form
                 onSubmit={handleSendComment}
-                {...dropHandlers(uploads, setDraggingComment)}
+                {...dropHandlers(uploads, setDraggingComment, { disabled: sendingComment })}
                 className={`space-y-2 rounded-lg transition-shadow ${
                   draggingComment ? "ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-night-900" : ""
                 }`}
               >
-                <AttachmentPicker uploads={uploads} variant='inline' />
+                <AttachmentPicker uploads={uploads} variant='inline' disabled={sendingComment} />
                 <div className='flex items-end gap-2'>
                   <AttachButton uploads={uploads} disabled={sendingComment} />
                   <div className='relative flex-1 min-w-0'>

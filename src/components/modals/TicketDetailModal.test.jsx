@@ -491,4 +491,65 @@ describe("TicketDetailModal", () => {
 
     await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 44));
   });
+
+  describe("con un comentario enviándose", () => {
+    const startPendingSend = async (id, onClose = vi.fn()) => {
+      ticketsAPI.getById.mockImplementation((ticketId) => Promise.resolve({ ...portalTicket, id: ticketId }));
+      attachmentsAPI.upload.mockResolvedValue({ id, name: "c.png", mime: "image/png", size: 3 });
+      let rejectSend;
+      ticketsAPI.addComment.mockReturnValue(new Promise((_, reject) => { rejectSend = reject; }));
+      const view = render(<TicketDetailModal isOpen onClose={onClose} ticket={{ id: 20 }} />);
+      await screen.findByText("Acme SA");
+      fireEvent.change(attachInput(), { target: { files: [png()] } });
+      await screen.findByRole("button", { name: "Quitar c.png" });
+      await waitFor(() => expect(screen.getByRole("button", { name: "Enviar comentario" })).toBeEnabled());
+      fireEvent.click(screen.getByRole("button", { name: "Enviar comentario" }));
+      await waitFor(() => expect(ticketsAPI.addComment).toHaveBeenCalledWith(20, "", false, [id]));
+      return { ...view, rejectSend: (error) => rejectSend(error) };
+    };
+
+    it("cerrar el modal no descarta las imágenes de la petición", async () => {
+      const { rerender } = await startPendingSend(70);
+      rerender(<TicketDetailModal isOpen={false} onClose={vi.fn()} ticket={{ id: 20 }} />);
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+    });
+
+    it("si el envío falla con el modal ya cerrado, descarta las pendientes", async () => {
+      const { rerender, rejectSend } = await startPendingSend(71);
+      rerender(<TicketDetailModal isOpen={false} onClose={vi.fn()} ticket={{ id: 20 }} />);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+
+      rejectSend(new Error("Falló"));
+
+      await waitFor(() => expect(attachmentsAPI.remove).toHaveBeenCalledWith("staff", 71));
+    });
+
+    it("cambiar de ticket no descarta las imágenes de la petición", async () => {
+      const { rerender } = await startPendingSend(72);
+      rerender(<TicketDetailModal isOpen onClose={vi.fn()} ticket={{ id: 21 }} />);
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(attachmentsAPI.remove).not.toHaveBeenCalled();
+    });
+
+    it("no permite quitar ni reintentar imágenes mientras se envía", async () => {
+      await startPendingSend(73);
+
+      expect(screen.getByRole("button", { name: "Quitar c.png" })).toBeDisabled();
+    });
+
+    it("soltar un archivo mientras se envía no lo sube, pero evita que el navegador lo abra", async () => {
+      await startPendingSend(74);
+      attachmentsAPI.upload.mockClear();
+
+      const form = screen.getByLabelText("Comentario").closest("form");
+      const notCancelled = fireEvent.drop(form, { dataTransfer: { types: ["Files"], files: [png("d.png")] } });
+
+      expect(notCancelled).toBe(false); // preventDefault llamado
+      expect(attachmentsAPI.upload).not.toHaveBeenCalled();
+    });
+  });
 });

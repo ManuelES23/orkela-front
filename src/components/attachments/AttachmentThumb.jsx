@@ -48,7 +48,7 @@ const AttachmentThumb = ({ scope, attachment, className = "" }) => {
           </span>
         </div>
       )}
-      {status !== "ready" && status !== "error" && <div className='absolute inset-0 animate-pulse' aria-hidden='true' />}
+      {status !== "ready" && status !== "error" && <div className='absolute inset-0 bg-gray-200 dark:bg-night-700 motion-safe:animate-pulse' aria-hidden='true' />}
     </div>
   );
 };

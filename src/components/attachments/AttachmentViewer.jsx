@@ -13,6 +13,7 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
   const { url, status } = useAttachmentBlob(scope, current?.id, { enabled: isOpen && Boolean(current) });
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const count = attachments.length;
 
   const go = (step) => onIndexChange((index + step + count) % count);
@@ -38,11 +39,25 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
     URL.revokeObjectURL(href);
   };
 
+  const openConfirm = () => {
+    setDeleteError("");
+    setConfirming(true);
+  };
+
+  const closeConfirm = () => {
+    setDeleteError("");
+    setConfirming(false);
+  };
+
   const confirmDelete = async () => {
     setDeleting(true);
+    setDeleteError("");
     try {
       await onDelete(current);
       setConfirming(false);
+    } catch {
+      // La confirmación sigue abierta para poder reintentar.
+      setDeleteError("No se pudo eliminar la imagen. Reintenta.");
     } finally {
       setDeleting(false);
     }
@@ -61,7 +76,7 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
                 <Download className='h-5 w-5' aria-hidden='true' />
               </button>
               {onDelete && (
-                <button type='button' onClick={() => setConfirming(true)} aria-label={`Eliminar ${current.name}`} className={`${iconButton} text-red-600 dark:text-red-400`}>
+                <button type='button' onClick={openConfirm} aria-label={`Eliminar ${current.name}`} className={`${iconButton} text-red-600 dark:text-red-400`}>
                   <Trash2 className='h-5 w-5' aria-hidden='true' />
                 </button>
               )}
@@ -89,11 +104,20 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
       {onDelete && (
         <ConfirmModal
           isOpen={confirming}
-          onClose={() => setConfirming(false)}
+          onClose={closeConfirm}
           onConfirm={confirmDelete}
           loading={deleting}
           title='Eliminar imagen'
-          message={`Se eliminará "${current.name}" para todos. No se puede deshacer.`}
+          message={
+            <>
+              {`Se eliminará "${current.name}" para todos. No se puede deshacer.`}
+              {deleteError && (
+                <span role='alert' className='mt-2 block font-medium text-red-600 dark:text-red-400'>
+                  {deleteError}
+                </span>
+              )}
+            </>
+          }
           confirmText='Eliminar'
         />
       )}

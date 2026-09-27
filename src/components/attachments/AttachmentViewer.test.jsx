@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import AttachmentViewer from "./AttachmentViewer";
 import { attachmentsAPI } from "../../utils/attachmentsApi";
 
@@ -60,7 +60,47 @@ describe("AttachmentViewer", () => {
       await waitFor(() => expect(clicked).not.toBeNull());
       expect(clicked.download).toBe("dos.png");
       expect(clicked.href).toMatch(/^blob:/);
-      expect(revokeSpy).toHaveBeenCalledWith(clicked.href);
+    });
+
+    it("libera la URL del blob diferida, no en el mismo instante del clic", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        render(<AttachmentViewer scope='portal' attachments={attachments} index={1} isOpen onClose={vi.fn()} onIndexChange={vi.fn()} />);
+
+        fireEvent.click(await screen.findByRole("button", { name: "Descargar dos.png" }));
+        await waitFor(() => expect(clicked).not.toBeNull());
+        expect(revokeSpy).not.toHaveBeenCalledWith(clicked.href);
+
+        act(() => {
+          vi.advanceTimersByTime(1000);
+        });
+        expect(revokeSpy).toHaveBeenCalledWith(clicked.href);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("si la descarga falla, avisa en el visor", async () => {
+      render(<AttachmentViewer scope='portal' attachments={attachments} index={1} isOpen onClose={vi.fn()} onIndexChange={vi.fn()} />);
+      await screen.findByRole("img", { name: "dos.png" });
+      attachmentsAPI.getBlob.mockRejectedValueOnce(new Error("Red caída"));
+
+      fireEvent.click(screen.getByRole("button", { name: "Descargar dos.png" }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo descargar la imagen.");
+      expect(clicked).toBeNull();
+    });
+
+    it("el aviso de descarga desaparece al cambiar de imagen", async () => {
+      const { rerender } = render(<AttachmentViewer scope='portal' attachments={attachments} index={0} isOpen onClose={vi.fn()} onIndexChange={vi.fn()} />);
+      await screen.findByRole("img", { name: "uno.png" });
+      attachmentsAPI.getBlob.mockRejectedValueOnce(new Error("Red caída"));
+      fireEvent.click(screen.getByRole("button", { name: "Descargar uno.png" }));
+      await screen.findByRole("alert");
+
+      rerender(<AttachmentViewer scope='portal' attachments={attachments} index={1} isOpen onClose={vi.fn()} onIndexChange={vi.fn()} />);
+
+      await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
     });
   });
 

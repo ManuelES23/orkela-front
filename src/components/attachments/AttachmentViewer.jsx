@@ -14,6 +14,8 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  // Id del adjunto cuya descarga falló: el aviso se apaga solo al cambiar de imagen.
+  const [downloadFailedId, setDownloadFailedId] = useState(null);
   const count = attachments.length;
 
   const go = (step) => onIndexChange((index + step + count) % count);
@@ -30,13 +32,19 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
   }, [isOpen, confirming, index, count, onIndexChange]);
 
   const download = async () => {
-    const blob = await attachmentsAPI.getBlob(scope, current.id, { download: true });
-    const href = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = href;
-    link.download = current.name;
-    link.click();
-    URL.revokeObjectURL(href);
+    setDownloadFailedId(null);
+    try {
+      const blob = await attachmentsAPI.getBlob(scope, current.id, { download: true });
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = current.name;
+      link.click();
+      // Diferido: revocarla en el mismo instante puede cortar la descarga en algunos navegadores.
+      setTimeout(() => URL.revokeObjectURL(href), 1000);
+    } catch {
+      setDownloadFailedId(current.id);
+    }
   };
 
   const openConfirm = () => {
@@ -82,6 +90,11 @@ const AttachmentViewer = ({ scope, attachments, index, isOpen, onClose, onIndexC
               )}
             </div>
           </div>
+          {downloadFailedId === current.id && (
+            <p role='alert' className='text-sm font-medium text-red-600 dark:text-red-400'>
+              No se pudo descargar la imagen.
+            </p>
+          )}
           <div className='relative flex min-h-64 items-center justify-center rounded-lg bg-gray-900/95'>
             {url ? (
               <img src={url} alt={current.name} className='max-h-[70vh] w-auto object-contain' />

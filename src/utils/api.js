@@ -570,10 +570,10 @@ export const ticketsAPI = {
     return await request("/tickets-stats");
   },
 
-  addComment: async (ticketId, content, isInternal = false) => {
+  addComment: async (ticketId, content, isInternal = false, attachmentIds = []) => {
     return await request(`/tickets/${ticketId}/comments`, {
       method: "POST",
-      body: JSON.stringify({ content, is_internal: isInternal }),
+      body: JSON.stringify({ content, is_internal: isInternal, attachment_ids: attachmentIds }),
     });
   },
 

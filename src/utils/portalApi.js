@@ -92,10 +92,10 @@ export const portalAPI = {
     return await portalRequest(`/portal/tickets/${id}`);
   },
 
-  addComment: async (id, content) => {
+  addComment: async (id, content, attachmentIds = []) => {
     return await portalRequest(`/portal/tickets/${id}/comments`, {
       method: "POST",
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, attachment_ids: attachmentIds }),
     });
   },
 

@@ -46,6 +46,23 @@ describe("useAttachmentUploads", () => {
     await waitFor(() => expect(result.current.ids).toEqual([3]));
   });
 
+  it("reintentar solo actúa sobre un item con error", async () => {
+    attachmentsAPI.upload.mockResolvedValue({ id: 5, name: "a.png", mime: "image/png", size: 4 });
+    const { result } = renderHook(() => useAttachmentUploads({ scope: "staff" }));
+
+    act(() => result.current.addFiles([png()]));
+    const key = result.current.items[0].key;
+    // Subiendo: no relanza
+    act(() => result.current.retry(key));
+    expect(attachmentsAPI.upload).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => expect(result.current.items[0].status).toBe("done"));
+    // Hecha: no la vuelve a subir ni pisa su estado
+    act(() => result.current.retry(key));
+    expect(attachmentsAPI.upload).toHaveBeenCalledTimes(1);
+    expect(result.current.items[0]).toMatchObject({ status: "done", id: 5 });
+  });
+
   it("respeta el máximo y avisa", () => {
     attachmentsAPI.upload.mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useAttachmentUploads({ scope: "staff", max: 2 }));

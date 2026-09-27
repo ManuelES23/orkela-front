@@ -81,7 +81,7 @@ export const useAttachmentUploads = ({ scope, max = ATTACHMENT_LIMITS.maxFiles }
   const retry = useCallback(
     (key) => {
       const item = latest.current.find((candidate) => candidate.key === key);
-      if (!item || item.invalid) return;
+      if (!item || item.invalid || item.status !== "error") return;
       patch(key, { status: "uploading", progress: 0, error: null });
       start(key);
     },

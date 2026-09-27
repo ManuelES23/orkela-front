@@ -324,7 +324,7 @@ describe("PortalInboxScreen detalle del ticket", () => {
       fireEvent.keyDown(input, { key: "Enter" });
     });
 
-    expect(portalAPI.addComment).toHaveBeenCalledWith(1, "Hola equipo");
+    expect(portalAPI.addComment).toHaveBeenCalledWith(1, "Hola equipo", []);
     await waitFor(() => expect(screen.queryByText("Enviando…")).not.toBeInTheDocument());
     expect(screen.getAllByText("Hola equipo")).toHaveLength(1);
   });

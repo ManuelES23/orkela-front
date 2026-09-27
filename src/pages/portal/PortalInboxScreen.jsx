@@ -302,12 +302,12 @@ const PortalInboxScreen = () => {
 
   // Devuelve el comentario guardado (o rechaza): PortalThread lleva el
   // estado "enviando / error — reintentar" de cada mensaje.
-  const handleSendComment = async (content) => {
+  const handleSendComment = async (content, attachmentIds = []) => {
     const targetId = selectedId;
     // Responder en resuelto/cerrado lo reabre en el servidor: luego se pide
     // el detalle para reflejar el estado y el evento nuevos.
     const reopens = REOPENS_ON_REPLY.includes(selectedTicket?.status);
-    const comment = await portalAPI.addComment(targetId, content);
+    const comment = await portalAPI.addComment(targetId, content, attachmentIds);
     if (selectedIdRef.current === targetId) {
       setSelectedTicket((prev) =>
         prev && prev.id === targetId

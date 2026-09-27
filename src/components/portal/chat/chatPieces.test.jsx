@@ -4,6 +4,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import PortalMessageBubble from "./PortalMessageBubble";
 import PortalComposer, { MESSAGE_MAX } from "./PortalComposer";
 
+vi.mock("../../../utils/attachmentsApi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  attachmentsAPI: { upload: vi.fn(), remove: vi.fn(), getBlob: vi.fn().mockResolvedValue(new Blob(["x"])) },
+}));
+
 const message = {
   key: "c-1", id: 1, content: "Mira https://ayuda.acme.com\nsegunda línea", created_at: "2026-09-18T09:10:00Z",
   own: false, fromStaff: true, authorName: "Beto", status: "sent",
@@ -35,7 +40,22 @@ describe("PortalMessageBubble", () => {
   });
 });
 
-const ComposerHarness = ({ onSubmit, hint = null }) => {
+const makeUploads = (overrides = {}) => ({
+  items: [],
+  ids: [],
+  uploaded: [],
+  isUploading: false,
+  hasErrors: false,
+  notice: null,
+  addFiles: vi.fn(),
+  retry: vi.fn(),
+  remove: vi.fn(),
+  reset: vi.fn(),
+  discardAll: vi.fn(),
+  ...overrides,
+});
+
+const ComposerHarness = ({ onSubmit, hint = null, uploads = makeUploads() }) => {
   const [value, setValue] = useState("");
   const inputRef = useRef(null);
   return (
@@ -47,6 +67,7 @@ const ComposerHarness = ({ onSubmit, hint = null }) => {
         setValue("");
       }}
       inputRef={inputRef}
+      uploads={uploads}
       hint={hint}
     />
   );
@@ -84,5 +105,48 @@ describe("PortalComposer", () => {
     expect(MESSAGE_MAX).toBe(5000);
     expect(input).toHaveAttribute("maxLength", "5000");
     expect(input).toHaveAccessibleDescription("Si respondes, el ticket se reabrirá.");
+  });
+
+  it("con solo imágenes listas envía texto vacío y las imágenes, y vacía el selector", () => {
+    const onSubmit = vi.fn();
+    const uploaded = [{ id: 5, name: "c.png", mime: "image/png", size: 3 }];
+    const uploads = makeUploads({ ids: [5], uploaded, items: [{ key: "k", name: "c.png", status: "done", progress: 100, previewUrl: "blob:x" }] });
+    render(<PortalComposer value='' onChange={vi.fn()} onSubmit={onSubmit} inputRef={{ current: null }} uploads={uploads} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+
+    expect(onSubmit).toHaveBeenCalledWith("", uploaded);
+    expect(uploads.reset).toHaveBeenCalled();
+  });
+
+  it("bloquea el envío mientras sube o hay errores", () => {
+    const { rerender } = render(
+      <PortalComposer value='Hola' onChange={vi.fn()} onSubmit={vi.fn()} inputRef={{ current: null }} uploads={makeUploads({ isUploading: true })} />
+    );
+    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled();
+
+    rerender(<PortalComposer value='Hola' onChange={vi.fn()} onSubmit={vi.fn()} inputRef={{ current: null }} uploads={makeUploads({ hasErrors: true })} />);
+    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled();
+    expect(screen.getByText("Una imagen no se subió: reintenta o quítala.")).toBeInTheDocument();
+  });
+
+  it("soltar archivos en el compositor los añade a las subidas", () => {
+    const uploads = makeUploads();
+    const { container } = render(<PortalComposer value='' onChange={vi.fn()} onSubmit={vi.fn()} inputRef={{ current: null }} uploads={uploads} />);
+    const file = new File([new Uint8Array(3)], "c.png", { type: "image/png" });
+
+    fireEvent.drop(container.querySelector("form"), { dataTransfer: { files: [file], types: ["Files"] } });
+
+    expect(uploads.addFiles).toHaveBeenCalledWith([file]);
+  });
+});
+
+describe("PortalMessageBubble con adjuntos", () => {
+  it("sin texto no pinta la burbuja de texto y muestra la galería", () => {
+    const { container } = render(
+      <PortalMessageBubble message={{ ...message, content: "", attachments: [{ id: 9, name: "c.png", mime: "image/png", size: 3 }] }} />
+    );
+    expect(container.querySelector(".whitespace-pre-wrap")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Ver imagen 1 de 1: c\.png/ })).toBeInTheDocument();
   });
 });

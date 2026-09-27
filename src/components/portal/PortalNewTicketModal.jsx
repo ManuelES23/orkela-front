@@ -16,6 +16,8 @@ import Button from "../ui/Button";
 import Modal from "../ui/Modal";
 import { motionTokens } from "../animations/variants";
 import { TYPE_LABELS, PRIORITY_LABELS } from "./ticketVocabulary";
+import AttachmentPicker, { pasteHandler } from "../attachments/AttachmentPicker";
+import { useAttachmentUploads } from "../attachments/useAttachmentUploads";
 
 // Etiquetas desde ticketVocabulary.js (fuente única en constants/tickets.js).
 const typeOptions = [
@@ -88,6 +90,8 @@ const PortalNewTicketModal = ({ isOpen, onClose, onCreate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const formId = useId();
+  const uploads = useAttachmentUploads({ scope: "portal" });
+  const { discardAll, reset } = uploads;
 
   useEffect(() => {
     if (isOpen) {
@@ -101,7 +105,9 @@ const PortalNewTicketModal = ({ isOpen, onClose, onCreate }) => {
 
   // Mientras se crea no se puede cerrar (ni con Escape ni con el fondo).
   const handleClose = () => {
-    if (!loading) onClose();
+    if (loading) return;
+    discardAll();
+    onClose();
   };
 
   const handleSubmit = async (e) => {
@@ -113,9 +119,16 @@ const PortalNewTicketModal = ({ isOpen, onClose, onCreate }) => {
       return;
     }
 
+    if (uploads.isUploading || uploads.hasErrors) {
+      setError("Espera a que terminen de subir las imágenes o quita las que fallaron.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await onCreate({ title, description, type, priority });
+      await onCreate({ title, description, type, priority, attachment_ids: uploads.ids });
+      // Las imágenes ya pertenecen al ticket: se sueltan sin borrarlas.
+      reset();
     } catch {
       setError("No se pudo crear el ticket. Intenta de nuevo.");
     } finally {
@@ -193,8 +206,12 @@ const PortalNewTicketModal = ({ isOpen, onClose, onCreate }) => {
               placeholder='Describe el problema o la solicitud con el mayor detalle posible...'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              onPaste={pasteHandler(uploads, { disabled: loading })}
               className={inputClass}
             />
+          </div>
+          <div className='mt-2'>
+            <AttachmentPicker uploads={uploads} variant='dropzone' disabled={loading} />
           </div>
         </motion.div>
 

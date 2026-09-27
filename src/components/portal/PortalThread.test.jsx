@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, act, within } from "@testing-library/react";
+import { render, screen, fireEvent, act, within, waitFor } from "@testing-library/react";
 import PortalThread from "./PortalThread";
+import { attachmentsAPI } from "../../utils/attachmentsApi";
+
+vi.mock("../../utils/attachmentsApi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  attachmentsAPI: { upload: vi.fn(), remove: vi.fn().mockResolvedValue(undefined), getBlob: vi.fn() },
+}));
 
 const baseTicket = {
   id: 7,
@@ -62,7 +68,12 @@ const fakeScrollBox = (element, { scrollHeight, clientHeight, scrollTop }) => {
 
 const staffReply = { id: 5, content: "Ya lo revisamos", created_at: "2026-09-18T09:20:00Z", contact_id: null, user: { name: "Beto Soporte" }, contact: null };
 
-beforeEach(() => sessionStorage.clear());
+beforeEach(() => {
+  sessionStorage.clear();
+  vi.clearAllMocks();
+});
+
+const pngFile = () => new File([new Uint8Array(3)], "c.png", { type: "image/png" });
 
 describe("PortalThread", () => {
   it("expone el hilo como región viva y atribuye cada mensaje", () => {
@@ -112,7 +123,7 @@ describe("PortalThread", () => {
       fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
     });
     expect(onSendComment).toHaveBeenCalledTimes(2);
-    expect(onSendComment).toHaveBeenLastCalledWith("Hola de nuevo");
+    expect(onSendComment).toHaveBeenLastCalledWith("Hola de nuevo", []);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -157,5 +168,60 @@ describe("PortalThread", () => {
     expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Volver a mis tickets" }));
     expect(onBack).toHaveBeenCalled();
+  });
+
+  it("envía un mensaje solo con imagen y la muestra en la burbuja", async () => {
+    attachmentsAPI.upload.mockResolvedValue({ id: 70, name: "c.png", mime: "image/png", size: 3 });
+    attachmentsAPI.getBlob.mockResolvedValue(new Blob(["x"]));
+    const pending = deferred();
+    const onSendComment = vi.fn(() => pending.promise);
+    render(<PortalThread {...threadProps({ onSendComment })} />);
+
+    const input = screen.getByLabelText("Adjuntar imágenes", { selector: "input" });
+    fireEvent.change(input, { target: { files: [pngFile()] } });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled());
+    fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+
+    await waitFor(() => expect(onSendComment).toHaveBeenCalledWith("", [70]));
+    // Burbuja optimista: mientras el servidor responde ya se ven las imágenes.
+    expect(await screen.findByRole("button", { name: /Ver imagen 1 de 1: c\.png/ })).toBeInTheDocument();
+    expect(screen.getByText("Enviando…")).toBeInTheDocument();
+    await act(async () => {
+      pending.resolve({ id: 13 });
+    });
+  });
+
+  it("no envía mientras una imagen sigue subiendo", async () => {
+    attachmentsAPI.upload.mockReturnValue(new Promise(() => {}));
+    const onSendComment = vi.fn();
+    render(<PortalThread {...threadProps({ onSendComment })} />);
+
+    fireEvent.change(screen.getByLabelText("Tu respuesta"), { target: { value: "Hola" } });
+    fireEvent.change(screen.getByLabelText("Adjuntar imágenes", { selector: "input" }), {
+      target: { files: [pngFile()] },
+    });
+
+    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled();
+    fireEvent.keyDown(screen.getByLabelText("Tu respuesta"), { key: "Enter" });
+    expect(onSendComment).not.toHaveBeenCalled();
+  });
+
+  it("si falla, el reintento reenvía las mismas imágenes", async () => {
+    attachmentsAPI.upload.mockResolvedValue({ id: 71, name: "c.png", mime: "image/png", size: 3 });
+    attachmentsAPI.getBlob.mockResolvedValue(new Blob(["x"]));
+    const onSendComment = vi.fn().mockRejectedValueOnce(new Error("red")).mockResolvedValueOnce({ id: 12 });
+    render(<PortalThread {...threadProps({ onSendComment })} />);
+
+    fireEvent.change(screen.getByLabelText("Adjuntar imágenes", { selector: "input" }), { target: { files: [pngFile()] } });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled());
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent("No se envió");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+    });
+    expect(onSendComment).toHaveBeenLastCalledWith("", [71]);
   });
 });

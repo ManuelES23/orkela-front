@@ -11,6 +11,7 @@ import { buildThreadMessages } from "./chat/threadMessages";
 import { useStickToBottom } from "./chat/useStickToBottom";
 import PortalTicketStatusBar from "./PortalTicketStatusBar";
 import { REOPENS_ON_REPLY } from "./portalStatusHelp";
+import { useAttachmentUploads } from "../attachments/useAttachmentUploads";
 
 const DRAFT_KEY_PREFIX = "orkela_portal_draft_";
 
@@ -44,6 +45,8 @@ const PortalThread = ({
   // Mensajes enviados por este contacto que aún no confirmó el servidor.
   const [outbox, setOutbox] = useState([]);
   const composerRef = useRef(null);
+  // Al remontarse por ticket, las imágenes pendientes son de un solo ticket y el hook las descarta al salir.
+  const uploads = useAttachmentUploads({ scope: "portal" });
 
   useEffect(() => {
     if (!ticketId) return;
@@ -66,6 +69,7 @@ const PortalThread = ({
         fromStaff: false,
         authorName: null,
         status: item.status,
+        attachments: item.attachments ?? [],
       })),
     ],
     [ticket, contactId, outbox]
@@ -77,7 +81,10 @@ const PortalThread = ({
     async (item) => {
       setOutbox((prev) => prev.map((m) => (m.tempId === item.tempId ? { ...m, status: "sending" } : m)));
       try {
-        await onSendComment(item.content);
+        await onSendComment(
+          item.content,
+          item.attachments.map((attachment) => attachment.id)
+        );
         setOutbox((prev) => prev.filter((m) => m.tempId !== item.tempId));
       } catch {
         setOutbox((prev) => prev.map((m) => (m.tempId === item.tempId ? { ...m, status: "failed" } : m)));
@@ -86,8 +93,8 @@ const PortalThread = ({
     [onSendComment]
   );
 
-  const handleSubmit = (content) => {
-    const item = { tempId: nextTempId(), content, status: "sending", created_at: new Date().toISOString() };
+  const handleSubmit = (content, attachments = []) => {
+    const item = { tempId: nextTempId(), content, attachments, status: "sending", created_at: new Date().toISOString() };
     setOutbox((prev) => [...prev, item]);
     setDraft("");
     // El propio mensaje siempre se ve, aunque el usuario hubiera subido.
@@ -237,6 +244,7 @@ const PortalThread = ({
             onChange={setDraft}
             onSubmit={handleSubmit}
             inputRef={composerRef}
+            uploads={uploads}
             hint={REOPENS_ON_REPLY.includes(ticket.status) ? "Si respondes, el ticket se reabrirá." : null}
           />
         </>

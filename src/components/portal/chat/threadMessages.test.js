@@ -45,6 +45,26 @@ describe("buildThreadMessages", () => {
     const dup = { ...ticket, comments: [...ticket.comments, { ...ticket.comments[0] }] };
     expect(buildThreadMessages(dup, 55).filter((m) => m.key === "c-4")).toHaveLength(1);
   });
+
+  it("incluye los adjuntos de la apertura y de cada comentario", () => {
+    const withFiles = {
+      description: "Hola",
+      created_at: "2026-01-01T00:00:00Z",
+      attachments: [{ id: 1, name: "a.png" }],
+      comments: [{ id: 5, content: null, contact_id: 9, created_at: "2026-01-01T00:01:00Z", attachments: [{ id: 2, name: "b.png" }] }],
+    };
+
+    const [opening, comment] = buildThreadMessages(withFiles, 9);
+
+    expect(opening.attachments).toEqual([{ id: 1, name: "a.png" }]);
+    expect(comment.attachments).toEqual([{ id: 2, name: "b.png" }]);
+    expect(comment.content).toBe("");
+  });
+
+  it("tolera respuestas sin adjuntos", () => {
+    const messages = buildThreadMessages(ticket, 55);
+    expect(messages.every((m) => Array.isArray(m.attachments) && m.attachments.length === 0)).toBe(true);
+  });
 });
 
 describe("formatMessageTime", () => {

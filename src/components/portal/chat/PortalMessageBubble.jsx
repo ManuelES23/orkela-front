@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import AttachmentGallery from "../../attachments/AttachmentGallery";
 import { splitLinks } from "./linkify";
 import { formatMessageTime } from "./threadMessages";
 
@@ -9,7 +10,7 @@ const bubbleClass = (message) => {
 };
 
 const PortalMessageBubble = ({ message, onRetry }) => {
-  const { own, fromStaff, authorName, content, created_at: createdAt, status } = message;
+  const { own, fromStaff, authorName, content, created_at: createdAt, status, attachments = [] } = message;
 
   return (
     <div
@@ -22,27 +23,36 @@ const PortalMessageBubble = ({ message, onRetry }) => {
           {fromStaff && <span className='font-normal'> · Equipo de soporte</span>}
         </p>
       )}
-      <div
-        className={`rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap wrap-break-word ${bubbleClass(message)} ${
-          status === "failed" ? "opacity-70" : ""
-        }`}
-      >
-        {splitLinks(content).map((part, index) =>
-          part.type === "link" ? (
-            <a
-              key={index}
-              href={part.href}
-              target='_blank'
-              rel='noopener noreferrer'
-              className={own ? "underline text-white" : "underline text-brand-700 dark:text-brand-300"}
-            >
-              {part.value}
-            </a>
-          ) : (
-            <Fragment key={index}>{part.value}</Fragment>
-          )
-        )}
-      </div>
+      {content && (
+        <div
+          className={`rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap wrap-break-word ${bubbleClass(message)} ${
+            status === "failed" ? "opacity-70" : ""
+          }`}
+        >
+          {splitLinks(content).map((part, index) =>
+            part.type === "link" ? (
+              <a
+                key={index}
+                href={part.href}
+                target='_blank'
+                rel='noopener noreferrer'
+                className={own ? "underline text-white" : "underline text-brand-700 dark:text-brand-300"}
+              >
+                {part.value}
+              </a>
+            ) : (
+              <Fragment key={index}>{part.value}</Fragment>
+            )
+          )}
+        </div>
+      )}
+      {attachments.length > 0 && (
+        <AttachmentGallery
+          scope='portal'
+          attachments={attachments}
+          className={`${content ? "mt-1" : ""} ${own ? "justify-self-end" : ""} ${status === "failed" ? "opacity-70" : ""}`}
+        />
+      )}
       <div className='text-[11px] text-gray-400 dark:text-night-500 mt-1 px-1'>
         {status === "sending" && <span>Enviando…</span>}
         {status === "failed" && (

@@ -20,6 +20,7 @@ export const buildThreadMessages = (ticket, contactId) => {
     fromStaff: false,
     authorName: openingIsOwn ? null : creator?.name ?? null,
     status: "sent",
+    attachments: ticket.attachments ?? [],
   };
 
   const comments = mergeComments([], ticket.comments).map((comment) => {
@@ -38,6 +39,7 @@ export const buildThreadMessages = (ticket, contactId) => {
       fromStaff,
       authorName,
       status: "sent",
+      attachments: comment.attachments ?? [],
     };
   });
 

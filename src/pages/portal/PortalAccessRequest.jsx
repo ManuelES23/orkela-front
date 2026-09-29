@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Send } from "lucide-react";
 import { portalAPI } from "../../utils/portalApi";
+import { getAssetUrl } from "../../utils/assetUrl";
 import { motionTokens } from "../../components/animations/variants";
 import Button from "../../components/ui/Button";
 
@@ -87,7 +88,7 @@ const PortalAccessRequest = () => {
       >
         <div className='flex items-center gap-2.5 mb-6'>
           <img
-            src={org?.logo || "/img/isotipo_orkela.png"}
+            src={getAssetUrl(org?.logo) || "/img/isotipo_orkela.png"}
             alt=''
             className='w-9 h-9 object-contain'
             aria-hidden='true'

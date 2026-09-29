@@ -7,6 +7,7 @@ import {
   getPortalOrgSlug,
   portalAPI,
 } from "../../utils/portalApi";
+import { getAssetUrl } from "../../utils/assetUrl";
 
 /**
  * Shell de las pantallas AUTENTICADAS del portal público de clientes
@@ -81,7 +82,7 @@ const PortalLayout = ({ children, organization }) => {
     <div className='h-dvh overflow-hidden bg-[#f7f5fb] dark:bg-night-950 flex flex-col'>
       <header className='border-b border-gray-200 dark:border-night-700 bg-white dark:bg-night-900 px-6 py-3.5 flex items-center gap-2.5 shrink-0'>
         <img
-          src={organization?.logo || "/img/isotipo_orkela.png"}
+          src={getAssetUrl(organization?.logo) || "/img/isotipo_orkela.png"}
           alt=''
           className='w-8 h-8 object-contain'
           aria-hidden='true'

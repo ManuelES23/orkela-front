@@ -59,6 +59,17 @@ describe("PortalAccessRequest", () => {
     expect(screen.getByRole("button", { name: /Enviar enlace de acceso/ })).toBeInTheDocument();
   });
 
+  it("resuelve el logo relativo de la organización contra el host de la API", async () => {
+    portalAPI.getOrgInfo.mockResolvedValue({ name: "Acme", logo: "/storage/logos/org_1_1.png" });
+
+    const { container } = renderAt("acme");
+
+    await screen.findByText("Acme");
+    expect(container.querySelector("img").getAttribute("src")).toMatch(
+      /^https?:\/\/.+\/storage\/logos\/org_1_1\.png$/
+    );
+  });
+
   it("anuncia el error de envío", async () => {
     portalAPI.getOrgInfo.mockResolvedValue({ name: "Acme", logo: null });
     portalAPI.requestAccess.mockRejectedValue(new Error("red"));
